@@ -17,6 +17,9 @@ import { ClosModule } from './clos/clos.module';
 import { Plo } from './plos/entities/plo.entity';
 import { Clo } from './clos/entities/clo.entity';
 import { Subject } from './subjects/entities/subject.entity';
+import { SkillsModule } from './skills/skills.module';
+import { Faculty } from './faculties/entities/faculty.entity';
+import { Skill } from './skills/entities/skill.entity';
 
 @Module({
   imports: [
@@ -24,7 +27,17 @@ import { Subject } from './subjects/entities/subject.entity';
       type: 'sqlite',
       database: 'mybuu.sqlite',
       logging: false,
-      entities: [Curriculum, User, Branch, Role, Plo, Clo, Subject],
+      entities: [
+        Curriculum,
+        User,
+        Branch,
+        Role,
+        Plo,
+        Clo,
+        Subject,
+        Faculty,
+        Skill,
+      ],
       synchronize: true,
     }),
     UsersModule,
@@ -34,6 +47,7 @@ import { Subject } from './subjects/entities/subject.entity';
     SubjectsModule,
     PlosModule,
     ClosModule,
+    SkillsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

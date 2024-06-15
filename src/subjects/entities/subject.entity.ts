@@ -1,5 +1,6 @@
 import { Clo } from 'src/clos/entities/clo.entity';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
+import { Skill } from 'src/skills/entities/skill.entity';
 import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
@@ -30,4 +31,7 @@ export class Subject {
 
   @OneToMany(() => Clo, (clo) => clo.subject)
   clos: Clo[];
+
+  @ManyToMany(() => Skill, (skill) => skill.subjects)
+  skills: Skill[];
 }

@@ -11,6 +11,9 @@ export class Plo {
   @Column()
   description: string;
 
+  @Column()
+  resultTypes: string;
+
   @ManyToOne(() => Curriculum, (curriculum) => curriculum.plos)
   curriculum: Curriculum;
 

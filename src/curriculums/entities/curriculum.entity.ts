@@ -32,7 +32,7 @@ export class Curriculum {
   branch: Branch;
 
   @Column()
-  description: string;
+  objective: string;
 
   @Column()
   period: number;
