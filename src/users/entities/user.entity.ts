@@ -49,6 +49,6 @@ export class User {
   @JoinTable()
   roles: Role[];
 
-  @ManyToMany(() => Curriculum, (curriculum) => curriculum.coordinator)
+  @ManyToMany(() => Curriculum, (curriculum) => curriculum.coordinators)
   curriculums: Curriculum[];
 }

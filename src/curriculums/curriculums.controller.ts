@@ -27,7 +27,7 @@ export class CurriculumsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.curriculumsService.findOne(+id);
+    return this.curriculumsService.findOne(id);
   }
 
   @Patch(':id')
@@ -35,11 +35,11 @@ export class CurriculumsController {
     @Param('id') id: string,
     @Body() updateCurriculumDto: UpdateCurriculumDto,
   ) {
-    return this.curriculumsService.update(+id, updateCurriculumDto);
+    return this.curriculumsService.update(id, updateCurriculumDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.curriculumsService.remove(+id);
+    return this.curriculumsService.remove(id);
   }
 }

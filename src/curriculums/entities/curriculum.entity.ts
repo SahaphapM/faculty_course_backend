@@ -5,6 +5,7 @@ import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -43,9 +44,13 @@ export class Curriculum {
   @OneToMany(() => Plo, (plo) => plo.curriculum)
   plos: Plo[];
 
-  @ManyToMany(() => User, (user) => user.curriculums)
-  coordinator: User[];
+  @ManyToMany(() => User, (user) => user.curriculums, { cascade: true })
+  @JoinTable()
+  coordinators: User[];
 
-  @ManyToMany(() => Subject, (subject) => subject.curriculums)
+  @ManyToMany(() => Subject, (subject) => subject.curriculums, {
+    cascade: true,
+  })
+  @JoinTable()
   subjects: Subject[];
 }

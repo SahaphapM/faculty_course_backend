@@ -1,4 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
 import { Curriculum } from './entities/curriculum.entity';
@@ -12,23 +16,76 @@ export class CurriculumsService {
     private curriculumsRepository: Repository<Curriculum>,
   ) {}
 
-  create(createCurriculumDto: CreateCurriculumDto) {
-    return this.curriculumsRepository.save(createCurriculumDto);
+  async create(createCurriculumDto: CreateCurriculumDto): Promise<Curriculum> {
+    const curriculum = this.curriculumsRepository.create(createCurriculumDto);
+    try {
+      await this.curriculumsRepository.save(curriculum);
+      const id = curriculum.id;
+      return this.curriculumsRepository.findOne({
+        where: { id },
+        relations: { coordinators: true },
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to create Curriculum ',
+        error.message,
+      );
+    }
   }
 
-  findAll() {
-    return this.curriculumsRepository.find();
+  async findAll(): Promise<Curriculum[]> {
+    return await this.curriculumsRepository.find({
+      relations: { coordinators: true },
+    });
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} curriculum`;
+  async findOne(id: string): Promise<Curriculum> {
+    const curriculum = await this.curriculumsRepository.findOne({
+      where: { id },
+      relations: { coordinators: true },
+    });
+    if (!curriculum) {
+      throw new NotFoundException(`Curriculum with ID '${id}' not found`);
+    }
+    return curriculum;
   }
 
-  update(id: number, updateCurriculumDto: UpdateCurriculumDto) {
-    return `This action updates a #${id} curriculum`;
+  async update(
+    id: string,
+    updateCurriculumDto: UpdateCurriculumDto,
+  ): Promise<Curriculum> {
+    const curriculum = await this.findOne(id);
+
+    if (!curriculum) {
+      throw new NotFoundException(`Curriculum with ID ${id} not found`);
+    }
+
+    this.curriculumsRepository.merge(curriculum, updateCurriculumDto); // directly merge is not to delete the first data.
+    curriculum.coordinators = updateCurriculumDto.coordinators;
+    curriculum.plos = updateCurriculumDto.plos;
+    curriculum.subjects = updateCurriculumDto.subjects;
+    // Object.assign(curriculum, updateCurriculumDto); // directly create new delete the first data to new value.
+
+    try {
+      await this.curriculumsRepository.save(curriculum);
+      return this.curriculumsRepository.findOne({
+        where: { id },
+        relations: { coordinators: true },
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to update Curriculum',
+        error.message,
+      );
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} curriculum`;
+  async remove(id: string): Promise<void> {
+    const curriculum = await this.findOne(id);
+    try {
+      await this.curriculumsRepository.remove(curriculum);
+    } catch (error) {
+      throw new BadRequestException('Failed to remove user');
+    }
   }
 }
