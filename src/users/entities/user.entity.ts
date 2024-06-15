@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 import { Role } from 'src/roles/entities/role.entity';
-import { Column, Entity, ManyToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -45,7 +45,8 @@ export class User {
   @MaxLength(10)
   phone: string;
 
-  @ManyToMany(() => Role, (role) => role.users)
+  @ManyToMany(() => Role, (role) => role.users, { cascade: true })
+  @JoinTable()
   roles: Role[];
 
   @ManyToMany(() => Curriculum, (curriculum) => curriculum.coordinator)
