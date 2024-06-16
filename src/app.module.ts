@@ -20,6 +20,7 @@ import { Subject } from './subjects/entities/subject.entity';
 import { SkillsModule } from './skills/skills.module';
 import { Faculty } from './faculties/entities/faculty.entity';
 import { Skill } from './skills/entities/skill.entity';
+import { DepartmentsModule } from './departments/departments.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { Skill } from './skills/entities/skill.entity';
     PlosModule,
     ClosModule,
     SkillsModule,
+    DepartmentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
