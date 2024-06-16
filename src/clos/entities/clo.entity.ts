@@ -11,9 +11,15 @@ export class Clo {
   @Column()
   description: string;
 
-  @ManyToOne(() => Subject, (subject) => subject.clos)
+  @ManyToOne(() => Subject, (subject) => subject.clos, {
+    onDelete: 'CASCADE', // When delete from root of relation that relate row will be deleted
+  })
   subject: Subject;
 
-  @ManyToOne(() => Plo, (plo) => plo.clos)
+  @ManyToOne(
+    () => Plo,
+    (plo) => plo.clos,
+    // When delete from root of relation that relate row will be deleted
+  )
   plo: Plo;
 }

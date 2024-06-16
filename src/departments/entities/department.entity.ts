@@ -15,6 +15,6 @@ export class Department {
   @OneToMany(() => Branch, (branch) => branch.department)
   branches: Branch[];
 
-  @ManyToOne(() => Faculty, (faculty) => faculty.departments)
+  @ManyToOne(() => Faculty, (faculty) => faculty.departments, { cascade: true })
   faculty: Faculty;
 }

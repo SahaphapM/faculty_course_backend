@@ -16,9 +16,13 @@ export class Branch {
   @ManyToOne(() => Faculty, (faculty) => faculty.branches)
   faculty: Faculty;
 
-  @ManyToOne(() => Department, (department) => department.branches)
+  @ManyToOne(() => Department, (department) => department.branches, {
+    cascade: true,
+  })
   department: Department;
 
-  @OneToMany(() => Curriculum, (curriculum) => curriculum.branch)
+  @OneToMany(() => Curriculum, (curriculum) => curriculum.branch, {
+    cascade: true,
+  })
   curriculums: Curriculum[];
 }

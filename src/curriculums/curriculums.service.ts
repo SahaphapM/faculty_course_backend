@@ -35,14 +35,24 @@ export class CurriculumsService {
 
   async findAll(): Promise<Curriculum[]> {
     return await this.curriculumsRepository.find({
-      relations: { coordinators: true },
+      relations: {
+        coordinators: true,
+        plos: true,
+        subjects: true,
+        branch: true,
+      },
     });
   }
 
   async findOne(id: string): Promise<Curriculum> {
     const curriculum = await this.curriculumsRepository.findOne({
       where: { id },
-      relations: { coordinators: true },
+      relations: {
+        coordinators: true,
+        plos: true,
+        subjects: true,
+        branch: true,
+      },
     });
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID '${id}' not found`);

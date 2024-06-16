@@ -41,7 +41,7 @@ export class Curriculum {
   @Column()
   minimumGrade: number;
 
-  @OneToMany(() => Plo, (plo) => plo.curriculum)
+  @OneToMany(() => Plo, (plo) => plo.curriculum, { cascade: true })
   plos: Plo[];
 
   @ManyToMany(() => User, (user) => user.curriculums, { cascade: true })

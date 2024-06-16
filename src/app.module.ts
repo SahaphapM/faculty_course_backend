@@ -21,6 +21,8 @@ import { SkillsModule } from './skills/skills.module';
 import { Faculty } from './faculties/entities/faculty.entity';
 import { Skill } from './skills/entities/skill.entity';
 import { DepartmentsModule } from './departments/departments.module';
+import { Department } from './departments/entities/department.entity';
+import { FacultiesModule } from './faculties/faculties.module';
 
 @Module({
   imports: [
@@ -38,6 +40,7 @@ import { DepartmentsModule } from './departments/departments.module';
         Subject,
         Faculty,
         Skill,
+        Department,
       ],
       synchronize: true,
     }),
@@ -50,6 +53,7 @@ import { DepartmentsModule } from './departments/departments.module';
     ClosModule,
     SkillsModule,
     DepartmentsModule,
+    FacultiesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

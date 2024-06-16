@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateBranchDto } from './dto/create-branch.dto';
 import { UpdateBranchDto } from './dto/update-branch.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -11,23 +11,61 @@ export class BranchsService {
     @InjectRepository(Branch)
     private branchsRepository: Repository<Branch>,
   ) {}
-  create(createBranchDto: CreateBranchDto) {
-    return this.branchsRepository.save(createBranchDto);
+
+  async create(createBranchDto: CreateBranchDto): Promise<Branch> {
+    try {
+      const branch = this.branchsRepository.create(createBranchDto);
+      return await this.branchsRepository.save(branch);
+    } catch (error) {
+      throw new Error(`Failed to create branch ${error.message}`);
+    }
   }
 
-  findAll() {
-    return this.branchsRepository.find();
+  async findAll(): Promise<Branch[]> {
+    try {
+      return await this.branchsRepository.find({
+        relations: { curriculums: true, department: true, faculty: true },
+      });
+    } catch (error) {
+      throw new Error('Failed to fetch branches');
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} branch`;
+  async findOne(id: string): Promise<Branch> {
+    try {
+      const branch = await this.branchsRepository.findOne({
+        where: { id },
+        relations: { curriculums: true, department: true, faculty: true },
+      });
+      if (!branch) {
+        throw new NotFoundException(`Branch with ID ${id} not found`);
+      }
+      return branch;
+    } catch (error) {
+      throw new Error('Failed to fetch branch');
+    }
   }
 
-  update(id: number, updateBranchDto: UpdateBranchDto) {
-    return `This action updates a #${id} branch`;
+  async update(id: string, updateBranchDto: UpdateBranchDto): Promise<Branch> {
+    try {
+      const branch = await this.findOne(id);
+      Object.assign(branch, updateBranchDto);
+      await this.branchsRepository.save(branch);
+      return this.branchsRepository.findOne({
+        where: { id },
+        relations: { faculty: true, curriculums: true, department: true },
+      });
+    } catch (error) {
+      throw new Error('Failed to update branch');
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} branch`;
+  async remove(id: string): Promise<void> {
+    try {
+      const branch = await this.findOne(id);
+      await this.branchsRepository.remove(branch);
+    } catch (error) {
+      throw new Error('Failed to remove branch');
+    }
   }
 }

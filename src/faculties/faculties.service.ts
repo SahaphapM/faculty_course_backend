@@ -1,26 +1,85 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateFacultyDto } from './dto/create-faculty.dto';
 import { UpdateFacultyDto } from './dto/update-faculty.dto';
+import { Faculty } from './entities/faculty.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class FacultiesService {
-  create(createFacultyDto: CreateFacultyDto) {
-    return 'This action adds a new faculty';
+  constructor(
+    @InjectRepository(Faculty)
+    private facultiesRepository: Repository<Faculty>,
+  ) {}
+  async create(createFacultyDto: CreateFacultyDto): Promise<Faculty> {
+    try {
+      const faculty = this.facultiesRepository.create(createFacultyDto);
+      return await this.facultiesRepository.save(faculty);
+    } catch (error) {
+      // Handle specific error types here
+      throw new Error('Failed to create faculty');
+    }
   }
 
-  findAll() {
-    return `This action returns all faculties`;
+  async findAll(): Promise<Faculty[]> {
+    try {
+      return await this.facultiesRepository.find({
+        relations: { branches: true, departments: true },
+      });
+    } catch (error) {
+      // Handle specific error types here
+      throw new Error('Failed to fetch faculties');
+    }
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} faculty`;
+  async findOne(id: string): Promise<Faculty> {
+    try {
+      const faculty = await this.facultiesRepository.findOne({
+        where: { id },
+        relations: { branches: true, departments: true },
+      });
+      if (!faculty) {
+        throw new NotFoundException('Faculty not found');
+      }
+      return faculty;
+    } catch (error) {
+      // Handle specific error types here
+      throw new Error('Failed to fetch faculty');
+    }
   }
 
-  update(id: number, updateFacultyDto: UpdateFacultyDto) {
-    return `This action updates a #${id} faculty`;
+  async update(
+    id: string,
+    updateFacultyDto: UpdateFacultyDto,
+  ): Promise<Faculty> {
+    try {
+      const existingFaculty = await this.facultiesRepository.findOne({
+        where: { id },
+      });
+      if (!existingFaculty) {
+        throw new NotFoundException('Faculty not found');
+      }
+      Object.assign(existingFaculty, updateFacultyDto);
+      await this.facultiesRepository.save(existingFaculty);
+      return await this.facultiesRepository.findOne({
+        where: { id },
+        relations: { branches: true, departments: true },
+      });
+    } catch (error) {
+      // Handle specific error types here
+      throw new Error('Failed to update faculty');
+    }
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} faculty`;
+  async remove(id: string): Promise<void> {
+    try {
+      const result = await this.facultiesRepository.delete(id);
+      if (result.affected === 0) {
+        throw new NotFoundException('Faculty not found');
+      }
+    } catch (error) {
+      // Handle specific error types here
+      throw new Error('Failed to remove faculty');
+    }
   }
 }

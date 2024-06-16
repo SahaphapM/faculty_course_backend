@@ -17,6 +17,6 @@ export class Plo {
   @ManyToOne(() => Curriculum, (curriculum) => curriculum.plos)
   curriculum: Curriculum;
 
-  @OneToMany(() => Clo, (clo) => clo.plo)
+  @OneToMany(() => Clo, (clo) => clo.plo, { cascade: true })
   clos: Clo[];
 }
