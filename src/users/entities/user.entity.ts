@@ -18,7 +18,7 @@ export class User {
   @IsEmail()
   email: string;
 
-  @Column()
+  @Column({ select: false }) // select : false  It is hiding the password.
   @IsString()
   @MinLength(6)
   password: string;
