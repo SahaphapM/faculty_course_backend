@@ -23,9 +23,15 @@ import { Skill } from './skills/entities/skill.entity';
 import { DepartmentsModule } from './departments/departments.module';
 import { Department } from './departments/entities/department.entity';
 import { FacultiesModule } from './faculties/faculties.module';
+import { AuthModule } from './auth/auth.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '.env',
+    }),
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'mybuu.sqlite',
@@ -54,6 +60,7 @@ import { FacultiesModule } from './faculties/faculties.module';
     SkillsModule,
     DepartmentsModule,
     FacultiesModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
