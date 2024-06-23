@@ -63,14 +63,14 @@ export class CurriculumsController {
     @Param('id') id: string,
     @Body() createUserDto: CreateUserDto,
   ) {
-    const cordinator = await this.usersService.create(createUserDto); // create subject to database
-    return this.curriculumsService.addCordinator(id, cordinator); // add subject to curriculum
+    const cordinator = await this.usersService.findOne(createUserDto.id); // find user in database by id
+    return this.curriculumsService.addCordinator(id, cordinator); // add user to curriculum
   }
 
   @Patch(':id/plos')
   async addPLO(@Param('id') id: string, @Body() createPloDto: CreatePloDto) {
-    const plo = await this.plosService.create(createPloDto); // create subject to database
-    return this.curriculumsService.addPLO(id, plo); // add subject to curriculum
+    const plo = await this.plosService.create(createPloDto); // create plo to database
+    return this.curriculumsService.addPLO(id, plo); // add plo to curriculum
   }
 
   @Delete(':id')
