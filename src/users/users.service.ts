@@ -70,9 +70,6 @@ export class UsersService {
         'phone',
       ],
     });
-    if (!user) {
-      throw new NotFoundException(`User with ID ${email} not found`);
-    }
     return user;
   }
 

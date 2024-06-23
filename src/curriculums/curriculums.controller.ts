@@ -10,10 +10,21 @@ import {
 import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from './dto/update-curriculum.dto';
+import { CreateSubjectDto } from 'src/subjects/dto/create-subject.dto';
+import { SubjectsService } from 'src/subjects/subjects.service';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { CreatePloDto } from 'src/plos/dto/create-plo.dto';
+import { UsersService } from 'src/users/users.service';
+import { PlosService } from 'src/plos/plos.service';
 
 @Controller('curriculums')
 export class CurriculumsController {
-  constructor(private readonly curriculumsService: CurriculumsService) {}
+  constructor(
+    private readonly curriculumsService: CurriculumsService,
+    private readonly subjectsService: SubjectsService,
+    private readonly usersService: UsersService,
+    private readonly plosService: PlosService,
+  ) {}
 
   @Post()
   create(@Body() createCurriculumDto: CreateCurriculumDto) {
@@ -36,6 +47,30 @@ export class CurriculumsController {
     @Body() updateCurriculumDto: UpdateCurriculumDto,
   ) {
     return this.curriculumsService.update(id, updateCurriculumDto);
+  }
+
+  @Patch(':id/subjects')
+  async addSubject(
+    @Param('id') id: string,
+    @Body() createSubjectDto: CreateSubjectDto,
+  ) {
+    const subject = await this.subjectsService.create(createSubjectDto); // create subject to database
+    return this.curriculumsService.addSubject(id, subject); // add subject to curriculum
+  }
+
+  @Patch(':id/cordinators')
+  async addCordinator(
+    @Param('id') id: string,
+    @Body() createUserDto: CreateUserDto,
+  ) {
+    const cordinator = await this.usersService.create(createUserDto); // create subject to database
+    return this.curriculumsService.addCordinator(id, cordinator); // add subject to curriculum
+  }
+
+  @Patch(':id/plos')
+  async addPLO(@Param('id') id: string, @Body() createPloDto: CreatePloDto) {
+    const plo = await this.plosService.create(createPloDto); // create subject to database
+    return this.curriculumsService.addPLO(id, plo); // add subject to curriculum
   }
 
   @Delete(':id')

@@ -24,16 +24,16 @@ export class Curriculum {
   engName: string;
 
   @Column()
-  phdName: string;
+  thaiDegreeName: string;
 
   @Column()
-  degreeName: string;
+  engDegreeName: string;
 
   @ManyToOne(() => Branch, (branch) => branch.curriculums)
   branch: Branch;
 
   @Column()
-  objective: string;
+  description: string;
 
   @Column()
   period: number;

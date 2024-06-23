@@ -8,5 +8,6 @@ import { Plo } from './entities/plo.entity';
   imports: [TypeOrmModule.forFeature([Plo])],
   controllers: [PlosController],
   providers: [PlosService],
+  exports: [PlosService],
 })
 export class PlosModule {}

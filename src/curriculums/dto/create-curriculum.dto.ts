@@ -10,9 +10,9 @@ export class CreateCurriculumDto {
 
   engName: string;
 
-  phdName: string;
+  thaiDegreeName: string;
 
-  degreeName: string;
+  engDegreeName: string;
 
   branch: Branch;
 
