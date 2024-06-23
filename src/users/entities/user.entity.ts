@@ -27,7 +27,7 @@ export class User {
   @IsString()
   firstName: string;
 
-  @Column()
+  @Column({ nullable: true })
   @IsString()
   middleName: string;
 
@@ -35,11 +35,15 @@ export class User {
   @IsString()
   lastName: string;
 
-  @Column()
+  @Column({ nullable: true })
   @IsString()
   gender: string;
 
-  @Column()
+  @Column({ nullable: true })
+  @IsString()
+  googleId: string;
+
+  @Column({ nullable: true })
   @IsPhoneNumber()
   @MinLength(10)
   @MaxLength(10)

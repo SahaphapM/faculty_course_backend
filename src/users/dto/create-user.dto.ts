@@ -16,6 +16,8 @@ export class CreateUserDto {
 
   gender: string;
 
+  googleId: string;
+
   roles: Role[];
 
   phone: string;
