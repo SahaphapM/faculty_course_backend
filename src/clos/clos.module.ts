@@ -8,5 +8,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   imports: [TypeOrmModule.forFeature([Clo])],
   controllers: [ClosController],
   providers: [ClosService],
+  exports: [ClosService],
 })
 export class ClosModule {}

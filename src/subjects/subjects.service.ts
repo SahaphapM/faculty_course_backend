@@ -9,6 +9,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Subject } from './entities/subject.entity';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
+import { User } from 'src/users/entities/user.entity';
+import { Clo } from 'src/clos/entities/clo.entity';
+import { Skill } from 'src/skills/entities/skill.entity';
 
 @Injectable()
 export class SubjectsService {
@@ -68,6 +71,66 @@ export class SubjectsService {
       });
     } catch (error) {
       throw new BadRequestException('Failed to update subject');
+    }
+  }
+
+  async addTeacher(id: string, user: User): Promise<Subject> {
+    const subject = await this.subjectsRepository.findOne({ where: { id } });
+    if (!subject) {
+      throw new NotFoundException(`Subject with ID ${id} not found`);
+    }
+    if (!subject.teachers) {
+      subject.teachers = [];
+    }
+    subject.teachers.push(user);
+    try {
+      await this.subjectsRepository.save(subject);
+      return this.subjectsRepository.findOne({
+        where: { id },
+        relations: { teachers: true },
+      });
+    } catch (error) {
+      throw new BadRequestException('Failed to update Subject', error.message);
+    }
+  }
+
+  async addCLO(id: string, clo: Clo): Promise<Subject> {
+    const subject = await this.subjectsRepository.findOne({ where: { id } });
+    if (!subject) {
+      throw new NotFoundException(`Subject with ID ${id} not found`);
+    }
+    if (!subject.clos) {
+      subject.clos = [];
+    }
+    subject.clos.push(clo);
+    try {
+      await this.subjectsRepository.save(subject);
+      return this.subjectsRepository.findOne({
+        where: { id },
+        relations: { clos: true },
+      });
+    } catch (error) {
+      throw new BadRequestException('Failed to update Subject', error.message);
+    }
+  }
+
+  async addSkill(id: string, skill: Skill): Promise<Subject> {
+    const subject = await this.subjectsRepository.findOne({ where: { id } });
+    if (!subject) {
+      throw new NotFoundException(`Subject with ID ${id} not found`);
+    }
+    if (!subject.skills) {
+      subject.skills = [];
+    }
+    subject.skills.push(skill);
+    try {
+      await this.subjectsRepository.save(subject);
+      return this.subjectsRepository.findOne({
+        where: { id },
+        relations: { skills: true },
+      });
+    } catch (error) {
+      throw new BadRequestException('Failed to update Subject', error.message);
     }
   }
 
