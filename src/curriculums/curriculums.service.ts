@@ -98,6 +98,9 @@ export class CurriculumsService {
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
+    if (!curriculum.subjects) {
+      curriculum.subjects = [];
+    }
     curriculum.subjects.push(subject);
     try {
       await this.curriculumsRepository.save(curriculum);
@@ -118,6 +121,9 @@ export class CurriculumsService {
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
+    if (!curriculum.coordinators) {
+      curriculum.coordinators = [];
+    }
     curriculum.coordinators.push(user);
     try {
       await this.curriculumsRepository.save(curriculum);
@@ -137,6 +143,9 @@ export class CurriculumsService {
     const curriculum = await this.findOne(id);
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
+    }
+    if (!curriculum.plos) {
+      curriculum.plos = [];
     }
     curriculum.plos.push(plo);
     try {
