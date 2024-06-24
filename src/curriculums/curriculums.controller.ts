@@ -58,13 +58,13 @@ export class CurriculumsController {
     return this.curriculumsService.addSubject(id, subject); // add subject to curriculum
   }
 
-  @Patch(':id/cordinators')
-  async addCordinator(
+  @Patch(':id/coordinators')
+  async addCoordinator(
     @Param('id') id: string,
     @Body() createUserDto: CreateUserDto,
   ) {
-    const cordinator = await this.usersService.findOne(createUserDto.id); // find user in database by id
-    return this.curriculumsService.addCordinator(id, cordinator); // add user to curriculum
+    const coordinator = await this.usersService.findOne(createUserDto.id); // find user in database by id
+    return this.curriculumsService.addCoordinator(id, coordinator); // add user to curriculum
   }
 
   @Patch(':id/plos')
