@@ -116,7 +116,7 @@ export class CurriculumsService {
     }
   }
 
-  async addCordinator(id: string, user: User): Promise<Curriculum> {
+  async addCoordinator(id: string, user: User): Promise<Curriculum> {
     const curriculum = await this.findOne(id);
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
