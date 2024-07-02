@@ -116,15 +116,32 @@ export class CurriculumsService {
     }
   }
 
-  async addCoordinator(id: string, user: User): Promise<Curriculum> {
+  async selectSubject(id: string, subjects: Subject[]): Promise<Curriculum> {
     const curriculum = await this.findOne(id);
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
-    if (!curriculum.coordinators) {
-      curriculum.coordinators = [];
+    curriculum.subjects = subjects;
+    try {
+      await this.curriculumsRepository.save(curriculum);
+      return this.curriculumsRepository.findOne({
+        where: { id },
+        relations: { subjects: true },
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to update Curriculum',
+        error.message,
+      );
     }
-    curriculum.coordinators.push(user);
+  }
+
+  async addCoordinator(id: string, users: User[]): Promise<Curriculum> {
+    const curriculum = await this.findOne(id);
+    if (!curriculum) {
+      throw new NotFoundException(`Curriculum with ID ${id} not found`);
+    }
+    curriculum.coordinators = users;
     try {
       await this.curriculumsRepository.save(curriculum);
       return this.curriculumsRepository.findOne({

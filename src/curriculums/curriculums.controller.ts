@@ -54,17 +54,31 @@ export class CurriculumsController {
     @Param('id') id: string,
     @Body() createSubjectDto: CreateSubjectDto,
   ) {
-    const subject = await this.subjectsService.create(createSubjectDto); // create subject to database
-    return this.curriculumsService.addSubject(id, subject); // add subject to curriculum
+    const subjects = await this.subjectsService.create(createSubjectDto); // create subject to database
+    return this.curriculumsService.addSubject(id, subjects); // add subject to curriculum
+  }
+
+  @Patch(':id/selectSubjects')
+  async selectSubject(
+    @Param('id') id: string,
+    @Body() createSubjectDtos: CreateSubjectDto[],
+  ) {
+    // option and select the former subjects
+    const subjects = await Promise.all(
+      createSubjectDtos.map((dto) => this.subjectsService.findOne(dto.id)),
+    );
+    return this.curriculumsService.selectSubject(id, subjects); // add subject to curriculum
   }
 
   @Patch(':id/coordinators')
   async addCoordinator(
     @Param('id') id: string,
-    @Body() createUserDto: CreateUserDto,
+    @Body() createUserDtos: CreateUserDto[],
   ) {
-    const coordinator = await this.usersService.findOne(createUserDto.id); // find user in database by id
-    return this.curriculumsService.addCoordinator(id, coordinator); // add user to curriculum
+    const coordinators = await Promise.all(
+      createUserDtos.map((dto) => this.usersService.findOne(dto.id)),
+    );
+    return this.curriculumsService.addCoordinator(id, coordinators); // add user to curriculum
   }
 
   @Patch(':id/plos')
