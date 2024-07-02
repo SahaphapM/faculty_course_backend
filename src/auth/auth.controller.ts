@@ -12,12 +12,14 @@ export class AuthController {
   @UseGuards(LocalAuthGuard)
   @Post('/login')
   async login(@Request() req, @Res({ passthrough: true }) res) {
-    const { access_token } = await this.authService.login(req.user);
+    const { access_token, user } = await this.authService.login(req.user);
     // save to cookie
     res.cookie('access_token', access_token, {
-      httpOnly: true, // sent to only Serverside
+      // httpOnly: true, // sent to only Serverside
+      // secure: process.env.NODE_ENV === 'production', // ensure it's secure in production
+      // sameSite: 'strict',
     });
-    return { message: 'Login successful' };
+    return { message: 'Login successful', user: user };
   }
 
   @UseGuards(JwtAuthGuard)
@@ -40,6 +42,7 @@ export class AuthController {
     res.cookie('access_token', access_token, {
       httpOnly: true, // sent to only Serverside
     });
+    console.log(access_token);
     return { message: 'Login with Google successful' };
   }
 }
