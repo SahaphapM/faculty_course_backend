@@ -8,14 +8,20 @@ import {
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 import { Role } from 'src/roles/entities/role.entity';
 import { Subject } from 'src/subjects/entities/subject.entity';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: string;
 
-  @Column()
+  @Column({ unique: true })
   @IsEmail()
   email: string;
 
