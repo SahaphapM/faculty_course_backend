@@ -14,10 +14,9 @@ export class AuthController {
   async login(@Request() req, @Res({ passthrough: true }) res) {
     const { access_token, user } = await this.authService.login(req.user);
     // save to cookie
+    console.log(access_token);
     res.cookie('access_token', access_token, {
-      // httpOnly: true, // sent to only Serverside
-      // secure: process.env.NODE_ENV === 'production', // ensure it's secure in production
-      // sameSite: 'strict',
+      httpOnly: true, // sent to only Serverside
     });
     return { message: 'Login successful', user: user };
   }
