@@ -8,17 +8,26 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role } from 'src/roles/entities/role.entity';
 import * as bcrypt from 'bcrypt';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    @InjectRepository(Role)
-    private rolesRepository: Repository<Role>,
   ) {}
+
+  async findAllByPage(
+    paginationDto: PaginationDto,
+  ): Promise<{ data: User[]; total: number }> {
+    const { page = 1, limit = 10 } = paginationDto;
+    const [result, total] = await this.usersRepository.findAndCount({
+      take: limit,
+      skip: (page - 1) * limit,
+    });
+    return { data: result, total };
+  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.usersRepository.findOne({
