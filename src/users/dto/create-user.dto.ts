@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 import { Role } from 'src/roles/entities/role.entity';
 
@@ -9,6 +9,7 @@ export class CreateUserDto {
   email: string;
 
   @IsString()
+  @IsNotEmpty()
   password: string;
 
   @IsString()

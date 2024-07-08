@@ -25,6 +25,7 @@ export class UsersService {
     const [result, total] = await this.usersRepository.findAndCount({
       take: limit,
       skip: (page - 1) * limit,
+      relations: ['roles'],
     });
     return { data: result, total };
   }
@@ -64,8 +65,6 @@ export class UsersService {
         'lastName',
         'gender',
         'phone',
-        'googleId',
-        'roles',
       ],
     });
   }
