@@ -1,8 +1,7 @@
 import { IsString } from 'class-validator';
 
 export class CreateRoleDto {
-  @IsString()
-  id: string;
+  id: string | null;
 
   @IsString()
   name: string;

@@ -6,19 +6,49 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Role } from 'src/roles/entities/role.entity';
 import * as bcrypt from 'bcrypt';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    @InjectRepository(Role)
-    private rolesRepository: Repository<Role>,
   ) {}
+
+  async findAllByPage(
+    paginationDto: PaginationDto,
+  ): Promise<{ data: User[]; total: number }> {
+    console.log(paginationDto);
+    const { page, limit, sort, order, search } = paginationDto;
+    console.log(search);
+
+    const options: FindManyOptions<User> = {
+      take: limit,
+      skip: (page - 1) * limit,
+      order: sort ? { [sort]: order } : {},
+      relations: ['roles'],
+    };
+
+    if (search) {
+      options.where = [
+        { firstName: Like(`%${search}%`) },
+        { lastName: Like(`%${search}%`) },
+        { email: Like(`%${search}%`) },
+      ];
+    }
+
+    console.log('Query options:', options); // Debugging line
+
+    const [result, total] = await this.usersRepository.findAndCount(options);
+
+    console.log('Result:', result); // Debugging line
+    console.log('Total:', total); // Debugging line
+
+    return { data: result, total };
+  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.usersRepository.findOne({
@@ -55,8 +85,6 @@ export class UsersService {
         'lastName',
         'gender',
         'phone',
-        'googleId',
-        'roles',
       ],
     });
   }
