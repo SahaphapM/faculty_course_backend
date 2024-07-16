@@ -6,7 +6,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { PaginationDto } from './dto/pagination.dto';
@@ -21,12 +21,32 @@ export class UsersService {
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: User[]; total: number }> {
-    const { page = 1, limit = 10 } = paginationDto;
-    const [result, total] = await this.usersRepository.findAndCount({
+    console.log(paginationDto);
+    const { page, limit, sort, order, search } = paginationDto;
+    console.log(search);
+
+    const options: FindManyOptions<User> = {
       take: limit,
       skip: (page - 1) * limit,
+      order: sort ? { [sort]: order } : {},
       relations: ['roles'],
-    });
+    };
+
+    if (search) {
+      options.where = [
+        { firstName: Like(`%${search}%`) },
+        { lastName: Like(`%${search}%`) },
+        { email: Like(`%${search}%`) },
+      ];
+    }
+
+    console.log('Query options:', options); // Debugging line
+
+    const [result, total] = await this.usersRepository.findAndCount(options);
+
+    console.log('Result:', result); // Debugging line
+    console.log('Total:', total); // Debugging line
+
     return { data: result, total };
   }
 

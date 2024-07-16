@@ -23,7 +23,6 @@ export class UsersController {
 
   @Get('pages')
   findAllByPage(@Query() paginationDto: PaginationDto) {
-    console.log(paginationDto);
     return this.usersService.findAllByPage(paginationDto);
   }
 
