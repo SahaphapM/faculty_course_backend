@@ -1,14 +1,14 @@
 services:
-  # backend:
-  #   container_name: nestjs_backend
-  #   build: .
-  #   ports:
-  #     - "3000:3000"
-  #   command: npm run start:dev
-    # depends_on:
-    #   - mysql_db
-    # volumes:
-    #   - ./docker_data/src:/usr/src/app/src
+  backend:
+    container_name: nestjs_backend
+    build: .
+    ports:
+      - "3000:3000"
+    command: npm run start:dev
+    depends_on:
+      - mysql_db
+    volumes:
+      - ./src:/usr/src/app/src
   
   mysql_db:
     image: mysql:latest
