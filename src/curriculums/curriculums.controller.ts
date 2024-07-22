@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
@@ -16,6 +17,7 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { CreatePloDto } from 'src/plos/dto/create-plo.dto';
 import { UsersService } from 'src/users/users.service';
 import { PlosService } from 'src/plos/plos.service';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('curriculums')
 export class CurriculumsController {
@@ -25,6 +27,11 @@ export class CurriculumsController {
     private readonly usersService: UsersService,
     private readonly plosService: PlosService,
   ) {}
+
+  @Get('pages')
+  findAllByPage(@Query() paginationDto: PaginationDto) {
+    return this.curriculumsService.findAllByPage(paginationDto);
+  }
 
   @Post()
   create(@Body() createCurriculumDto: CreateCurriculumDto) {
@@ -57,6 +64,7 @@ export class CurriculumsController {
     const subjects = await this.subjectsService.create(createSubjectDto); // create subject to database
     return this.curriculumsService.addSubject(id, subjects); // add subject to curriculum
   }
+
 
   @Patch(':id/selectSubjects')
   async selectSubject(
