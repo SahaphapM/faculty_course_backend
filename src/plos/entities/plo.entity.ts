@@ -9,7 +9,7 @@ export class Plo {
   id: string;
 
   @Column()
-  Plo: string;
+  num_plo: string;
 
   @Column()
   description: string;

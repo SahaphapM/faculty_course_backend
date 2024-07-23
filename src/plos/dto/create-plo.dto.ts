@@ -3,7 +3,7 @@ import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 
 export class CreatePloDto {
   id: string;
-  Plo: string;
+  num_plo: string;
   description: string;
   resultTypes: string;
   curriculum: Curriculum;
