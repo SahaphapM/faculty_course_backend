@@ -28,20 +28,22 @@ export class AuthController {
   }
 
   @UseGuards(GoogleAuthGuard)
-  @Get('google')
-  async googleAuth(@Request() req) {
+  @Get('/google')
+  googleAuth() {
     // Initiates the Google OAuth process
   }
 
   @UseGuards(GoogleAuthGuard)
-  @Get('google/redirect')
-  async googleAuthRedirect(@Request() req, @Res({ passthrough: true }) res) {
-    const { access_token } = await this.authService.googleLogin(req);
+  @Get('/google/redirect')
+  async googleAuthRedirect(@Request() req, @Res() res) {
+    const { access_token } = await this.authService.loginGoogle(req);
     // save to cookie
     res.cookie('access_token', access_token, {
       httpOnly: true, // sent to only Serverside
     });
-    console.log(access_token);
-    return { message: 'Login with Google successful' };
+    // console.log(access_token);
+    const frontendURL = process.env.FRONTEND_URL;
+    return res.redirect(`${frontendURL}/auth/google/success`);
+    // return { message: 'Login with Google successful', status: 200 };
   }
 }
