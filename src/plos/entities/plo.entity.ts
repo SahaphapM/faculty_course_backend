@@ -9,6 +9,9 @@ export class Plo {
   id: string;
 
   @Column()
+  num_plo: string;
+
+  @Column()
   description: string;
 
   @Column()
