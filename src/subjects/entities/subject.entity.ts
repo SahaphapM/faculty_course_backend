@@ -37,14 +37,7 @@ export class Subject {
   @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
   curriculums: Curriculum[];
 
-  @ManyToMany(() => User, (user) => user.subjects, { cascade: true })
-  @JoinTable()
-  teachers: User[]; // อาจารย์ผู้สอน
-
   @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
   clos: Clo[];
 
-  @ManyToMany(() => Skill, (skill) => skill.subjects, { cascade: true })
-  @JoinTable()
-  skills: Skill[];
 }

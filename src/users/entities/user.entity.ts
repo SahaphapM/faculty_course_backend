@@ -63,6 +63,6 @@ export class User {
   @ManyToMany(() => Curriculum, (curriculum) => curriculum.coordinators)
   curriculums: Curriculum[];
 
-  @ManyToMany(() => Subject, (subject) => subject.teachers)
-  subjects: Subject[];
+  // @ManyToMany(() => Subject, (subject) => subject.teachers)
+  // subjects: Subject[];
 }
