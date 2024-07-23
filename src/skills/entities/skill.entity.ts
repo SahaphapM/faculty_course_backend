@@ -15,6 +15,6 @@ export class Skill {
   @Column()
   colorsTag: string;
 
-  @ManyToMany(() => Subject, (subject) => subject.skills)
-  subjects: Subject[];
+  // @ManyToMany(() => Subject, (subject) => subject.skills)
+  // subjects: Subject[];
 }

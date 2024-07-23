@@ -32,31 +32,10 @@ import { ConfigModule } from '@nestjs/config';
       isGlobal: true,
       envFilePath: '.env',
     }),
-    // TypeOrmModule.forRoot({
-    //   type: 'sqlite',
-    //   database: 'mybuu.sqlite',
-    //   logging: false,
-    //   entities: [
-    //     Curriculum,
-    //     User,
-    //     Branch,
-    //     Role,
-    //     Plo,
-    //     Clo,
-    //     Subject,
-    //     Faculty,
-    //     Skill,
-    //     Department,
-    //   ],
-    //   synchronize: true,
-    // }),
     TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'mysql_db',
-      port: 3306,
-      username: 'user123',
-      password: 'pass123',
-      database: 'faculty_db',
+      type: 'sqlite',
+      database: 'mybuu.sqlite',
+      logging: false,
       entities: [
         Curriculum,
         User,
@@ -71,6 +50,27 @@ import { ConfigModule } from '@nestjs/config';
       ],
       synchronize: true,
     }),
+    // TypeOrmModule.forRoot({
+    //   type: 'mysql',
+    //   host: 'mysql_db',
+    //   port: 3306,
+    //   username: 'user123',
+    //   password: 'pass123',
+    //   database: 'faculty_db',
+    //   entities: [
+    //     Curriculum,
+    //     User,
+    //     Branch,
+    //     Role,
+    //     Plo,
+    //     Clo,
+    //     Subject,
+    //     Faculty,
+    //     Skill,
+    //     Department,
+    //   ],
+    //   synchronize: true,
+    // }),
     UsersModule,
     CurriculumsModule,
     BranchsModule,
@@ -87,5 +87,5 @@ import { ConfigModule } from '@nestjs/config';
   providers: [AppService],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) {}
+  constructor(private dataSource: DataSource) { }
 }
