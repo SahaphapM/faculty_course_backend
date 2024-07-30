@@ -5,6 +5,7 @@ import {
   Body,
   Patch,
   Param,
+  Query,
   Delete,
   HttpCode,
   HttpStatus,
@@ -12,6 +13,7 @@ import {
 import { SkillsService } from './skills.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('skills')
 export class SkillsController {
@@ -21,7 +23,10 @@ export class SkillsController {
   create(@Body() createSkillDto: CreateSkillDto) {
     return this.skillsService.create(createSkillDto);
   }
-
+  @Get('pages')
+  findAllByPage(@Query() paginationDto: PaginationDto) {
+    return this.skillsService.findAllByPage(paginationDto);
+  }
   @Get()
   findAll() {
     return this.skillsService.findAll();

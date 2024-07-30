@@ -6,8 +6,9 @@ import {
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill } from './entities/skill.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class SkillsService {
@@ -23,6 +24,38 @@ export class SkillsService {
     } catch (error) {
       throw new BadRequestException('Failed to create skill');
     }
+  }
+
+  async findAllByPage(
+    paginationDto: PaginationDto,
+  ): Promise<{ data: Skill[]; total: number }> {
+    console.log(paginationDto);
+    const { page, limit, sort, order, search } = paginationDto;
+    console.log(search);
+
+    const options: FindManyOptions<Skill> = {
+      take: limit,
+      skip: (page - 1) * limit,
+      order: sort ? { [sort]: order } : {},
+    };
+
+    if (search) {
+      options.where = [
+        { id: Like(`%${search}%`) },
+        { name: Like(`%${search}%`) },
+        { description: Like(`%${search}%`) },
+        { colorsTag: Like(`%${search}%`) }, // Corrected for nested relation
+      ];
+    }
+
+    console.log('Query options:', options); // Debugging line
+
+    const [result, total] = await this.skillsRepository.findAndCount(options);
+
+    console.log('Result:', result); // Debugging line
+    console.log('Total:', total); // Debugging line
+
+    return { data: result, total };
   }
 
   async findAll(): Promise<Skill[]> {
