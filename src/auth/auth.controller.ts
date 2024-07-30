@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Request, Res, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { GoogleAuthGuard } from './guard/google-auth.guard';
+import { Response, Request } from 'express';
 
 @Controller('auth')
 export class AuthController {
@@ -11,8 +12,8 @@ export class AuthController {
 
   @UseGuards(LocalAuthGuard)
   @Post('/login')
-  async login(@Request() req, @Res({ passthrough: true }) res) {
-    const { access_token, user } = await this.authService.login(req.user);
+  async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+    const { access_token, user } = await this.authService.login(req.body);
     // save to cookie
     console.log(access_token);
     res.cookie('access_token', access_token, {
@@ -23,7 +24,7 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/profile')
-  getProfile(@Request() req) {
+  getProfile(@Req() req) {
     return req.user;
   }
 
@@ -35,15 +36,32 @@ export class AuthController {
 
   @UseGuards(GoogleAuthGuard)
   @Get('/google/redirect')
-  async googleAuthRedirect(@Request() req, @Res() res) {
-    const { access_token } = await this.authService.loginGoogle(req);
-    // save to cookie
+  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+    const { access_token } = await this.authService.googleLogin(req);
+
     res.cookie('access_token', access_token, {
-      httpOnly: true, // sent to only Serverside
+      httpOnly: true,
     });
-    // console.log(access_token);
-    const frontendURL = process.env.FRONTEND_URL;
-    return res.redirect(`${frontendURL}/auth/google/success`);
-    // return { message: 'Login with Google successful', status: 200 };
+    console.log(access_token);
+    res.redirect(`${process.env.FRONTEND_URL}/auth/google/success`);
+    return {
+      message: 'Login with Google successful',
+      status: 200,
+    };
+  }
+
+  @Post('logout')
+  @UseGuards(JwtAuthGuard)
+  async logout(@Res({ passthrough: true }) res: Response) {
+    res.clearCookie('access_token', {
+      httpOnly: true,
+      // Include other options you used when setting the cookie
+      // For example:
+      // secure: true,
+      // sameSite: 'strict',
+      // domain: 'your-domain.com',
+      // path: '/',
+    });
+    return { message: 'Logged out successfully' };
   }
 }
