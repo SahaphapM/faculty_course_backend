@@ -3,9 +3,10 @@ import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { User } from 'src/users/entities/user.entity';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
+// import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Payload } from './payload';
 
 @Injectable()
 export class AuthService {
@@ -39,7 +40,7 @@ export class AuthService {
   }
 
   // เพิ่ม google Login
-  async loginGoogle(req): Promise<any> {
+  async googleLogin(req): Promise<any> {
     if (!req.user) {
       throw new Error('Google login failed: No user information received.');
     }
@@ -62,7 +63,12 @@ export class AuthService {
     // }
     // console.log(user);
 
-    const payload = { email: req.user.email, gid: req.user.id };
+    const payload: Payload = {
+      id: req.user.id,
+      email: req.user.email,
+      name: req.user.name,
+      picture: req.user.picture,
+    };
     return {
       access_token: this.jwtService.sign(payload),
     };
