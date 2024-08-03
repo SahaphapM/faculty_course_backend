@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
@@ -77,16 +78,30 @@ export class CurriculumsController {
     );
     return this.curriculumsService.selectSubject(id, subjects); // add subject to curriculum
   }
-
+  
   @Patch(':id/coordinators')
   async addCoordinator(
     @Param('id') id: string,
-    @Body() createUserDtos: CreateUserDto[],
+    @Body() createUserDtos: CreateUserDto[]
   ) {
+    console.log('Received data:', createUserDtos); // Log the received data
+
+    // Ensure createUserDtos is an array
+    if (!Array.isArray(createUserDtos)) {
+      throw new BadRequestException('Invalid data format: Expected an array');
+    }
+
+    // Validate each item in the array
+    createUserDtos.forEach(dto => {
+      if (typeof dto.id !== 'string' || dto.id.trim() === '') {
+        throw new BadRequestException('Invalid ID format');
+      }
+    });
+
     const coordinators = await Promise.all(
-      createUserDtos.map((dto) => this.usersService.findOne(dto.id)),
+      createUserDtos.map((dto) => this.usersService.findOne(dto.id))
     );
-    return this.curriculumsService.addCoordinator(id, coordinators); // add user to curriculum
+    return this.curriculumsService.addCoordinator(id, coordinators); // Add user to curriculum
   }
 
   @Patch(':id/plos')
