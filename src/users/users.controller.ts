@@ -70,7 +70,7 @@ export class UsersController {
     const randomFileName = `${uuidv4()}${fileExtension}`;
     const uploadPath = path.join(
       process.cwd(),
-      '/public/users/image',
+      '/public/users/images',
       randomFileName,
     );
 

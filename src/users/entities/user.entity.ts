@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 import { Role } from 'src/roles/entities/role.entity';
-import { Subject } from 'src/subjects/entities/subject.entity';
+// import { Subject } from 'src/subjects/entities/subject.entity';
 import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
@@ -50,7 +50,7 @@ export class User {
   @MaxLength(10)
   phone: string;
 
-  @Column({ nullable: true })
+  @Column({ default: 'unknown.jpg' })
   @IsString()
   image: string;
 
