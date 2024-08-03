@@ -1,5 +1,4 @@
 import { FileValidator } from '@nestjs/common';
-import { Express } from 'express';
 import * as fileType from 'file-type-mime';
 
 export interface CustomUploadTypeValidatorOptions {

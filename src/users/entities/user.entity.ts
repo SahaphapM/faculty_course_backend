@@ -50,6 +50,10 @@ export class User {
   @MaxLength(10)
   phone: string;
 
+  @Column({ nullable: true })
+  @IsString()
+  image: string;
+
   @ManyToMany(() => Role, (role) => role.users, { cascade: true })
   @JoinTable()
   roles: Role[];
