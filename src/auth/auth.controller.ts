@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
-// import { LocalAuthGuard } from './guard/local-auth.guard';
+import { LocalAuthGuard } from './guard/local-auth.guard';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { GoogleAuthGuard } from './guard/google-auth.guard';
 import { Response, Request } from 'express';
@@ -10,7 +10,7 @@ import { Response, Request } from 'express';
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
-  // @UseGuards(LocalAuthGuard)
+  @UseGuards(LocalAuthGuard)
   @Post('/login')
   async login(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const { access_token, user } = await this.authService.login(req.body);

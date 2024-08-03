@@ -39,7 +39,7 @@ export class Subject {
 
   @ManyToMany(() => User, (user) => user.subjects, { cascade: true })
   @JoinTable()
-  teachers: User[]; // อาจารย์ผู้สอน
+  teachers: User[];
 
   @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
   clos: Clo[];
