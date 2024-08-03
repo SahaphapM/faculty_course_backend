@@ -44,9 +44,10 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
 
-  @Post('image/upload')
+  @Post(':id/image/upload')
   @UseInterceptors(FileInterceptor('image'))
   public async uploadFile(
+    @Param('id') id: string,
     @UploadedFile(
       new ParseFilePipeBuilder()
         .addValidator(
@@ -79,6 +80,11 @@ export class UsersController {
     // Save the file
     fs.writeFileSync(uploadPath, file.buffer);
     console.log(file);
+
+    // set image name of user
+    const user = await this.usersService.findOne(id);
+    user.image = randomFileName;
+    await this.usersService.update(id, user);
     return { message: 'File upload successful', filename: randomFileName };
   }
 
