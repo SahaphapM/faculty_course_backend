@@ -25,6 +25,8 @@ import { Department } from './departments/entities/department.entity';
 import { FacultiesModule } from './faculties/faculties.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -82,10 +84,14 @@ import { ConfigModule } from '@nestjs/config';
     DepartmentsModule,
     FacultiesModule,
     AuthModule,
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public'), // Serve files from 'public' directory
+      serveRoot: '/public', // URL path to serve static files
+    }),
   ],
   controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
-  constructor(private dataSource: DataSource) { }
+  constructor(private dataSource: DataSource) {}
 }
