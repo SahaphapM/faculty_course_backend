@@ -8,7 +8,7 @@ export class Plo {
   @PrimaryColumn()
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   num_plo: string;
 
   @Column()
