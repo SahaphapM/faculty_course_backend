@@ -7,7 +7,8 @@ import { CreateCloDto } from './dto/create-clo.dto';
 import { UpdateCloDto } from './dto/update-clo.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clo } from './entities/clo.entity';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Like, Repository } from 'typeorm';
+import { PaginationDto } from 'src/users/dto/pagination.dto';
 
 @Injectable()
 export class ClosService {
@@ -23,6 +24,38 @@ export class ClosService {
     } catch (error) {
       throw new BadRequestException('Failed to create CLO');
     }
+  }
+
+  async findAllByPage(
+    paginationDto: PaginationDto,
+  ): Promise<{ data: Clo[]; total: number }> {
+    console.log(paginationDto);
+    const { page, limit, sort, order, search } = paginationDto;
+    console.log(search);
+
+    const options: FindManyOptions<Clo> = {
+      take: limit,
+      skip: (page - 1) * limit,
+      order: sort ? { [sort]: order } : {},
+    };
+
+    if (search) {
+      options.where = [
+        { id: Like(`%${search}%`) },
+        { name: Like(`%${search}%`) },
+        { description: Like(`%${search}%`) },
+        { subject: Like(`%${search}%`) }, // Corrected for nested relation
+      ];
+    }
+
+    console.log('Query options:', options); // Debugging line
+
+    const [result, total] = await this.closRepository.findAndCount(options);
+
+    console.log('Result:', result); // Debugging line
+    console.log('Total:', total); // Debugging line
+
+    return { data: result, total };
   }
 
   async findAll(): Promise<Clo[]> {

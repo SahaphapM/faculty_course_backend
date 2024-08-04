@@ -8,10 +8,12 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Query,
 } from '@nestjs/common';
 import { ClosService } from './clos.service';
 import { CreateCloDto } from './dto/create-clo.dto';
 import { UpdateCloDto } from './dto/update-clo.dto';
+import { PaginationDto } from 'src/users/dto/pagination.dto';
 
 @Controller('clos')
 export class ClosController {
@@ -20,6 +22,11 @@ export class ClosController {
   @Post()
   create(@Body() createCloDto: CreateCloDto) {
     return this.closService.create(createCloDto);
+  }
+
+  @Get('pages')
+  findAllByPage(@Query() paginationDto: PaginationDto) {
+    return this.closService.findAllByPage(paginationDto);
   }
 
   @Get()
@@ -36,7 +43,7 @@ export class ClosController {
   update(@Param('id') id: string, @Body() updateCloDto: UpdateCloDto) {
     return this.closService.update(id, updateCloDto);
   }
- 
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
