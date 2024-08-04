@@ -6,7 +6,7 @@ import {
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
-import { FindManyOptions, Like, Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import * as bcrypt from 'bcrypt';
 import { PaginationDto } from './dto/pagination.dto';
@@ -21,33 +21,57 @@ export class UsersService {
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: User[]; total: number }> {
-    console.log(paginationDto);
-    const { page, limit, sort, order, search } = paginationDto;
-    console.log(search);
+    const { page, limit, sort, order, search, column1, column2 } =
+      paginationDto;
 
-    const options: FindManyOptions<User> = {
-      take: limit,
-      skip: (page - 1) * limit,
-      order: sort ? { [sort]: order } : {},
-      relations: ['roles'],
-    };
+    const queryBuilder = this.usersRepository.createQueryBuilder('user');
 
-    if (search) {
-      options.where = [
-        { firstName: Like(`%${search}%`) },
-        { lastName: Like(`%${search}%`) },
-        { email: Like(`%${search}%`) },
-      ];
+    // Include roles in the query
+    queryBuilder.innerJoinAndSelect('user.roles', 'roles');
+
+    // Conditionally add joins if necessary
+    if (column1) {
+      queryBuilder
+        .innerJoinAndSelect('user.branch', 'branch')
+        .innerJoinAndSelect('branch.faculty', 'faculty');
+    } else if (column2) {
+      queryBuilder.innerJoinAndSelect('user.branch', 'branch');
     }
 
-    console.log('Query options:', options); // Debugging line
+    // Conditionally add where clauses
+    if (column1) {
+      queryBuilder.andWhere('faculty.id = :facultyId', { facultyId: column1 });
+    }
+    if (column2) {
+      queryBuilder.andWhere('branch.id = :branchId', { branchId: column2 });
+    }
 
-    const [result, total] = await this.usersRepository.findAndCount(options);
+    if (search) {
+      queryBuilder.andWhere(
+        new Brackets((qb) => {
+          qb.where('user.firstName LIKE :search', { search: `%${search}%` })
+            .orWhere('user.lastName LIKE :search', { search: `%${search}%` })
+            .orWhere('user.email LIKE :search', { search: `%${search}%` });
+        }),
+      );
+    }
 
-    console.log('Result:', result); // Debugging line
-    console.log('Total:', total); // Debugging line
+    if (sort && order) {
+      queryBuilder.orderBy(`user.${sort}`, order);
+    }
 
-    return { data: result, total };
+    // console.log('Generated SQL:', queryBuilder.getSql()); // Log the SQL query
+
+    const [data, total] = await queryBuilder
+      .take(limit)
+      .skip((page - 1) * limit)
+      .getManyAndCount();
+
+    // console.log('PaginationDto:', paginationDto);
+    // console.log('Data:', data);
+    // console.log('Total:', total);
+
+    return { data, total };
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {

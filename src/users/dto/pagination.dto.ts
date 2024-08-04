@@ -25,4 +25,12 @@ export class PaginationDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  @IsOptional()
+  @IsString()
+  column1?: string;
+
+  @IsOptional()
+  @IsString()
+  column2?: string;
 }
