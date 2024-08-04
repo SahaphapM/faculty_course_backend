@@ -32,6 +32,33 @@ export class FacultiesService {
     }
   }
 
+  async findAllBranchId(): Promise<any[]> {
+    try {
+      const faculties = await this.facultiesRepository
+        .createQueryBuilder('faculty')
+        .leftJoinAndSelect('faculty.branches', 'branch')
+        .select([
+          'faculty.id', // Select faculty ID
+          'faculty.name', // Select faculty name
+          'branch.id', // Select branch ID
+          'branch.name', // Select branch name
+        ])
+        .getMany();
+
+      // Transform the result to include an array of branches for each faculty
+      return faculties.map((faculty) => ({
+        id: faculty.id,
+        name: faculty.name,
+        branches: faculty.branches.map((branch) => ({
+          id: branch.id,
+          name: branch.name,
+        })),
+      }));
+    } catch (error) {
+      throw new Error('Failed to fetch faculties');
+    }
+  }
+
   async findOne(id: string): Promise<Faculty> {
     try {
       const faculty = await this.facultiesRepository.findOne({
