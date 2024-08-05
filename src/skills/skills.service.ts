@@ -18,6 +18,8 @@ export class SkillsService {
   ) {}
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
+    console.log(createSkillDto);
+
     const skill = this.skillsRepository.create(createSkillDto);
     try {
       return await this.skillsRepository.save(skill);
@@ -29,14 +31,13 @@ export class SkillsService {
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: Skill[]; total: number }> {
-    console.log(paginationDto);
     const { page, limit, sort, order, search } = paginationDto;
-    console.log(search);
 
     const options: FindManyOptions<Skill> = {
       take: limit,
       skip: (page - 1) * limit,
       order: sort ? { [sort]: order } : {},
+      relations: { subjects: true },
     };
 
     if (search) {
@@ -48,12 +49,12 @@ export class SkillsService {
       ];
     }
 
-    console.log('Query options:', options); // Debugging line
+    // console.log('Query options:', options); // Debugging line
 
     const [result, total] = await this.skillsRepository.findAndCount(options);
 
-    console.log('Result:', result); // Debugging line
-    console.log('Total:', total); // Debugging line
+    // console.log('Result:', result); // Debugging line
+    // console.log('Total:', total); // Debugging line
 
     return { data: result, total };
   }

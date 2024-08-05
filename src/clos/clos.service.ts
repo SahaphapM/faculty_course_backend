@@ -18,6 +18,8 @@ export class ClosService {
   ) {}
 
   async create(createCloDto: CreateCloDto): Promise<Clo> {
+    console.log(createCloDto);
+
     const clo = this.closRepository.create(createCloDto);
     try {
       return await this.closRepository.save(clo);
@@ -29,9 +31,9 @@ export class ClosService {
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: Clo[]; total: number }> {
-    console.log(paginationDto);
+    // console.log(paginationDto);
     const { page, limit, sort, order, search } = paginationDto;
-    console.log(search);
+    // console.log(search);
 
     const options: FindManyOptions<Clo> = {
       take: limit,
@@ -50,12 +52,12 @@ export class ClosService {
       ];
     }
 
-    console.log('Query options:', options); // Debugging line
+    // console.log('Query options:', options); // Debugging line
 
     const [result, total] = await this.closRepository.findAndCount(options);
 
-    console.log('Result:', result); // Debugging line
-    console.log('Total:', total); // Debugging line
+    // console.log('Result:', result); // Debugging line
+    // console.log('Total:', total); // Debugging line
 
     return { data: result, total };
   }
@@ -79,6 +81,8 @@ export class ClosService {
 
   async update(id: string, updateCloDto: UpdateCloDto): Promise<Clo> {
     await this.findOne(id); // Ensure the CLO exists
+    console.log(updateCloDto);
+
     const clo = await this.closRepository.preload({
       id,
       ...updateCloDto,
