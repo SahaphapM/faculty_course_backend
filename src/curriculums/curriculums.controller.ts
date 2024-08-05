@@ -6,6 +6,8 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
+  BadRequestException,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from './dto/create-curriculum.dto';
@@ -16,6 +18,7 @@ import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { CreatePloDto } from 'src/plos/dto/create-plo.dto';
 import { UsersService } from 'src/users/users.service';
 import { PlosService } from 'src/plos/plos.service';
+import { PaginationDto } from './dto/pagination.dto';
 
 @Controller('curriculums')
 export class CurriculumsController {
@@ -25,6 +28,11 @@ export class CurriculumsController {
     private readonly usersService: UsersService,
     private readonly plosService: PlosService,
   ) {}
+
+  @Get('pages')
+  findAllByPage(@Query() paginationDto: PaginationDto) {
+    return this.curriculumsService.findAllByPage(paginationDto);
+  }
 
   @Post()
   create(@Body() createCurriculumDto: CreateCurriculumDto) {
@@ -70,15 +78,45 @@ export class CurriculumsController {
     return this.curriculumsService.selectSubject(id, subjects); // add subject to curriculum
   }
 
+  @Patch(':id/removeSubject/:SubjectId')
+  async removeSubject(
+    @Param('id') id: string,
+    @Param('SubjectId') SubjectId: string,
+  ) {
+    return this.curriculumsService.removeSubject(id, SubjectId);
+  }
+
   @Patch(':id/coordinators')
   async addCoordinator(
     @Param('id') id: string,
     @Body() createUserDtos: CreateUserDto[],
   ) {
+    console.log('Received data:', createUserDtos); // Log the received data
+
+    // Ensure createUserDtos is an array
+    if (!Array.isArray(createUserDtos)) {
+      throw new BadRequestException('Invalid data format: Expected an array');
+    }
+
+    // Validate each item in the array
+    createUserDtos.forEach((dto) => {
+      if (typeof dto.id !== 'string' || dto.id.trim() === '') {
+        throw new BadRequestException('Invalid ID format');
+      }
+    });
+
     const coordinators = await Promise.all(
       createUserDtos.map((dto) => this.usersService.findOne(dto.id)),
     );
-    return this.curriculumsService.addCoordinator(id, coordinators); // add user to curriculum
+    return this.curriculumsService.addCoordinator(id, coordinators); // Add user to curriculum
+  }
+
+  @Patch(':id/removeCoordinator/:CoordinatorId')
+  async removeCoordinator(
+    @Param('id') id: string,
+    @Param('CoordinatorId') CoordinatorId: string,
+  ) {
+    return this.curriculumsService.removeCoordinator(id, CoordinatorId);
   }
 
   @Patch(':id/plos')

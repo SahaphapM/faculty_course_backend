@@ -1,7 +1,6 @@
 import { Clo } from 'src/clos/entities/clo.entity';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
-import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,
@@ -34,17 +33,13 @@ export class Subject {
   @Column()
   studyTime: string;
 
-  @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
-  curriculums: Curriculum[];
-
-  @ManyToMany(() => User, (user) => user.subjects, { cascade: true })
-  @JoinTable()
-  teachers: User[];
-
-  @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
-  clos: Clo[];
-
   @ManyToMany(() => Skill, (skill) => skill.subjects, { cascade: true })
   @JoinTable()
   skills: Skill[];
+
+  @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
+  curriculums: Curriculum[];
+
+  @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
+  clos: Clo[];
 }

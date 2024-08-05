@@ -30,9 +30,6 @@ export class CreateSubjectDto {
   @IsArray()
   curriculums?: Curriculum[];
 
-  @IsArray()
-  teachers: User[];
-
   @IsOptional()
   @IsArray()
   clos?: Clo[];

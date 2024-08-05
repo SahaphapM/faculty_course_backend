@@ -8,6 +8,9 @@ export class Plo {
   @PrimaryColumn()
   id: string;
 
+  @Column({ nullable: true })
+  num_plo: string;
+
   @Column()
   description: string;
 

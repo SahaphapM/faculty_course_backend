@@ -5,20 +5,23 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
+import { Branch } from 'src/branchs/entities/branch.entity';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
+import { Faculty } from 'src/faculties/entities/faculty.entity';
 import { Role } from 'src/roles/entities/role.entity';
-import { Subject } from 'src/subjects/entities/subject.entity';
+// import { Subject } from 'src/subjects/entities/subject.entity';
 import {
   Column,
   Entity,
   JoinTable,
   ManyToMany,
-  PrimaryGeneratedColumn,
+  ManyToOne,
+  PrimaryColumn,
 } from 'typeorm';
 
 @Entity()
 export class User {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   id: string;
 
   @Column({ unique: true })
@@ -56,6 +59,10 @@ export class User {
   @MaxLength(10)
   phone: string;
 
+  @Column({ default: 'unknown.jpg' })
+  @IsString()
+  image: string;
+
   @ManyToMany(() => Role, (role) => role.users, { cascade: true })
   @JoinTable()
   roles: Role[];
@@ -63,6 +70,12 @@ export class User {
   @ManyToMany(() => Curriculum, (curriculum) => curriculum.coordinators)
   curriculums: Curriculum[];
 
-  @ManyToMany(() => Subject, (subject) => subject.teachers)
-  subjects: Subject[];
+  // @ManyToMany(() => Subject, (subject) => subject.teachers)
+  // subjects: Subject[];
+
+  @ManyToOne(() => Branch, (branch) => branch.users)
+  branch: Branch;
+
+  @ManyToOne(() => Faculty, (faculty) => faculty.users)
+  faculty: Faculty;
 }

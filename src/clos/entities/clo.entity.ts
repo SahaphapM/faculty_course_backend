@@ -9,6 +9,9 @@ export class Clo {
   id: string;
 
   @Column()
+  name: string;
+
+  @Column()
   description: string;
 
   @ManyToOne(() => Subject, (subject) => subject.clos, {
@@ -16,10 +19,6 @@ export class Clo {
   })
   subject: Subject;
 
-  @ManyToOne(
-    () => Plo,
-    (plo) => plo.clos,
-    // When delete from root of relation that relate row will be deleted
-  )
-  plo: Plo;
+  @ManyToOne(() => Plo, (plo) => plo.clos)
+  plo: Plo | null;
 }
