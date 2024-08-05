@@ -1,9 +1,9 @@
 import { Subject } from 'src/subjects/entities/subject.entity';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, ManyToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Skill {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   id: string;
 
   @Column()
@@ -15,6 +15,6 @@ export class Skill {
   @Column()
   colorsTag: string;
 
-  // @ManyToMany(() => Subject, (subject) => subject.skills)
-  // subjects: Subject[];
+  @ManyToMany(() => Subject, (subject) => subject.skills)
+  subjects: Subject[];
 }
