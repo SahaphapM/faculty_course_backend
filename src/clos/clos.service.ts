@@ -37,6 +37,7 @@ export class ClosService {
       take: limit,
       skip: (page - 1) * limit,
       order: sort ? { [sort]: order } : {},
+      relations: { subject: true, plo: true },
     };
 
     if (search) {
@@ -44,7 +45,8 @@ export class ClosService {
         { id: Like(`%${search}%`) },
         { name: Like(`%${search}%`) },
         { description: Like(`%${search}%`) },
-        { subject: Like(`%${search}%`) }, // Corrected for nested relation
+        { subject: Like(`%${search}%`) },
+        { plo: Like(`%${search}%`) },
       ];
     }
 

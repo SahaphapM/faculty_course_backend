@@ -44,7 +44,7 @@ export class SkillsService {
         { id: Like(`%${search}%`) },
         { name: Like(`%${search}%`) },
         { description: Like(`%${search}%`) },
-        { colorsTag: Like(`%${search}%`) }, // Corrected for nested relation
+        { subjects: Like(`%${search}%`) }, // Corrected for nested relation
       ];
     }
 
