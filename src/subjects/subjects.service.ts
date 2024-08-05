@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Like, Repository } from 'typeorm';
 import { Subject } from './entities/subject.entity';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
-import { User } from 'src/users/entities/user.entity';
 import { Clo } from 'src/clos/entities/clo.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
@@ -21,7 +20,7 @@ export class SubjectsService {
     private subjectsRepository: Repository<Subject>,
     @InjectRepository(Curriculum)
     private curriculumsRepository: Repository<Curriculum>,
-  ) { }
+  ) {}
 
   async findAllByPage(
     paginationDto: PaginationDto,
@@ -33,7 +32,7 @@ export class SubjectsService {
     const options: FindManyOptions<Subject> = {
       take: limit,
       skip: (page - 1) * limit,
-      order: sort ? { [sort]: order } : {}
+      order: sort ? { [sort]: order } : {},
     };
 
     if (search) {
@@ -65,7 +64,7 @@ export class SubjectsService {
   async findAll(): Promise<Subject[]> {
     try {
       return await this.subjectsRepository.find({
-        relations: ['curriculums', 'clos'],
+        relations: ['curriculums', 'clos', 'skills'],
       });
     } catch (error) {
       throw new BadRequestException('Failed to get subjects');
@@ -145,25 +144,55 @@ export class SubjectsService {
     }
   }
 
-  // async addSkill(id: string, skill: Skill): Promise<Subject> {
-  //   const subject = await this.subjectsRepository.findOne({ where: { id } });
-  //   if (!subject) {
-  //     throw new NotFoundException(`Subject with ID ${id} not found`);
-  //   }
-  //   if (!subject.skills) {
-  //     subject.skills = [];
-  //   }
-  //   subject.skills.push(skill);
-  //   try {
-  //     await this.subjectsRepository.save(subject);
-  //     return this.subjectsRepository.findOne({
-  //       where: { id },
-  //       relations: { skills: true },
-  //     });
-  //   } catch (error) {
-  //     throw new BadRequestException('Failed to update Subject', error.message);
-  //   }
-  // }
+  async selectSkills(id: string, skills: Skill[]): Promise<Subject> {
+    const subject = await this.subjectsRepository.findOne({ where: { id } });
+    if (!subject) {
+      throw new NotFoundException(`Subject with ID ${id} not found`);
+    }
+    subject.skills = skills;
+    try {
+      await this.subjectsRepository.save(subject);
+      return this.subjectsRepository.findOne({
+        where: { id },
+        relations: { skills: true },
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to update Skill in Subject',
+        error.message,
+      );
+    }
+  }
+
+  async removeSkill(id: string, skillId: string): Promise<Subject> {
+    const subject = await this.subjectsRepository.findOne({
+      where: { id },
+      relations: { skills: true },
+    });
+    if (!subject) {
+      throw new NotFoundException(`Subject with ID ${id} not found`);
+    }
+
+    // Remove the skill from the subject's skills array
+    // const newskills = subject.skills.filter((skill) => skill.id !== skillId);
+    // console.log(newskills);
+    console.log('Before:', subject.skills);
+    subject.skills = subject.skills.filter((skill) => skill.id !== skillId);
+    console.log('After:', subject.skills);
+
+    try {
+      await this.subjectsRepository.save(subject);
+      return this.subjectsRepository.findOne({
+        where: { id },
+        relations: { skills: true },
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to remove Skill from Subject',
+        error.message,
+      );
+    }
+  }
 
   async remove(id: string): Promise<void> {
     const subject = await this.findOne(id);
