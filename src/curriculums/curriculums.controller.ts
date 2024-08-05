@@ -66,7 +66,6 @@ export class CurriculumsController {
     return this.curriculumsService.addSubject(id, subjects); // add subject to curriculum
   }
 
-
   @Patch(':id/selectSubjects')
   async selectSubject(
     @Param('id') id: string,
@@ -78,11 +77,19 @@ export class CurriculumsController {
     );
     return this.curriculumsService.selectSubject(id, subjects); // add subject to curriculum
   }
-  
+
+  @Patch(':id/removeSubject/:SubjectId')
+  async removeSubject(
+    @Param('id') id: string,
+    @Param('SubjectId') SubjectId: string,
+  ) {
+    return this.curriculumsService.removeSubject(id, SubjectId);
+  }
+
   @Patch(':id/coordinators')
   async addCoordinator(
     @Param('id') id: string,
-    @Body() createUserDtos: CreateUserDto[]
+    @Body() createUserDtos: CreateUserDto[],
   ) {
     console.log('Received data:', createUserDtos); // Log the received data
 
@@ -92,16 +99,24 @@ export class CurriculumsController {
     }
 
     // Validate each item in the array
-    createUserDtos.forEach(dto => {
+    createUserDtos.forEach((dto) => {
       if (typeof dto.id !== 'string' || dto.id.trim() === '') {
         throw new BadRequestException('Invalid ID format');
       }
     });
 
     const coordinators = await Promise.all(
-      createUserDtos.map((dto) => this.usersService.findOne(dto.id))
+      createUserDtos.map((dto) => this.usersService.findOne(dto.id)),
     );
     return this.curriculumsService.addCoordinator(id, coordinators); // Add user to curriculum
+  }
+
+  @Patch(':id/removeCoordinator/:CoordinatorId')
+  async removeCoordinator(
+    @Param('id') id: string,
+    @Param('CoordinatorId') CoordinatorId: string,
+  ) {
+    return this.curriculumsService.removeCoordinator(id, CoordinatorId);
   }
 
   @Patch(':id/plos')

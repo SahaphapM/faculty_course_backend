@@ -30,7 +30,7 @@ export class CurriculumsService {
     const options: FindManyOptions<Curriculum> = {
       take: limit,
       skip: (page - 1) * limit,
-      order: sort ? { [sort]: order } : {}
+      order: sort ? { [sort]: order } : {},
     };
 
     if (search) {
@@ -39,13 +39,14 @@ export class CurriculumsService {
         { thaiName: Like(`%${search}%`) },
         { engName: Like(`%${search}%`) },
         { branch: { name: Like(`%${search}%`) } }, // Corrected for nested relation
-        { branch: { faculty: { name: Like(`%${search}%`) } } }
+        { branch: { faculty: { name: Like(`%${search}%`) } } },
       ];
     }
 
     console.log('Query options:', options); // Debugging line
 
-    const [result, total] = await this.curriculumsRepository.findAndCount(options);
+    const [result, total] =
+      await this.curriculumsRepository.findAndCount(options);
 
     console.log('Result:', result); // Debugging line
     console.log('Total:', total); // Debugging line
@@ -170,6 +171,31 @@ export class CurriculumsService {
     }
   }
 
+  async removeSubject(id: string, SubjectId: string): Promise<Curriculum> {
+    const curriculum = await this.curriculumsRepository.findOne({
+      where: { id },
+      relations: { subjects: true },
+    });
+    if (!curriculum) {
+      throw new NotFoundException(`Curriculum with ID ${id} not found`);
+    }
+    curriculum.subjects = curriculum.subjects.filter(
+      (subjects) => subjects.id !== SubjectId,
+    );
+    try {
+      await this.curriculumsRepository.save(curriculum);
+      return this.curriculumsRepository.findOne({
+        where: { id },
+        relations: { subjects: true },
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to remove subject in Curriculum',
+        error.message,
+      );
+    }
+  }
+
   async addCoordinator(id: string, users: User[]): Promise<Curriculum> {
     const curriculum = await this.findOne(id);
     if (!curriculum) {
@@ -185,6 +211,34 @@ export class CurriculumsService {
     } catch (error) {
       throw new BadRequestException(
         'Failed to update Curriculum',
+        error.message,
+      );
+    }
+  }
+
+  async removeCoordinator(
+    id: string,
+    coordinatorId: string,
+  ): Promise<Curriculum> {
+    const curriculum = await this.curriculumsRepository.findOne({
+      where: { id },
+      relations: { coordinators: true },
+    });
+    if (!curriculum) {
+      throw new NotFoundException(`Curriculum with ID ${id} not found`);
+    }
+    curriculum.coordinators = curriculum.coordinators.filter(
+      (coordinator) => coordinator.id !== coordinatorId,
+    );
+    try {
+      await this.curriculumsRepository.save(curriculum);
+      return this.curriculumsRepository.findOne({
+        where: { id },
+        relations: { coordinators: true },
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to remove coordinator in Curriculum',
         error.message,
       );
     }
