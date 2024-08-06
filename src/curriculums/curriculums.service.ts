@@ -244,15 +244,12 @@ export class CurriculumsService {
     }
   }
 
-  async addPLO(id: string, plo: Plo): Promise<Curriculum> {
+  async addPLO(id: string, plos: Plo[]): Promise<Curriculum> {
     const curriculum = await this.findOne(id);
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
-    if (!curriculum.plos) {
-      curriculum.plos = [];
-    }
-    curriculum.plos.push(plo);
+    curriculum.plos = plos;
     try {
       await this.curriculumsRepository.save(curriculum);
       return this.curriculumsRepository.findOne({

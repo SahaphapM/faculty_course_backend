@@ -124,13 +124,28 @@ export class CurriculumsController {
     return this.curriculumsService.removeCoordinator(id, CoordinatorId);
   }
 
-  @Post(':id/plos')
-  async addPLO(@Param('id') id: string, @Body() createPloDto: CreatePloDto[]) {
-    for (let index = 0; index < createPloDto.length; index++) {
-      const plo = await this.plosService.create(createPloDto[index]); // create plo to database
-      await this.curriculumsService.addPLO(id, plo); // add plo to curriculum
+
+  @Patch(':id/plos')
+  async addPLO(@Param('id') id: string, @Body() createPloDtos: CreatePloDto[]) {
+    console.log('Received data:', createPloDtos); // Log the received data
+
+    // Ensure createPloDtos is an array
+    if (!Array.isArray(createPloDtos)) {
+      throw new BadRequestException('Invalid data format: Expected an array');
     }
-    return this.curriculumsService.findOne(id);
+
+    // Validate each item in the array
+    createPloDtos.forEach((dto) => {
+      if (typeof dto.id !== 'string' || dto.id.trim() === '') {
+        throw new BadRequestException('Invalid ID format');
+      }
+    });
+
+    const plos = await Promise.all(
+      createPloDtos.map((dto) => this.plosService.create(dto)),
+    );
+    return this.curriculumsService.addPLO(id, plos); // Add PLOs to curriculum
+
   }
 
   @Delete(':id')
