@@ -27,7 +27,7 @@ export class UsersService {
     const queryBuilder = this.usersRepository.createQueryBuilder('user');
 
     // Include roles in the query
-    queryBuilder.innerJoinAndSelect('user.roles', 'roles');
+    queryBuilder.leftJoinAndSelect('user.roles', 'roles');
 
     // Conditionally add joins if necessary
     if (column1) {
@@ -67,9 +67,9 @@ export class UsersService {
       .skip((page - 1) * limit)
       .getManyAndCount();
 
-    // console.log('PaginationDto:', paginationDto);
-    // console.log('Data:', data);
-    // console.log('Total:', total);
+    console.log('PaginationDto:', paginationDto);
+    console.log('Data:', data);
+    console.log('Total:', total);
 
     return { data, total };
   }
@@ -100,7 +100,7 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return await this.usersRepository.find({
-      relations: { roles: true },
+      relations: { roles: true, branch: true, faculty: true },
       select: [
         'id',
         'email',

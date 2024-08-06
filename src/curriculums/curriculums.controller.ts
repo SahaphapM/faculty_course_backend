@@ -57,13 +57,18 @@ export class CurriculumsController {
     return this.curriculumsService.update(id, updateCurriculumDto);
   }
 
-  @Patch(':id/subjects')
+  @Post(':id/subjects')
   async addSubject(
     @Param('id') id: string,
-    @Body() createSubjectDto: CreateSubjectDto,
+    @Body() createSubjectDto: CreateSubjectDto[],
   ) {
-    const subjects = await this.subjectsService.create(createSubjectDto); // create subject to database
-    return this.curriculumsService.addSubject(id, subjects); // add subject to curriculum
+    for (let index = 0; index < createSubjectDto.length; index++) {
+      const subjects = await this.subjectsService.create(
+        createSubjectDto[index],
+      ); // create subject to database
+      await this.curriculumsService.addSubject(id, subjects);
+    }
+    return this.curriculumsService.findOne(id); // add subject to curriculum
   }
 
   @Patch(':id/selectSubjects')
@@ -119,6 +124,7 @@ export class CurriculumsController {
     return this.curriculumsService.removeCoordinator(id, CoordinatorId);
   }
 
+
   @Patch(':id/plos')
   async addPLO(@Param('id') id: string, @Body() createPloDtos: CreatePloDto[]) {
     console.log('Received data:', createPloDtos); // Log the received data
@@ -139,6 +145,7 @@ export class CurriculumsController {
       createPloDtos.map((dto) => this.plosService.create(dto)),
     );
     return this.curriculumsService.addPLO(id, plos); // Add PLOs to curriculum
+
   }
 
   @Delete(':id')
