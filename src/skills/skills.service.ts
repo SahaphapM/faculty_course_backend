@@ -64,7 +64,10 @@ export class SkillsService {
   }
 
   async findOne(id: string): Promise<Skill> {
-    const skill = await this.skillsRepository.findOne({ where: { id } });
+    const skill = await this.skillsRepository.findOne({
+      where: { id },
+      relations: { relatedSkills: true, subjects: true },
+    });
     if (!skill) {
       throw new NotFoundException(`Skill with id ${id} not found`);
     }
@@ -88,6 +91,41 @@ export class SkillsService {
       return await this.skillsRepository.save(skill);
     } catch (error) {
       throw new BadRequestException('Failed to update skill');
+    }
+  }
+
+  async updateSubSkills(
+    id: string,
+    createSkillsDto: CreateSkillDto[],
+  ): Promise<Skill> {
+    const skill = await this.findOne(id); // Ensure the skill exists
+
+    const subSkills = [];
+    for (let index = 0; index < createSkillsDto.length; index++) {
+      const subSkill = await this.findOne(createSkillsDto[index].id);
+      subSkills.push(subSkill);
+    }
+
+    skill.relatedSkills = subSkills; // update new skill[]
+
+    try {
+      return await this.skillsRepository.save(skill);
+    } catch (error) {
+      throw new BadRequestException('Failed to update skill');
+    }
+  }
+
+  async removeSubSkills(id: string, subId: string): Promise<void> {
+    const skill = await this.findOne(id); // Ensure the skill exists
+    skill.relatedSkills = skill.relatedSkills.filter(
+      (relatedSkill) => relatedSkill.id !== subId,
+    );
+    console.log(skill.relatedSkills);
+
+    try {
+      await this.skillsRepository.save(skill);
+    } catch (error) {
+      throw new BadRequestException('Failed to remove subSkill');
     }
   }
 

@@ -42,6 +42,19 @@ export class SkillsController {
     return this.skillsService.update(id, updateSkillDto);
   }
 
+  @Patch(':id/addSubSkills')
+  updateSubSkills(
+    @Param('id') id: string,
+    @Body() createSkillsDto: CreateSkillDto[],
+  ) {
+    return this.skillsService.updateSubSkills(id, createSkillsDto);
+  }
+
+  @Patch(':id/remove/:subId')
+  removeSubSkills(@Param('id') id: string, @Param('subId') subId: string) {
+    return this.skillsService.removeSubSkills(id, subId);
+  }
+
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
