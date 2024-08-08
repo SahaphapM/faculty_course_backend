@@ -42,4 +42,6 @@ export class Subject {
 
   @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
   clos: Clo[];
+
+  
 }

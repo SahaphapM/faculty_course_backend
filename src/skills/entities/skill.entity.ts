@@ -1,4 +1,5 @@
 import { Subject } from 'src/subjects/entities/subject.entity';
+import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
 import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
@@ -26,4 +27,10 @@ export class Skill {
 
   @ManyToMany(() => Skill, (skill) => skill.relatedSkills)
   inverseRelatedSkills: Skill[];
+
+  @ManyToMany(() => TechSkill, (techSkill) => techSkill.skill, {
+    cascade: true,
+  })
+  @JoinTable()
+  techSkills: TechSkill[];
 }
