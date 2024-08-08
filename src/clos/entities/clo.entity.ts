@@ -8,7 +8,7 @@ export class Clo {
   @PrimaryGeneratedColumn()
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
   @Column()
