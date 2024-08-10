@@ -30,24 +30,6 @@ export class SkillsController {
     return this.skillsService.create(createSkillDto);
   }
 
-  @Post(':id/createChilds')
-  @HttpCode(HttpStatus.CREATED)
-  async createChilds(
-    @Param('id') parentId: string,
-    @Body() createSkillDtos: CreateSkillDto[],
-  ) {
-    return this.skillsService.createChilds(parentId, createSkillDtos);
-  }
-
-  // @Post(':id/createSubSkill')
-  // @HttpCode(HttpStatus.CREATED)
-  // async createSubSkill(
-  //   @Param('id') id: string,
-  //   @Body() createSkillDto: CreateSkillDto,
-  // ) {
-  //   return this.skillsService.createSubSkill(id, createSkillDto);
-  // }
-
   @Get('pages')
   @HttpCode(HttpStatus.OK)
   findAllByPage(@Query() paginationDto: PaginationDto) {
@@ -65,61 +47,70 @@ export class SkillsController {
     return this.skillsService.findOne(id);
   }
 
-  @Get('tree')
-  async findTree() {
-    return this.skillsService.findTree();
-  }
-
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
     return this.skillsService.update(id, updateSkillDto);
   }
 
-  @Patch(':id/selectChildSkills')
-  @HttpCode(HttpStatus.OK)
-  updateSubSkills(@Param('id') parentId: string, @Body() childrenId: string[]) {
-    return this.skillsService.selectChild(parentId, childrenId);
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  remove(@Param('id') id: string) {
+    return this.skillsService.remove(id);
   }
 
-  // Optional
-  @Patch(':id/removeChild/:childId')
-  @HttpCode(HttpStatus.OK)
-  removeChildSkill(@Param('id') id: string, @Param('childId') childId: string) {
-    return this.skillsService.removeChildSkill(id, childId);
+  ///////////  subSkill /////////////
+
+  @Post(':id/createSubSkills') // select or create subskills use this.
+  @HttpCode(HttpStatus.CREATED)
+  async createSubSkill(
+    @Param('id') id: string,
+    @Body() createSkillDtos: CreateSkillDto[],
+  ) {
+    return this.skillsService.createSubSkills(id, createSkillDtos);
   }
 
-  @Post(':id/createTechSkill')
+  // @Patch(':id/selectSubSkills')
+  // @HttpCode(HttpStatus.OK)
+  // updateSubSkills(@Param('id') id: string, @Body() subSkillIds: string[]) {
+  //   return this.skillsService.selectSubSkills(id, subSkillIds);
+  // }
+
+  @Patch(':id/removeSubSkill/:subSkillId')
+  @HttpCode(HttpStatus.OK)
+  removeSubSkillId(
+    @Param('id') id: string,
+    @Param('subSkillId') subSkillId: string,
+  ) {
+    return this.skillsService.removeSubSkillId(id, subSkillId);
+  }
+
+  ///////// techSkill /////////////
+
+  @Post(':id/createTechSkills') // select or create subskills use this.
   @HttpCode(HttpStatus.CREATED)
   async createTechSkill(
     @Param('id') id: string,
     @Body() createTechSkillDtos: CreateTechSkillDto[],
   ) {
-    const techSkills = [];
-    for (let index = 0; index < createTechSkillDtos.length; index++) {
-      techSkills.push(
-        await this.techSkillsService.create(createTechSkillDtos[index]),
-      );
-    }
-    return this.skillsService.createTechSkill(id, techSkills);
+    const techSkills = await Promise.all(
+      createTechSkillDtos.map(async (dto) => {
+        const techSkill = await this.techSkillsService.findOne(dto.id);
+        return techSkill || this.techSkillsService.create(dto);
+      }),
+    );
+    return this.skillsService.createTechSkills(id, techSkills);
   }
 
-  @Patch(':id/selectTechSkills')
-  @HttpCode(HttpStatus.OK)
-  updateTechSkills(@Param('id') id: string, @Body() techSkillIds: string[]) {
-    return this.skillsService.updateTechSkills(id, techSkillIds);
-  }
+  // @Patch(':id/selectTechSkills')
+  // @HttpCode(HttpStatus.OK)
+  // updateTechSkills(@Param('id') id: string, @Body() techSkillIds: string[]) {
+  //   return this.skillsService.updateTechSkills(id, techSkillIds);
+  // }
 
-  // Optional
   @Patch(':id/removeTechSkill/:techId')
   @HttpCode(HttpStatus.OK)
   removeTechSkills(@Param('id') id: string, @Param('techId') TechId: string) {
     return this.skillsService.removeTechSkill(id, TechId);
-  }
-
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
-    return this.skillsService.remove(id);
   }
 }
