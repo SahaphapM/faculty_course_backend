@@ -44,12 +44,12 @@ export class Curriculum {
   @OneToMany(() => Plo, (plo) => plo.curriculum, { cascade: true })
   plos: Plo[];
 
-  @ManyToMany(() => User, (user) => user.curriculums, { cascade: true })
+  @ManyToMany(() => User, (user) => user.curriculums, { cascade: false })
   @JoinTable()
   coordinators: User[];
 
   @ManyToMany(() => Subject, (subject) => subject.curriculums, {
-    cascade: true,
+    cascade: false,
   })
   @JoinTable()
   subjects: Subject[];
