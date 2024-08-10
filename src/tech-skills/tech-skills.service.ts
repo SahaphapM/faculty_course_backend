@@ -17,9 +17,7 @@ export class TechSkillsService {
     if (existId) {
       throw new BadRequestException('this id already exist!');
     }
-    const newObj = this.repo.create(dto);
-    await this.repo.save(newObj);
-    return 'Create Success';
+    return this.repo.save(dto);
   }
 
   async findAll() {

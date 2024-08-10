@@ -1,4 +1,5 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { Skill } from 'src/skills/entities/skill.entity';
+import { Column, Entity, ManyToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class TechSkill {
@@ -10,4 +11,7 @@ export class TechSkill {
 
   @Column()
   description: string;
+
+  @ManyToMany(() => Skill, (skill) => skill.techSkills)
+  skill: Skill[];
 }

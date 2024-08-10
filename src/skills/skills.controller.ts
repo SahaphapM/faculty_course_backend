@@ -14,50 +14,103 @@ import { SkillsService } from './skills.service';
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { PaginationDto } from './dto/pagination.dto';
+import { CreateTechSkillDto } from 'src/tech-skills/dto/create-tech-skill.dto';
+import { TechSkillsService } from 'src/tech-skills/tech-skills.service';
 
 @Controller('skills')
 export class SkillsController {
-  constructor(private readonly skillsService: SkillsService) {}
+  constructor(
+    private readonly skillsService: SkillsService,
+    private readonly techSkillsService: TechSkillsService,
+  ) {}
 
   @Post()
-  create(@Body() createSkillDto: CreateSkillDto) {
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createSkillDto: CreateSkillDto) {
     return this.skillsService.create(createSkillDto);
   }
+
   @Get('pages')
+  @HttpCode(HttpStatus.OK)
   findAllByPage(@Query() paginationDto: PaginationDto) {
     return this.skillsService.findAllByPage(paginationDto);
   }
   @Get()
+  @HttpCode(HttpStatus.OK)
   findAll() {
     return this.skillsService.findAll();
   }
 
   @Get(':id')
+  @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
     return this.skillsService.findOne(id);
   }
 
   @Patch(':id')
+  @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
     return this.skillsService.update(id, updateSkillDto);
-  }
-
-  @Patch(':id/addSubSkills')
-  updateSubSkills(
-    @Param('id') id: string,
-    @Body() createSkillsDto: CreateSkillDto[],
-  ) {
-    return this.skillsService.updateSubSkills(id, createSkillsDto);
-  }
-
-  @Patch(':id/remove/:subId')
-  removeSubSkills(@Param('id') id: string, @Param('subId') subId: string) {
-    return this.skillsService.removeSubSkills(id, subId);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
     return this.skillsService.remove(id);
+  }
+
+  ///////////  subSkill /////////////
+
+  @Post(':id/createSubSkills') // select or create subskills use this.
+  @HttpCode(HttpStatus.CREATED)
+  async createSubSkill(
+    @Param('id') id: string,
+    @Body() createSkillDtos: CreateSkillDto[],
+  ) {
+    return this.skillsService.createSubSkills(id, createSkillDtos);
+  }
+
+  // @Patch(':id/selectSubSkills')
+  // @HttpCode(HttpStatus.OK)
+  // updateSubSkills(@Param('id') id: string, @Body() subSkillIds: string[]) {
+  //   return this.skillsService.selectSubSkills(id, subSkillIds);
+  // }
+
+  @Patch(':id/removeSubSkill/:subSkillId')
+  @HttpCode(HttpStatus.OK)
+  removeSubSkillId(
+    @Param('id') id: string,
+    @Param('subSkillId') subSkillId: string,
+  ) {
+    return this.skillsService.removeSubSkillId(id, subSkillId);
+  }
+
+  ///////// techSkill /////////////
+
+  @Post(':id/createTechSkills') // select or create subskills use this.
+  @HttpCode(HttpStatus.CREATED)
+  async createTechSkill(
+    @Param('id') id: string,
+    @Body() createTechSkillDtos: CreateTechSkillDto[],
+  ) {
+    const techSkills = await Promise.all(
+      createTechSkillDtos.map(async (dto) => {
+        const techSkill = await this.techSkillsService.findOne(dto.id);
+        return techSkill || this.techSkillsService.create(dto);
+      }),
+    );
+    return this.skillsService.createTechSkills(id, techSkills);
+  }
+
+  // @Patch(':id/selectTechSkills')
+  // @HttpCode(HttpStatus.OK)
+  // updateTechSkills(@Param('id') id: string, @Body() techSkillIds: string[]) {
+  //   return this.skillsService.updateTechSkills(id, techSkillIds);
+  // }
+
+  @Patch(':id/removeTechSkill/:techId')
+  @HttpCode(HttpStatus.OK)
+  removeTechSkills(@Param('id') id: string, @Param('techId') TechId: string) {
+    return this.skillsService.removeTechSkill(id, TechId);
   }
 }

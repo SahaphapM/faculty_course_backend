@@ -25,9 +25,9 @@ export class FacultiesController {
     return this.facultiesService.findAll();
   }
 
-  @Get('getBranchIds')
-  findAllBranchId() {
-    return this.facultiesService.findAllBranchId();
+  @Get('getAllDetails')
+  findAllDetails() {
+    return this.facultiesService.findAllDetails();
   }
 
   @Get(':id')
