@@ -6,7 +6,7 @@ import {
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill } from './entities/skill.entity';
-import { FindManyOptions, Like, Repository } from 'typeorm';
+import { FindManyOptions, Like, TreeRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from './dto/pagination.dto';
 import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
@@ -15,38 +15,59 @@ import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
 export class SkillsService {
   constructor(
     @InjectRepository(Skill)
-    private skillsRepository: Repository<Skill>,
+    private skillsRepository: TreeRepository<Skill>,
   ) {}
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
     try {
       return await this.skillsRepository.save(createSkillDto);
     } catch (error) {
-      throw new BadRequestException('Failed to create skill');
+      throw new BadRequestException(
+        'Failed to create skill',
+        createSkillDto.name,
+      );
     }
   }
 
-  async createSubSkill(
-    id: string,
-    createSkillDto: CreateSkillDto,
+  async createChilds(
+    parentId: string,
+    createSkillDtos: CreateSkillDto[],
   ): Promise<Skill> {
-    let newSkill: Skill;
-    try {
-      newSkill = await this.skillsRepository.save(createSkillDto);
-    } catch (error) {
-      throw new BadRequestException('Failed to create skill');
-    }
-
-    if (id) {
-      const skill = await this.findOne(id);
-      skill.relatedSkills.push(newSkill);
+    const parentSkill = await this.findOne(parentId);
+    for (let index = 0; index < createSkillDtos.length; index++) {
+      if (parentSkill) {
+        createSkillDtos[index].parent = parentSkill;
+      }
       try {
-        return await this.skillsRepository.save(skill);
+        await this.skillsRepository.save(createSkillDtos[index]);
       } catch (error) {
-        throw new BadRequestException('Failed to update skill');
+        throw new BadRequestException('Failed to create child skills');
       }
     }
+    return await this.findOne(parentId);
   }
+
+  // async createSubSkill(
+  //   id: string,
+  //   createSkillDto: CreateSkillDto,
+  // ): Promise<Skill> {
+  //   let newSkill: Skill;
+  //   try {
+  //     newSkill = await this.skillsRepository.save(createSkillDto);
+  //   } catch (error) {
+  //     throw new BadRequestException('Failed to create skill');
+  //   }
+
+  //   if (id) {
+  //     const skill = await this.findOne(id);
+  //     skill.relatedSkills.push(newSkill);
+  //     try {
+  //       return await this.skillsRepository.save(skill);
+  //     } catch (error) {
+  //       throw new BadRequestException('Failed to update skill');
+  //     }
+  //   }
+  // }
 
   async createTechSkill(id: string, TechSkill: TechSkill): Promise<Skill> {
     const skill = await this.findOne(id);
@@ -91,19 +112,33 @@ export class SkillsService {
 
   async findAll(): Promise<Skill[]> {
     return await this.skillsRepository.find({
-      relations: { relatedSkills: true, subjects: true, techSkills: true },
+      relations: {
+        parent: true,
+        children: true,
+        subjects: true,
+        techSkills: true,
+      },
     });
   }
 
   async findOne(id: string): Promise<Skill> {
     const skill = await this.skillsRepository.findOne({
       where: { id },
-      relations: { relatedSkills: true, subjects: true, techSkills: true },
+      relations: {
+        parent: true,
+        children: true,
+        subjects: true,
+        techSkills: true,
+      },
     });
     if (!skill) {
       throw new NotFoundException(`Skill with id ${id} not found`);
     }
     return skill;
+  }
+
+  async findTree(): Promise<Skill[]> {
+    return await this.skillsRepository.findTrees();
   }
 
   async update(id: string, updateSkillDto: UpdateSkillDto): Promise<Skill> {
@@ -124,21 +159,39 @@ export class SkillsService {
     }
   }
 
-  async updateSubSkills(id: string, subSkillIds: string[]): Promise<Skill> {
-    const skill = await this.findOne(id); // Ensure the skill exists
+  // async updateSubSkills(id: string, subSkillIds: string[]): Promise<Skill> {
+  //   const skill = await this.findOne(id); // Ensure the skill exists
 
-    const subSkills = [];
-    for (let index = 0; index < subSkillIds.length; index++) {
-      const subSkill = await this.findOne(subSkillIds[index]);
-      subSkills.push(subSkill);
+  //   const subSkills = [];
+  //   for (let index = 0; index < subSkillIds.length; index++) {
+  //     const subSkill = await this.findOne(subSkillIds[index]);
+  //     subSkills.push(subSkill);
+  //   }
+
+  //   skill.relatedSkills = subSkills; // update new skill[]
+
+  //   try {
+  //     return await this.skillsRepository.save(skill);
+  //   } catch (error) {
+  //     throw new BadRequestException('Failed to update skill');
+  //   }
+  // }
+
+  async selectChild(parentId: string, childrenId: string[]): Promise<Skill> {
+    const parentSkill = await this.findOne(parentId); // Ensure the skill exists
+    const childrenSkills = [];
+
+    for (let index = 0; index < childrenId.length; index++) {
+      const childrenSkill = await this.findOne(childrenId[index]);
+      childrenSkills.push(childrenSkill);
     }
 
-    skill.relatedSkills = subSkills; // update new skill[]
+    parentSkill.children = childrenSkills; // update new skill[]
 
     try {
-      return await this.skillsRepository.save(skill);
+      return await this.skillsRepository.save(parentSkill);
     } catch (error) {
-      throw new BadRequestException('Failed to update skill');
+      throw new BadRequestException('Failed to select Children');
     }
   }
 
@@ -156,6 +209,20 @@ export class SkillsService {
   //     throw new BadRequestException('Failed to remove subSkill');
   //   }
   // }
+
+  async removeChildSkill(id: string, childId: string): Promise<Skill> {
+    const parentSkill = await this.findOne(id); // Ensure the skill exists
+
+    parentSkill.children = parentSkill.children.filter(
+      (children) => children.id !== childId,
+    );
+
+    try {
+      return await this.skillsRepository.save(parentSkill);
+    } catch (error) {
+      throw new BadRequestException('Failed to remove childSkill');
+    }
+  }
 
   async updateTechSkills(id: string, techSkillIds: string[]): Promise<Skill> {
     const skill = await this.findOne(id); // Ensure the skill exists

@@ -26,20 +26,28 @@ export class SkillsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(
-    @Param('id') id: string,
-    @Body() createSkillDto: CreateSkillDto,
-  ) {
+  async create(@Body() createSkillDto: CreateSkillDto) {
     return this.skillsService.create(createSkillDto);
   }
-  @Post(':id/createSubSkill')
+
+  @Post(':id/createChilds')
   @HttpCode(HttpStatus.CREATED)
-  async createSubSkill(
-    @Param('id') id: string,
-    @Body() createSkillDto: CreateSkillDto,
+  async createChilds(
+    @Param('id') parentId: string,
+    @Body() createSkillDtos: CreateSkillDto[],
   ) {
-    return this.skillsService.createSubSkill(id, createSkillDto);
+    return this.skillsService.createChilds(parentId, createSkillDtos);
   }
+
+  // @Post(':id/createSubSkill')
+  // @HttpCode(HttpStatus.CREATED)
+  // async createSubSkill(
+  //   @Param('id') id: string,
+  //   @Body() createSkillDto: CreateSkillDto,
+  // ) {
+  //   return this.skillsService.createSubSkill(id, createSkillDto);
+  // }
+
   @Get('pages')
   @HttpCode(HttpStatus.OK)
   findAllByPage(@Query() paginationDto: PaginationDto) {
@@ -57,24 +65,29 @@ export class SkillsController {
     return this.skillsService.findOne(id);
   }
 
+  @Get('tree')
+  async findTree() {
+    return this.skillsService.findTree();
+  }
+
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
     return this.skillsService.update(id, updateSkillDto);
   }
 
-  @Patch(':id/selectSubSkills')
+  @Patch(':id/selectChildSkills')
   @HttpCode(HttpStatus.OK)
-  updateSubSkills(@Param('id') id: string, @Body() subSkillIds: string[]) {
-    return this.skillsService.updateSubSkills(id, subSkillIds);
+  updateSubSkills(@Param('id') parentId: string, @Body() childrenId: string[]) {
+    return this.skillsService.selectChild(parentId, childrenId);
   }
 
   // Unrequire
-  // @Patch(':id/remove/:subId')
-  // @HttpCode(HttpStatus.OK)
-  // removeSubSkills(@Param('id') id: string, @Param('subId') subId: string) {
-  //   return this.skillsService.removeSubSkill(id, subId);
-  // }
+  @Patch(':id/removeChild/:childId')
+  @HttpCode(HttpStatus.OK)
+  removeChildSkill(@Param('id') id: string, @Param('childId') childId: string) {
+    return this.skillsService.removeChildSkill(id, childId);
+  }
 
   @Post(':id/createTechSkill')
   @HttpCode(HttpStatus.CREATED)
@@ -84,9 +97,7 @@ export class SkillsController {
   ) {
     const newTechSkill =
       await this.techSkillsService.create(createTechSkillDto);
-    this.skillsService.createTechSkill(id, newTechSkill);
-
-    return;
+    return this.skillsService.createTechSkill(id, newTechSkill);
   }
 
   @Patch(':id/selectTechSkills')
