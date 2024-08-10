@@ -6,7 +6,7 @@ import {
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill } from './entities/skill.entity';
-import { FindManyOptions, Like, TreeRepository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from './dto/pagination.dto';
 import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
@@ -15,7 +15,7 @@ import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
 export class SkillsService {
   constructor(
     @InjectRepository(Skill)
-    private skillsRepository: TreeRepository<Skill>,
+    private skillsRepository: Repository<Skill>,
   ) {}
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
@@ -32,32 +32,56 @@ export class SkillsService {
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: Skill[]; total: number }> {
-    const { page, limit, sort, order, search } = paginationDto;
+    const { page, limit, sort, order, search, bySubject } =
+      paginationDto;
 
-    const options: FindManyOptions<Skill> = {
-      take: limit,
-      skip: (page - 1) * limit,
-      order: sort ? { [sort]: order } : {},
-      relations: { subjects: true },
-    };
+    const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
 
-    if (search) {
-      options.where = [
-        { id: Like(`%${search}%`) },
-        { name: Like(`%${search}%`) },
-        { description: Like(`%${search}%`) },
-        { subjects: Like(`%${search}%`) }, // Corrected for nested relation
-      ];
+    // Conditionally add joins
+    if (bySubject) {
+      queryBuilder
+        .innerJoinAndSelect('skill.subjects', 'subject')
+        .andWhere('subject.id = :subjectId', { subjectId: bySubject });
     }
 
-    // console.log('Query options:', options); // Debugging line
+    // if (byBranch || byFaculty) {
+    //   queryBuilder
+    //     .innerJoinAndSelect('skill.techSkills', 'techSkill')
+    //     .innerJoinAndSelect('techSkill.branch', 'branch') // Adjust according to your actual entity relations
+    //     .innerJoinAndSelect('branch.faculty', 'faculty'); // Adjust according to your actual entity relations
 
-    const [result, total] = await this.skillsRepository.findAndCount(options);
+    //   if (byBranch) {
+    //     queryBuilder.andWhere('branch.id = :branchId', { branchId: byBranch });
+    //   }
 
-    // console.log('Result:', result); // Debugging line
-    // console.log('Total:', total); // Debugging line
+    //   if (byFaculty) {
+    //     queryBuilder.andWhere('faculty.id = :facultyId', {
+    //       facultyId: byFaculty,
+    //     });
+    //   }
+    // }
 
-    return { data: result, total };
+    // Add search condition if provided
+    if (search) {
+      queryBuilder.andWhere(
+        new Brackets((qb) => {
+          qb.where('skill.name LIKE :search', {
+            search: `%${search}%`,
+          }).orWhere('skill.description LIKE :search', {
+            search: `%${search}%`,
+          });
+        }),
+      );
+    }
+
+    // Pagination
+    const [data, total] = await queryBuilder
+      .skip((page - 1) * limit)
+      .take(limit)
+      .orderBy(`skill.${sort || 'id'}`, order || 'ASC')
+      .getManyAndCount();
+
+    return { data, total };
   }
 
   async findAll(): Promise<Skill[]> {

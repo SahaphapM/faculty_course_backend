@@ -25,4 +25,16 @@ export class PaginationDto {
   @IsOptional()
   @IsString()
   search?: string;
+
+  // @IsOptional()
+  // @IsString()
+  // byFaculty?: string;
+
+  // @IsOptional()
+  // @IsString()
+  // byBranch?: string;
+
+  @IsOptional()
+  @IsString()
+  bySubject?: string;
 }
