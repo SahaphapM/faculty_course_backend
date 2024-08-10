@@ -82,7 +82,7 @@ export class SkillsController {
     return this.skillsService.selectChild(parentId, childrenId);
   }
 
-  // Unrequire
+  // Optional
   @Patch(':id/removeChild/:childId')
   @HttpCode(HttpStatus.OK)
   removeChildSkill(@Param('id') id: string, @Param('childId') childId: string) {
@@ -93,11 +93,15 @@ export class SkillsController {
   @HttpCode(HttpStatus.CREATED)
   async createTechSkill(
     @Param('id') id: string,
-    @Body() createTechSkillDto: CreateTechSkillDto,
+    @Body() createTechSkillDtos: CreateTechSkillDto[],
   ) {
-    const newTechSkill =
-      await this.techSkillsService.create(createTechSkillDto);
-    return this.skillsService.createTechSkill(id, newTechSkill);
+    const techSkills = [];
+    for (let index = 0; index < createTechSkillDtos.length; index++) {
+      techSkills.push(
+        await this.techSkillsService.create(createTechSkillDtos[index]),
+      );
+    }
+    return this.skillsService.createTechSkill(id, techSkills);
   }
 
   @Patch(':id/selectTechSkills')
@@ -106,12 +110,12 @@ export class SkillsController {
     return this.skillsService.updateTechSkills(id, techSkillIds);
   }
 
-  // Unrequire
-  // @Patch(':id/remove/:techId')
-  // @HttpCode(HttpStatus.OK)
-  // removeTechSkills(@Param('id') id: string, @Param('techId') TechId: string) {
-  //   return this.skillsService.removeTechSkill(id, TechId);
-  // }
+  // Optional
+  @Patch(':id/removeTechSkill/:techId')
+  @HttpCode(HttpStatus.OK)
+  removeTechSkills(@Param('id') id: string, @Param('techId') TechId: string) {
+    return this.skillsService.removeTechSkill(id, TechId);
+  }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)

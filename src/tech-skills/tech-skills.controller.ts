@@ -11,7 +11,7 @@ import { TechSkillsService } from './tech-skills.service';
 import { CreateTechSkillDto } from './dto/create-tech-skill.dto';
 import { UpdateTechSkillDto } from './dto/update-tech-skill.dto';
 
-@Controller('tech-skills')
+@Controller('techSkills')
 export class TechSkillsController {
   constructor(private readonly techSkillsService: TechSkillsService) {}
 

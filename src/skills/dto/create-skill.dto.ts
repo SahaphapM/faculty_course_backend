@@ -15,7 +15,7 @@ export class CreateSkillDto {
 
   children: Skill[];
 
-  parent: Skill;
+  parent: Skill[];
 
   techSkills: TechSkill[];
 }

@@ -39,14 +39,14 @@ export class Skill {
   // inverseRelatedSkills: Skill[];
 
   // Tree relation
-  @TreeChildren()
+  @TreeChildren({ cascade: false }) // delete parent not effect childs
   children: Skill[];
 
   @TreeParent()
-  parent: Skill;
+  parent: Skill[];
 
   @ManyToMany(() => TechSkill, (techSkill) => techSkill.skill, {
-    cascade: true,
+    cascade: false,
   })
   @JoinTable()
   techSkills: TechSkill[];
