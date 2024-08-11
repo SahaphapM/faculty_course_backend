@@ -1,12 +1,6 @@
 import { Subject } from 'src/subjects/entities/subject.entity';
 import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  PrimaryColumn,
-} from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Skill {
@@ -18,6 +12,9 @@ export class Skill {
 
   @Column()
   description: string;
+
+  @Column()
+  level: number; // level 1-5
 
   @ManyToMany(() => Subject, (subject) => subject.skills)
   subjects: Subject[];
