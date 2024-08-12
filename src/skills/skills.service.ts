@@ -32,16 +32,21 @@ export class SkillsService {
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: Skill[]; total: number }> {
-    const { page, limit, sort, order, search, bySubject } =
-      paginationDto;
+    const { page, limit, sort, order, search, bySubject } = paginationDto;
 
     const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
 
-    // Conditionally add joins
+    // Join relations to include them in the result
+    queryBuilder
+      .leftJoinAndSelect('skill.subjects', 'subject')
+      .leftJoinAndSelect('skill.relatedSkills', 'relatedSkills')
+      .leftJoinAndSelect('skill.techSkills', 'techSkills');
+
+    // Conditionally add joins based on bySubject
     if (bySubject) {
-      queryBuilder
-        .innerJoinAndSelect('skill.subjects', 'subject')
-        .andWhere('subject.id = :subjectId', { subjectId: bySubject });
+      queryBuilder.andWhere('subject.id = :subjectId', {
+        subjectId: bySubject,
+      });
     }
 
     // if (byBranch || byFaculty) {
@@ -62,6 +67,7 @@ export class SkillsService {
     // }
 
     // Add search condition if provided
+
     if (search) {
       queryBuilder.andWhere(
         new Brackets((qb) => {
