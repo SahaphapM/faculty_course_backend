@@ -9,11 +9,9 @@ export class CreateSkillDto {
 
   description: string;
 
-  colorsTag: string;
+  subjects: Subject[] | null;
 
-  subjects: Subject[];
+  relatedSkills: Skill[] | null;
 
-  relatedSkills: Skill[];
-
-  techSkills: TechSkill[];
+  techSkills: TechSkill[] | null;
 }
