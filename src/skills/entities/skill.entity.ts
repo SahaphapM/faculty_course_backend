@@ -13,7 +13,7 @@ export class Skill {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
   level: number; // level 1-5
 
   @ManyToMany(() => Subject, (subject) => subject.skills)
@@ -28,8 +28,8 @@ export class Skill {
   })
   relatedSkills: Skill[];
 
-  @ManyToMany(() => Skill, (skill) => skill.relatedSkills)
-  inverseRelatedSkills: Skill[];
+  // @ManyToMany(() => Skill, (skill) => skill.relatedSkills)
+  // inverseRelatedSkills: Skill[];
 
   @ManyToMany(() => TechSkill, (techSkill) => techSkill.skill, {
     cascade: false,
