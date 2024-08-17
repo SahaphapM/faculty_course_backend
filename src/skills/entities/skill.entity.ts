@@ -1,10 +1,16 @@
 import { Subject } from 'src/subjects/entities/subject.entity';
 import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
-import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity()
 export class Skill {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: string;
 
   @Column()
@@ -17,7 +23,7 @@ export class Skill {
   level: number; // level 1-5
 
   @ManyToMany(() => Subject, (subject) => subject.skills)
-  subjects: Subject[];
+  subjects: Subject[] | null;
 
   // Self Relation
   @ManyToMany(() => Skill, (skill) => skill.relatedSkills)
@@ -26,7 +32,7 @@ export class Skill {
     joinColumn: { name: 'skillId', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'relatedSkillId', referencedColumnName: 'id' },
   })
-  relatedSkills: Skill[];
+  relatedSkills: Skill[] | null;
 
   // @ManyToMany(() => Skill, (skill) => skill.relatedSkills)
   // inverseRelatedSkills: Skill[];
@@ -35,5 +41,5 @@ export class Skill {
     cascade: false,
   })
   @JoinTable()
-  techSkills: TechSkill[];
+  techSkills: TechSkill[] | null;
 }
