@@ -34,8 +34,8 @@ export class Skill {
   })
   relatedSkills: Skill[] | null;
 
-  @ManyToMany(() => Skill, (skill) => skill.relatedSkills)
-  inverseRelatedSkills: Skill[] | null;
+  // @ManyToMany(() => Skill, (skill) => skill.relatedSkills)
+  // inverseRelatedSkills: Skill[];
 
   @ManyToMany(() => TechSkill, (techSkill) => techSkill.skill, {
     cascade: false,
