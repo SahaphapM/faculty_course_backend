@@ -1,16 +1,10 @@
 import { Subject } from 'src/subjects/entities/subject.entity';
 import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Skill {
-  @PrimaryGeneratedColumn()
+  @PrimaryColumn()
   id: string;
 
   @Column()
@@ -26,13 +20,13 @@ export class Skill {
   subjects: Subject[] | null;
 
   // Self Relation
-  @ManyToMany(() => Skill, (skill) => skill.relatedSkills)
+  @ManyToMany(() => Skill, (skill) => skill.subSkills)
   @JoinTable({
     name: 'skill_relations', // Table to store the relations
     joinColumn: { name: 'skillId', referencedColumnName: 'id' },
     inverseJoinColumn: { name: 'relatedSkillId', referencedColumnName: 'id' },
   })
-  relatedSkills: Skill[] | null;
+  subSkills: Skill[] | null;
 
   // @ManyToMany(() => Skill, (skill) => skill.relatedSkills)
   // inverseRelatedSkills: Skill[];

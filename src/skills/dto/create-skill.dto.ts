@@ -11,7 +11,7 @@ export class CreateSkillDto {
 
   subjects: Subject[] | null;
 
-  relatedSkills: Skill[] | null;
+  subSkills: Skill[] | null;
 
   techSkills: TechSkill[] | null;
 }

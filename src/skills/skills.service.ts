@@ -39,7 +39,7 @@ export class SkillsService {
     // Join relations to include them in the result
     queryBuilder
       .leftJoinAndSelect('skill.subjects', 'subject')
-      .leftJoinAndSelect('skill.relatedSkills', 'relatedSkills')
+      .leftJoinAndSelect('skill.subSkills', 'subSkills')
       .leftJoinAndSelect('skill.techSkills', 'techSkills');
 
     // Conditionally add joins based on bySubject
@@ -94,7 +94,7 @@ export class SkillsService {
     return await this.skillsRepository.find({
       relations: {
         subjects: true,
-        relatedSkills: true,
+        subSkills: true,
         techSkills: true,
       },
     });
@@ -105,7 +105,7 @@ export class SkillsService {
       where: { id },
       relations: {
         subjects: true,
-        relatedSkills: true,
+        subSkills: true,
         techSkills: true,
       },
     });
@@ -148,7 +148,7 @@ export class SkillsService {
     createSkillDtos: CreateSkillDto[],
   ): Promise<Skill> {
     const skill = await this.findOne(id);
-    console.log(skill.relatedSkills);
+    console.log(skill.subSkills);
     for (const createSkillDto of createSkillDtos) {
       let subSkill = await this.skillsRepository.findOne({
         where: { id: createSkillDto.id },
@@ -160,13 +160,13 @@ export class SkillsService {
       }
 
       // Check if the subSkill is already related to the main skill
-      const isAlreadyRelated = skill.relatedSkills.some(
+      const isAlreadyRelated = skill.subSkills.some(
         (relatedSkill) => relatedSkill.id === subSkill.id,
       );
 
-      // If not already related, add the subSkill to relatedSkills
+      // If not already related, add the subSkill to subSkills
       if (!isAlreadyRelated) {
-        skill.relatedSkills.push(subSkill);
+        skill.subSkills.push(subSkill);
       }
     }
     try {
@@ -185,7 +185,7 @@ export class SkillsService {
   //     subSkills.push(subSkill);
   //   }
 
-  //   skill.relatedSkills = subSkills; // update new skill[]
+  //   skill.subSkills = subSkills; // update new skill[]
 
   //   try {
   //     return await this.skillsRepository.save(skill);
@@ -198,9 +198,10 @@ export class SkillsService {
   async removeSubSkillId(id: string, subSkillId: string): Promise<Skill> {
     const parentSkill = await this.findOne(id); // Ensure the skill exists
 
-    parentSkill.relatedSkills = parentSkill.relatedSkills.filter(
+    parentSkill.subSkills = parentSkill.subSkills.filter(
       (children) => children.id !== subSkillId,
     );
+    console.log(parentSkill.subSkills);
     try {
       return await this.skillsRepository.save(parentSkill);
     } catch (error) {

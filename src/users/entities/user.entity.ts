@@ -5,19 +5,10 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-import { Branch } from 'src/branchs/entities/branch.entity';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
-import { Faculty } from 'src/faculties/entities/faculty.entity';
 import { Role } from 'src/roles/entities/role.entity';
 // import { Subject } from 'src/subjects/entities/subject.entity';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  ManyToOne,
-  PrimaryColumn,
-} from 'typeorm';
+import { Column, Entity, JoinTable, ManyToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class User {
@@ -72,10 +63,4 @@ export class User {
 
   // @ManyToMany(() => Subject, (subject) => subject.teachers)
   // subjects: Subject[];
-
-  @ManyToOne(() => Branch, (branch) => branch.users)
-  branch: Branch;
-
-  @ManyToOne(() => Faculty, (faculty) => faculty.users)
-  faculty: Faculty;
 }
