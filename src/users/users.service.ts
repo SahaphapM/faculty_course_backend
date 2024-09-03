@@ -21,7 +21,7 @@ export class UsersService {
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: User[]; total: number }> {
-    const { page, limit, sort, order, search, column1, column2 } =
+    const { page, limit, sort, order, search, columnId, columnName } =
       paginationDto;
 
     const queryBuilder = this.usersRepository.createQueryBuilder('user');
@@ -29,21 +29,19 @@ export class UsersService {
     // Include roles in the query
     queryBuilder.leftJoinAndSelect('user.roles', 'roles');
 
-    // Conditionally add joins if necessary
-    if (column1) {
-      queryBuilder
-        .innerJoinAndSelect('user.branch', 'branch')
-        .innerJoinAndSelect('branch.faculty', 'faculty');
-    } else if (column2) {
-      queryBuilder.innerJoinAndSelect('user.branch', 'branch');
-    }
-
-    // Conditionally add where clauses
-    if (column1) {
-      queryBuilder.andWhere('faculty.id = :facultyId', { facultyId: column1 });
-    }
-    if (column2) {
-      queryBuilder.andWhere('branch.id = :branchId', { branchId: column2 });
+    // Conditionally add joins if columnId and columnName are provided
+    if (columnId && columnName === 'branch') {
+      // Join user with curriculum
+      queryBuilder.innerJoin('user.curriculums', 'curriculum');
+      // Join curriculum with branch
+      queryBuilder.innerJoin('curriculum.branch', 'branch');
+      // Filter by branchId
+      queryBuilder.andWhere('branch.id = :branchId', { branchId: columnId });
+    } else if (columnId && columnName === 'curriculum') {
+      queryBuilder.innerJoinAndSelect(`user.${columnName}s`, `${columnName}`);
+      queryBuilder.andWhere(`${columnName}.id = :columnId`, {
+        columnId,
+      });
     }
 
     if (search) {
@@ -60,7 +58,9 @@ export class UsersService {
       queryBuilder.orderBy(`user.${sort}`, order);
     }
 
-    // console.log('Generated SQL:', queryBuilder.getSql()); // Log the SQL query
+    // Log the generated SQL query and its parameters
+    console.log('Generated SQL:', queryBuilder.getSql());
+    console.log('Query Parameters:', queryBuilder.getParameters());
 
     const [data, total] = await queryBuilder
       .take(limit)
@@ -100,7 +100,7 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return await this.usersRepository.find({
-      relations: { roles: true, branch: true, faculty: true },
+      relations: { roles: true },
       select: [
         'id',
         'email',
