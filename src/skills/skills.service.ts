@@ -90,7 +90,7 @@ export class SkillsService {
       where: { id },
       relations: {
         subjects: true,
-        children: true,
+        children: { children: { children: { children: { children: true } } } },
         parent: true,
         techSkills: true,
       },
