@@ -39,7 +39,6 @@ export class SkillsService {
     // Join relations to include them in the result
     queryBuilder
       .leftJoinAndSelect('skill.subjects', 'subject')
-      .leftJoinAndSelect('skill.children', 'children')
       .leftJoinAndSelect('skill.techSkills', 'techSkills');
 
     // Conditionally add joins based on bySubject
@@ -48,24 +47,6 @@ export class SkillsService {
         subjectId: bySubject,
       });
     }
-
-    // if (byBranch || byFaculty) {
-    //   queryBuilder
-    //     .innerJoinAndSelect('skill.techSkills', 'techSkill')
-    //     .innerJoinAndSelect('techSkill.branch', 'branch') // Adjust according to your actual entity relations
-    //     .innerJoinAndSelect('branch.faculty', 'faculty'); // Adjust according to your actual entity relations
-
-    //   if (byBranch) {
-    //     queryBuilder.andWhere('branch.id = :branchId', { branchId: byBranch });
-    //   }
-
-    //   if (byFaculty) {
-    //     queryBuilder.andWhere('faculty.id = :facultyId', {
-    //       facultyId: byFaculty,
-    //     });
-    //   }
-    // }
-
     // Add search condition if provided
 
     if (search) {
@@ -87,14 +68,21 @@ export class SkillsService {
       .orderBy(`skill.${sort || 'id'}`, order || 'ASC')
       .getManyAndCount();
 
-    return { data, total };
+    const allSkillsWithChildren = await Promise.all(
+      data.map(async (skill) => {
+        return this.skillsRepository.findDescendantsTree(skill);
+      }),
+    );
+
+    return { data: allSkillsWithChildren, total };
   }
 
   async findAll(): Promise<Skill[]> {
     return await this.skillsRepository.find({
       relations: {
         subjects: true,
-        children: true,
+        children: { children: { children: { children: { children: true } } } },
+        parent: { parent: { parent: true } },
         techSkills: true,
       },
     });
@@ -168,9 +156,11 @@ export class SkillsService {
 
       // If not already related, add the subSkill to subSkills
       if (!isAlreadyRelated) {
+        subSkill.parent = parentSkill;
         parentSkill.children.push(subSkill);
       }
     }
+
     try {
       return await this.skillsRepository.save(parentSkill);
     } catch (error) {
@@ -180,12 +170,13 @@ export class SkillsService {
 
   async removeSubSkillId(id: string, subSkillId: string): Promise<Skill> {
     const parentSkill = await this.findOne(id); // Ensure the skill exists
-
+    const childSkill = await this.findOne(subSkillId);
     parentSkill.children = parentSkill.children.filter(
-      (children) => children.id !== subSkillId,
+      (children) => children.id !== subSkillId, //Remove child of parent
     );
-    console.log(parentSkill.children);
+    childSkill.parent = null; // Parent of child = null
     try {
+      this.skillsRepository.save(childSkill);
       return await this.skillsRepository.save(parentSkill);
     } catch (error) {
       throw new BadRequestException('Failed to remove subSkill');
