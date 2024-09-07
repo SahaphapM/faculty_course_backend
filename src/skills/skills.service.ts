@@ -6,7 +6,7 @@ import {
 import { CreateSkillDto } from './dto/create-skill.dto';
 import { UpdateSkillDto } from './dto/update-skill.dto';
 import { Skill } from './entities/skill.entity';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, TreeRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from './dto/pagination.dto';
 import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
@@ -15,7 +15,7 @@ import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
 export class SkillsService {
   constructor(
     @InjectRepository(Skill)
-    private skillsRepository: Repository<Skill>,
+    private skillsRepository: TreeRepository<Skill>,
   ) {}
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
@@ -39,7 +39,7 @@ export class SkillsService {
     // Join relations to include them in the result
     queryBuilder
       .leftJoinAndSelect('skill.subjects', 'subject')
-      .leftJoinAndSelect('skill.subSkills', 'subSkills')
+      .leftJoinAndSelect('skill.children', 'children')
       .leftJoinAndSelect('skill.techSkills', 'techSkills');
 
     // Conditionally add joins based on bySubject
@@ -94,7 +94,7 @@ export class SkillsService {
     return await this.skillsRepository.find({
       relations: {
         subjects: true,
-        subSkills: true,
+        children: true,
         techSkills: true,
       },
     });
@@ -105,7 +105,7 @@ export class SkillsService {
       where: { id },
       relations: {
         subjects: true,
-        subSkills: true,
+        children: true,
         techSkills: true,
       },
     });
@@ -147,8 +147,8 @@ export class SkillsService {
     id: string,
     createSkillDtos: CreateSkillDto[],
   ): Promise<Skill> {
-    const skill = await this.findOne(id);
-    console.log(skill.subSkills);
+    const parentSkill = await this.findOne(id);
+
     for (const createSkillDto of createSkillDtos) {
       let subSkill = await this.skillsRepository.findOne({
         where: { id: createSkillDto.id },
@@ -159,49 +159,32 @@ export class SkillsService {
         subSkill = await this.skillsRepository.save(createSkillDto);
       }
 
+      console.log('childSkill', subSkill);
+
       // Check if the subSkill is already related to the main skill
-      const isAlreadyRelated = skill.subSkills.some(
-        (relatedSkill) => relatedSkill.id === subSkill.id,
+      const isAlreadyRelated = parentSkill.children.some(
+        (childSkill) => childSkill.id === subSkill.id,
       );
 
       // If not already related, add the subSkill to subSkills
       if (!isAlreadyRelated) {
-        skill.subSkills.push(subSkill);
+        parentSkill.children.push(subSkill);
       }
     }
     try {
-      return await this.skillsRepository.save(skill);
+      return await this.skillsRepository.save(parentSkill);
     } catch (error) {
-      throw new BadRequestException('Failed to create and select subSkills');
+      throw new BadRequestException('Failed to create and select childSkill');
     }
   }
 
-  // async selectSubSkills(id: string, subSkillIds: string[]): Promise<Skill> {
-  //   const skill = await this.findOne(id); // Ensure the skill exists
-
-  //   const subSkills = [];
-  //   for (let index = 0; index < subSkillIds.length; index++) {
-  //     const subSkill = await this.findOne(subSkillIds[index]);
-  //     subSkills.push(subSkill);
-  //   }
-
-  //   skill.subSkills = subSkills; // update new skill[]
-
-  //   try {
-  //     return await this.skillsRepository.save(skill);
-  //   } catch (error) {
-  //     throw new BadRequestException('Failed to update skill');
-  //   }
-  // }
-
-  // Optional
   async removeSubSkillId(id: string, subSkillId: string): Promise<Skill> {
     const parentSkill = await this.findOne(id); // Ensure the skill exists
 
-    parentSkill.subSkills = parentSkill.subSkills.filter(
+    parentSkill.children = parentSkill.children.filter(
       (children) => children.id !== subSkillId,
     );
-    console.log(parentSkill.subSkills);
+    console.log(parentSkill.children);
     try {
       return await this.skillsRepository.save(parentSkill);
     } catch (error) {
@@ -230,25 +213,6 @@ export class SkillsService {
     }
   }
 
-  // async updateTechSkills(id: string, techSkillIds: string[]): Promise<Skill> {
-  //   const skill = await this.findOne(id); // Ensure the skill exists
-
-  //   const techSkills = [];
-  //   for (let index = 0; index < techSkillIds.length; index++) {
-  //     const subSkill = await this.findOne(techSkillIds[index]);
-  //     techSkills.push(subSkill);
-  //   }
-
-  //   skill.techSkills = techSkills; // update new skill[]
-
-  //   try {
-  //     return await this.skillsRepository.save(skill);
-  //   } catch (error) {
-  //     throw new BadRequestException('Failed to update skill');
-  //   }
-  // }
-
-  // Optional
   async removeTechSkill(id: string, techId: string): Promise<Skill> {
     const skill = await this.findOne(id); // Ensure the skill exists
     skill.techSkills = skill.techSkills.filter(
