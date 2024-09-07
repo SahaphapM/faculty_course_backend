@@ -39,6 +39,9 @@ export class SkillsService {
     // Join relations to include them in the result
     queryBuilder
       .leftJoinAndSelect('skill.subjects', 'subject')
+      .leftJoinAndSelect('skill.children', 'children') // For direct children
+      .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
+      .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
       .leftJoinAndSelect('skill.techSkills', 'techSkills');
 
     // Conditionally add joins based on bySubject
@@ -68,13 +71,7 @@ export class SkillsService {
       .orderBy(`skill.${sort || 'id'}`, order || 'ASC')
       .getManyAndCount();
 
-    const allSkillsWithChildren = await Promise.all(
-      data.map(async (skill) => {
-        return this.skillsRepository.findDescendantsTree(skill);
-      }),
-    );
-
-    return { data: allSkillsWithChildren, total };
+    return { data, total };
   }
 
   async findAll(): Promise<Skill[]> {
@@ -82,7 +79,7 @@ export class SkillsService {
       relations: {
         subjects: true,
         children: { children: { children: { children: { children: true } } } },
-        parent: { parent: { parent: true } },
+        parent: true,
         techSkills: true,
       },
     });
@@ -94,6 +91,7 @@ export class SkillsService {
       relations: {
         subjects: true,
         children: true,
+        parent: true,
         techSkills: true,
       },
     });
