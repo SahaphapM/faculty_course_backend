@@ -17,4 +17,7 @@ export class Faculty {
 
   @OneToMany(() => Department, (department) => department.faculty)
   departments: Department[];
+
+  // @OneToMany(() => Student, (student) => student.faculty)
+  // students: Student[];
 }

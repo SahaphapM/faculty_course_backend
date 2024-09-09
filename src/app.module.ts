@@ -18,6 +18,8 @@ import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { TechSkillsModule } from './tech-skills/tech-skills.module';
+import { StudentsModule } from './students/students.module';
+import { CoursesModule } from './courses/courses.module';
 
 @Module({
   imports: [
@@ -81,6 +83,8 @@ import { TechSkillsModule } from './tech-skills/tech-skills.module';
       serveRoot: '/public', // URL path to serve static files
     }),
     TechSkillsModule,
+    StudentsModule,
+    CoursesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

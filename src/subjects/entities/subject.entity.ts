@@ -1,4 +1,5 @@
 import { Clo } from 'src/clos/entities/clo.entity';
+import { Course } from 'src/courses/entities/course.entity';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 import { Skill } from 'src/skills/entities/skill.entity';
 import {
@@ -10,36 +11,39 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 
-@Entity()
-export class Subject {
-  @PrimaryColumn()
-  id: string;
+  @Entity()
+  export class Subject {
+    @PrimaryColumn()
+    id: string;
 
-  @Column()
-  thaiName: string;
+    @Column()
+    thaiName: string;
 
-  @Column()
-  engName: string;
+    @Column()
+    engName: string;
 
-  @Column()
-  description: string;
+    @Column()
+    description: string;
 
-  @Column()
-  credit: number;
+    @Column()
+    credit: number;
 
-  @Column()
-  type: string;
+    @Column()
+    type: string;
 
-  @Column()
-  studyTime: string;
+    @Column()
+    studyTime: string;
 
-  @ManyToMany(() => Skill, (skill) => skill.subjects, { cascade: false })
-  @JoinTable()
-  skills: Skill[];
+    @ManyToMany(() => Skill, (skill) => skill.subjects, { cascade: false })
+    @JoinTable()
+    skills: Skill[];
 
-  @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
-  curriculums: Curriculum[];
+    @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
+    curriculums: Curriculum[];
 
-  @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
-  clos: Clo[];
+    @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
+    clos: Clo[];
+
+    @OneToMany(() => Course, (course) => course.subject)
+    courses: Course[];
 }
