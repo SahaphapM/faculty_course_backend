@@ -15,22 +15,23 @@ export class CheckTokenExpiryGuard implements CanActivate {
     const accessToken = request.cookies['access_token'];
 
     if (await this.authService.isTokenExpired(accessToken)) {
-      const refreshToken = request.cookies['refresh_token'];
+      throw new UnauthorizedException('Access token expired');
+      // const refreshToken = request.cookies['refresh_token'];
 
-      if (!refreshToken) {
-        throw new UnauthorizedException('Refresh token not found');
-      }
+      // if (!refreshToken) {
+      //   throw new UnauthorizedException('Refresh token not found');
+      // }
 
-      try {
-        const newAccessToken =
-          await this.authService.getNewAccessToken(refreshToken);
-        request.res.cookie('access_token', newAccessToken, {
-          httpOnly: true,
-        });
-        request.cookies['access_token'] = newAccessToken;
-      } catch (error) {
-        throw new UnauthorizedException('Failed to refresh token');
-      }
+      // try {
+      //   const newAccessToken =
+      //     await this.authService.getNewAccessToken(refreshToken);
+      //   request.res.cookie('access_token', newAccessToken, {
+      //     httpOnly: true,
+      //   });
+      //   request.cookies['access_token'] = newAccessToken;
+      // } catch (error) {
+      //   throw new UnauthorizedException('Failed to refresh token');
+      // }
     }
 
     return true;
