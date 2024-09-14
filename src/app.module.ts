@@ -40,7 +40,7 @@ import { TechSkillsModule } from './tech-skills/tech-skills.module';
       useFactory: (config: ConfigService) => ({
         type: 'mariadb',
         host: config.getOrThrow('DB_HOST'),
-        port: 3306,
+        port: +config.getOrThrow('DB_PORT'),
         username: config.getOrThrow('DB_USERNAME'),
         password: config.getOrThrow('DB_PASSWORD'),
         database: config.getOrThrow('DB_NAME'),
