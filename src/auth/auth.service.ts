@@ -75,7 +75,7 @@ export class AuthService {
     };
   }
 
-  async getProfile(token: string) {
+  async getGProfile(token: string) {
     try {
       return axios.get(
         `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${token}`,
