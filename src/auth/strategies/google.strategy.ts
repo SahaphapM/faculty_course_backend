@@ -27,10 +27,10 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     const { id, name, emails, photos } = profile;
-    const email = emails[0].value;
-    const domain = email.split('@')[1];
+    const email: string = emails[0].value;
+    const domain: string = email.split('@')[1];
 
-    if (domain !== 'go.buu.ac.th' || domain !== 'my.buu.ac.th') {
+    if (!domain.includes('buu.ac.th')) {
       throw new HttpException(`Invalid domain: ${domain}`, 401);
     }
 
