@@ -13,7 +13,8 @@ import { LocalAuthGuard } from './guard/local-auth.guard';
 // import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { GoogleAuthGuard } from './guard/google-auth.guard';
 import { Response, Request } from 'express';
-import { CheckTokenExpiryGuard } from './CheckTokenExpiryGuard';
+// import { CheckTokenExpiryGuard } from './CheckTokenExpiryGuard';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -30,12 +31,13 @@ export class AuthController {
     return { message: 'Login successful', user: user };
   }
 
-  @UseGuards(CheckTokenExpiryGuard)
+  @UseGuards(JwtAuthGuard)
   @Get('/profile')
   async getProfile(@Req() req: Request) {
     const accessToken = req.cookies['access_token'];
-    if (accessToken)
-      return (await this.authService.getProfile(accessToken)).data;
+    if (accessToken) {
+      return;
+    }
     throw new UnauthorizedException('No access token');
   }
 
@@ -48,25 +50,27 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @Get('/google/redirect')
   async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
-    const googleToken = req.user.accessToken;
-    const googleRefreshToken = req.user.refreshToken;
+    // const googleToken = req.user.accessToken;
+    // const googleRefreshToken = req.user.refreshToken;
 
-    res.cookie('access_token', googleToken, {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: false,
-    });
-    res.cookie('refresh_token', googleRefreshToken, {
-      httpOnly: true,
-      sameSite: 'none',
-      secure: false,
-    });
-
-    // const { access_token } = await this.authService.googleLogin(req);
-
-    // res.cookie('access_token', access_token, {
+    // res.cookie('access_token', googleToken, {
     //   httpOnly: true,
+    //   sameSite: 'none',
+    //   secure: false,
     // });
+    // res.cookie('refresh_token', googleRefreshToken, {
+    //   httpOnly: true,
+    //   sameSite: 'none',
+    //   secure: false,
+    // });
+
+    const { access_token } = await this.authService.googleLogin(req);
+
+    res.cookie('access_token', access_token, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: false,
+    });
     res.redirect(`${process.env.FRONTEND_URL}/auth/google/success`);
     return {
       message: 'Login with Google successful',
