@@ -32,7 +32,7 @@ export class AuthController {
 
   @UseGuards(CheckTokenExpiryGuard)
   @Get('/profile')
-  async getProfile(@Req() req) {
+  async getProfile(@Req() req: Request) {
     const accessToken = req.cookies['access_token'];
     if (accessToken)
       return (await this.authService.getProfile(accessToken)).data;
@@ -51,9 +51,15 @@ export class AuthController {
     const googleToken = req.user.accessToken;
     const googleRefreshToken = req.user.refreshToken;
 
-    res.cookie('access_token', googleToken, { httpOnly: true });
+    res.cookie('access_token', googleToken, {
+      httpOnly: true,
+      sameSite: 'none',
+      secure: false,
+    });
     res.cookie('refresh_token', googleRefreshToken, {
       httpOnly: true,
+      sameSite: 'none',
+      secure: false,
     });
 
     // const { access_token } = await this.authService.googleLogin(req);
@@ -68,17 +74,12 @@ export class AuthController {
     };
   }
 
-  @Post('logout')
-  async logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token', {
-      httpOnly: true,
-      // Include other options you used when setting the cookie
-      // For example:
-      // secure: true,
-      // sameSite: 'strict',
-      // domain: 'your-domain.com',
-      // path: '/',
-    });
-    return { message: 'Logged out successfully' };
+  @Get('logout')
+  logout(@Req() req, @Res() res: Response) {
+    const refreshToken = req.cookies['refresh_token'];
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+    this.authService.revokeGoogleToken(refreshToken);
+    res.redirect(`${process.env.FRONTEND_URL}`);
   }
 }
