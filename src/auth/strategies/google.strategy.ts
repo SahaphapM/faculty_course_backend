@@ -16,6 +16,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
   authorizationParams(): { [key: string]: string } {
     return {
+      prompt: 'consent',
       access_type: 'offline',
     };
   }
