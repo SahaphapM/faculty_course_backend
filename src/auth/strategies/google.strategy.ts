@@ -11,6 +11,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       clientSecret: configService.get('GOOGLE_CLIENT_SECRET'),
       callbackURL: configService.get('GOOGLE_REDIRECT'),
       scope: ['email', 'profile'],
+      accessType: 'offline',
     });
   }
 
@@ -24,7 +25,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const email = emails[0].value;
     const domain = email.split('@')[1];
 
-    if (domain !== 'go.buu.ac.th' || domain! == 'my.buu.ac.th') {
+    if (domain !== 'go.buu.ac.th' || domain !== 'buu.ac.th') {
       throw new HttpException('Invalid domain', 401);
     }
 
@@ -34,6 +35,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       name: `${name.givenName} ${name.familyName}`,
       picture: photos[0].value,
       accessToken,
+      refreshToken,
     };
     done(null, user);
   }

@@ -31,6 +31,7 @@ export class AuthService {
     return null;
   }
 
+  //JWT
   async login(user: any) {
     const payload = { email: user.email, sub: user.id };
     return {
