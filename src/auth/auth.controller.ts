@@ -1,12 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Req,
-  Res,
-  UnauthorizedException,
-  UseGuards,
-} from '@nestjs/common';
+import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
@@ -34,16 +26,17 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('/profile')
   async getProfile(@Req() req: Request) {
-    const accessToken = req.cookies['access_token'];
-    if (accessToken) {
-      return;
-    }
-    throw new UnauthorizedException('No access token');
+    return req.user;
+    // const accessToken = req.cookies['access_token'];
+    // if (accessToken) {
+    //   return;
+    // }
+    // throw new UnauthorizedException('No access token');
   }
 
   @UseGuards(GoogleAuthGuard)
   @Get('/google')
-  googleAuth() {
+  googleLogin() {
     // Initiates the Google OAuth process
   }
 
@@ -68,8 +61,6 @@ export class AuthController {
 
     res.cookie('access_token', access_token, {
       httpOnly: true,
-      sameSite: 'none',
-      secure: false,
     });
     res.redirect(`${process.env.FRONTEND_URL}/auth/google/success`);
     return {
