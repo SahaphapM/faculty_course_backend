@@ -57,19 +57,36 @@ export class CurriculumsController {
     return this.curriculumsService.update(id, updateCurriculumDto);
   }
 
-  @Post(':id/subjects')
+  @Patch(':id/subjects')
   async addSubject(
     @Param('id') id: string,
-    @Body() createSubjectDto: CreateSubjectDto[],
+    @Body() createSubjectDtos: CreateSubjectDto[],
   ) {
-    for (let index = 0; index < createSubjectDto.length; index++) {
-      const subjects = await this.subjectsService.create(
-        createSubjectDto[index],
-      ); // create subject to database
-      await this.curriculumsService.addSubject(id, subjects);
+    console.log('Received data:', createSubjectDtos); // Log the received data
+  
+    // Ensure createSubjectDtos is an array
+    if (!Array.isArray(createSubjectDtos)) {
+      throw new BadRequestException('Invalid data format: Expected an array');
     }
+  
+    // Validate each item in the array
+    createSubjectDtos.forEach((dto) => {
+      if (typeof dto.id !== 'string' || dto.id.trim() === '') {
+        throw new BadRequestException('Invalid subject name format');
+      }
+    });
+  
+    const subjects = await Promise.all(
+      createSubjectDtos.map((dto) => this.subjectsService.create(dto)),
+    );
+  
+    await Promise.all(
+      subjects.map(() => this.curriculumsService.addSubject(id, subjects)),
+    );
+  
     return this.curriculumsService.findOne(id); // add subject to curriculum
   }
+
 
   @Patch(':id/selectSubjects')
   async selectSubject(
@@ -82,19 +99,11 @@ export class CurriculumsController {
     );
     return this.curriculumsService.selectSubject(id, subjects); // add subject to curriculum
   }
-
-  @Patch(':id/removeSubject/:SubjectId')
-  async removeSubject(
-    @Param('id') id: string,
-    @Param('SubjectId') SubjectId: string,
-  ) {
-    return this.curriculumsService.removeSubject(id, SubjectId);
-  }
-
-  @Patch(':id/coordinators')
+  
+ @Patch(':id/coordinators')
   async addCoordinator(
     @Param('id') id: string,
-    @Body() createUserDtos: CreateUserDto[],
+    @Body() createUserDtos: CreateUserDto[]
   ) {
     console.log('Received data:', createUserDtos); // Log the received data
 
@@ -104,48 +113,22 @@ export class CurriculumsController {
     }
 
     // Validate each item in the array
-    createUserDtos.forEach((dto) => {
+    createUserDtos.forEach(dto => {
       if (typeof dto.id !== 'string' || dto.id.trim() === '') {
         throw new BadRequestException('Invalid ID format');
       }
     });
 
     const coordinators = await Promise.all(
-      createUserDtos.map((dto) => this.usersService.findOne(dto.id)),
+      createUserDtos.map((dto) => this.usersService.findOne(dto.id))
     );
     return this.curriculumsService.addCoordinator(id, coordinators); // Add user to curriculum
   }
 
-  @Patch(':id/removeCoordinator/:CoordinatorId')
-  async removeCoordinator(
-    @Param('id') id: string,
-    @Param('CoordinatorId') CoordinatorId: string,
-  ) {
-    return this.curriculumsService.removeCoordinator(id, CoordinatorId);
-  }
-
-
   @Patch(':id/plos')
-  async addPLO(@Param('id') id: string, @Body() createPloDtos: CreatePloDto[]) {
-    console.log('Received data:', createPloDtos); // Log the received data
-
-    // Ensure createPloDtos is an array
-    if (!Array.isArray(createPloDtos)) {
-      throw new BadRequestException('Invalid data format: Expected an array');
-    }
-
-    // Validate each item in the array
-    createPloDtos.forEach((dto) => {
-      if (typeof dto.id !== 'string' || dto.id.trim() === '') {
-        throw new BadRequestException('Invalid ID format');
-      }
-    });
-
-    const plos = await Promise.all(
-      createPloDtos.map((dto) => this.plosService.create(dto)),
-    );
-    return this.curriculumsService.addPLO(id, plos); // Add PLOs to curriculum
-
+  async addPLO(@Param('id') id: string, @Body() createPloDto: CreatePloDto) {
+    const plo = await this.plosService.create(createPloDto); // create plo to database
+    return this.curriculumsService.addPLO(id, plo); // add plo to curriculum
   }
 
   @Delete(':id')
