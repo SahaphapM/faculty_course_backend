@@ -5,12 +5,12 @@ import { ConfigService } from '@nestjs/config';
 import { Payload } from '../payload';
 
 @Injectable()
-export class JwtStrategy extends PassportStrategy(Strategy) {
+export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private configService: ConfigService) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
         (request) => {
-          return request?.cookies?.access_token;
+          return request.cookies.access_token;
         },
       ]),
       ignoreExpiration: false,

@@ -99,7 +99,6 @@ export class SubjectsController {
     @Param('id') id: string,
     @Param('skillId') skillId: string,
   ) {
-    
     return await this.subjectsService.removeSkill(id, skillId);
   }
 

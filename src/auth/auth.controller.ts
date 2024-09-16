@@ -2,9 +2,11 @@ import { Controller, Get, Post, Req, Res, UseGuards } from '@nestjs/common';
 
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guard/local-auth.guard';
-import { JwtAuthGuard } from './guard/jwt-auth.guard';
+// import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { GoogleAuthGuard } from './guard/google-auth.guard';
 import { Response, Request } from 'express';
+// import { CheckTokenExpiryGuard } from './CheckTokenExpiryGuard';
+import { JwtAuthGuard } from './guard/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -23,19 +25,38 @@ export class AuthController {
 
   @UseGuards(JwtAuthGuard)
   @Get('/profile')
-  getProfile(@Req() req) {
+  async getProfile(@Req() req: Request) {
     return req.user;
+    // const accessToken = req.cookies['access_token'];
+    // if (accessToken) {
+    //   return;
+    // }
+    // throw new UnauthorizedException('No access token');
   }
 
   @UseGuards(GoogleAuthGuard)
   @Get('/google')
-  googleAuth() {
+  googleLogin() {
     // Initiates the Google OAuth process
   }
 
   @UseGuards(GoogleAuthGuard)
   @Get('/google/redirect')
-  async googleAuthRedirect(@Req() req: Request, @Res() res: Response) {
+  async googleAuthRedirect(@Req() req: any, @Res() res: Response) {
+    // const googleToken = req.user.accessToken;
+    // const googleRefreshToken = req.user.refreshToken;
+
+    // res.cookie('access_token', googleToken, {
+    //   httpOnly: true,
+    //   sameSite: 'none',
+    //   secure: false,
+    // });
+    // res.cookie('refresh_token', googleRefreshToken, {
+    //   httpOnly: true,
+    //   sameSite: 'none',
+    //   secure: false,
+    // });
+
     const { access_token } = await this.authService.googleLogin(req);
 
     res.cookie('access_token', access_token, {
@@ -48,18 +69,12 @@ export class AuthController {
     };
   }
 
-  @Post('logout')
-  @UseGuards(JwtAuthGuard)
-  async logout(@Res({ passthrough: true }) res: Response) {
-    res.clearCookie('access_token', {
-      httpOnly: true,
-      // Include other options you used when setting the cookie
-      // For example:
-      // secure: true,
-      // sameSite: 'strict',
-      // domain: 'your-domain.com',
-      // path: '/',
-    });
-    return { message: 'Logged out successfully' };
+  @Get('logout')
+  logout(@Req() req, @Res() res: Response) {
+    const refreshToken = req.cookies['refresh_token'];
+    res.clearCookie('access_token');
+    res.clearCookie('refresh_token');
+    this.authService.revokeGoogleToken(refreshToken);
+    res.redirect(`${process.env.FRONTEND_URL}`);
   }
 }

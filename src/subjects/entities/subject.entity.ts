@@ -33,7 +33,7 @@ export class Subject {
   @Column()
   studyTime: string;
 
-  @ManyToMany(() => Skill, (skill) => skill.subjects, { cascade: true })
+  @ManyToMany(() => Skill, (skill) => skill.subjects, { cascade: false })
   @JoinTable()
   skills: Skill[];
 

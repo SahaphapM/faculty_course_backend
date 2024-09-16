@@ -28,9 +28,9 @@ export class PaginationDto {
 
   @IsOptional()
   @IsString()
-  column1?: string;
+  columnId?: string;
 
   @IsOptional()
   @IsString()
-  column2?: string;
+  columnName?: string;
 }

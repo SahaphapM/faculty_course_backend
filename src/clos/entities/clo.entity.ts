@@ -1,14 +1,14 @@
 import { Plo } from 'src/plos/entities/plo.entity';
 import { Subject } from 'src/subjects/entities/subject.entity';
-import { Column, Entity, ManyToOne, PrimaryColumn } from 'typeorm';
+import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
 export class Clo {
   // CLO Class Learning Outcome
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
   @Column()

@@ -32,30 +32,58 @@ export class FacultiesService {
     }
   }
 
-  async findAllBranchId(): Promise<any[]> {
+  async findAllDetails(): Promise<any[]> {
     try {
       const faculties = await this.facultiesRepository
         .createQueryBuilder('faculty')
         .leftJoinAndSelect('faculty.branches', 'branch')
+        .leftJoinAndSelect('branch.curriculums', 'curriculum')
+        .leftJoinAndSelect('curriculum.subjects', 'subject')
+        .leftJoinAndSelect('subject.skills', 'skill')
+        .leftJoinAndSelect('skill.techSkills', 'techSkill')
         .select([
-          'faculty.id', // Select faculty ID
-          'faculty.name', // Select faculty name
-          'branch.id', // Select branch ID
-          'branch.name', // Select branch name
+          'faculty.id',
+          'faculty.name',
+          'branch.id',
+          'branch.name',
+          'curriculum.id',
+          'curriculum.thaiName', // Adjust based on the name you want to use
+          'subject.id',
+          'subject.thaiName', // Adjust based on the name you want to use
+          'skill.id',
+          'skill.name',
+          'techSkill.id',
+          'techSkill.name',
         ])
         .getMany();
 
-      // Transform the result to include an array of branches for each faculty
+      // Transform the result into a hierarchical structure
       return faculties.map((faculty) => ({
         id: faculty.id,
         name: faculty.name,
         branches: faculty.branches.map((branch) => ({
           id: branch.id,
           name: branch.name,
+          curriculums: branch.curriculums.map((curriculum) => ({
+            id: curriculum.id,
+            name: curriculum.thaiName || curriculum.engName, // Adjust based on preference
+            subjects: curriculum.subjects.map((subject) => ({
+              id: subject.id,
+              name: subject.thaiName || subject.engName, // Adjust based on preference
+              skills: subject.skills.map((skill) => ({
+                id: skill.id,
+                name: skill.name,
+                techSkills: skill.techSkills.map((techSkill) => ({
+                  id: techSkill.id,
+                  name: techSkill.name,
+                })),
+              })),
+            })),
+          })),
         })),
       }));
     } catch (error) {
-      throw new Error('Failed to fetch faculties');
+      throw new Error('Failed to fetch details');
     }
   }
 

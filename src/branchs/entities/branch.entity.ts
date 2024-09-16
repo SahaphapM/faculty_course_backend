@@ -2,7 +2,6 @@ import { IsString } from 'class-validator';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 import { Department } from 'src/departments/entities/department.entity';
 import { Faculty } from 'src/faculties/entities/faculty.entity';
-import { User } from 'src/users/entities/user.entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
 
 @Entity()
@@ -18,15 +17,12 @@ export class Branch {
   faculty: Faculty;
 
   @ManyToOne(() => Department, (department) => department.branches, {
-    cascade: true,
+    cascade: false,
   })
   department: Department;
 
   @OneToMany(() => Curriculum, (curriculum) => curriculum.branch, {
-    cascade: true,
+    cascade: false,
   })
   curriculums: Curriculum[];
-
-  @OneToMany(() => User, (user) => user.branch)
-  users: User[];
 }
