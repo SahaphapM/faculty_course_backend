@@ -1,6 +1,7 @@
 import { Skill } from 'src/skills/entities/skill.entity';
 import { Subject } from 'src/subjects/entities/subject.entity';
 import {
+  Column,
   Entity,
   JoinTable,
   ManyToMany,
@@ -8,12 +9,18 @@ import {
   OneToMany,
   PrimaryColumn,
 } from 'typeorm';
-import { CourseDetails } from './courseDetails.entity';
+import { CourseDetail } from './courseDetail.entity';
 
 @Entity()
 export class Course {
   @PrimaryColumn()
   id: string;
+
+  @Column()
+  name: string;
+
+  @Column()
+  description: string;
 
   @ManyToOne(() => Subject, (subject) => subject.courses, {
     cascade: false,
@@ -24,6 +31,6 @@ export class Course {
   @JoinTable()
   skills: Skill[];
 
-  @OneToMany(() => CourseDetails, (courseDetail) => courseDetail.course)
-  courseDetails : CourseDetails[]
+  @OneToMany(() => CourseDetail, (courseDetail) => courseDetail.course)
+  courseDetails: CourseDetail[];
 }

@@ -6,7 +6,7 @@ import {
   IsNotEmpty,
   IsDateString,
 } from 'class-validator';
-import { CourseDetails } from 'src/courses/entities/courseDetails.entity';
+import { CourseDetail } from 'src/courses/entities/courseDetail.entity';
 
 export class CreateStudentDto {
   @IsString()
@@ -45,12 +45,9 @@ export class CreateStudentDto {
   @IsNotEmpty()
   degreeName: string; // e.g., "Bachelor of Science B.Sc. (Computer Science) Updated 65 - 4-Year Regular"
 
-  @IsString()
   @IsNotEmpty()
-  admissionYear: string; // e.g., "2565 / 1"
-
-  //   @IsDateString()
-  admissionDate: string; // e.g., "2022-07-06"
+  @IsDateString()
+  admissionDate: Date; // e.g., "2565 / 1"
 
   @IsOptional()
   @IsString()
@@ -83,5 +80,5 @@ export class CreateStudentDto {
 
   gpa: number; // e.g., 3.54
 
-  courseDetails: CourseDetails[];
+  courseDetails: CourseDetail[];
 }

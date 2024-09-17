@@ -6,10 +6,10 @@ import { Brackets, Repository } from 'typeorm';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
 
 @Injectable()
-export class StudentService {
+export class StudentsService {
   constructor(
     @InjectRepository(Student)
-    private studentRepository: Repository<Student>,
+    private readonly studentRepository: Repository<Student>,
   ) {}
 
   // Create a new student
@@ -28,7 +28,7 @@ export class StudentService {
 
     // Join relations to include courseDetails, courses, and subjects
     queryBuilder
-      .leftJoin('student.courseDetails', 'courseDetails')
+      .innerJoin('student.courseDetails', 'courseDetails')
       .leftJoin('courseDetails.course', 'course')
       .leftJoin('course.subject', 'subject');
 

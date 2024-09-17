@@ -1,4 +1,4 @@
-import { CourseDetails } from 'src/courses/entities/courseDetails.entity';
+import { CourseDetail } from 'src/courses/entities/courseDetail.entity';
 import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
 
 @Entity()
@@ -33,9 +33,6 @@ export class Student {
   @Column({ type: 'varchar', length: 100 })
   degreeName: string; // e.g., "Bachelor of Science B.Sc. (Computer Science) Updated 65 - 4-Year Regular"
 
-  @Column({ type: 'varchar', length: 20 })
-  admissionYear: string; // e.g., "2565 / 1"
-
   @Column({ type: 'date' })
   admissionDate: Date; // e.g., "2022-07-06"
 
@@ -66,8 +63,8 @@ export class Student {
   @Column({ type: 'float' })
   gpa: number; // e.g., 3.54
 
-  @OneToMany(() => CourseDetails, (courseDetail) => courseDetail.student, {
+  @OneToMany(() => CourseDetail, (courseDetail) => courseDetail.student, {
     cascade: false,
   })
-  courseDetails: CourseDetails[];
+  courseDetails: CourseDetail[];
 }
