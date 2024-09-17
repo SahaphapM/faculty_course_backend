@@ -17,6 +17,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { TechSkillsModule } from './tech-skills/tech-skills.module';
+import { StudentsModule } from './students/students.module';
+import { CoursesModule } from './courses/courses.module';
 
 @Module({
   imports: [
@@ -62,6 +64,8 @@ import { TechSkillsModule } from './tech-skills/tech-skills.module';
     FacultiesModule,
     AuthModule,
     TechSkillsModule,
+    StudentsModule,
+    CoursesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

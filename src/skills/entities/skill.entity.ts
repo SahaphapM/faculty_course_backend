@@ -1,3 +1,4 @@
+import { Course } from 'src/courses/entities/course.entity';
 import { Subject } from 'src/subjects/entities/subject.entity';
 import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
 import {
@@ -53,4 +54,10 @@ export class Skill {
   })
   @JoinTable()
   techSkills: TechSkill[] | null;
+
+  @ManyToMany(() => Course, (course) => course.skills, {
+    cascade: false,
+  })
+  @JoinTable()
+  courses: Course[];
 }

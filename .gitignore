@@ -60,3 +60,6 @@ mybuu.sqlite
 
 #db docker
 db
+
+docker-compose.yml
+docker-compose.yml
