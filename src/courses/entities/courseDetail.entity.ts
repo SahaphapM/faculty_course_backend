@@ -5,7 +5,7 @@ import { Course } from './course.entity';
 @Entity()
 export class CourseDetail {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @ManyToOne(() => Course, (course) => course.courseDetails, { cascade: false })
   course: Course;

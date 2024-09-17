@@ -1,16 +1,17 @@
 import { Course } from 'src/courses/entities/course.entity';
-import { Subject } from 'src/subjects/entities/subject.entity';
 import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
 import {
   Column,
   Entity,
   JoinTable,
   ManyToMany,
+  OneToMany,
   PrimaryColumn,
   Tree,
   TreeChildren,
   TreeParent,
 } from 'typeorm';
+import { SkillDetail } from './skillDetail.entity';
 
 @Entity()
 @Tree('closure-table')
@@ -27,8 +28,8 @@ export class Skill {
   @Column({ nullable: true })
   level: number; // level 1-5
 
-  @ManyToMany(() => Subject, (subject) => subject.skills)
-  subjects: Subject[] | null;
+  // @ManyToMany(() => Subject, (subject) => subject.skills)
+  // subjects: Subject[] | null;
 
   // Self Relation
   // @ManyToMany(() => Skill, (skill) => skill.subSkills)
@@ -60,4 +61,9 @@ export class Skill {
   })
   @JoinTable()
   courses: Course[];
+
+  @OneToMany(() => SkillDetail, (skillDetail) => skillDetail.skill, {
+    cascade: false,
+  })
+  skillDetail: SkillDetail[];
 }
