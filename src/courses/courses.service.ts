@@ -8,9 +8,9 @@ import { Repository } from 'typeorm';
 import { CreateCourseDto } from './dto/create-course.dto'; // Create this DTO
 import { UpdateCourseDto } from './dto/update-course.dto'; // Create this DTO
 import { Course } from './entities/course.entity';
-import { Student } from 'src/students/entities/student.entity';
 import { CourseDetail } from './entities/courseDetail.entity';
 import { StudentsService } from 'src/students/students.service';
+import { SubjectsService } from 'src/subjects/subjects.service';
 
 @Injectable()
 export class CoursesService {
@@ -20,6 +20,8 @@ export class CoursesService {
 
     @InjectRepository(CourseDetail)
     private readonly courseDetailRepository: Repository<CourseDetail>,
+
+    private readonly subjectsService: SubjectsService,
 
     private readonly studentsService: StudentsService, // Inject StudentsService
   ) {}
@@ -75,7 +77,10 @@ export class CoursesService {
     }
   }
 
-  async importStudents(id: string, createStudents: Student[]): Promise<Course> {
+  async importStudents(
+    id: string,
+    courseDetails: CourseDetail[],
+  ): Promise<Course> {
     const course = await this.findOne(id);
 
     // Ensure courseDetails is initialized
@@ -87,19 +92,23 @@ export class CoursesService {
     );
 
     // Process each student to add if not already present
-    for (const studentData of createStudents) {
-      if (!existingStudentIds.has(studentData.id)) {
-        const student = await this.studentsService.findOne(studentData.id);
-        const courseDetail = new CourseDetail();
-        courseDetail.student = student;
-
+    for (const courseDetail of courseDetails) {
+      if (!existingStudentIds.has(courseDetail.student.id)) {
+        const student = await this.studentsService.findOne(
+          courseDetail.student.id,
+        );
+        if (!student) {
+          throw new NotFoundException(
+            `Student with ID ${student.id} not found`,
+          );
+        }
         // Save and add new course detail
         const savedCourseDetail =
           await this.courseDetailRepository.save(courseDetail);
         course.courseDetails.push(savedCourseDetail);
 
         // Update the set with the newly added student ID
-        existingStudentIds.add(studentData.id);
+        existingStudentIds.add(courseDetail.student.id);
       }
     }
 
@@ -107,12 +116,15 @@ export class CoursesService {
     return await this.courseRepository.save(course);
   }
 
-  async removeStudent(courseId: string, studentId: string): Promise<Course> {
+  async removeStudent(
+    courseId: string,
+    courseDetailId: number,
+  ): Promise<Course> {
     const course = await this.findOne(courseId);
 
     // Find the CourseDetail that matches the studentId to be removed
     const courseDetailToRemove = course.courseDetails.find(
-      (courseDetail) => courseDetail.student.id === studentId,
+      (courseDetail) => courseDetail.id === courseDetailId,
     );
 
     if (courseDetailToRemove) {
@@ -129,5 +141,13 @@ export class CoursesService {
     }
 
     return course;
+  }
+
+  async selectSubject(id: string, subjectId: string): Promise<Course> {
+    const course = await this.findOne(id);
+    const subject = await this.subjectsService.findOne(subjectId);
+    course.subject = subject;
+    // Save the updated course
+    return await this.courseRepository.save(course);
   }
 }
