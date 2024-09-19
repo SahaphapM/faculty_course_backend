@@ -10,7 +10,7 @@ import {
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { Student } from 'src/students/entities/student.entity';
+import { CourseDetail } from './entities/courseDetail.entity';
 
 @Controller('courses')
 export class CoursesController {
@@ -42,16 +42,18 @@ export class CoursesController {
   }
 
   @Patch('importStudents/:id')
-  importStudents(@Param('id') id: string, @Body() createStudents: Student[]) {
-    console.log('skfjasdkjfdaskjf');
-    return this.coursesService.importStudents(id, createStudents);
+  importStudents(
+    @Param('id') id: string,
+    @Body() courseDetails: CourseDetail[],
+  ) {
+    return this.coursesService.importStudents(id, courseDetails);
   }
 
-  @Delete('removeStudent/:courseId/:studentId')
+  @Delete('removeStudent/:courseId/:courseDetailId')
   removeStudent(
     @Param('courseId') courseId: string,
-    @Param('studentId') studentId: string,
+    @Param('courseDetailId') courseDetailId: number,
   ) {
-    return this.coursesService.removeStudent(courseId, studentId);
+    return this.coursesService.removeStudent(courseId, courseDetailId);
   }
 }
