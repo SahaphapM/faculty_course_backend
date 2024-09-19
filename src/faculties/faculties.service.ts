@@ -39,7 +39,8 @@ export class FacultiesService {
         .leftJoinAndSelect('faculty.branches', 'branch')
         .leftJoinAndSelect('branch.curriculums', 'curriculum')
         .leftJoinAndSelect('curriculum.subjects', 'subject')
-        .leftJoinAndSelect('subject.skills', 'skill')
+        .leftJoinAndSelect('subject.skillDetails', 'skillDetail') // Changed from 'subject.skills' to 'subject.skillDetails'
+        .leftJoinAndSelect('skillDetail.skill', 'skill') // Join through skillDetail to skill
         .leftJoinAndSelect('skill.techSkills', 'techSkill')
         .select([
           'faculty.id',
@@ -47,16 +48,17 @@ export class FacultiesService {
           'branch.id',
           'branch.name',
           'curriculum.id',
-          'curriculum.thaiName', // Adjust based on the name you want to use
+          'curriculum.thaiName',
           'subject.id',
-          'subject.thaiName', // Adjust based on the name you want to use
+          'subject.thaiName',
+          'skillDetail.id', // Include skillDetail ID if needed
           'skill.id',
           'skill.name',
           'techSkill.id',
           'techSkill.name',
         ])
         .getMany();
-
+  
       // Transform the result into a hierarchical structure
       return faculties.map((faculty) => ({
         id: faculty.id,
@@ -66,14 +68,14 @@ export class FacultiesService {
           name: branch.name,
           curriculums: branch.curriculums.map((curriculum) => ({
             id: curriculum.id,
-            name: curriculum.thaiName || curriculum.engName, // Adjust based on preference
+            name: curriculum.thaiName || curriculum.engName,
             subjects: curriculum.subjects.map((subject) => ({
               id: subject.id,
-              name: subject.thaiName || subject.engName, // Adjust based on preference
-              skills: subject.skills.map((skill) => ({
-                id: skill.id,
-                name: skill.name,
-                techSkills: skill.techSkills.map((techSkill) => ({
+              name: subject.thaiName || subject.engName,
+              skills: subject.skillDetails.map((skillDetail) => ({
+                id: skillDetail.skill.id, // Access skill through skillDetail
+                name: skillDetail.skill.name,
+                techSkills: skillDetail.skill.techSkills.map((techSkill) => ({
                   id: techSkill.id,
                   name: techSkill.name,
                 })),
@@ -86,6 +88,7 @@ export class FacultiesService {
       throw new Error('Failed to fetch details');
     }
   }
+  
 
   async findOne(id: string): Promise<Faculty> {
     try {

@@ -1,8 +1,7 @@
 import { IsString, IsNumber, IsArray, IsOptional } from 'class-validator';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 import { Clo } from 'src/clos/entities/clo.entity';
-import { Skill } from 'src/skills/entities/skill.entity';
-import { User } from 'src/users/entities/user.entity';
+import { SkillDetail } from 'src/skills/entities/skillDetail.entity';
 
 export class CreateSubjectDto {
   @IsString()
@@ -36,5 +35,5 @@ export class CreateSubjectDto {
 
   @IsOptional()
   @IsArray()
-  skills?: Skill[];
+  skillDetails?: SkillDetail[];
 }

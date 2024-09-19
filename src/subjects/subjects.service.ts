@@ -10,8 +10,8 @@ import { FindManyOptions, Like, Repository } from 'typeorm';
 import { Subject } from './entities/subject.entity';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 import { Clo } from 'src/clos/entities/clo.entity';
-import { Skill } from 'src/skills/entities/skill.entity';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
+import { SkillDetail } from 'src/skills/entities/skillDetail.entity';
 
 @Injectable()
 export class SubjectsService {
@@ -20,6 +20,8 @@ export class SubjectsService {
     private subjectsRepository: Repository<Subject>,
     @InjectRepository(Curriculum)
     private curriculumsRepository: Repository<Curriculum>,
+    @InjectRepository(SkillDetail)
+    private readonly SkillDetailsRepository: Repository<SkillDetail>,
   ) {}
 
   async findAllByPage(
@@ -64,7 +66,7 @@ export class SubjectsService {
   async findAll(): Promise<Subject[]> {
     try {
       return await this.subjectsRepository.find({
-        relations: ['curriculums', 'clos', 'skills'],
+        relations: ['curriculums', 'clos', 'skillDetails'],
       });
     } catch (error) {
       throw new BadRequestException('Failed to get subjects');
@@ -74,7 +76,7 @@ export class SubjectsService {
   async findOne(id: string): Promise<Subject> {
     const subject = await this.subjectsRepository.findOne({
       where: { id },
-      relations: ['curriculums', 'clos'],
+      relations: { skillDetails: { skill: true } },
     });
     if (!subject) {
       throw new NotFoundException(`Subject with id ${id} not found`);
@@ -104,26 +106,6 @@ export class SubjectsService {
     }
   }
 
-  // async addTeacher(id: string, user: User): Promise<Subject> {
-  //   const subject = await this.subjectsRepository.findOne({ where: { id } });
-  //   if (!subject) {
-  //     throw new NotFoundException(`Subject with ID ${id} not found`);
-  //   }
-  //   if (!subject.teachers) {
-  //     subject.teachers = [];
-  //   }
-  //   subject.teachers.push(user);
-  //   try {
-  //     await this.subjectsRepository.save(subject);
-  //     return this.subjectsRepository.findOne({
-  //       where: { id },
-  //       relations: { teachers: true },
-  //     });
-  //   } catch (error) {
-  //     throw new BadRequestException('Failed to update Subject', error.message);
-  //   }
-  // }
-
   async addCLO(id: string, clo: Clo): Promise<Subject> {
     const subject = await this.subjectsRepository.findOne({ where: { id } });
     if (!subject) {
@@ -144,47 +126,112 @@ export class SubjectsService {
     }
   }
 
-  async selectSkills(id: string, skills: Skill[]): Promise<Subject> {
-    const subject = await this.subjectsRepository.findOne({ where: { id } });
-    if (!subject) {
-      throw new NotFoundException(`Subject with ID ${id} not found`);
-    }
-    subject.skills = skills;
-    try {
-      await this.subjectsRepository.save(subject);
-      return this.subjectsRepository.findOne({
-        where: { id },
-        relations: { skills: true },
-      });
-    } catch (error) {
-      throw new BadRequestException(
-        'Failed to update Skill in Subject',
-        error.message,
-      );
-    }
-  }
-
-  async removeSkill(id: string, skillId: string): Promise<Subject> {
+  async selectSkills(
+    id: string,
+    skillDetails: SkillDetail[],
+  ): Promise<Subject> {
     const subject = await this.subjectsRepository.findOne({
       where: { id },
-      relations: { skills: true },
+      relations: { skillDetails: true },
     });
     if (!subject) {
       throw new NotFoundException(`Subject with ID ${id} not found`);
     }
 
-    // Remove the skill from the subject's skills array
-    // const newskills = subject.skills.filter((skill) => skill.id !== skillId);
-    // console.log(newskills);
-    console.log('Before:', subject.skills);
-    subject.skills = subject.skills.filter((skill) => skill.id !== skillId);
-    console.log('After:', subject.skills);
+    // Ensure skillDetails is initialized
+    subject.skillDetails = subject.skillDetails || [];
+
+    // const existingSkillDetails = new Set(
+    //   subject.skillDetails.map((skillDetail) => skillDetail.id),
+    // );
+    // for (const SkillDetail of skillDetails) {
+    //   if (!existingSkillDetails.has(SkillDetail.id)) {
+    //     // Check if the skillDetail with the same ID already exists
+
+    //     const skillDetail = await this.SkillDetailsRepository.save(SkillDetail);
+    //     console.log('save or update', skillDetail);
+
+    //     subject.skillDetails.push(skillDetail);
+    //     // Update the set with the newly added skillDetail
+    //     existingSkillDetails.add(SkillDetail.id);
+    //   } else {
+    //     console.log('Original', SkillDetail);
+    //   }
+    // }
+
+    for (let index = 0; index < skillDetails.length; index++) {
+      // Check if the skillDetail with the same ID already exists
+      const exists = subject.skillDetails.some(
+        (sd) => sd.id === skillDetails[index].id,
+      );
+      if (!exists) {
+        const skillDetail = await this.SkillDetailsRepository.save(
+          skillDetails[index],
+        );
+
+        subject.skillDetails.push(skillDetail);
+      }
+    }
 
     try {
+      return await this.subjectsRepository.save(subject);
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to update SkillDetail in Subject',
+        error.message,
+      );
+    }
+  }
+
+  async updateSkillDetail(skillDetail: SkillDetail): Promise<SkillDetail> {
+    try {
+      return await this.SkillDetailsRepository.save(skillDetail);
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to update SkillDetail ID : ${skillDetail.id}`,
+        error.message,
+      );
+    }
+  }
+
+  async removeSkill(id: string, skillDetailId: number): Promise<Subject> {
+    // Fetch the subject with the associated skillDetails
+    const subject = await this.subjectsRepository.findOne({
+      where: { id },
+      relations: { skillDetails: true },
+    });
+
+    if (!subject) {
+      throw new NotFoundException(`Subject with ID ${id} not found`);
+    }
+
+    // Find the skillDetail to remove
+    const skillDetailToRemove = subject.skillDetails.find(
+      (skillDetail) => skillDetail.id === skillDetailId,
+    );
+
+    if (!skillDetailToRemove) {
+      throw new NotFoundException(
+        `SkillDetail with ID ${skillDetailId} not found`,
+      );
+    }
+
+    // Filter out the skillDetail from the subject
+    subject.skillDetails = subject.skillDetails.filter(
+      (skillDetail) => skillDetail.id !== skillDetailId,
+    );
+
+    try {
+      // Delete the skillDetail from the database
+      await this.SkillDetailsRepository.delete(skillDetailId);
+
+      // Save the updated subject
       await this.subjectsRepository.save(subject);
-      return this.subjectsRepository.findOne({
+
+      // Return the updated subject with the remaining skillDetails
+      return await this.subjectsRepository.findOne({
         where: { id },
-        relations: { skills: true },
+        relations: { skillDetails: true },
       });
     } catch (error) {
       throw new BadRequestException(

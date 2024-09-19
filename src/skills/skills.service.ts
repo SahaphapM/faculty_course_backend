@@ -77,7 +77,7 @@ export class SkillsService {
   async findAll(): Promise<Skill[]> {
     return await this.skillsRepository.find({
       relations: {
-        subjects: true,
+        skillDetail: { skill: true },
         children: { children: { children: { children: { children: true } } } },
         parent: true,
         techSkills: true,
@@ -89,7 +89,7 @@ export class SkillsService {
     const skill = await this.skillsRepository.findOne({
       where: { id },
       relations: {
-        subjects: true,
+        skillDetail: { skill: true },
         children: { children: { children: { children: { children: true } } } },
         parent: true,
         techSkills: true,
