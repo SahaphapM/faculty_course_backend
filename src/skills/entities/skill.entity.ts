@@ -25,7 +25,7 @@ export class Skill {
   description: string;
 
   @Column({ nullable: true })
-  type: string; // type 1-5
+  doman: string; // type 1-5
 
   // @ManyToMany(() => Subject, (subject) => subject.skills)
   // subjects: Subject[] | null;

@@ -8,7 +8,7 @@ export class CreateSkillDto {
 
   description: string;
 
-  type: string;
+  doman: string;
 
   // subjects: Subject[] | null;
 
