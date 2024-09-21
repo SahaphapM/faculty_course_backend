@@ -8,13 +8,10 @@ export class SkillDetail {
   id: number;
 
   @Column()
-  domain: string;
-
-  @Column()
   description: string;
 
   @Column({ nullable: true })
-  type: string; // type 1-5
+  level: number; // level 1-5
 
   @ManyToOne(() => Subject, (subject) => subject.skillDetails)
   subjects: Subject;
