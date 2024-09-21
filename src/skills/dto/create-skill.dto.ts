@@ -2,7 +2,7 @@ import { Skill } from '../entities/skill.entity';
 import { TechSkill } from 'src/tech-skills/entities/tech-skill.entity';
 
 export class CreateSkillDto {
-  id: string;
+  id: number;
 
   name: string;
 

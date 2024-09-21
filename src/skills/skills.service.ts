@@ -89,7 +89,7 @@ export class SkillsService {
 
   async findOne(id: string): Promise<Skill> {
     const skill = await this.skillsRepository.findOne({
-      where: { id },
+      where: { id: Number(id) },
       relations: {
         skillDetail: { skill: true },
         children: { children: { children: { children: { children: true } } } },
@@ -106,7 +106,7 @@ export class SkillsService {
   async update(id: string, updateSkillDto: UpdateSkillDto): Promise<Skill> {
     await this.findOne(id); // Ensure the skill exists
     const skill = await this.skillsRepository.preload({
-      id,
+      id: Number(id),
       ...updateSkillDto,
     });
 
@@ -172,7 +172,7 @@ export class SkillsService {
     const parentSkill = await this.findOne(id); // Ensure the skill exists
     const childSkill = await this.findOne(subSkillId);
     parentSkill.children = parentSkill.children.filter(
-      (children) => children.id !== subSkillId, //Remove child of parent
+      (children) => children.id.toString() !== subSkillId, //Remove child of parent//+
     );
     childSkill.parent = null; // Parent of child = null
     try {

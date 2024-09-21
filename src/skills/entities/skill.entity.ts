@@ -16,7 +16,7 @@ import { SkillDetail } from './skillDetail.entity';
 @Tree('closure-table')
 export class Skill {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column()
   name: string;
