@@ -57,7 +57,7 @@ export class AuthController {
     //   secure: false,
     // });
 
-    const { access_token } = await this.authService.googleLogin(req);
+    // const { access_token } = await this.authService.googleLogin(req);
 
     // res.cookie('access_token', access_token, {
     //   httpOnly: true,
@@ -67,7 +67,7 @@ export class AuthController {
     //   message: 'Login with Google successful',
     //   status: 200,
     // };
-    return { access_token };
+    return await this.authService.googleLogin(req);
   }
 
   @Get('logout')
