@@ -12,9 +12,9 @@ export class CreateSkillDto {
 
   // subjects: Subject[] | null;
 
-  children: Skill[];
+  children: Skill[] | null;
 
-  parent: Skill;
+  parent: Skill | null;
 
   techSkills: TechSkill[] | null;
 }
