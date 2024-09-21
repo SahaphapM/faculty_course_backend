@@ -59,14 +59,15 @@ export class AuthController {
 
     const { access_token } = await this.authService.googleLogin(req);
 
-    res.cookie('access_token', access_token, {
-      httpOnly: true,
-    });
+    // res.cookie('access_token', access_token, {
+    //   httpOnly: true,
+    // });
     res.redirect(`${process.env.FRONTEND_URL}/auth/google/success`);
-    return {
-      message: 'Login with Google successful',
-      status: 200,
-    };
+    // return {
+    //   message: 'Login with Google successful',
+    //   status: 200,
+    // };
+    return { access_token };
   }
 
   @Get('logout')
