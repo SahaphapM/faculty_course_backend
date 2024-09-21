@@ -19,6 +19,8 @@ export class SkillsService {
   ) {}
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
+    console.log(createSkillDto);
+
     try {
       return await this.skillsRepository.save(createSkillDto);
     } catch (error) {
