@@ -8,7 +8,7 @@ export class CreateSkillDto {
 
   description: string;
 
-  level: number;
+  type: string;
 
   // subjects: Subject[] | null;
 
