@@ -23,14 +23,13 @@ export class CurriculumsService {
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: Curriculum[]; total: number }> {
-    console.log(paginationDto);
     const { page, limit, sort, order, search } = paginationDto;
-    console.log(search);
+    // console.log(search);
 
     const options: FindManyOptions<Curriculum> = {
       take: limit,
       skip: (page - 1) * limit,
-      order: sort ? { [sort]: order } : {}
+      order: sort ? { [sort]: order } : {},
     };
 
     if (search) {
@@ -39,16 +38,17 @@ export class CurriculumsService {
         { thaiName: Like(`%${search}%`) },
         { engName: Like(`%${search}%`) },
         { branch: { name: Like(`%${search}%`) } }, // Corrected for nested relation
-        { branch: { faculty: { name: Like(`%${search}%`) } } }
+        { branch: { faculty: { name: Like(`%${search}%`) } } },
       ];
     }
 
-    console.log('Query options:', options); // Debugging line
+    // console.log('Query options:', options); // Debugging line
 
-    const [result, total] = await this.curriculumsRepository.findAndCount(options);
+    const [result, total] =
+      await this.curriculumsRepository.findAndCount(options);
 
-    console.log('Result:', result); // Debugging line
-    console.log('Total:', total); // Debugging line
+    // console.log('Result:', result); // Debugging line
+    // console.log('Total:', total); // Debugging line
 
     return { data: result, total };
   }
@@ -132,10 +132,10 @@ export class CurriculumsService {
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
-  
+
     // Assign subjects directly to the curriculum
     curriculum.subjects = subjects;
-  
+
     try {
       await this.curriculumsRepository.save(curriculum);
       return this.curriculumsRepository.findOne({

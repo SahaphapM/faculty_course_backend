@@ -59,17 +59,17 @@ export class UsersService {
     }
 
     // Log the generated SQL query and its parameters
-    console.log('Generated SQL:', queryBuilder.getSql());
-    console.log('Query Parameters:', queryBuilder.getParameters());
+    // console.log('Generated SQL:', queryBuilder.getSql());
+    // console.log('Query Parameters:', queryBuilder.getParameters());
 
     const [data, total] = await queryBuilder
       .take(limit)
       .skip((page - 1) * limit)
       .getManyAndCount();
 
-    console.log('PaginationDto:', paginationDto);
-    console.log('Data:', data);
-    console.log('Total:', total);
+    // console.log('PaginationDto:', paginationDto);
+    // console.log('Data:', data);
+    // console.log('Total:', total);
 
     return { data, total };
   }
