@@ -1,9 +1,9 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
-import { User } from 'src/users/entities/user.entity';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Payload } from './types/payload';
+// import { User } from 'src/users/entities/user.entity';
+// import { InjectRepository } from '@nestjs/typeorm';
+// import { Payload } from './types/payload';
 import { compare } from 'bcrypt';
 import * as argon2 from 'argon2';
 import { CreateUserDto } from 'src/users/dto/create-user.dto';
@@ -15,7 +15,7 @@ import { ConfigType } from '@nestjs/config';
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
+    // @InjectRepository(User)
     private usersService: UsersService,
     private jwtService: JwtService,
     @Inject(refreshJwtConfig.KEY)
@@ -32,7 +32,6 @@ export class AuthService {
     return { id: user.id };
   }
 
-  //JWT
   async login(userId: number) {
     // const payload: AuthJwtPayload = { sub: userId };
     // const token = this.jwtService.sign(payload);
@@ -77,20 +76,20 @@ export class AuthService {
   }
 
   // google
-  async googleLogin(req): Promise<any> {
-    if (!req.user) {
-      throw new Error('Google login failed: No user information received.');
-    }
-    const payload: Payload = {
-      id: req.user.id,
-      email: req.user.email,
-      name: req.user.name,
-      picture: req.user.picture,
-    };
-    return {
-      access_token: this.jwtService.sign(payload),
-    };
-  }
+  // async googleLogin(req): Promise<any> {
+  //   if (!req.user) {
+  //     throw new Error('Google login failed: No user information received.');
+  //   }
+  //   const payload: Payload = {
+  //     id: req.user.id,
+  //     email: req.user.email,
+  //     name: req.user.name,
+  //     picture: req.user.picture,
+  //   };
+  //   return {
+  //     access_token: this.jwtService.sign(payload),
+  //   };
+  // }
 
   async validateRefreshToken(userId: number, refreshToken: string) {
     const user = await this.usersService.findOne(userId);
@@ -114,7 +113,12 @@ export class AuthService {
   async validateJwtUser(userId: number) {
     const user = await this.usersService.findOne(userId);
     if (!user) throw new UnauthorizedException('User not found!');
-    const currentUser: CurrentUser = { id: user.id, roles: user.roles };
+    const currentUser: CurrentUser = {
+      id: user.id,
+      roles: user.roles,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+    };
     return currentUser;
   }
 
