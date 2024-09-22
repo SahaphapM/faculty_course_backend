@@ -1,25 +1,31 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
-import { ConfigService } from '@nestjs/config';
-import { HttpException, Injectable } from '@nestjs/common';
+import { ConfigType } from '@nestjs/config';
+import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { AuthService } from '../auth.service';
+import googleOauthConfig from '../config/google-oauth.config';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
-  constructor(private configService: ConfigService) {
+  constructor(
+    @Inject(googleOauthConfig.KEY)
+    private googleConfiguration: ConfigType<typeof googleOauthConfig>,
+    private authService: AuthService,
+  ) {
     super({
-      clientID: configService.get('GOOGLE_CLIENT_ID'),
-      clientSecret: configService.get('GOOGLE_CLIENT_SECRET'),
-      callbackURL: configService.get('GOOGLE_REDIRECT'),
+      clientID: googleConfiguration.clientID,
+      clientSecret: googleConfiguration.clientSecret,
+      callbackURL: googleConfiguration.callbackURL,
       scope: ['email', 'profile'],
     });
   }
 
-  authorizationParams(): { [key: string]: string } {
-    return {
-      prompt: 'consent',
-      access_type: 'offline',
-    };
-  }
+  // authorizationParams(): { [key: string]: string } {
+  //   return {
+  //     prompt: 'consent',
+  //     access_type: 'offline',
+  //   };
+  // }
 
   async validate(
     accessToken: string,
@@ -27,7 +33,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
     done: VerifyCallback,
   ): Promise<any> {
-    const { id, name, emails, photos } = profile;
+    const { emails } = profile;
     const email: string = emails[0].value;
     const domain: string = email.split('@')[1];
 
@@ -35,14 +41,20 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       throw new HttpException(`Invalid domain: ${domain}`, 401);
     }
 
-    const user = {
-      id: id,
-      email: email,
-      name: `${name.givenName} ${name.familyName}`,
-      picture: photos[0].value,
-      accessToken,
-      refreshToken,
-    };
+    // const user = {
+    //   id: id,
+    //   email: email,
+    //   name: `${name.givenName} ${name.familyName}`,
+    //   picture: photos[0].value,
+    // };
+
+    const user = await this.authService.validateGoogleUser({
+      email: profile.emails[0].value,
+      // name: `${profile.name.givenName} ${profile.name.familyName}`,
+      password: '',
+      avatarUrl: profile.photos[0].value,
+      roles: [],
+    });
     done(null, user);
   }
 }

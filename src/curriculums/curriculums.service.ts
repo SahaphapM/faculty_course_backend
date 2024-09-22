@@ -23,7 +23,6 @@ export class CurriculumsService {
     paginationDto: PaginationDto,
   ): Promise<{ data: Curriculum[]; total: number }> {
     const { page, limit, sort, order, search } = paginationDto;
-    // console.log(search);
 
     const options: FindManyOptions<Curriculum> = {
       take: limit,
@@ -41,13 +40,8 @@ export class CurriculumsService {
       ];
     }
 
-    // console.log('Query options:', options); // Debugging line
-
     const [result, total] =
       await this.curriculumsRepository.findAndCount(options);
-
-    // console.log('Result:', result); // Debugging line
-    // console.log('Total:', total); // Debugging line
 
     return { data: result, total };
   }

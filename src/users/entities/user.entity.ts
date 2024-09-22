@@ -24,9 +24,13 @@ export class User {
   @MinLength(6)
   password: string;
 
+  // @Column({ default: 'unknown.jpg' })
+  // @IsString()
+  // image: string;
+
   @Column({ default: 'unknown.jpg' })
   @IsString()
-  image: string;
+  avatarUrl: string;
 
   @ManyToMany(() => Role, (role) => role.users, { cascade: true })
   @JoinTable()

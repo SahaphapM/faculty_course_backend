@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Role } from 'src/roles/entities/role.entity';
 
 export class CreateUserDto {
@@ -8,6 +8,10 @@ export class CreateUserDto {
   @IsString()
   @IsNotEmpty()
   password: string;
+
+  @IsOptional()
+  @IsString()
+  avatarUrl: string;
 
   @IsNotEmpty()
   roles: Role[];
