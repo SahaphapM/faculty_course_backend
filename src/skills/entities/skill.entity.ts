@@ -5,7 +5,7 @@ import {
   JoinTable,
   ManyToMany,
   OneToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
   Tree,
   TreeChildren,
   TreeParent,
@@ -15,8 +15,8 @@ import { SkillDetail } from './skillDetail.entity';
 @Entity()
 @Tree('closure-table')
 export class Skill {
-  @PrimaryColumn()
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   name: string;
@@ -24,7 +24,7 @@ export class Skill {
   @Column()
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
   domain: string;
   // @ManyToMany(() => Subject, (subject) => subject.skills)
   // subjects: Subject[] | null;

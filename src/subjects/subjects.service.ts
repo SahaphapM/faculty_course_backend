@@ -27,9 +27,9 @@ export class SubjectsService {
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: Subject[]; total: number }> {
-    console.log(paginationDto);
+    // console.log(paginationDto);
     const { page, limit, sort, order, search } = paginationDto;
-    console.log(search);
+    // console.log(search);
 
     const options: FindManyOptions<Subject> = {
       take: limit,
@@ -45,12 +45,12 @@ export class SubjectsService {
       ];
     }
 
-    console.log('Query options:', options); // Debugging line
+    // console.log('Query options:', options); // Debugging line
 
     const [result, total] = await this.subjectsRepository.findAndCount(options);
 
-    console.log('Result:', result); // Debugging line
-    console.log('Total:', total); // Debugging line
+    // console.log('Result:', result); // Debugging line
+    // console.log('Total:', total); // Debugging line
 
     return { data: result, total };
   }
