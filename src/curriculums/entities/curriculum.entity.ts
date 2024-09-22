@@ -1,7 +1,6 @@
 import { Branch } from 'src/branchs/entities/branch.entity';
 import { Plo } from 'src/plos/entities/plo.entity';
 import { Subject } from 'src/subjects/entities/subject.entity';
-import { User } from 'src/users/entities/user.entity';
 import {
   Column,
   Entity,
@@ -44,9 +43,9 @@ export class Curriculum {
   @OneToMany(() => Plo, (plo) => plo.curriculum, { cascade: true })
   plos: Plo[];
 
-  @ManyToMany(() => User, (user) => user.curriculums, { cascade: false })
-  @JoinTable()
-  coordinators: User[];
+  // @ManyToMany(() => User, (user) => user.curriculums, { cascade: false })
+  // @JoinTable()
+  // coordinators: User[];
 
   @ManyToMany(() => Subject, (subject) => subject.curriculums, {
     cascade: false,
