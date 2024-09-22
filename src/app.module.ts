@@ -5,7 +5,6 @@ import { UsersModule } from './users/users.module';
 import { CurriculumsModule } from './curriculums/curriculums.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { BranchsModule } from './branchs/branchs.module';
-import { RolesModule } from './roles/roles.module';
 import { SubjectsModule } from './subjects/subjects.module';
 import { PlosModule } from './plos/plos.module';
 import { ClosModule } from './clos/clos.module';
@@ -19,6 +18,7 @@ import { join } from 'path';
 import { TechSkillsModule } from './tech-skills/tech-skills.module';
 import { StudentsModule } from './students/students.module';
 import { CoursesModule } from './courses/courses.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -33,7 +33,7 @@ import { CoursesModule } from './courses/courses.module';
     // TypeOrmModule.forRoot({
     //   type: 'sqlite',
     //   database: 'mybuu.sqlite',
-    //   logging: false,
+    //   logging: true,
     //   autoLoadEntities: true,
     //   synchronize: true,
     // }),
@@ -52,10 +52,10 @@ import { CoursesModule } from './courses/courses.module';
       }),
       inject: [ConfigService],
     }),
+    RolesModule,
     UsersModule,
     CurriculumsModule,
     BranchsModule,
-    RolesModule,
     SubjectsModule,
     PlosModule,
     ClosModule,

@@ -63,30 +63,29 @@ export class CurriculumsController {
     @Body() createSubjectDtos: CreateSubjectDto[],
   ) {
     console.log('Received data:', createSubjectDtos); // Log the received data
-  
+
     // Ensure createSubjectDtos is an array
     if (!Array.isArray(createSubjectDtos)) {
       throw new BadRequestException('Invalid data format: Expected an array');
     }
-  
+
     // Validate each item in the array
     createSubjectDtos.forEach((dto) => {
       if (typeof dto.id !== 'string' || dto.id.trim() === '') {
         throw new BadRequestException('Invalid subject name format');
       }
     });
-  
+
     const subjects = await Promise.all(
       createSubjectDtos.map((dto) => this.subjectsService.create(dto)),
     );
-  
+
     await Promise.all(
       subjects.map(() => this.curriculumsService.addSubject(id, subjects)),
     );
-  
+
     return this.curriculumsService.findOne(id); // add subject to curriculum
   }
-
 
   @Patch(':id/selectSubjects')
   async selectSubject(
@@ -99,11 +98,11 @@ export class CurriculumsController {
     );
     return this.curriculumsService.selectSubject(id, subjects); // add subject to curriculum
   }
-  
- @Patch(':id/coordinators')
+
+  @Patch(':id/coordinators')
   async addCoordinator(
     @Param('id') id: string,
-    @Body() createUserDtos: CreateUserDto[]
+    @Body() createUserDtos: CreateUserDto[],
   ) {
     console.log('Received data:', createUserDtos); // Log the received data
 
@@ -113,16 +112,16 @@ export class CurriculumsController {
     }
 
     // Validate each item in the array
-    createUserDtos.forEach(dto => {
-      if (typeof dto.id !== 'string' || dto.id.trim() === '') {
-        throw new BadRequestException('Invalid ID format');
-      }
-    });
+    // createUserDtos.forEach(dto => {
+    //   if (typeof dto.id !== 'string' || dto.id.trim() === '') {
+    //     throw new BadRequestException('Invalid ID format');
+    //   }
+    // });
 
-    const coordinators = await Promise.all(
-      createUserDtos.map((dto) => this.usersService.findOne(dto.id))
-    );
-    return this.curriculumsService.addCoordinator(id, coordinators); // Add user to curriculum
+    // const coordinators = await Promise.all(
+    //   createUserDtos.map((dto) => this.usersService.findByEmail(dto.email)),
+    // );
+    return this.curriculumsService.addCoordinator(id); // Add user to curriculum
   }
 
   @Patch(':id/plos')

@@ -9,7 +9,6 @@ import { Curriculum } from './entities/curriculum.entity';
 import { FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Subject } from 'src/subjects/entities/subject.entity';
-import { User } from 'src/users/entities/user.entity';
 import { Plo } from 'src/plos/entities/plo.entity';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
 
@@ -60,7 +59,6 @@ export class CurriculumsService {
       const id = curriculum.id;
       return this.curriculumsRepository.findOne({
         where: { id },
-        relations: { coordinators: true },
       });
     } catch (error) {
       throw new BadRequestException(
@@ -73,7 +71,6 @@ export class CurriculumsService {
   async findAll(): Promise<Curriculum[]> {
     return await this.curriculumsRepository.find({
       relations: {
-        coordinators: true,
         plos: true,
         subjects: true,
         branch: true,
@@ -85,7 +82,6 @@ export class CurriculumsService {
     const curriculum = await this.curriculumsRepository.findOne({
       where: { id },
       relations: {
-        coordinators: true,
         plos: true,
         subjects: true,
         branch: true,
@@ -108,7 +104,6 @@ export class CurriculumsService {
     }
 
     this.curriculumsRepository.merge(curriculum, updateCurriculumDto); // directly merge is not to delete the first data.
-    curriculum.coordinators = updateCurriculumDto.coordinators;
     curriculum.plos = updateCurriculumDto.plos;
     curriculum.subjects = updateCurriculumDto.subjects;
     // Object.assign(curriculum, updateCurriculumDto); // directly create new delete the first data to new value.
@@ -117,7 +112,6 @@ export class CurriculumsService {
       await this.curriculumsRepository.save(curriculum);
       return this.curriculumsRepository.findOne({
         where: { id },
-        relations: { coordinators: true },
       });
     } catch (error) {
       throw new BadRequestException(
@@ -170,17 +164,15 @@ export class CurriculumsService {
     }
   }
 
-  async addCoordinator(id: string, users: User[]): Promise<Curriculum> {
+  async addCoordinator(id: string): Promise<Curriculum> {
     const curriculum = await this.findOne(id);
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
-    curriculum.coordinators = users;
     try {
       await this.curriculumsRepository.save(curriculum);
       return this.curriculumsRepository.findOne({
         where: { id },
-        relations: { coordinators: true },
       });
     } catch (error) {
       throw new BadRequestException(

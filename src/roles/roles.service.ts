@@ -61,9 +61,8 @@ export class RolesService {
     if (!role) {
       throw new NotFoundException(`Role with ID ${id} not found`);
     }
-    console.log(role);
     try {
-      await this.rolesRepository.delete(role);
+      await this.rolesRepository.remove(role);
     } catch (error) {
       throw new BadRequestException('Failed to remove role: ' + error.message);
     }

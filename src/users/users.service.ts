@@ -8,14 +8,13 @@ import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
 import { Brackets, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as bcrypt from 'bcrypt';
 import { PaginationDto } from './dto/pagination.dto';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    private UserRepo: Repository<User>,
   ) {}
 
   async findAllByPage(
@@ -24,7 +23,7 @@ export class UsersService {
     const { page, limit, sort, order, search, columnId, columnName } =
       paginationDto;
 
-    const queryBuilder = this.usersRepository.createQueryBuilder('user');
+    const queryBuilder = this.UserRepo.createQueryBuilder('user');
 
     // Include roles in the query
     queryBuilder.leftJoinAndSelect('user.roles', 'roles');
@@ -75,46 +74,40 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.usersRepository.findOne({
+    const existingUser = await this.UserRepo.findOne({
       where: { email: createUserDto.email },
     });
-    if (existingUser === undefined) {
+    if (existingUser) {
       throw new BadRequestException(
         `User with Email ${createUserDto.email} already exists`,
       );
     }
 
-    const user = this.usersRepository.create(createUserDto);
-    user.roles = createUserDto.roles;
+    const user = this.UserRepo.create(createUserDto);
+    return await this.UserRepo.save(user);
 
-    // Hashing password
-    const saltOrRounds = 10;
-    user.password = await bcrypt.hash(createUserDto.password, saltOrRounds);
+    // const user = this.usersRepository.create(createUserDto);
+    // user.roles = createUserDto.roles;
 
-    try {
-      return await this.usersRepository.save(user);
-    } catch (error) {
-      throw new BadRequestException('Failed to create user');
-    }
+    // // Hashing password
+    // const saltOrRounds = 10;
+    // user.password = await bcrypt.hash(createUserDto.password, saltOrRounds);
+
+    // try {
+    //   return await this.usersRepository.save(user);
+    // } catch (error) {
+    //   throw new BadRequestException('Failed to create user');
+    // }
   }
 
   async findAll(): Promise<User[]> {
-    return await this.usersRepository.find({
+    return await this.UserRepo.find({
       relations: { roles: true },
-      select: [
-        'id',
-        'email',
-        'firstName',
-        'middleName',
-        'lastName',
-        'gender',
-        'phone',
-      ],
     });
   }
 
-  async findOne(id: string): Promise<User> {
-    const user = await this.usersRepository.findOne({
+  async findOne(id: number): Promise<User> {
+    const user = await this.UserRepo.findOne({
       where: { id },
       relations: { roles: true },
     });
@@ -124,24 +117,14 @@ export class UsersService {
     return user;
   }
 
-  async findOneByEmail(email: string): Promise<User> {
-    const user = await this.usersRepository.findOne({
+  async findByEmail(email: string): Promise<User> {
+    const user = await this.UserRepo.findOne({
       where: { email },
-      select: [
-        'id',
-        'email',
-        'password',
-        'firstName',
-        'middleName',
-        'lastName',
-        'gender',
-        'phone',
-      ],
     });
     return user;
   }
 
-  async update(id: string, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
     const user = await this.findOne(id);
 
     if (!user) {
@@ -152,7 +135,7 @@ export class UsersService {
     user.roles = updateUserDto.roles;
 
     try {
-      await this.usersRepository.save(user);
+      await this.UserRepo.save(user);
       const userUpdated = await this.findOne(id);
       return userUpdated;
     } catch (error) {
@@ -160,14 +143,18 @@ export class UsersService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     const user = await this.findOne(id);
     console.log(user);
     try {
-      await this.usersRepository.remove(user);
+      await this.UserRepo.remove(user);
       return `Success Delete ID ${id}`;
     } catch (error) {
       throw new BadRequestException('Failed to remove user');
     }
+  }
+
+  async updateHashedRefreshToken(userId: any, hashedRefreshToken: string) {
+    return await this.UserRepo.update({ id: userId }, { hashedRefreshToken });
   }
 }
