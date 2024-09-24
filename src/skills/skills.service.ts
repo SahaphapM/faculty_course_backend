@@ -43,8 +43,8 @@ export class SkillsService {
       .leftJoinAndSelect('skill.skillDetail', 'skillDetail')
       .leftJoinAndSelect('skillDetail.subjects', 'subject')
       .leftJoinAndSelect('skill.children', 'children') // For direct children
-      // .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
-      // .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
+      .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
+      .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
       .leftJoinAndSelect('skill.techSkills', 'techSkills');
 
     // Conditionally add joins based on bySubject
