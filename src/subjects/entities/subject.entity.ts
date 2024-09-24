@@ -19,6 +19,9 @@ export class Subject {
   description: string;
 
   @Column()
+  descriptionEng: string;
+
+  @Column()
   credit: number;
 
   @Column()

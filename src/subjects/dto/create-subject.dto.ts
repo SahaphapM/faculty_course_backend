@@ -16,6 +16,9 @@ export class CreateSubjectDto {
   @IsString()
   description: string;
 
+  @IsString()
+  descriptionEng: string;
+
   @IsNumber()
   credit: number;
 
