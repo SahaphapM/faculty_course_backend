@@ -40,6 +40,7 @@ export class SkillsService {
 
     // Join relations to include them in the result
     queryBuilder
+      .where('skill.parentId IS NULL') // Correctly check for NULL
       .leftJoinAndSelect('skill.skillDetail', 'skillDetail')
       .leftJoinAndSelect('skillDetail.subjects', 'subject')
       .leftJoinAndSelect('skill.children', 'children') // For direct children
