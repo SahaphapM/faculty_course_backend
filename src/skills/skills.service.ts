@@ -79,15 +79,15 @@ export class SkillsService {
   }
 
   async findAll(): Promise<Skill[]> {
-    return await this.skillsRepository.find({
-      relations: {
-        skillDetail: { skill: true },
-        children: { children: { children: { children: { children: true } } } },
-        parent: true,
-        techSkills: true,
-      },
-    });
+    const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
+  
+    queryBuilder
+      .where('skill.parentId IS NULL') // Check where parentId is null
+    const skills = await queryBuilder.getMany();
+  
+    return skills;
   }
+  
 
   async findOne(id: string): Promise<Skill> {
     const skill = await this.skillsRepository.findOne({
