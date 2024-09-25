@@ -130,10 +130,7 @@ export class SubjectsService {
     id: string,
     skillDetails: SkillDetail[],
   ): Promise<Subject> {
-    const subject = await this.subjectsRepository.findOne({
-      where: { id },
-      relations: { skillDetails: true },
-    });
+    const subject = await this.findOne(id);
     if (!subject) {
       throw new NotFoundException(`Subject with ID ${id} not found`);
     }
@@ -141,36 +138,21 @@ export class SubjectsService {
     // Ensure skillDetails is initialized
     subject.skillDetails = subject.skillDetails || [];
 
-    // const existingSkillDetails = new Set(
-    //   subject.skillDetails.map((skillDetail) => skillDetail.id),
-    // );
-    // for (const SkillDetail of skillDetails) {
-    //   if (!existingSkillDetails.has(SkillDetail.id)) {
-    //     // Check if the skillDetail with the same ID already exists
+    const notSameSkillDetails = skillDetails.filter(
+      (newSkillDetail) =>
+        !subject.skillDetails.some(
+          (subjectSkillDetail) =>
+            subjectSkillDetail.skill.id === newSkillDetail.skill.id,
+        ),
+    );
 
-    //     const skillDetail = await this.SkillDetailsRepository.save(SkillDetail);
-    //     console.log('save or update', skillDetail);
-
-    //     subject.skillDetails.push(skillDetail);
-    //     // Update the set with the newly added skillDetail
-    //     existingSkillDetails.add(SkillDetail.id);
-    //   } else {
-    //     console.log('Original', SkillDetail);
-    //   }
-    // }
-
-    for (let index = 0; index < skillDetails.length; index++) {
-      // Check if the skillDetail with the same ID already exists
-      const exists = subject.skillDetails.some(
-        (sd) => sd.id === skillDetails[index].id,
+    for (let index = 0; index < notSameSkillDetails.length; index++) {
+      let skillDetail = this.SkillDetailsRepository.create(
+        notSameSkillDetails[index],
       );
-      if (!exists) {
-        const skillDetail = await this.SkillDetailsRepository.save(
-          skillDetails[index],
-        );
+      skillDetail = await this.SkillDetailsRepository.save(skillDetail);
 
-        subject.skillDetails.push(skillDetail);
-      }
+      subject.skillDetails.push(skillDetail);
     }
 
     try {

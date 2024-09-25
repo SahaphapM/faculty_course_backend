@@ -28,6 +28,9 @@ export class StudentsService {
 
     // Join relations to include courseDetails, courses, and subjects
     queryBuilder
+      .leftJoinAndSelect('student.skillCollection', 'skillCollection')
+      .leftJoinAndSelect('skillCollection.skillDetail', 'skillDetail')
+      .leftJoinAndSelect('skillDetail.skill', 'skill')
       .innerJoin('student.courseDetails', 'courseDetails')
       .leftJoin('courseDetails.course', 'course')
       .leftJoin('course.subject', 'subject');
@@ -64,8 +67,8 @@ export class StudentsService {
     }
 
     // Log the generated SQL query and its parameters
-    console.log('Generated SQL:', queryBuilder.getSql());
-    console.log('Query Parameters:', queryBuilder.getParameters());
+    // console.log('Generated SQL:', queryBuilder.getSql());
+    // console.log('Query Parameters:', queryBuilder.getParameters());
 
     // Execute the query with pagination
     const [data, total] = await queryBuilder
@@ -78,7 +81,11 @@ export class StudentsService {
 
   // Get all students
   async findAll(): Promise<Student[]> {
-    return await this.studentRepository.find();
+    return await this.studentRepository.find({
+      relations: {
+        skillCollection: { skillDetail: { skill: true } },
+      },
+    });
   }
 
   // Get a student by ID

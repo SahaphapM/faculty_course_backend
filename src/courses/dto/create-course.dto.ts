@@ -9,6 +9,8 @@ export class CreateCourseDto {
 
   description: string;
 
+  active: boolean;
+
   subject: Subject;
 
   skills: Skill[];
