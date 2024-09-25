@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Course } from './course.entity';
-import { SkillCollection } from 'src/students/entities/skil-collection';
+import { SkillCollection } from 'src/students/entities/skil-collection.entity';
 
 @Entity()
 export class CourseDetail {

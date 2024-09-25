@@ -1,6 +1,6 @@
 import { CourseDetail } from 'src/courses/entities/courseDetail.entity';
 import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
-import { SkillCollection } from './skil-collection';
+import { SkillCollection } from './skil-collection.entity';
 
 @Entity()
 export class Student {

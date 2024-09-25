@@ -11,6 +11,8 @@ import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
 import { CourseDetail } from './entities/courseDetail.entity';
+import { PaginationDto } from 'src/users/dto/pagination.dto';
+import { Query } from '@nestjs/common';
 
 @Controller('courses')
 export class CoursesController {
@@ -26,6 +28,11 @@ export class CoursesController {
     return this.coursesService.findAll();
   }
 
+  @Get('pages')
+  findAllByPage(@Query() paginationDto: PaginationDto) {
+    return this.coursesService.findAllByPage(paginationDto);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.coursesService.findOne(id);
@@ -39,6 +46,14 @@ export class CoursesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.coursesService.remove(id);
+  }
+
+  @Patch('selectSubject/:id/:subjectId')
+  selectSubject(
+    @Param('id') id: string,
+    @Param('subjectId') subjectId: string,
+  ) {
+    return this.coursesService.selectSubject(id, subjectId);
   }
 
   @Patch('importStudents/:id')

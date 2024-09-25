@@ -2,7 +2,7 @@ import { Subject } from 'src/subjects/entities/subject.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Skill } from './skill.entity';
 import { OneToMany } from 'typeorm';
-import { SkillCollection } from 'src/students/entities/skil-collection';
+import { SkillCollection } from 'src/students/entities/skil-collection.entity';
 
 @Entity()
 export class SkillDetail {
@@ -21,8 +21,12 @@ export class SkillDetail {
   @ManyToOne(() => Skill, (skill) => skill.skillDetail)
   skill: Skill;
 
-  @OneToMany(() => SkillCollection, (skillCollection) => skillCollection.skillDetail, {
-    cascade: false,
-  })
+  @OneToMany(
+    () => SkillCollection,
+    (skillCollection) => skillCollection.skillDetail,
+    {
+      cascade: false,
+    },
+  )
   skillCollection: SkillCollection[];
 }
