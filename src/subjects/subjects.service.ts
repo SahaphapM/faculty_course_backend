@@ -134,21 +134,25 @@ export class SubjectsService {
     if (!subject) {
       throw new NotFoundException(`Subject with ID ${id} not found`);
     }
-    console.log(subject.skillDetails);
+
     // Ensure skillDetails is initialized
     subject.skillDetails = subject.skillDetails || [];
 
-    for (let index = 0; index < skillDetails.length; index++) {
-      // Check if the skillDetail with the same ID already exists
-      const exists = subject.skillDetails.some(
-        (sd) => sd.skill.id === skillDetails[index].skill.id,
+    const notSameSkillDetails = skillDetails.filter(
+      (newSkillDetail) =>
+        !subject.skillDetails.some(
+          (subjectSkillDetail) =>
+            subjectSkillDetail.skill.id === newSkillDetail.skill.id,
+        ),
+    );
+
+    for (let index = 0; index < notSameSkillDetails.length; index++) {
+      let skillDetail = this.SkillDetailsRepository.create(
+        notSameSkillDetails[index],
       );
-      if (!exists) {
-        const skillDetail = await this.SkillDetailsRepository.save(
-          skillDetails[index],
-        );
-        subject.skillDetails.push(skillDetail);
-      }
+      skillDetail = await this.SkillDetailsRepository.save(skillDetail);
+
+      subject.skillDetails.push(skillDetail);
     }
 
     try {
