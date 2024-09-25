@@ -13,6 +13,9 @@ export class Course {
   @Column()
   description: string;
 
+  @Column({ nullable: true })
+  active: boolean;
+
   @ManyToOne(() => Subject, (subject) => subject.courses, {
     cascade: false,
   })
