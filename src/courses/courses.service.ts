@@ -195,6 +195,12 @@ export class CoursesService {
       course.courseDetails = course.courseDetails.filter(
         (courseDetail) => courseDetail !== courseDetailToRemove,
       );
+      if (courseDetailToRemove.skillCollections) {
+        // Remove SkillCollection records from the database
+        await this.skillCollectionsRepository.remove(
+          courseDetailToRemove.skillCollections,
+        );
+      }
 
       // Save the updated course
       await this.courseRepository.save(course);
