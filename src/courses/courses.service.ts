@@ -145,10 +145,8 @@ export class CoursesService {
             `Student with ID ${student.id} not found`,
           );
         }
-        // Save and add new course detail
-        const savedCourseDetail =
-          await this.courseDetailRepository.save<CourseDetail>(courseDetail);
-        course.courseDetails.push(savedCourseDetail);
+
+        courseDetail.skillCollections = courseDetail.skillCollections || [];
 
         for (
           let index = 0;
@@ -160,10 +158,18 @@ export class CoursesService {
           skillCollection.student = student;
           skillCollection.acquiredLevel = 0;
           skillCollection.pass = false;
-          this.skillCollectionsRepository.save(skillCollection);
+          const skillCollectionSaved =
+            await this.skillCollectionsRepository.save<SkillCollection>(
+              skillCollection,
+            );
+          console.log(skillCollectionSaved);
+          courseDetail.skillCollections.push(skillCollectionSaved);
         }
+        // Save and add new course detail
+        course.courseDetails.push(
+          await this.courseDetailRepository.save<CourseDetail>(courseDetail),
+        );
 
-        this.studentsService.update(student.id, student);
         // Update the set with the newly added student ID
         existingStudentIds.add(courseDetail.student.id);
       }
@@ -189,6 +195,12 @@ export class CoursesService {
       course.courseDetails = course.courseDetails.filter(
         (courseDetail) => courseDetail !== courseDetailToRemove,
       );
+      if (courseDetailToRemove.skillCollections) {
+        // Remove SkillCollection records from the database
+        await this.skillCollectionsRepository.remove(
+          courseDetailToRemove.skillCollections,
+        );
+      }
 
       // Save the updated course
       await this.courseRepository.save(course);
@@ -203,7 +215,7 @@ export class CoursesService {
   async selectSubject(id: string, subjectId: string): Promise<Course> {
     const course = await this.findOne(id);
     const subject = await this.subjectsService.findOne(subjectId);
-    if (course.subject) {
+    if (course.subject && course.courseDetails) {
       await this.createSkillCollection(
         subject.skillDetails,
         course.courseDetails,
