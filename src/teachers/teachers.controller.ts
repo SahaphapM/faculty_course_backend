@@ -26,20 +26,20 @@ import * as path from 'path';
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 2 * 1024 * 1024; // 2 mb
 const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 
-@Controller('users')
+@Controller('teachers')
 export class TeachersController {
-  constructor(private readonly usersService: TeachersService) {}
+  constructor(private readonly teachersService: TeachersService) {}
 
   @Get('pages')
   findAllByPage(@Query() paginationDto: PaginationDto) {
-    return this.usersService.findAllByPage(paginationDto);
+    return this.teachersService.findAllByPage(paginationDto);
   }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createTeacherDto: CreateTeacherDto) {
     console.log(createTeacherDto);
-    return this.usersService.create(createTeacherDto);
+    return this.teachersService.create(createTeacherDto);
   }
 
   @Post(':id/image/upload')
@@ -68,7 +68,7 @@ export class TeachersController {
     const randomFileName = `${uuidv4()}${fileExtension}`;
     const uploadPath = path.join(
       process.cwd(),
-      '/public/users/images',
+      '/public/teachers/images',
       randomFileName,
     );
 
@@ -78,35 +78,35 @@ export class TeachersController {
     // Save the file
     fs.writeFileSync(uploadPath, file.buffer);
 
-    // set image name of user
-    const user = await this.usersService.findOne(+id);
-    user.avatarUrl = randomFileName;
-    await this.usersService.update(+id, user);
+    // set image name of teacher
+    const teacher = await this.teachersService.findOne(id);
+    teacher.avatarUrl = randomFileName;
+    await this.teachersService.update(id, teacher);
     return { message: 'File upload successful', filename: randomFileName };
   }
 
   @Get()
   @HttpCode(HttpStatus.OK)
   findAll() {
-    return this.usersService.findAll();
+    return this.teachersService.findAll();
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.teachersService.findOne(id);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() updateTeacherDto: UpdateTeacherDto) {
-    return this.usersService.update(+id, updateTeacherDto);
+    return this.teachersService.update(id, updateTeacherDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   // @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
-    return this.usersService.remove(+id);
+    return this.teachersService.remove(id);
   }
 }

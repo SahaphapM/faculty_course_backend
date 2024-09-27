@@ -107,7 +107,7 @@ export class TeachersService {
     return await this.teacherRepo.find({});
   }
 
-  async findOne(id: number): Promise<Teacher> {
+  async findOne(id: string): Promise<Teacher> {
     const teacher = await this.teacherRepo.findOne({
       where: { id },
     });
@@ -125,7 +125,7 @@ export class TeachersService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateTeacherDto: UpdateTeacherDto,
   ): Promise<Teacher> {
     const teacher = await this.findOne(id);
@@ -146,7 +146,7 @@ export class TeachersService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     const teacher = await this.findOne(id);
     console.log(teacher);
     try {

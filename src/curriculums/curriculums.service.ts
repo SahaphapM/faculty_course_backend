@@ -11,12 +11,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Subject } from 'src/subjects/entities/subject.entity';
 import { Plo } from 'src/plos/entities/plo.entity';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
+import { TeachersService } from 'src/teachers/teachers.service';
 
 @Injectable()
 export class CurriculumsService {
   constructor(
     @InjectRepository(Curriculum)
     private curriculumsRepository: Repository<Curriculum>,
+
+    private readonly teachersService: TeachersService,
   ) {}
 
   async findAllByPage(
@@ -25,6 +28,13 @@ export class CurriculumsService {
     const { page, limit, sort, order, search } = paginationDto;
 
     const options: FindManyOptions<Curriculum> = {
+      relations: [
+        'coordinators',
+        'plos',
+        'subjects',
+        'branch',
+        'branch.faculty',
+      ],
       take: limit,
       skip: (page - 1) * limit,
       order: sort ? { [sort]: order } : {},
@@ -79,6 +89,7 @@ export class CurriculumsService {
         plos: true,
         subjects: true,
         branch: true,
+        coordinators: true,
       },
     });
     if (!curriculum) {
@@ -158,10 +169,21 @@ export class CurriculumsService {
     }
   }
 
-  async addCoordinator(id: string): Promise<Curriculum> {
+  async addCoordinator(
+    id: string,
+    teachers: { id: string }[],
+  ): Promise<Curriculum> {
+    console.log('addCoordinator', teachers);
     const curriculum = await this.findOne(id);
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
+    }
+    curriculum.coordinators = [];
+    if (teachers) {
+      for (let index = 0; index < teachers.length; index++) {
+        const teacher = await this.teachersService.findOne(teachers[index].id);
+        curriculum.coordinators.push(teacher);
+      }
     }
     try {
       await this.curriculumsRepository.save(curriculum);

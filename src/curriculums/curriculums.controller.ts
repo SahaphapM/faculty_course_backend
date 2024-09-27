@@ -18,15 +18,12 @@ import { SubjectsService } from 'src/subjects/subjects.service';
 import { CreatePloDto } from 'src/plos/dto/create-plo.dto';
 import { PlosService } from 'src/plos/plos.service';
 import { PaginationDto } from './dto/pagination.dto';
-import { CreateTeacherDto } from 'src/teachers/dto/create-teacher.dto';
-import { TeachersService } from 'src/teachers/teachers.service';
 
 @Controller('curriculums')
 export class CurriculumsController {
   constructor(
     private readonly curriculumsService: CurriculumsService,
     private readonly subjectsService: SubjectsService,
-    private readonly teachersService: TeachersService,
     private readonly plosService: PlosService,
   ) {}
 
@@ -103,26 +100,9 @@ export class CurriculumsController {
   @Patch(':id/coordinators')
   async addCoordinator(
     @Param('id') id: string,
-    @Body() createTeacherDtos: CreateTeacherDto[],
+    @Body() createTeacherDtos: { id: string }[],
   ) {
-    console.log('Received data:', createTeacherDtos); // Log the received data
-
-    // Ensure createTeacherDtos is an array
-    if (!Array.isArray(createTeacherDtos)) {
-      throw new BadRequestException('Invalid data format: Expected an array');
-    }
-
-    // Validate each item in the array
-    // createTeacherDtos.forEach(dto => {
-    //   if (typeof dto.id !== 'string' || dto.id.trim() === '') {
-    //     throw new BadRequestException('Invalid ID format');
-    //   }
-    // });
-
-    // const coordinators = await Promise.all(
-    //   createTeacherDtos.map((dto) => this.teachersService.findByEmail(dto.email)),
-    // );
-    return this.curriculumsService.addCoordinator(id); // Add teacher to curriculum
+    return this.curriculumsService.addCoordinator(id, createTeacherDtos); // Add teacher to curriculum
   }
 
   @Patch(':id/plos')

@@ -5,7 +5,7 @@ import {
   Entity,
   JoinTable,
   ManyToMany,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
@@ -13,8 +13,8 @@ import { Role } from 'src/roles/entities/role.entity';
 
 @Entity()
 export class Teacher {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn()
+  id: string;
 
   @Column({ unique: true })
   @IsEmail()
