@@ -4,14 +4,14 @@ import { CurriculumsController } from './curriculums.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Curriculum } from './entities/curriculum.entity';
 import { SubjectsModule } from 'src/subjects/subjects.module';
-import { UsersModule } from 'src/users/users.module';
 import { PlosModule } from 'src/plos/plos.module';
+import { TeachersModule } from 'src/teachers/teachers.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Curriculum]),
     SubjectsModule,
-    UsersModule,
+    TeachersModule,
     PlosModule,
   ],
   controllers: [CurriculumsController],
