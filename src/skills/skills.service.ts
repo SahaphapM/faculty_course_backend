@@ -78,13 +78,20 @@ export class SkillsService {
     return { data, total };
   }
 
-  async findAll(): Promise<Skill[]> {
+async findAll(): Promise<Skill[]> {
     const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
-  
-    queryBuilder
-      .where('skill.parentId IS NULL') // Check where parentId is null
+
+    queryBuilder.leftJoinAndSelect('skill.parent', 'parent')
+    .leftJoinAndSelect('skill.skillDetail', 'skillDetail')
+    .leftJoinAndSelect('skillDetail.subjects', 'subject')
+    .leftJoinAndSelect('skill.children', 'children') // For direct children
+    .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
+    .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
+    .leftJoinAndSelect('skill.techSkills', 'techSkills');
+    // .where('skill.parentId IS NULL') // Check where parentId is null
+    // .leftJoinAndSelect['skill.skillDetail', 'skillDetail']
     const skills = await queryBuilder.getMany();
-  
+
     return skills;
   }
   
