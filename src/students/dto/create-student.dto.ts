@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty } from 'class-validator';
-import { CourseDetail } from 'src/courses/entities/courseDetail.entity';
 import { SkillCollection } from '../entities/skil-collection.entity';
+import { CourseDetail } from 'src/courses/entities/courseStudentDetail.entity';
 
 export class CreateStudentDto {
   @IsString()
