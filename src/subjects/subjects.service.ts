@@ -7,11 +7,13 @@ import { CreateSubjectDto } from './dto/create-subject.dto';
 import { UpdateSubjectDto } from './dto/update-subject.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Like, Repository } from 'typeorm';
-import { Subject } from './entities/subject.entity';
+import { SkillMapping, Subject } from './entities/subject.entity';
 import { Curriculum } from 'src/curriculums/entities/curriculum.entity';
 import { Clo } from 'src/clos/entities/clo.entity';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
 import { SkillDetail } from 'src/skills/entities/skillDetail.entity';
+import { SkillsService } from 'src/skills/skills.service';
+import { CreateSkillDto } from 'src/skills/dto/create-skill.dto';
 
 @Injectable()
 export class SubjectsService {
@@ -22,6 +24,8 @@ export class SubjectsService {
     private curriculumsRepository: Repository<Curriculum>,
     @InjectRepository(SkillDetail)
     private readonly SkillDetailsRepository: Repository<SkillDetail>,
+
+    private readonly skillsService: SkillsService,
   ) {}
 
   async findAllByPage(
@@ -246,5 +250,65 @@ export class SubjectsService {
         `Failed to remove subject: ${error.message}`,
       );
     }
+  }
+
+  async skillMappings(skillMaping: SkillMapping[]) {
+    //////////// Should sort the skillMapping array on the SubjectID  ////////////
+    if (!skillMaping) {
+      throw new BadRequestException('Skill Mapping data not provided');
+    }
+
+    const distinctSubjectIds = Array.from(
+      new Set(skillMaping.map((map) => map.subjectId)),
+    ); // get distinct subject IDs to map with skills with same subject ID
+
+    // Loop through distinct subject IDs
+    for (let index = 0; index < distinctSubjectIds.length; index++) {
+      const subject = await this.findOne(distinctSubjectIds[index]);
+
+      if (!subject) {
+        throw new NotFoundException(
+          `Subject with ID ${skillMaping[index].subjectId} not found`,
+        );
+      }
+
+      // Filter skillMapping array to get skills of the current subject
+      const skillMapingOfSubjects = skillMaping.filter(
+        (map) => map.subjectId === subject.id,
+      );
+
+      // Loop through skillMapping array of the current subject
+      for (let i = 0; i < skillMapingOfSubjects.length; i++) {
+        let skill = await this.skillsService.findOne(
+          skillMapingOfSubjects[i].skillId.toString(),
+        );
+
+        if (!skill) {
+          // throw new NotFoundException(`Skill with ID ${skillMaping[index].skillId} not found`);
+
+          // Create new skill if not found
+          const createSkillDto = new CreateSkillDto();
+          createSkillDto.name = skillMapingOfSubjects[index].skillName;
+          createSkillDto.description = '';
+          createSkillDto.domain = skillMapingOfSubjects[index].skillDomain;
+          skill = await this.skillsService.create(createSkillDto);
+        }
+
+        // Create skillDetail for the subject
+        let skillDetail = new SkillDetail();
+        skillDetail.level = skillMapingOfSubjects[index].expectedLevel;
+        skillDetail.skill.id = skillMapingOfSubjects[index].skillId;
+        skillDetail = this.SkillDetailsRepository.create({
+          skill: { id: skillMapingOfSubjects[index].skillId },
+        });
+        subject.skillDetails.push(skillDetail);
+      }
+      try {
+        await this.subjectsRepository.save(subject);
+      } catch (error) {
+        throw new BadRequestException('Failed to create and select techSkills');
+      }
+    }
+    return 'Skill Mapping completed successfully!!!!';
   }
 }

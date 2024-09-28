@@ -1,6 +1,6 @@
 import { Subject } from 'src/subjects/entities/subject.entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { CourseDetail } from './courseDetail.entity';
+import { CourseDetail } from './courseStudentDetail.entity';
 
 @Entity()
 export class Course {

@@ -15,6 +15,7 @@ import { ClosService } from 'src/clos/clos.service';
 import { CreateCloDto } from 'src/clos/dto/create-clo.dto';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
 import { SkillDetail } from 'src/skills/entities/skillDetail.entity';
+import { SkillMapping } from './entities/subject.entity';
 
 @Controller('subjects')
 export class SubjectsController {
@@ -82,5 +83,10 @@ export class SubjectsController {
   async addPLO(@Param('id') id: string, @Body() createCloDto: CreateCloDto) {
     const plo = await this.closService.create(createCloDto); // create clo to database
     return this.subjectsService.addCLO(id, plo); // add clo to curriculum
+  }
+
+  @Post('skillMappings')
+  async skillMappings(@Body() skillMaping: SkillMapping[]) {
+    return this.subjectsService.skillMappings(skillMaping); // mapping skill with skill detail
   }
 }

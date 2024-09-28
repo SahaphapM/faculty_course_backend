@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { CreateCourseDto } from './dto/create-course.dto'; // Create this DTO
 import { UpdateCourseDto } from './dto/update-course.dto'; // Create this DTO
 import { Course } from './entities/course.entity';
-import { CourseDetail } from './entities/courseDetail.entity';
+import { CourseDetail } from './entities/courseStudentDetail.entity';
 import { StudentsService } from 'src/students/students.service';
 import { SubjectsService } from 'src/subjects/subjects.service';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
@@ -72,7 +72,10 @@ export class CoursesService {
 
   async findAll(): Promise<Course[]> {
     return await this.courseRepository.find({
-      relations: { courseDetails: { student: true } },
+      relations: {
+        courseDetails: { student: true, skillCollections: true },
+        subject: { skillDetails: true },
+      },
     });
   }
 

@@ -65,3 +65,11 @@ export class Skill {
   })
   skillDetail: SkillDetail[];
 }
+
+
+export enum SkillDomain {
+  Ability = 'Ability',
+  Knowledge = 'Knowledge',
+  Personality = 'Personality',
+  Ethics = 'Ethics',
+}

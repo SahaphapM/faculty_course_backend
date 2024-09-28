@@ -10,7 +10,7 @@ import {
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { CourseDetail } from './entities/courseDetail.entity';
+import { CourseDetail } from './entities/courseStudentDetail.entity';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
 import { Query } from '@nestjs/common';
 
