@@ -83,7 +83,9 @@ export class StudentsService {
   async findAll(): Promise<Student[]> {
     return await this.studentRepository.find({
       relations: {
-        skillCollection: { skillDetail: { skill: true } },
+        skillCollection: {
+          skillDetail: { skill: { parent: true, children: true } },
+        },
       },
     });
   }
@@ -92,7 +94,11 @@ export class StudentsService {
   async findOne(id: string): Promise<Student> {
     const student = await this.studentRepository.findOne({
       where: { id },
-      relations: { skillCollection: { skillDetail: { skill: true } } },
+      relations: {
+        skillCollection: {
+          skillDetail: { skill: { parent: true, children: true } },
+        },
+      },
     });
     if (!student) {
       throw new NotFoundException(`Student with ID "${id}" not found`);
