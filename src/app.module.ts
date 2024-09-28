@@ -48,7 +48,7 @@ import { RolesModule } from './roles/roles.module';
         database: config.getOrThrow('DB_NAME'),
         autoLoadEntities: true,
         synchronize: true,
-        logging: true,
+        // logging: true,
       }),
       inject: [ConfigService],
     }),
