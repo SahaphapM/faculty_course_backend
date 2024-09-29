@@ -10,7 +10,7 @@ import { Course } from './course.entity';
 import { SkillCollection } from 'src/students/entities/skil-collection.entity';
 
 @Entity()
-export class CourseDetail {
+export class CourseStudentDetail {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -26,20 +26,20 @@ export class CourseDetail {
   @Column({ type: 'float', nullable: true })
   projectScore: number;
 
-  @ManyToOne(() => Course, (course) => course.courseDetails, {
+  @ManyToOne(() => Course, (course) => course.courseStudentDetails, {
     onDelete: 'CASCADE',
     nullable: true,
   })
   course: Course;
 
-  @ManyToOne(() => Student, (student) => student.courseDetails, {
+  @ManyToOne(() => Student, (student) => student.courseStudentDetails, {
     cascade: false,
   })
   student: Student;
 
   @OneToMany(
     () => SkillCollection,
-    (skillCollection) => skillCollection.courseDetail,
+    (skillCollection) => skillCollection.courseStudentDetail,
   )
   skillCollections: SkillCollection[];
 }

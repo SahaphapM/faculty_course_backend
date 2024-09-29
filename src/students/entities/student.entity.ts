@@ -1,6 +1,6 @@
 import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
 import { SkillCollection } from './skil-collection.entity';
-import { CourseDetail } from 'src/courses/entities/courseStudentDetail.entity';
+import { CourseStudentDetail } from 'src/courses/entities/courseStudentDetail.entity';
 
 @Entity()
 export class Student {
@@ -16,10 +16,14 @@ export class Student {
   @Column({ type: 'varchar', length: 50, nullable: true })
   status: string | null; // e.g., null if no status
 
-  @OneToMany(() => CourseDetail, (courseDetail) => courseDetail.student, {
-    cascade: false,
-  })
-  courseDetails: CourseDetail[];
+  @OneToMany(
+    () => CourseStudentDetail,
+    (courseStudentDetail) => courseStudentDetail.student,
+    {
+      cascade: false,
+    },
+  )
+  courseStudentDetails: CourseStudentDetail[];
 
   @OneToMany(
     () => SkillCollection,

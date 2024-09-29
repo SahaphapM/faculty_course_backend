@@ -1,6 +1,6 @@
 import { IsString, IsNotEmpty } from 'class-validator';
 import { SkillCollection } from '../entities/skil-collection.entity';
-import { CourseDetail } from 'src/courses/entities/courseStudentDetail.entity';
+import { CourseStudentDetail } from 'src/courses/entities/courseStudentDetail.entity';
 
 export class CreateStudentDto {
   @IsString()
@@ -18,7 +18,7 @@ export class CreateStudentDto {
   @IsString()
   status: string | null; // e.g., null if no status
 
-  courseDetails: CourseDetail[];
+  courseStudentDetails: CourseStudentDetail[];
 
   skillCollection: SkillCollection[];
 }

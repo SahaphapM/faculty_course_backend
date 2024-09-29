@@ -1,7 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
 import { Student } from './student.entity';
 import { SkillDetail } from 'src/skills/entities/skillDetail.entity';
-import { CourseDetail } from 'src/courses/entities/courseStudentDetail.entity';
+import { CourseStudentDetail } from 'src/courses/entities/courseStudentDetail.entity';
 
 @Entity()
 export class SkillCollection {
@@ -25,12 +25,12 @@ export class SkillCollection {
   skillDetail: SkillDetail;
 
   @ManyToOne(
-    () => CourseDetail,
-    (courseDetail) => courseDetail.skillCollections,
+    () => CourseStudentDetail,
+    (courseStudentDetail) => courseStudentDetail.skillCollections,
     {
       cascade: true,
       onDelete: 'CASCADE',
     },
   )
-  courseDetail: CourseDetail;
+  courseStudentDetail: CourseStudentDetail;
 }

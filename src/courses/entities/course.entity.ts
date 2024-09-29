@@ -1,6 +1,6 @@
 import { Subject } from 'src/subjects/entities/subject.entity';
 import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { CourseDetail } from './courseStudentDetail.entity';
+import { CourseStudentDetail } from './courseStudentDetail.entity';
 
 @Entity()
 export class Course {
@@ -21,6 +21,9 @@ export class Course {
   })
   subject: Subject;
 
-  @OneToMany(() => CourseDetail, (courseDetail) => courseDetail.course)
-  courseDetails: CourseDetail[];
+  @OneToMany(
+    () => CourseStudentDetail,
+    (courseStudentDetail) => courseStudentDetail.course,
+  )
+  courseStudentDetails: CourseStudentDetail[];
 }
