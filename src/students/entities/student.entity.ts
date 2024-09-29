@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
-import { SkillCollection } from './skil-collection.entity';
+import { SkillCollection, SkillCollectionTree } from './skil-collection.entity';
 import { CourseStudentDetail } from 'src/courses/entities/courseStudentDetail.entity';
 
 @Entity()
@@ -33,4 +33,7 @@ export class Student {
     },
   )
   skillCollection: SkillCollection[];
+
+  // It is Not Column but is needed to show skill collection in tree view form.
+  skillCollectionTree: SkillCollectionTree[];
 }
