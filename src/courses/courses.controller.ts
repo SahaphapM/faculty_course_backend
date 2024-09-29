@@ -10,7 +10,7 @@ import {
 import { CoursesService } from './courses.service';
 import { CreateCourseDto } from './dto/create-course.dto';
 import { UpdateCourseDto } from './dto/update-course.dto';
-import { CourseDetail } from './entities/courseStudentDetail.entity';
+import { CourseStudentDetail } from './entities/courseStudentDetail.entity';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
 import { Query } from '@nestjs/common';
 
@@ -59,16 +59,16 @@ export class CoursesController {
   @Patch('importStudents/:id')
   importStudents(
     @Param('id') id: string,
-    @Body() courseDetails: CourseDetail[],
+    @Body() courseStudentDetails: CourseStudentDetail[],
   ) {
-    return this.coursesService.importStudents(id, courseDetails);
+    return this.coursesService.importStudents(id, courseStudentDetails);
   }
 
-  @Delete('removeStudent/:courseId/:courseDetailId')
+  @Delete('removeStudent/:courseId/:courseStudentDetailId')
   removeStudent(
     @Param('courseId') courseId: string,
-    @Param('courseDetailId') courseDetailId: number,
+    @Param('courseStudentDetailId') courseStudentDetailId: number,
   ) {
-    return this.coursesService.removeStudent(courseId, courseDetailId);
+    return this.coursesService.removeStudent(courseId, courseStudentDetailId);
   }
 }

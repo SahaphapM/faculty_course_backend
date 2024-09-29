@@ -296,7 +296,7 @@ export class SubjectsService {
 
         // Create skillDetail for the subject
         let skillDetail = new SkillDetail();
-        skillDetail.level = skillMapingOfSubjects[index].expectedLevel;
+        skillDetail.requiredLevel = skillMapingOfSubjects[index].expectedLevel;
         skillDetail.skill.id = skillMapingOfSubjects[index].skillId;
         skillDetail = this.SkillDetailsRepository.create({
           skill: { id: skillMapingOfSubjects[index].skillId },

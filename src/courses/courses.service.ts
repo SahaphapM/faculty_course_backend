@@ -8,7 +8,7 @@ import { Repository } from 'typeorm';
 import { CreateCourseDto } from './dto/create-course.dto'; // Create this DTO
 import { UpdateCourseDto } from './dto/update-course.dto'; // Create this DTO
 import { Course } from './entities/course.entity';
-import { CourseDetail } from './entities/courseStudentDetail.entity';
+import { CourseStudentDetail } from './entities/courseStudentDetail.entity';
 import { StudentsService } from 'src/students/students.service';
 import { SubjectsService } from 'src/subjects/subjects.service';
 import { PaginationDto } from 'src/users/dto/pagination.dto';
@@ -23,8 +23,8 @@ export class CoursesService {
     @InjectRepository(Course)
     private readonly courseRepository: Repository<Course>,
 
-    @InjectRepository(CourseDetail)
-    private readonly courseDetailRepository: Repository<CourseDetail>,
+    @InjectRepository(CourseStudentDetail)
+    private readonly courseStudentDetailRepository: Repository<CourseStudentDetail>,
 
     @InjectRepository(SkillCollection)
     private readonly skillCollectionsRepository: Repository<SkillCollection>,
@@ -47,7 +47,30 @@ export class CoursesService {
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: Course[]; total: number }> {
-    const { page, limit, sort, order, search } = paginationDto;
+    const { page, limit, sort, order, search, columnId, columnName } =
+      paginationDto;
+
+    // const queryBuilder = this.courseRepository.createQueryBuilder('course');
+
+    // Include roles in the query
+    // queryBuilder.leftJoinAndSelect('course.roles', 'roles');
+    // .leftJoinAndSelect('course.courseStudentDetails', 'courseStudentDetails')
+    // .leftJoinAndSelect('courseStudentDetails.student', 'student')
+
+    // // Conditionally add joins if columnId and columnName are provided
+    // if (columnId && columnName === 'branch') {
+    //   // Join user with curriculum
+    //   queryBuilder.innerJoin('user.curriculums', 'curriculum');
+    //   // Join curriculum with branch
+    //   queryBuilder.innerJoin('curriculum.branch', 'branch');
+    //   // Filter by branchId
+    //   queryBuilder.andWhere('branch.id = :branchId', { branchId: columnId });
+    // } else if (columnId && columnName === 'curriculum') {
+    //   queryBuilder.innerJoinAndSelect(`user.${columnName}s`, `${columnName}`);
+    //   queryBuilder.andWhere(`${columnName}.id = :columnId`, {
+    //     columnId,
+    //   });
+    // }
 
     const options: FindManyOptions<Course> = {
       take: limit,
@@ -73,7 +96,6 @@ export class CoursesService {
   async findAll(): Promise<Course[]> {
     return await this.courseRepository.find({
       relations: {
-        courseDetails: { student: true, skillCollections: true },
         subject: { skillDetails: true },
       },
     });
@@ -81,13 +103,34 @@ export class CoursesService {
 
   // Find a single course by ID
   async findOne(id: string): Promise<Course> {
-    const course = await this.courseRepository.findOne({
-      where: { id },
-      relations: {
-        courseDetails: { student: true, skillCollections: true },
-        subject: { skillDetails: true },
-      },
-    });
+    const course = await this.courseRepository
+      .createQueryBuilder('course')
+      .leftJoinAndSelect('course.courseStudentDetails', 'courseStudentDetails')
+      .leftJoinAndSelect('courseStudentDetails.student', 'student')
+      .leftJoinAndSelect('course.subject', 'subject')
+      .leftJoinAndSelect('subject.skillDetails', 'skillDetail')
+      .leftJoinAndSelect('skillDetail.skill', 'skill')
+      .select([
+        'course.id',
+        'course.name',
+        'course.description',
+        'course.active',
+        'courseStudentDetails.id',
+        'student.id', // Select only the student id
+        'student.name', // Select only the student name
+        'subject.id',
+        'subject.thaiName',
+        'subject.engName',
+        'subject.description',
+        'skillDetail.id',
+        'skillDetail.level',
+        'skillDetail.description',
+        'skill.name',
+        'skill.description',
+        'skill.domain',
+      ])
+      .where('course.id = :id', { id })
+      .getOne();
 
     if (!course) {
       throw new NotFoundException(`Course with ID ${id} not found`);
@@ -119,7 +162,7 @@ export class CoursesService {
 
   async importStudents(
     id: string,
-    courseDetails: CourseDetail[],
+    courseStudentDetails: CourseStudentDetail[],
   ): Promise<Course> {
     const course = await this.findOne(id);
 
@@ -129,19 +172,21 @@ export class CoursesService {
       );
     }
 
-    // Ensure courseDetails is initialized
-    course.courseDetails = course.courseDetails || [];
+    // Ensure courseStudentDetails is initialized
+    course.courseStudentDetails = course.courseStudentDetails || [];
 
     // Create a set of existing student IDs for quick lookup
     const existingStudentIds = new Set(
-      course.courseDetails.map((courseDetail) => courseDetail.student.id),
+      course.courseStudentDetails.map(
+        (courseStudentDetail) => courseStudentDetail.student.id,
+      ),
     );
 
     // Process each student to add if not already present
-    for (const courseDetail of courseDetails) {
-      if (!existingStudentIds.has(courseDetail.student.id)) {
+    for (const courseStudentDetail of courseStudentDetails) {
+      if (!existingStudentIds.has(courseStudentDetail.student.id)) {
         const student = await this.studentsService.findOne(
-          courseDetail.student.id,
+          courseStudentDetail.student.id,
         );
         if (!student) {
           throw new NotFoundException(
@@ -149,7 +194,8 @@ export class CoursesService {
           );
         }
 
-        courseDetail.skillCollections = courseDetail.skillCollections || [];
+        courseStudentDetail.skillCollections =
+          courseStudentDetail.skillCollections || [];
 
         for (
           let index = 0;
@@ -166,15 +212,17 @@ export class CoursesService {
               skillCollection,
             );
           console.log(skillCollectionSaved);
-          courseDetail.skillCollections.push(skillCollectionSaved);
+          courseStudentDetail.skillCollections.push(skillCollectionSaved);
         }
         // Save and add new course detail
-        course.courseDetails.push(
-          await this.courseDetailRepository.save<CourseDetail>(courseDetail),
+        course.courseStudentDetails.push(
+          await this.courseStudentDetailRepository.save<CourseStudentDetail>(
+            courseStudentDetail,
+          ),
         );
 
         // Update the set with the newly added student ID
-        existingStudentIds.add(courseDetail.student.id);
+        existingStudentIds.add(courseStudentDetail.student.id);
       }
     }
 
@@ -184,32 +232,35 @@ export class CoursesService {
 
   async removeStudent(
     courseId: string,
-    courseDetailId: number,
+    courseStudentDetailId: number,
   ): Promise<Course> {
     const course = await this.findOne(courseId);
 
-    // Find the CourseDetail that matches the studentId to be removed
-    const courseDetailToRemove = course.courseDetails.find(
-      (courseDetail) => courseDetail.id === courseDetailId,
+    // Find the CourseStudentDetail that matches the studentId to be removed
+    const courseStudentDetailToRemove = course.courseStudentDetails.find(
+      (courseStudentDetail) => courseStudentDetail.id === courseStudentDetailId,
     );
 
-    if (courseDetailToRemove) {
-      // Remove the course detail from the courseDetails array
-      course.courseDetails = course.courseDetails.filter(
-        (courseDetail) => courseDetail !== courseDetailToRemove,
+    if (courseStudentDetailToRemove) {
+      // Remove the course detail from the courseStudentDetails array
+      course.courseStudentDetails = course.courseStudentDetails.filter(
+        (courseStudentDetail) =>
+          courseStudentDetail !== courseStudentDetailToRemove,
       );
-      if (courseDetailToRemove.skillCollections) {
+      if (courseStudentDetailToRemove.skillCollections) {
         // Remove SkillCollection records from the database
         await this.skillCollectionsRepository.remove(
-          courseDetailToRemove.skillCollections,
+          courseStudentDetailToRemove.skillCollections,
         );
       }
 
       // Save the updated course
       await this.courseRepository.save(course);
 
-      // Delete the corresponding CourseDetail record from the database
-      await this.courseDetailRepository.delete(courseDetailToRemove.id);
+      // Delete the corresponding CourseStudentDetail record from the database
+      await this.courseStudentDetailRepository.delete(
+        courseStudentDetailToRemove.id,
+      );
     }
 
     return course;
@@ -218,13 +269,13 @@ export class CoursesService {
   async selectSubject(id: string, subjectId: string): Promise<Course> {
     const course = await this.findOne(id);
     const subject = await this.subjectsService.findOne(subjectId);
-    if (course.subject && course.courseDetails) {
+    if (course.subject && course.courseStudentDetails) {
       await this.createSkillCollection(
         subject.skillDetails,
-        course.courseDetails,
+        course.courseStudentDetails,
       );
     }
-    delete course.courseDetails;
+    delete course.courseStudentDetails;
     course.subject = subject;
 
     // Save the updated course
@@ -232,33 +283,33 @@ export class CoursesService {
   }
   async createSkillCollection(
     skillDetails: SkillDetail[],
-    courseDetails: CourseDetail[],
+    courseStudentDetails: CourseStudentDetail[],
   ) {
-    for (let i = 0; i < courseDetails.length; i++) {
-      if (courseDetails[i].skillCollections) {
+    for (let i = 0; i < courseStudentDetails.length; i++) {
+      if (courseStudentDetails[i].skillCollections) {
         await this.skillCollectionsRepository.remove(
-          courseDetails[i].skillCollections,
+          courseStudentDetails[i].skillCollections,
         );
       } else {
-        courseDetails[i].skillCollections = [];
+        courseStudentDetails[i].skillCollections = [];
       }
 
       for (let index = 0; index < skillDetails.length; index++) {
         const skillCollection = new SkillCollection();
         skillCollection.skillDetail = skillDetails[index];
-        skillCollection.student = courseDetails[i].student;
+        skillCollection.student = courseStudentDetails[i].student;
         skillCollection.acquiredLevel = 0;
         skillCollection.pass = false;
-        // Exclude the courseDetail property to avoid circular reference
-        delete skillCollection.courseDetail;
+        // Exclude the courseStudentDetail property to avoid circular reference
+        delete skillCollection.courseStudentDetail;
         const skillCollectionSaved =
           await this.skillCollectionsRepository.save<SkillCollection>(
             skillCollection,
           );
-        courseDetails[i].skillCollections.push(skillCollectionSaved);
+        courseStudentDetails[i].skillCollections.push(skillCollectionSaved);
       }
-      await this.courseDetailRepository.save(courseDetails[i]);
+      await this.courseStudentDetailRepository.save(courseStudentDetails[i]);
     }
-    return courseDetails;
+    return courseStudentDetails;
   }
 }

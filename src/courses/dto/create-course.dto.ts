@@ -1,5 +1,5 @@
 import { Skill } from 'src/skills/entities/skill.entity';
-import { CourseDetail } from '../entities/courseStudentDetail.entity';
+import { CourseStudentDetail } from '../entities/courseStudentDetail.entity';
 import { Subject } from 'src/subjects/entities/subject.entity';
 
 export class CreateCourseDto {
@@ -15,5 +15,5 @@ export class CreateCourseDto {
 
   skills: Skill[];
 
-  courseDetails: CourseDetail[];
+  courseStudentDetails: CourseStudentDetail[];
 }
