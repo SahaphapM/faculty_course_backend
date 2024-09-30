@@ -81,7 +81,8 @@ export class SkillsService {
 async findAll(): Promise<Skill[]> {
     const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
 
-    queryBuilder.leftJoinAndSelect('skill.parent', 'parent')
+    queryBuilder.where('skill.parentId IS NULL') 
+    .leftJoinAndSelect('skill.parent', 'parent')
     .leftJoinAndSelect('skill.skillDetail', 'skillDetail')
     .leftJoinAndSelect('skillDetail.subjects', 'subject')
     .leftJoinAndSelect('skill.children', 'children') // For direct children
