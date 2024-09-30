@@ -89,6 +89,7 @@ export class SkillsService {
       .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
       .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
       .leftJoinAndSelect('skill.techSkills', 'techSkills');
+
     // .where('skill.parentId IS NULL') // Check where parentId is null
     // .leftJoinAndSelect['skill.skillDetail', 'skillDetail']
     const skills = await queryBuilder.getMany();
