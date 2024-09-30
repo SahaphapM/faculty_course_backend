@@ -78,30 +78,29 @@ export class SkillsService {
     return { data, total };
   }
 
-async findAll(): Promise<Skill[]> {
+  async findAll(): Promise<Skill[]> {
     const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
 
-    queryBuilder.where('skill.parentId IS NULL') 
-    .leftJoinAndSelect('skill.parent', 'parent')
-    .leftJoinAndSelect('skill.skillDetail', 'skillDetail')
-    .leftJoinAndSelect('skillDetail.subjects', 'subject')
-    .leftJoinAndSelect('skill.children', 'children') // For direct children
-    .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
-    .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
-    .leftJoinAndSelect('skill.techSkills', 'techSkills');
+    queryBuilder
+      .leftJoinAndSelect('skill.parent', 'parent')
+      .leftJoinAndSelect('skill.skillDetail', 'skillDetail')
+      .leftJoinAndSelect('skillDetail.subjects', 'subject')
+      .leftJoinAndSelect('skill.children', 'children') // For direct children
+      .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
+      .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
+      .leftJoinAndSelect('skill.techSkills', 'techSkills');
+
     // .where('skill.parentId IS NULL') // Check where parentId is null
     // .leftJoinAndSelect['skill.skillDetail', 'skillDetail']
     const skills = await queryBuilder.getMany();
 
     return skills;
   }
-  
 
   async findOne(id: string): Promise<Skill> {
     const skill = await this.skillsRepository.findOne({
       where: { id: Number(id) },
       relations: {
-        skillDetail: { skill: true },
         children: { children: { children: { children: { children: true } } } },
         parent: true,
         techSkills: true,
@@ -146,6 +145,8 @@ async findAll(): Promise<Skill[]> {
     createSkillDtos: CreateSkillDto[],
   ): Promise<Skill> {
     const parentSkill = await this.findOne(id);
+
+    parentSkill.children = parentSkill.children || []; // initialize children
 
     for (const createSkillDto of createSkillDtos) {
       let subSkill = await this.skillsRepository.findOne({

@@ -123,7 +123,7 @@ export class CoursesService {
         'subject.engName',
         'subject.description',
         'skillDetail.id',
-        'skillDetail.level',
+        'skillDetail.requiredLevel',
         'skillDetail.description',
         'skill.name',
         'skill.description',
