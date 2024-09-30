@@ -27,9 +27,7 @@ export class CourseStudentDetail {
   projectScore: number;
 
   @ManyToOne(() => Course, (course) => course.courseStudentDetails, {
-    // onDelete: 'CASCADE',
-    nullable: true,
-    cascade: false,
+    onDelete: 'CASCADE', // When course is deleted. This record will be deleted
   })
   course: Course;
 

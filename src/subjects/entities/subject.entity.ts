@@ -39,7 +39,7 @@ export class Subject {
   @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
   clos: Clo[];
 
-  @OneToMany(() => Course, (course) => course.subject)
+  @OneToMany(() => Course, (course) => course.subject, { cascade: false })
   courses: Course[];
 }
 

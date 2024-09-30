@@ -24,7 +24,6 @@ export class Course {
   @OneToMany(
     () => CourseStudentDetail,
     (courseStudentDetail) => courseStudentDetail.course,
-    { cascade: false, nullable: true },
   )
   courseStudentDetails: CourseStudentDetail[];
 }
