@@ -149,28 +149,45 @@ export class SkillsService {
     parentSkill.children = parentSkill.children || []; // initialize children
 
     for (const createSkillDto of createSkillDtos) {
-      let subSkill = await this.skillsRepository.findOne({
-        where: { id: createSkillDto.id },
-      });
-
-      // If the subSkill doesn't exist, create and save it
-      if (!subSkill) {
-        subSkill = await this.skillsRepository.save(createSkillDto);
-      }
+      const subSkill = this.skillsRepository.save(createSkillDto);
 
       console.log('childSkill', subSkill);
 
       // Check if the subSkill is already related to the main skill
       const isAlreadyRelated = parentSkill.children.some(
-        (childSkill) => childSkill.id === subSkill.id,
+        async (childSkill) => childSkill.id === (await subSkill).id,
       );
 
       // If not already related, add the subSkill to subSkills
       if (!isAlreadyRelated) {
-        subSkill.parent = parentSkill;
-        parentSkill.children.push(subSkill);
+        (await subSkill).parent = parentSkill;
+        parentSkill.children.push(await subSkill);
       }
     }
+
+    // for (const createSkillDto of createSkillDtos) {
+    //   let subSkill = await this.skillsRepository.findOne({
+    //     where: { id: createSkillDto.id },
+    //   });
+
+    //   // If the subSkill doesn't exist, create and save it
+    //   if (!subSkill) {
+    //     subSkill = await this.skillsRepository.save(createSkillDto);
+    //   }
+
+    //   console.log('childSkill', subSkill);
+
+    //   // Check if the subSkill is already related to the main skill
+    //   const isAlreadyRelated = parentSkill.children.some(
+    //     (childSkill) => childSkill.id === subSkill.id,
+    //   );
+
+    //   // If not already related, add the subSkill to subSkills
+    //   if (!isAlreadyRelated) {
+    //     subSkill.parent = parentSkill;
+    //     parentSkill.children.push(subSkill);
+    //   }
+    // }
 
     try {
       return await this.skillsRepository.save(parentSkill);
