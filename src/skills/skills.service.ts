@@ -148,8 +148,7 @@ export class SkillsService {
 
     parentSkill.children = parentSkill.children || []; // initialize children
 
-    for (const createSkillDto of createSkillDtos) {
-      const subSkill = this.skillsRepository.save(createSkillDto);
+      const subSkill = this.skillsRepository.save(createSkillDtos[0]);
 
       console.log('childSkill', subSkill);
 
@@ -163,7 +162,6 @@ export class SkillsService {
         (await subSkill).parent = parentSkill;
         parentSkill.children.push(await subSkill);
       }
-    }
 
     // for (const createSkillDto of createSkillDtos) {
     //   let subSkill = await this.skillsRepository.findOne({
