@@ -142,14 +142,15 @@ export class SkillsService {
 
   async createSubSkills(
     id: string,
-    createSkillDtos: CreateSkillDto[],
+    createSkillDtos: CreateSkillDto,
   ): Promise<Skill> {
     const parentSkill = await this.findOne(id);
 
     parentSkill.children = parentSkill.children || []; // initialize children
 
-      const subSkill = this.skillsRepository.save(createSkillDtos[0]);
-
+      const subSkill = this.skillsRepository.save(createSkillDtos);
+      console.log('________________________');
+      
       console.log('childSkill', subSkill);
 
       // Check if the subSkill is already related to the main skill

@@ -65,7 +65,7 @@ export class SkillsController {
   @HttpCode(HttpStatus.CREATED)
   async createSubSkill(
     @Param('id') id: string,
-    @Body() createSkillDtos: CreateSkillDto[],
+    @Body() createSkillDtos: CreateSkillDto,
   ) {
     return this.skillsService.createSubSkills(id, createSkillDtos);
   }
