@@ -148,7 +148,8 @@ export class SkillsService {
 
     parentSkill.children = parentSkill.children || []; // initialize children
 
-      const subSkill = this.skillsRepository.save(createSkillDtos);
+      // const subSkill = this.skillsRepository.save(createSkillDtos);
+      const subSkill = this.create(createSkillDtos);
       console.log('________________________');
       
       console.log('childSkill', subSkill);
