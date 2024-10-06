@@ -37,9 +37,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const email: string = emails[0].value;
     const domain: string = email.split('@')[1];
 
-    if (!domain.includes('buu.ac.th')) {
-      throw new HttpException(`Invalid domain: ${domain}`, 401);
-    }
+    // if (!domain.includes('buu.ac.th')) {
+    //   throw new HttpException(`Invalid domain: ${domain}`, 401);
+    // }
 
     // const user = {
     //   id: id,
