@@ -14,7 +14,7 @@ import { LocalAuthGuard } from './guard/local-auth.guard';
 import { GoogleAuthGuard } from './guard/google-auth.guard';
 import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { RefreshAuthGuard } from './guard/refresh-auth.guard';
-import { Public } from './decorators/public.decorator';
+import { Public } from '../decorators/public.decorator';
 
 @Controller('auth')
 export class AuthController {

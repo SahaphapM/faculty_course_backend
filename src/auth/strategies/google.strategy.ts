@@ -1,7 +1,7 @@
 import { PassportStrategy } from '@nestjs/passport';
 import { Profile, Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { ConfigType } from '@nestjs/config';
-import { HttpException, Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import googleOauthConfig from '../config/google-oauth.config';
 
@@ -33,9 +33,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: Profile,
     done: VerifyCallback,
   ): Promise<any> {
-    const { emails } = profile;
-    const email: string = emails[0].value;
-    const domain: string = email.split('@')[1];
+    // const { emails } = profile;
+    // const email: string = emails[0].value;
+    // const domain: string = email.split('@')[1];
 
     // if (!domain.includes('buu.ac.th')) {
     //   throw new HttpException(`Invalid domain: ${domain}`, 401);
