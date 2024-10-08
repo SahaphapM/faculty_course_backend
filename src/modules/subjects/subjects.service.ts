@@ -80,7 +80,7 @@ export class SubjectsService {
   async findOne(id: string): Promise<Subject> {
     const subject = await this.subjectsRepository.findOne({
       where: { id },
-      relations: { skillDetails: { skill: true } },
+      relations: { skillDetails: { skill: { parent: true } } },
     });
     if (!subject) {
       throw new NotFoundException(`Subject with id ${id} not found`);

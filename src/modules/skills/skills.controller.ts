@@ -61,20 +61,23 @@ export class SkillsController {
 
   ///////////  subSkill /////////////
 
+  @Patch(':id/selectSubSkills') // select or create subskills use this.
+  @HttpCode(HttpStatus.CREATED)
+  async selectSubSkills(
+    @Param('id') id: string,
+    @Body() createSkillDtos: CreateSkillDto,
+  ) {
+    return this.skillsService.selectSubSkills(id, createSkillDtos);
+  }
+
   @Post(':id/createSubSkills') // select or create subskills use this.
   @HttpCode(HttpStatus.CREATED)
   async createSubSkill(
     @Param('id') id: string,
-    @Body() createSkillDtos: CreateSkillDto[],
+    @Body() createSkillDtos: CreateSkillDto,
   ) {
     return this.skillsService.createSubSkills(id, createSkillDtos);
   }
-
-  // @Patch(':id/selectSubSkills')
-  // @HttpCode(HttpStatus.OK)
-  // updateSubSkills(@Param('id') id: string, @Body() subSkillIds: string[]) {
-  //   return this.skillsService.selectSubSkills(id, subSkillIds);
-  // }
 
   @Patch(':id/removeSubSkill/:subSkillId')
   @HttpCode(HttpStatus.OK)
