@@ -140,59 +140,50 @@ export class SkillsService {
     }
   }
 
+  async selectSubSkills(
+    id: string,
+    createSkillDto: CreateSkillDto,
+  ): Promise<Skill> {
+    console.log(createSkillDto);
+    const parentSkill = await this.findOne(id);
+
+    parentSkill.children = parentSkill.children || []; // initialize children
+
+    // find child skill in database
+    const subSkill = await this.findOne(createSkillDto.id.toString());
+
+    // Check if subSkill already related to parentSkill
+    const isAlreadyRelated = parentSkill.children.some(
+      (child) => child.id.toString() === subSkill.id.toString(),
+    );
+
+    // If not already related, add the subSkill to subSkills
+    if (!isAlreadyRelated) {
+      parentSkill.children.push(subSkill);
+      try {
+        return await this.skillsRepository.save(parentSkill);
+      } catch (error) {
+        throw new BadRequestException('Failed to select childSkill');
+      }
+    }
+  }
+
   async createSubSkills(
     id: string,
-    createSkillDtos: CreateSkillDto,
+    createSkillDto: CreateSkillDto,
   ): Promise<Skill> {
     const parentSkill = await this.findOne(id);
 
     parentSkill.children = parentSkill.children || []; // initialize children
 
-      // const subSkill = this.skillsRepository.save(createSkillDtos);
-      const subSkill = this.create(createSkillDtos);
-      console.log('________________________');
-      
-      console.log('childSkill', subSkill);
+    const subSkill = await this.skillsRepository.save(createSkillDto);
 
-      // Check if the subSkill is already related to the main skill
-      const isAlreadyRelated = parentSkill.children.some(
-        async (childSkill) => childSkill.id === (await subSkill).id,
-      );
-
-      // If not already related, add the subSkill to subSkills
-      if (!isAlreadyRelated) {
-        (await subSkill).parent = parentSkill;
-        parentSkill.children.push(await subSkill);
-      }
-
-    // for (const createSkillDto of createSkillDtos) {
-    //   let subSkill = await this.skillsRepository.findOne({
-    //     where: { id: createSkillDto.id },
-    //   });
-
-    //   // If the subSkill doesn't exist, create and save it
-    //   if (!subSkill) {
-    //     subSkill = await this.skillsRepository.save(createSkillDto);
-    //   }
-
-    //   console.log('childSkill', subSkill);
-
-    //   // Check if the subSkill is already related to the main skill
-    //   const isAlreadyRelated = parentSkill.children.some(
-    //     (childSkill) => childSkill.id === subSkill.id,
-    //   );
-
-    //   // If not already related, add the subSkill to subSkills
-    //   if (!isAlreadyRelated) {
-    //     subSkill.parent = parentSkill;
-    //     parentSkill.children.push(subSkill);
-    //   }
-    // }
+    parentSkill.children.push(subSkill);
 
     try {
       return await this.skillsRepository.save(parentSkill);
     } catch (error) {
-      throw new BadRequestException('Failed to create and select childSkill');
+      throw new BadRequestException('Failed to create childSkill');
     }
   }
 
