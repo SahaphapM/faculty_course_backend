@@ -1,16 +1,16 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { UsersService } from '../users/users.service';
+import { UsersService } from '../modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
 // import { User } from 'src/users/entities/user.entity';
 // import { InjectRepository } from '@nestjs/typeorm';
 // import { Payload } from './types/payload';
 import { compare } from 'bcrypt';
 import * as argon2 from 'argon2';
-import { CreateUserDto } from 'src/users/dto/create-user.dto';
 import { CurrentUser } from './types/current-user';
 import { AuthJwtPayload } from './types/auth-jwtPayload';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
+import { CreateUserDto } from 'src/dto/user/create-user.dto';
 
 @Injectable()
 export class AuthService {
