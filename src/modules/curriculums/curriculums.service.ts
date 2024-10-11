@@ -171,7 +171,7 @@ export class CurriculumsService {
 
   async addCoordinator(
     id: string,
-    teachers: { id: string }[],
+    teachers: { id: number }[],
   ): Promise<Curriculum> {
     console.log('addCoordinator', teachers);
     const curriculum = await this.findOne(id);

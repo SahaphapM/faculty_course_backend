@@ -5,8 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Course } from 'src/entities/course.entity';
-import { CourseStudentDetail } from 'src/entities/courseStudentDetail.entity';
-import { SkillCollection } from 'src/entities/skil-collection.entity';
+import { CourseEnrollment } from 'src/entities/course-enrollment';
+import { SkillCollection } from 'src/entities/skill-collection.entity';
 import { Repository } from 'typeorm';
 import { FindManyOptions } from 'typeorm';
 import { Like } from 'typeorm';
@@ -15,19 +15,19 @@ import { StudentsService } from '../students/students.service';
 import { CreateCourseDto } from 'src/dto/course/create-course.dto';
 import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { SkillDetail } from 'src/entities/skillDetail.entity';
+import { Skill } from 'src/entities/skill.entity';
 
 @Injectable()
 export class CoursesService {
   constructor(
     @InjectRepository(Course)
-    private readonly courseRepository: Repository<Course>,
+    private readonly courseRepo: Repository<Course>,
 
-    @InjectRepository(CourseStudentDetail)
-    private readonly courseStudentDetailRepository: Repository<CourseStudentDetail>,
+    @InjectRepository(CourseEnrollment)
+    private readonly courseEnrollRepo: Repository<CourseEnrollment>,
 
     @InjectRepository(SkillCollection)
-    private readonly skillCollectionsRepository: Repository<SkillCollection>,
+    private readonly skillCollRepo: Repository<SkillCollection>,
 
     private readonly subjectsService: SubjectsService,
 
@@ -35,10 +35,22 @@ export class CoursesService {
   ) {}
 
   // Create a new course
-  async create(createCourseDto: CreateCourseDto): Promise<Course> {
-    const newCourse = this.courseRepository.create(createCourseDto);
+  async create(dto: CreateCourseDto): Promise<Course> {
     try {
-      return await this.courseRepository.save(newCourse);
+      const subject = await this.subjectsService.findOne(dto.subjectId);
+      if (!subject) {
+        throw new NotFoundException('Subject not found');
+      }
+      const curriculum = await this.subjectsService.findOne(dto.curriculumId);
+      if (!curriculum) {
+        throw new NotFoundException('Curriculum not found');
+      }
+      const newCourse = this.courseRepo.create({
+        ...dto,
+        subject,
+        curriculum,
+      });
+      return await this.courseRepo.save(newCourse);
     } catch (error) {
       throw new BadRequestException('Failed to create course');
     }
@@ -87,13 +99,13 @@ export class CoursesService {
       ];
     }
 
-    const [result, total] = await this.courseRepository.findAndCount(options);
+    const [result, total] = await this.courseRepo.findAndCount(options);
 
     return { data: result, total };
   }
 
   async findAll(): Promise<Course[]> {
-    return await this.courseRepository.find({
+    return await this.courseRepo.find({
       relations: {
         subject: { skillDetails: true },
       },
@@ -102,7 +114,7 @@ export class CoursesService {
 
   // Find a single course by ID
   async findOne(id: string): Promise<Course> {
-    const course = await this.courseRepository
+    const course = await this.courseRepo
       .createQueryBuilder('course')
       .leftJoinAndSelect('course.courseStudentDetails', 'courseStudentDetails')
       .leftJoinAndSelect('courseStudentDetails.student', 'student')
@@ -141,10 +153,13 @@ export class CoursesService {
   // Update an existing course
   async update(id: string, updateCourseDto: UpdateCourseDto): Promise<Course> {
     const course = await this.findOne(id); // Ensure the course exists
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${id} not found`);
+    }
 
-    const updatedCourse = this.courseRepository.merge(course, updateCourseDto);
+    const updatedCourse = this.courseRepo.merge(course, updateCourseDto);
     try {
-      return await this.courseRepository.save(updatedCourse);
+      return await this.courseRepo.save(updatedCourse);
     } catch (error) {
       throw new BadRequestException('Failed to Update course');
     }
@@ -152,7 +167,7 @@ export class CoursesService {
 
   // Delete a course by ID
   async remove(id: string): Promise<void> {
-    const result = await this.courseRepository.delete(id);
+    const result = await this.courseRepo.delete(id);
 
     if (result.affected === 0) {
       throw new NotFoundException(`Course with ID ${id} not found`);
@@ -161,7 +176,7 @@ export class CoursesService {
 
   async importStudents(
     id: string,
-    courseStudentDetails: CourseStudentDetail[],
+    courseEnrolls: CourseEnrollment[],
   ): Promise<Course> {
     const course = await this.findOne(id);
 
@@ -172,29 +187,24 @@ export class CoursesService {
     }
 
     // Ensure courseStudentDetails is initialized
-    course.courseStudentDetails = course.courseStudentDetails || [];
+    course.courseEnrollment = course.courseEnrollment || [];
 
     // Create a set of existing student IDs for quick lookup
     const existingStudentIds = new Set(
-      course.courseStudentDetails.map(
-        (courseStudentDetail) => courseStudentDetail.student.id,
-      ),
+      course.courseEnrollment.map((c) => c.student.id),
     );
 
     // Process each student to add if not already present
-    for (const courseStudentDetail of courseStudentDetails) {
-      if (!existingStudentIds.has(courseStudentDetail.student.id)) {
-        const student = await this.studentsService.findOne(
-          courseStudentDetail.student.id,
-        );
+    for (const courseEn of courseEnrolls) {
+      if (!existingStudentIds.has(courseEn.student.id)) {
+        const student = await this.studentsService.findOne(courseEn.student.id);
         if (!student) {
           throw new NotFoundException(
             `Student with ID ${student.id} not found`,
           );
         }
 
-        courseStudentDetail.skillCollections =
-          courseStudentDetail.skillCollections || [];
+        courseEn.skillCollections = courseEn.skillCollections || [];
 
         for (
           let index = 0;
@@ -202,31 +212,25 @@ export class CoursesService {
           index++
         ) {
           const skillCollection = new SkillCollection();
-          skillCollection.skillDetail = course.subject.skillDetails[index];
+          skillCollection.skill = course.subject.skills[index];
           skillCollection.student = student;
-          skillCollection.acquiredLevel = 0;
-          skillCollection.pass = false;
+          skillCollection.passed = false;
           const skillCollectionSaved =
-            await this.skillCollectionsRepository.save<SkillCollection>(
-              skillCollection,
-            );
-          console.log(skillCollectionSaved);
-          courseStudentDetail.skillCollections.push(skillCollectionSaved);
+            await this.skillCollRepo.save<SkillCollection>(skillCollection);
+          courseEn.skillCollections.push(skillCollectionSaved);
         }
         // Save and add new course detail
-        course.courseStudentDetails.push(
-          await this.courseStudentDetailRepository.save<CourseStudentDetail>(
-            courseStudentDetail,
-          ),
+        course.courseEnrollment.push(
+          await this.courseEnrollRepo.save<CourseEnrollment>(courseEn),
         );
 
         // Update the set with the newly added student ID
-        existingStudentIds.add(courseStudentDetail.student.id);
+        existingStudentIds.add(courseEn.student.id);
       }
     }
 
     // Save the updated course
-    return await this.courseRepository.save(course);
+    return await this.courseRepo.save(course);
   }
 
   async removeStudent(
@@ -236,30 +240,28 @@ export class CoursesService {
     const course = await this.findOne(courseId);
 
     // Find the CourseStudentDetail that matches the studentId to be removed
-    const courseStudentDetailToRemove = course.courseStudentDetails.find(
+    const courseStudentDetailToRemove = course.courseEnrollment.find(
       (courseStudentDetail) => courseStudentDetail.id === courseStudentDetailId,
     );
 
     if (courseStudentDetailToRemove) {
       // Remove the course detail from the courseStudentDetails array
-      course.courseStudentDetails = course.courseStudentDetails.filter(
+      course.courseEnrollment = course.courseEnrollment.filter(
         (courseStudentDetail) =>
           courseStudentDetail !== courseStudentDetailToRemove,
       );
       if (courseStudentDetailToRemove.skillCollections) {
         // Remove SkillCollection records from the database
-        await this.skillCollectionsRepository.remove(
+        await this.skillCollRepo.remove(
           courseStudentDetailToRemove.skillCollections,
         );
       }
 
       // Save the updated course
-      await this.courseRepository.save(course);
+      await this.courseRepo.save(course);
 
       // Delete the corresponding CourseStudentDetail record from the database
-      await this.courseStudentDetailRepository.delete(
-        courseStudentDetailToRemove.id,
-      );
+      await this.courseEnrollRepo.delete(courseStudentDetailToRemove.id);
     }
 
     return course;
@@ -268,47 +270,55 @@ export class CoursesService {
   async selectSubject(id: string, subjectId: string): Promise<Course> {
     const course = await this.findOne(id);
     const subject = await this.subjectsService.findOne(subjectId);
-    if (course.subject && course.courseStudentDetails) {
-      await this.createSkillCollection(
-        subject.skillDetails,
-        course.courseStudentDetails,
-      );
+    if (course.subject && course.courseEnrollment) {
+      await this.createSkillCollection(subject.skills, course.courseEnrollment);
     }
-    delete course.courseStudentDetails;
+    delete course.courseEnrollment;
     course.subject = subject;
 
     // Save the updated course
-    return await this.courseRepository.save(course);
+    return await this.courseRepo.save(course);
   }
-  async createSkillCollection(
-    skillDetails: SkillDetail[],
-    courseStudentDetails: CourseStudentDetail[],
-  ) {
-    for (let i = 0; i < courseStudentDetails.length; i++) {
-      if (courseStudentDetails[i].skillCollections) {
-        await this.skillCollectionsRepository.remove(
-          courseStudentDetails[i].skillCollections,
-        );
+  async createSkillCollection(skills: Skill[], courseEnr: CourseEnrollment[]) {
+    // Create array of skill collections to be saved
+    const skillCollectionsToSave: SkillCollection[] = [];
+
+    // Iterate through each course enrollment
+    for (let i = 0; i < courseEnr.length; i++) {
+      // Remove existing skill collections
+      if (courseEnr[i].skillCollections) {
+        await this.skillCollRepo.remove(courseEnr[i].skillCollections);
       } else {
-        courseStudentDetails[i].skillCollections = [];
+        courseEnr[i].skillCollections = [];
       }
 
-      for (let index = 0; index < skillDetails.length; index++) {
-        const skillCollection = new SkillCollection();
-        skillCollection.skillDetail = skillDetails[index];
-        skillCollection.student = courseStudentDetails[i].student;
-        skillCollection.acquiredLevel = 0;
-        skillCollection.pass = false;
+      // Iterate through each skill
+      for (let index = 0; index < skills.length; index++) {
+        const skillCollection = this.skillCollRepo.create({
+          courseEnrollment: courseEnr[i],
+          skill: skills[index],
+          passed: false,
+          student: courseEnr[i].student,
+        });
         // Exclude the courseStudentDetail property to avoid circular reference
-        delete skillCollection.courseStudentDetail;
-        const skillCollectionSaved =
-          await this.skillCollectionsRepository.save<SkillCollection>(
-            skillCollection,
-          );
-        courseStudentDetails[i].skillCollections.push(skillCollectionSaved);
+        delete skillCollection.courseEnrollment;
+
+        // Add to array of skill collections to be saved
+        skillCollectionsToSave.push(skillCollection);
       }
-      await this.courseStudentDetailRepository.save(courseStudentDetails[i]);
     }
-    return courseStudentDetails;
+
+    // Save all skill collections in one go
+    await this.skillCollRepo.save(skillCollectionsToSave);
+
+    // Add saved skill collections to course enrollments
+    for (let i = 0; i < courseEnr.length; i++) {
+      courseEnr[i].skillCollections = skillCollectionsToSave.filter(
+        (skillCollection) =>
+          skillCollection.courseEnrollment.id === courseEnr[i].id,
+      );
+      await this.courseEnrollRepo.save(courseEnr[i]);
+    }
+    return courseEnr;
   }
 }

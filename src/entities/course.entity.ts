@@ -1,6 +1,14 @@
 import { Subject } from 'src/entities/subject.entity';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { CourseStudentDetail } from './courseStudentDetail.entity';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
+import { CourseEnrollment } from './course-enrollment';
+import { Curriculum } from './curriculum.entity';
 
 @Entity()
 export class Course {
@@ -13,17 +21,21 @@ export class Course {
   @Column()
   description: string;
 
-  @Column({ nullable: true })
+  @Column({ default: true })
   active: boolean;
 
   @ManyToOne(() => Subject, (subject) => subject.courses, {
-    cascade: false,
+    onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'subjectId' })
   subject: Subject;
 
-  @OneToMany(
-    () => CourseStudentDetail,
-    (courseStudentDetail) => courseStudentDetail.course,
-  )
-  courseStudentDetails: CourseStudentDetail[];
+  @ManyToOne(() => Subject, (subject) => subject.courses, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'curriculumId' })
+  curriculum: Curriculum;
+
+  @OneToMany(() => CourseEnrollment, (c) => c.course)
+  courseEnrollment: CourseEnrollment[];
 }

@@ -1,9 +1,16 @@
 import { Clo } from 'src/entities/clo.entity';
 import { Course } from 'src/entities/course.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
-import { SkillDomain } from 'src/entities/skill.entity';
 import { SkillDetail } from 'src/entities/skillDetail.entity';
-import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinTable,
+  ManyToMany,
+  OneToMany,
+  PrimaryColumn,
+} from 'typeorm';
+import { Skill, SkillDomain } from './skill.entity';
 
 @Entity()
 export class Subject {
@@ -32,6 +39,12 @@ export class Subject {
     cascade: false,
   })
   skillDetails: SkillDetail[];
+
+  @ManyToMany(() => Skill, (s) => s.subjects, {
+    cascade: false,
+  })
+  @JoinTable()
+  skills: Skill[];
 
   @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
   curriculums: Curriculum[];

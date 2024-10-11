@@ -2,7 +2,7 @@ import { Subject } from 'src/entities/subject.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 import { Skill } from './skill.entity';
 import { OneToMany } from 'typeorm';
-import { SkillCollection } from 'src/entities/skil-collection.entity';
+import { SkillCollection } from 'src/entities/skill-collection.entity';
 
 @Entity()
 export class SkillDetail {
@@ -23,7 +23,7 @@ export class SkillDetail {
 
   @OneToMany(
     () => SkillCollection,
-    (skillCollection) => skillCollection.skillDetail,
+    (skillCollection) => skillCollection.skill,
     {
       cascade: false,
     },

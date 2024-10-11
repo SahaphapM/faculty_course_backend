@@ -1,44 +1,56 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
 import { Student } from './student.entity';
-import { CourseStudentDetail } from './courseStudentDetail.entity';
-import { SkillDetail } from './skillDetail.entity';
+import { CourseEnrollment } from './course-enrollment';
+import { SkillLevel } from 'src/enums/skill-level.enum';
+import { Skill } from './skill.entity';
 
 @Entity()
 export class SkillCollection {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // @Column({ nullable: true })
-  // name: string;
+  @Column({ nullable: true })
+  level: SkillLevel;
 
   @Column({ default: 0 })
-  acquiredLevel: number;
-
-  // @Column({ nullable: true })
-  // requiredLevel: number;
+  score: number;
 
   @Column({ default: false })
-  pass: boolean;
+  passed: boolean;
 
   @ManyToOne(() => Student, (student) => student.skillCollection, {
     cascade: false,
   })
+  @JoinColumn({ name: 'studentId' })
   student: Student;
 
-  @ManyToOne(() => SkillDetail, (skillDetail) => skillDetail.skillCollection, {
+  // @ManyToOne(() => SkillDetail, (sd) => sd.skillCollection, {
+  //   cascade: false,
+  // })
+  // skillDetail: SkillDetail;
+
+  @ManyToOne(() => Skill, (s) => s.skillCollections, {
     cascade: false,
   })
-  skillDetail: SkillDetail;
+  @JoinColumn({ name: 'skillId' })
+  skill: Skill;
 
   @ManyToOne(
-    () => CourseStudentDetail,
+    () => CourseEnrollment,
     (courseStudentDetail) => courseStudentDetail.skillCollections,
     // {
     //   cascade: true,
     //   onDelete: 'CASCADE',
     // },
   )
-  courseStudentDetail: CourseStudentDetail;
+  @JoinColumn({ name: 'courseEnrollmentId' })
+  courseEnrollment: CourseEnrollment;
 
   // // before insert skillCollection, also set name and requiredLevel from skillDetail
   // @BeforeInsert()

@@ -11,6 +11,8 @@ import {
   TreeParent,
 } from 'typeorm';
 import { SkillDetail } from './skillDetail.entity';
+import { SkillCollection } from './skill-collection.entity';
+import { Subject } from './subject.entity';
 
 @Entity()
 @Tree('closure-table')
@@ -54,6 +56,11 @@ export class Skill {
   @JoinTable()
   techSkills: TechSkill[] | null;
 
+  @ManyToMany(() => Subject, (s) => s.skills, {
+    cascade: false,
+  })
+  subjects: Subject[];
+
   // @ManyToMany(() => Course, (course) => course.skills, {
   //   cascade: false,
   // })
@@ -64,6 +71,11 @@ export class Skill {
     cascade: false,
   })
   skillDetail: SkillDetail[];
+
+  @OneToMany(() => SkillCollection, (s) => s.courseEnrollment, {
+    cascade: false,
+  })
+  skillCollections: SkillCollection[];
 }
 
 export enum SkillDomain {

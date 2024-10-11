@@ -1,37 +1,47 @@
-import { Entity, Column, PrimaryColumn, OneToMany } from 'typeorm';
-import { SkillCollection, SkillCollectionTree } from './skil-collection.entity';
-import { CourseStudentDetail } from './courseStudentDetail.entity';
+import {
+  Entity,
+  Column,
+  PrimaryColumn,
+  OneToMany,
+  OneToOne,
+  JoinColumn,
+} from 'typeorm';
+import {
+  SkillCollection,
+  SkillCollectionTree,
+} from './skill-collection.entity';
+import { CourseEnrollment } from './course-enrollment';
+import { Branch } from './branch.entity';
 
 @Entity()
 export class Student {
-  @PrimaryColumn({ type: 'varchar', length: 20 })
+  @PrimaryColumn()
   id: string;
 
-  @Column({ type: 'varchar', length: 100 })
+  @Column()
   name: string;
 
-  @Column({ type: 'varchar', length: 100 })
-  nameInEnglish: string;
+  @Column()
+  engName: string;
 
-  @Column({ type: 'varchar', length: 50, nullable: true })
-  status: string | null; // e.g., null if no status
+  @OneToOne(() => Branch)
+  @JoinColumn()
+  branch: Branch;
 
-  @OneToMany(
-    () => CourseStudentDetail,
-    (courseStudentDetail) => courseStudentDetail.student,
-    {
-      cascade: false,
-    },
-  )
-  courseStudentDetails: CourseStudentDetail[];
+  @Column()
+  dateEnrollment: Date;
 
-  @OneToMany(
-    () => SkillCollection,
-    (skillCollection) => skillCollection.student,
-    {
-      cascade: false,
-    },
-  )
+  @Column({ nullable: true })
+  socials: string;
+
+  @OneToMany(() => CourseEnrollment, (s) => s.student, {
+    cascade: false,
+  })
+  courseEnrollment: CourseEnrollment[];
+
+  @OneToMany(() => SkillCollection, (s) => s.student, {
+    cascade: false,
+  })
   skillCollection: SkillCollection[];
 
   // It is Not Column but is needed to show skill collection in tree view form.

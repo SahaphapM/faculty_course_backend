@@ -1,19 +1,18 @@
-import { CourseStudentDetail } from 'src/entities/courseStudentDetail.entity';
-import { Skill } from 'src/entities/skill.entity';
-import { Subject } from 'src/entities/subject.entity';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateCourseDto {
-  id: string;
-
-  name: string;
-
+  @IsString()
   description: string;
 
+  @IsOptional()
   active: boolean;
 
-  subject: Subject;
+  @IsNotEmpty()
+  subjectId: string;
 
-  skills: Skill[];
+  @IsNotEmpty()
+  curriculumId: string;
 
-  courseStudentDetails: CourseStudentDetail[];
+  @IsNotEmpty()
+  teacherListId: number[];
 }
