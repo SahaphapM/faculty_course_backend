@@ -171,17 +171,19 @@ export class CurriculumsService {
 
   async addCoordinator(
     id: string,
-    teachers: { id: number }[],
+    teacherListId: number[],
   ): Promise<Curriculum> {
-    console.log('addCoordinator', teachers);
+    console.log('addCoordinator', teacherListId);
     const curriculum = await this.findOne(id);
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
     curriculum.coordinators = [];
-    if (teachers) {
-      for (let index = 0; index < teachers.length; index++) {
-        const teacher = await this.teachersService.findOne(teachers[index].id);
+    if (teacherListId) {
+      for (let index = 0; index < teacherListId.length; index++) {
+        const teacher = await this.teachersService.findOne(
+          teacherListId[index],
+        );
         curriculum.coordinators.push(teacher);
       }
     }

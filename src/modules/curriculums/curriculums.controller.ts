@@ -98,11 +98,8 @@ export class CurriculumsController {
   }
 
   @Patch(':id/coordinators')
-  async addCoordinator(
-    @Param('id') id: string,
-    @Body() createTeacherDtos: { id: string }[],
-  ) {
-    return this.curriculumsService.addCoordinator(id, createTeacherDtos); // Add teacher to curriculum
+  async addCoordinator(@Param('id') id: string, @Body() dto: number[]) {
+    return this.curriculumsService.addCoordinator(id, dto); // Add teacher to curriculum
   }
 
   @Patch(':id/plos')
