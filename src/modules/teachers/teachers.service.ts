@@ -4,17 +4,23 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Teacher } from '../../entities/teacher.entity';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { CreateTeacherDto } from '../../dto/teacher/create-teacher.dto';
 import { UpdateTeacherDto } from '../../dto/teacher/update-teacher.dto';
+import { Curriculum } from 'src/entities/curriculum.entity';
+import { Branch } from 'src/entities/branch.entity';
 
 @Injectable()
 export class TeachersService {
   constructor(
+    @InjectRepository(Branch)
+    private braRepo: Repository<Branch>,
+    @InjectRepository(Curriculum)
+    private curRepo: Repository<Curriculum>,
     @InjectRepository(Teacher)
-    private teacherRepo: Repository<Teacher>,
+    private teaRepo: Repository<Teacher>,
   ) {}
 
   async findAllByPage(
@@ -23,10 +29,7 @@ export class TeachersService {
     const { page, limit, sort, order, search, columnId, columnName } =
       paginationDto;
 
-    const queryBuilder = this.teacherRepo.createQueryBuilder('teacher');
-
-    // Include roles in the query
-    queryBuilder.leftJoinAndSelect('teacher.roles', 'roles');
+    const queryBuilder = this.teaRepo.createQueryBuilder('teacher');
 
     // Conditionally add joins if columnId and columnName are provided
     if (columnId && columnName === 'branch') {
@@ -76,39 +79,53 @@ export class TeachersService {
     return { data, total };
   }
 
-  async create(createTeacherDto: CreateTeacherDto): Promise<Teacher> {
-    const existingTeacher = await this.teacherRepo.findOne({
-      where: { email: createTeacherDto.email },
+  async create(dto: CreateTeacherDto) {
+    const { email, branchId, curriculumsId, ...rest } = dto;
+
+    const existingTeacher = await this.teaRepo.findOne({
+      where: { email },
     });
     if (existingTeacher) {
       throw new BadRequestException(
-        `Teacher with Email ${createTeacherDto.email} already exists`,
+        `Teacher with Email ${email} already exists`,
       );
     }
 
-    const teacher = this.teacherRepo.create(createTeacherDto);
-    return await this.teacherRepo.save(teacher);
+    const [existBranch, existCurriculums] = await Promise.all([
+      this.braRepo.findOne({ where: { id: branchId } }),
+      this.curRepo.findBy({ id: In(curriculumsId) }),
+    ]);
 
-    // const teacher = this.teachersRepository.create(createTeacherDto);
-    // teacher.roles = createTeacherDto.roles;
+    if (!existBranch) {
+      throw new BadRequestException(
+        `Branch with ID ${branchId} does not exist`,
+      );
+    }
 
-    // // Hashing password
-    // const saltOrRounds = 10;
-    // teacher.password = await bcrypt.hash(createTeacherDto.password, saltOrRounds);
+    if (existCurriculums.length !== curriculumsId.length) {
+      throw new BadRequestException(
+        `Curriculum with ID ${curriculumsId
+          .filter((id) => !existCurriculums.find((c) => c.id === id))
+          .join(', ')} does not exist`,
+      );
+    }
 
-    // try {
-    //   return await this.teachersRepository.save(teacher);
-    // } catch (error) {
-    //   throw new BadRequestException('Failed to create teacher');
-    // }
+    const teacher = this.teaRepo.create({
+      ...rest,
+      specialists: dto.specialists.map((s) => s).join(', '),
+      socials: JSON.stringify(dto.socials),
+      curriculums: existCurriculums,
+      branch: existBranch,
+    });
+    return await this.teaRepo.save(teacher);
   }
 
   async findAll(): Promise<Teacher[]> {
-    return await this.teacherRepo.find({});
+    return await this.teaRepo.find();
   }
 
-  async findOne(id: string): Promise<Teacher> {
-    const teacher = await this.teacherRepo.findOne({
+  async findOne(id: number): Promise<Teacher> {
+    const teacher = await this.teaRepo.findOne({
       where: { id },
     });
     if (!teacher) {
@@ -118,14 +135,14 @@ export class TeachersService {
   }
 
   async findByEmail(email: string): Promise<Teacher> {
-    const teacher = await this.teacherRepo.findOne({
+    const teacher = await this.teaRepo.findOne({
       where: { email },
     });
     return teacher;
   }
 
   async update(
-    id: string,
+    id: number,
     updateTeacherDto: UpdateTeacherDto,
   ): Promise<Teacher> {
     const teacher = await this.findOne(id);
@@ -138,7 +155,7 @@ export class TeachersService {
     // teacher.roles = updateTeacherDto.roles;
 
     try {
-      await this.teacherRepo.save(teacher);
+      await this.teaRepo.save(teacher);
       const teacherUpdated = await this.findOne(id);
       return teacherUpdated;
     } catch (error) {
@@ -146,21 +163,13 @@ export class TeachersService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     const teacher = await this.findOne(id);
-    console.log(teacher);
     try {
-      await this.teacherRepo.remove(teacher);
+      await this.teaRepo.remove(teacher);
       return `Success Delete ID ${id}`;
     } catch (error) {
       throw new BadRequestException('Failed to remove teacher');
     }
-  }
-
-  async updateHashedRefreshToken(teacherId: any, hashedRefreshToken: string) {
-    return await this.teacherRepo.update(
-      { id: teacherId },
-      { hashedRefreshToken },
-    );
   }
 }

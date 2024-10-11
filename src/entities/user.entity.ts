@@ -3,12 +3,16 @@ import {
   BeforeInsert,
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { Role } from 'src/entities/role.entity';
+import { Teacher } from './teacher.entity';
+import { Student } from './student.entity';
 
 @Entity()
 export class User {
@@ -44,9 +48,11 @@ export class User {
     this.password = await bcrypt.hash(this.password, 10);
   }
 
-  // @ManyToMany(() => Curriculum, (curriculum) => curriculum.coordinators)
-  // curriculums: Curriculum[];
+  @OneToOne(() => Teacher)
+  @JoinColumn()
+  teacher: Teacher;
 
-  // @ManyToMany(() => Subject, (subject) => subject.teachers)
-  // subjects: Subject[];
+  @OneToOne(() => Student)
+  @JoinColumn()
+  student: Student;
 }

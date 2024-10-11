@@ -1,53 +1,56 @@
-import { IsEmail, IsString, MinLength } from 'class-validator';
+import { IsEmail } from 'class-validator';
 import {
-  BeforeInsert,
   Column,
   Entity,
-  JoinTable,
+  JoinColumn,
   ManyToMany,
+  OneToOne,
   PrimaryColumn,
 } from 'typeorm';
-import * as bcrypt from 'bcrypt';
-import { Role } from 'src/entities/role.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
+import { User } from './user.entity';
+import { Branch } from './branch.entity';
 
 @Entity()
 export class Teacher {
   @PrimaryColumn()
-  id: string;
+  id: number;
+
+  @Column()
+  name: string;
+
+  @Column()
+  engName: string;
+
+  @Column()
+  tel: string;
+
+  @Column({ default: 'unknown.jpg' })
+  picture: string;
+
+  @OneToOne(() => User)
+  user: User;
 
   @Column({ unique: true })
   @IsEmail()
   email: string;
 
-  @Column({ select: false }) // select : false  It is hiding the password.
-  @IsString()
-  @MinLength(6)
-  password: string;
+  @Column()
+  officeRoom: string;
 
-  // @Column({ default: 'unknown.jpg' })
-  // @IsString()
-  // image: string;
-
-  @Column({ default: 'unknown.jpg' })
-  @IsString()
-  avatarUrl: string;
-
-  @ManyToMany(() => Role, (role) => role.teachers)
-  @JoinTable()
-  roles: Role[];
+  @Column()
+  specialists: string;
 
   @Column({ nullable: true })
-  hashedRefreshToken: string;
+  socials: string;
 
-  @BeforeInsert()
-  async hashPassword() {
-    this.password = await bcrypt.hash(this.password, 10);
-  }
+  @Column({ nullable: true })
+  bio: string;
+
+  @OneToOne(() => Branch)
+  @JoinColumn()
+  branch: Branch;
 
   @ManyToMany(() => Curriculum, (curriculum) => curriculum.coordinators)
   curriculums: Curriculum[];
-
-  // @ManyToMany(() => Subject, (subject) => subject.teachers)
-  // subjects: Subject[];
 }
