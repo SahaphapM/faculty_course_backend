@@ -1,13 +1,6 @@
-import { Curriculum } from 'src/entities/curriculum.entity';
-import { Department } from 'src/entities/department.entity';
-import { Faculty } from 'src/entities/faculty.entity';
+import { IsString } from 'class-validator';
 
 export class CreateBranchDto {
+  @IsString()
   name: string;
-
-  faculty: Faculty;
-
-  department: Department;
-
-  curriculums: Curriculum[];
 }

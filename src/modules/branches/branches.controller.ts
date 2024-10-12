@@ -7,36 +7,36 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { BranchsService } from './branchs.service';
+import { BranchesService } from './branches.service';
 import { CreateBranchDto } from '../../dto/branch/create-branch.dto';
 import { UpdateBranchDto } from '../../dto/branch/update-branch.dto';
 
-@Controller('branchs')
-export class BranchsController {
-  constructor(private readonly branchsService: BranchsService) {}
+@Controller('branches')
+export class BranchesController {
+  constructor(private readonly branchService: BranchesService) {}
 
   @Post()
   create(@Body() createBranchDto: CreateBranchDto) {
-    return this.branchsService.create(createBranchDto);
+    return this.branchService.create(createBranchDto);
   }
 
   @Get()
   findAll() {
-    return this.branchsService.findAll();
+    return this.branchService.findAll();
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.branchsService.findOne(id);
+    return this.branchService.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBranchDto: UpdateBranchDto) {
-    return this.branchsService.update(id, updateBranchDto);
+    return this.branchService.update(id, updateBranchDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.branchsService.remove(id);
+    return this.branchService.remove(id);
   }
 }
