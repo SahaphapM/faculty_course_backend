@@ -1,7 +1,13 @@
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsEmail,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateTeacherDto {
-  @IsString()
+  @IsEmail()
   email: string;
 
   @IsString()
@@ -25,21 +31,26 @@ export class CreateTeacherDto {
   @IsString()
   position: string;
 
+  @IsOptional()
   @IsString()
   officeRoom: string;
 
+  @IsOptional()
   @IsArray()
   specialists: string[];
 
   @IsOptional()
   socials: Partial<SocialForm>;
 
+  @IsOptional()
   @IsString()
   branchId: string;
 
+  @IsOptional()
   @IsArray()
   curriculumsId: string[];
 
+  @IsOptional()
   @IsNumber()
   userId: number;
 }
