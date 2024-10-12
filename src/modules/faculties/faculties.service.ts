@@ -24,7 +24,7 @@ export class FacultiesService {
   async findAll(): Promise<Faculty[]> {
     try {
       return await this.facultiesRepository.find({
-        relations: { branches: true, departments: true },
+        relations: { branches: true },
       });
     } catch (error) {
       // Handle specific error types here
@@ -93,7 +93,7 @@ export class FacultiesService {
     try {
       const faculty = await this.facultiesRepository.findOne({
         where: { id },
-        relations: { branches: true, departments: true },
+        relations: { branches: true },
       });
       if (!faculty) {
         throw new NotFoundException('Faculty not found');
@@ -120,7 +120,7 @@ export class FacultiesService {
       await this.facultiesRepository.save(existingFaculty);
       return await this.facultiesRepository.findOne({
         where: { id },
-        relations: { branches: true, departments: true },
+        relations: { branches: true },
       });
     } catch (error) {
       // Handle specific error types here

@@ -4,6 +4,7 @@ import { Teacher } from 'src/entities/teacher.entity';
 import {
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   ManyToOne,
@@ -30,6 +31,7 @@ export class Curriculum {
   engDegreeName: string;
 
   @ManyToOne(() => Branch, (branch) => branch.curriculums)
+  @JoinColumn({ name: 'branchId' })
   branch: Branch;
 
   @Column()

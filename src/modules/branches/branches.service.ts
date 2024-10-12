@@ -14,6 +14,14 @@ export class BranchesService {
 
   async create(createBranchDto: CreateBranchDto): Promise<Branch> {
     try {
+      const existingBranch = await this.braRepo.findOne({
+        where: { name: createBranchDto.name },
+      });
+      if (existingBranch) {
+        throw new Error(
+          `Branch with name ${createBranchDto.name} already exists`,
+        );
+      }
       const branch = this.braRepo.create(createBranchDto);
       return await this.braRepo.save(branch);
     } catch (error) {
@@ -24,7 +32,7 @@ export class BranchesService {
   async findAll(): Promise<Branch[]> {
     try {
       return await this.braRepo.find({
-        relations: { curriculums: true, department: true, faculty: true },
+        relations: { curriculums: true, faculty: true },
       });
     } catch (error) {
       throw new Error('Failed to fetch branches');
@@ -35,7 +43,7 @@ export class BranchesService {
     try {
       const branch = await this.braRepo.findOne({
         where: { id },
-        relations: { curriculums: true, department: true, faculty: true },
+        relations: { curriculums: true, faculty: true },
       });
       if (!branch) {
         throw new NotFoundException(`Branch with ID ${id} not found`);
@@ -53,7 +61,7 @@ export class BranchesService {
       await this.braRepo.save(branch);
       return this.braRepo.findOne({
         where: { id },
-        relations: { faculty: true, curriculums: true, department: true },
+        relations: { faculty: true, curriculums: true },
       });
     } catch (error) {
       throw new Error('Failed to update branch');

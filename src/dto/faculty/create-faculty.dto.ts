@@ -1,12 +1,13 @@
-import { Branch } from 'src/entities/branch.entity';
-import { Department } from 'src/entities/department.entity';
+import { IsArray, IsString } from 'class-validator';
 
 export class CreateFacultyDto {
   id: string;
 
+  @IsString()
   name: string;
 
-  branches: Branch[];
+  @IsArray()
+  branchListId: number[];
 
-  departments: Department[];
+  // departments: Department[];
 }
