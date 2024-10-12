@@ -1,20 +1,58 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Role } from 'src/entities/role.entity';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreateTeacherDto {
   @IsString()
   email: string;
 
   @IsString()
-  @IsNotEmpty()
-  password: string;
+  name: string;
+
+  @IsString()
+  engName: string;
 
   @IsOptional()
   @IsString()
-  avatarUrl: string;
+  tel: string;
 
-  @IsNotEmpty()
-  roles: Role[];
+  @IsOptional()
+  @IsString()
+  picture: string;
 
-  // curriculums: Curriculum[];
+  @IsOptional()
+  @IsString()
+  bio: string;
+
+  @IsString()
+  position: string;
+
+  @IsString()
+  officeRoom: string;
+
+  @IsArray()
+  specialists: string[];
+
+  @IsOptional()
+  socials: Partial<SocialForm>;
+
+  @IsString()
+  branchId: string;
+
+  @IsArray()
+  curriculumsId: string[];
+
+  @IsNumber()
+  userId: number;
+}
+
+interface SocialForm {
+  line: string;
+  facebook: string;
+  linkedin: string;
+  github: string;
+  gitlab: string;
+  website: string;
+  twitter: string;
+  instagram: string;
+  youtube: string;
+  tiktok: string;
 }

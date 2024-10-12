@@ -12,7 +12,7 @@ import { Query } from '@nestjs/common';
 import { CreateCourseDto } from 'src/dto/course/create-course.dto';
 import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { CourseStudentDetail } from 'src/entities/courseStudentDetail.entity';
+import { CourseEnrollment } from 'src/entities/course-enrollment';
 
 @Controller('courses')
 export class CoursesController {
@@ -59,7 +59,7 @@ export class CoursesController {
   @Patch('importStudents/:id')
   importStudents(
     @Param('id') id: string,
-    @Body() courseStudentDetails: CourseStudentDetail[],
+    @Body() courseStudentDetails: CourseEnrollment[],
   ) {
     return this.coursesService.importStudents(id, courseStudentDetails);
   }

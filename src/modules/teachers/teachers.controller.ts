@@ -79,9 +79,12 @@ export class TeachersController {
     fs.writeFileSync(uploadPath, file.buffer);
 
     // set image name of teacher
-    const teacher = await this.teachersService.findOne(id);
-    teacher.avatarUrl = randomFileName;
-    await this.teachersService.update(id, teacher);
+    const teacher = await this.teachersService.findOne(+id);
+    teacher.picture = randomFileName;
+    await this.teachersService.update(
+      +id,
+      teacher as unknown as Partial<UpdateTeacherDto>,
+    );
     return { message: 'File upload successful', filename: randomFileName };
   }
 
@@ -94,19 +97,19 @@ export class TeachersController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
-    return this.teachersService.findOne(id);
+    return this.teachersService.findOne(+id);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() updateTeacherDto: UpdateTeacherDto) {
-    return this.teachersService.update(id, updateTeacherDto);
+    return this.teachersService.update(+id, updateTeacherDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   // @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
-    return this.teachersService.remove(id);
+    return this.teachersService.remove(+id);
   }
 }

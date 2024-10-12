@@ -10,12 +10,12 @@ import {
 } from '@nestjs/common';
 import { SubjectsService } from './subjects.service';
 import { SkillDetail } from 'src/entities/skillDetail.entity';
-import { SkillMapping } from '../../entities/subject.entity';
 import { CreateCloDto } from 'src/dto/clo/create-clo.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
 import { UpdateSubjectDto } from 'src/dto/subject/update-subject.dto';
 import { ClosService } from '../clos/clos.service';
+import { SkillMapping } from 'src/entities/subject.entity';
 
 @Controller('subjects')
 export class SubjectsController {
@@ -85,8 +85,8 @@ export class SubjectsController {
     return this.subjectsService.addCLO(id, plo); // add clo to curriculum
   }
 
-  @Post('skillMappings')
-  async skillMappings(@Body() skillMaping: SkillMapping[]) {
-    return this.subjectsService.skillMappings(skillMaping); // mapping skill with skill detail
+  @Post('skill-mappings')
+  async skillMappings(@Body() skill: SkillMapping[]) {
+    return this.subjectsService.skillMappings(skill); // mapping skill with skill detail
   }
 }

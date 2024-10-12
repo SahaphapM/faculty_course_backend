@@ -6,7 +6,7 @@ import { Brackets, Repository } from 'typeorm';
 import {
   SkillCollection,
   SkillCollectionTree,
-} from '../../entities/skil-collection.entity';
+} from '../../entities/skill-collection.entity';
 import { Skill } from 'src/entities/skill.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
 
@@ -88,9 +88,7 @@ export class StudentsService {
   async findAll(): Promise<Student[]> {
     return await this.studentRepository.find({
       relations: {
-        skillCollection: {
-          skillDetail: { skill: { parent: true, children: true } },
-        },
+        skillCollection: true,
       },
     });
   }
@@ -100,9 +98,7 @@ export class StudentsService {
     const student = await this.studentRepository.findOne({
       where: { id },
       relations: {
-        skillCollection: {
-          skillDetail: { skill: { parent: true, children: true } },
-        },
+        skillCollection: true,
       },
     });
     if (!student) {
@@ -137,17 +133,14 @@ export class StudentsService {
     const distinctParentSkills: Skill[] = [];
 
     for (let index = 0; index < skillCollections.length; index++) {
-      if (skillCollections[index].skillDetail.skill.parent) {
+      if (skillCollections[index].skill.parent) {
         if (
           !distinctParentSkills.some(
             (parentSkill) =>
-              parentSkill.id ===
-              skillCollections[index].skillDetail.skill.parent.id,
+              parentSkill.id === skillCollections[index].skill.parent.id,
           )
         ) {
-          distinctParentSkills.push(
-            skillCollections[index].skillDetail.skill.parent,
-          );
+          distinctParentSkills.push(skillCollections[index].skill.parent);
         }
       }
     }
@@ -172,23 +165,21 @@ export class StudentsService {
       // find children skillCollection by parent skill id
       const childrenSkillCollections = skillCollections.filter(
         (skillCollection) =>
-          skillCollection.skillDetail.skill.parent &&
-          skillCollection.skillDetail.skill.parent.id ===
+          skillCollection.skill.parent &&
+          skillCollection.skill.parent.id ===
             skillCollectionMapParent[index].id,
       );
 
       if (childrenSkillCollections) {
         for (let index = 0; index < childrenSkillCollections.length; index++) {
           const skillCollectionTree = new SkillCollectionTree();
-          skillCollectionTree.id =
-            childrenSkillCollections[index].skillDetail.id;
-          skillCollectionTree.name =
-            childrenSkillCollections[index].skillDetail.skill.name;
-          skillCollectionTree.acquiredLevel =
-            childrenSkillCollections[index].acquiredLevel;
-          skillCollectionTree.requiredLevel =
-            childrenSkillCollections[index].skillDetail.requiredLevel;
-          skillCollectionTree.pass = childrenSkillCollections[index].pass;
+          skillCollectionTree.id = childrenSkillCollections[index].skill.id;
+          skillCollectionTree.name = childrenSkillCollections[index].skill.name;
+          // skillCollectionTree.acquiredLevel =
+          //   childrenSkillCollections[index].level;
+          // skillCollectionTree.requiredLevel =
+          //   childrenSkillCollections[index].skill.requiredLevel;
+          skillCollectionTree.pass = childrenSkillCollections[index].passed;
           skillCollectionMapParent[index].children =
             skillCollectionMapParent[index].children || [];
           skillCollectionMapParent[index].children.push(skillCollectionTree);
@@ -200,14 +191,13 @@ export class StudentsService {
       // if skillCollection is in skillCollectionMapParent
       const chilSkillInParentMap = skillCollections.find(
         (skillCollection) =>
-          skillCollection.skillDetail.skill.id ===
-          skillCollectionMapParent[index].id,
+          skillCollection.skill.id === skillCollectionMapParent[index].id,
       );
       if (chilSkillInParentMap) {
         const parentSkillIndex = skillCollectionMapParent.findIndex(
           (skill) =>
-            chilSkillInParentMap.skillDetail.skill.parent &&
-            skill.id === chilSkillInParentMap.skillDetail.skill.parent.id,
+            chilSkillInParentMap.skill.parent &&
+            skill.id === chilSkillInParentMap.skill.parent.id,
         );
         if (parentSkillIndex > -1) {
           skillCollectionMapParent[parentSkillIndex].children.push(

@@ -252,14 +252,14 @@ export class SubjectsService {
     }
   }
 
-  async skillMappings(skillMaping: SkillMapping[]) {
+  async skillMappings(skillMapping: SkillMapping[]) {
     //////////// Should sort the skillMapping array on the SubjectID  ////////////
-    if (!skillMaping) {
+    if (!skillMapping) {
       throw new BadRequestException('Skill Mapping data not provided');
     }
 
     const distinctSubjectIds = Array.from(
-      new Set(skillMaping.map((map) => map.subjectId)),
+      new Set(skillMapping.map((map) => map.subjectId)),
     ); // get distinct subject IDs to map with skills with same subject ID
 
     // Loop through distinct subject IDs
@@ -268,12 +268,12 @@ export class SubjectsService {
 
       if (!subject) {
         throw new NotFoundException(
-          `Subject with ID ${skillMaping[index].subjectId} not found`,
+          `Subject with ID ${skillMapping[index].subjectId} not found`,
         );
       }
 
       // Filter skillMapping array to get skills of the current subject
-      const skillMapingOfSubjects = skillMaping.filter(
+      const skillMapingOfSubjects = skillMapping.filter(
         (map) => map.subjectId === subject.id,
       );
 
