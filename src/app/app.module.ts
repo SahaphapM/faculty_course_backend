@@ -15,7 +15,7 @@ import { TechSkillsModule } from '../modules/tech-skills/tech-skills.module';
 import { StudentsModule } from '../modules/students/students.module';
 import { RolesModule } from '../modules/roles/roles.module';
 import { CurriculumsModule } from 'src/modules/curriculums/curriculums.module';
-import { BranchsModule } from 'src/modules/branchs/branchs.module';
+import { BranchesModule } from 'src/modules/branches/branches.module';
 import { ClosModule } from 'src/modules/clos/clos.module';
 import { DepartmentsModule } from 'src/modules/departments/departments.module';
 import { CoursesModule } from 'src/modules/courses/courses.module';
@@ -55,7 +55,7 @@ import { CoursesModule } from 'src/modules/courses/courses.module';
     RolesModule,
     UsersModule,
     CurriculumsModule,
-    BranchsModule,
+    BranchesModule,
     SubjectsModule,
     PlosModule,
     ClosModule,

@@ -6,16 +6,16 @@ import { Repository } from 'typeorm';
 import { Branch } from '../../entities/branch.entity';
 
 @Injectable()
-export class BranchsService {
+export class BranchesService {
   constructor(
     @InjectRepository(Branch)
-    private branchsRepository: Repository<Branch>,
+    private braRepo: Repository<Branch>,
   ) {}
 
   async create(createBranchDto: CreateBranchDto): Promise<Branch> {
     try {
-      const branch = this.branchsRepository.create(createBranchDto);
-      return await this.branchsRepository.save(branch);
+      const branch = this.braRepo.create(createBranchDto);
+      return await this.braRepo.save(branch);
     } catch (error) {
       throw new Error(`Failed to create branch ${error.message}`);
     }
@@ -23,7 +23,7 @@ export class BranchsService {
 
   async findAll(): Promise<Branch[]> {
     try {
-      return await this.branchsRepository.find({
+      return await this.braRepo.find({
         relations: { curriculums: true, department: true, faculty: true },
       });
     } catch (error) {
@@ -33,7 +33,7 @@ export class BranchsService {
 
   async findOne(id: string): Promise<Branch> {
     try {
-      const branch = await this.branchsRepository.findOne({
+      const branch = await this.braRepo.findOne({
         where: { id },
         relations: { curriculums: true, department: true, faculty: true },
       });
@@ -50,8 +50,8 @@ export class BranchsService {
     try {
       const branch = await this.findOne(id);
       Object.assign(branch, updateBranchDto);
-      await this.branchsRepository.save(branch);
-      return this.branchsRepository.findOne({
+      await this.braRepo.save(branch);
+      return this.braRepo.findOne({
         where: { id },
         relations: { faculty: true, curriculums: true, department: true },
       });
@@ -63,7 +63,7 @@ export class BranchsService {
   async remove(id: string): Promise<void> {
     try {
       const branch = await this.findOne(id);
-      await this.branchsRepository.remove(branch);
+      await this.braRepo.remove(branch);
     } catch (error) {
       throw new Error('Failed to remove branch');
     }

@@ -38,7 +38,6 @@ export class TeachersController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createTeacherDto: CreateTeacherDto) {
-    console.log(createTeacherDto);
     return this.teachersService.create(createTeacherDto);
   }
 
