@@ -28,15 +28,12 @@ export class DepartmentsService {
   }
 
   async findAll(): Promise<Department[]> {
-    return this.departmentsRepository.find({
-      relations: { branches: true, faculty: true },
-    });
+    return this.departmentsRepository.find();
   }
 
   async findOne(id: string): Promise<Department> {
     const department = await this.departmentsRepository.findOne({
       where: { id },
-      relations: { branches: true, faculty: true },
     });
     if (!department) {
       throw new NotFoundException(`Department with ID ${id} not found`);
@@ -59,7 +56,7 @@ export class DepartmentsService {
       await this.departmentsRepository.save(department);
       return await this.departmentsRepository.findOne({
         where: { id },
-        relations: { branches: true, faculty: true },
+        // relations: { branches: true, faculty: true },
       });
     } catch (error) {
       throw new BadRequestException(

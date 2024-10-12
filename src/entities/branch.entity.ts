@@ -8,8 +8,6 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 import { Curriculum } from './curriculum.entity';
-import { Department } from './department.entity';
-
 @Entity()
 export class Branch {
   @PrimaryColumn()
@@ -18,15 +16,21 @@ export class Branch {
   @Column()
   name: string;
 
+  @Column()
+  engName: string;
+
+  @Column()
+  abbrev: string;
+
   @ManyToOne(() => Faculty, (faculty) => faculty.branches)
   @JoinColumn({ name: 'facultyId' })
   faculty: Faculty;
 
-  @ManyToOne(() => Department, (department) => department.branches, {
-    cascade: false,
-  })
-  @JoinColumn({ name: 'departmentId' })
-  department: Department;
+  // @ManyToOne(() => Department, (department) => department.branches, {
+  //   cascade: false,
+  // })
+  // @JoinColumn({ name: 'departmentId' })
+  // department: Department;
 
   @OneToMany(() => Curriculum, (curriculum) => curriculum.branch, {
     cascade: false,

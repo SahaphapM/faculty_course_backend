@@ -1,8 +1,5 @@
 import { IsString } from 'class-validator';
-
-import { Faculty } from 'src/entities/faculty.entity';
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
-import { Branch } from './branch.entity';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Department {
@@ -13,9 +10,9 @@ export class Department {
   @Column()
   name: string;
 
-  @OneToMany(() => Branch, (branch) => branch.department)
-  branches: Branch[];
+  // @OneToMany(() => Branch, (branch) => branch.department)
+  // branches: Branch[];
 
-  @ManyToOne(() => Faculty, (faculty) => faculty.departments, { cascade: true })
-  faculty: Faculty;
+  // @ManyToOne(() => Faculty, (faculty) => faculty.departments, { cascade: true })
+  // faculty: Faculty;
 }
