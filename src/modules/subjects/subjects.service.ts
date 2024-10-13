@@ -70,10 +70,11 @@ export class SubjectsService {
   async findAll(): Promise<Subject[]> {
     try {
       return await this.subjectsRepository.find({
-        relations: ['curriculums', 'clos', 'skillDetails'],
+        // relations: { curriculums: true },
+        // select: { curriculums: { id: true } },
       });
     } catch (error) {
-      throw new BadRequestException('Failed to get subjects');
+      throw new BadRequestException('Failed to get subjects', error.message);
     }
   }
 

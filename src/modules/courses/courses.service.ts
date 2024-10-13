@@ -17,6 +17,7 @@ import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { Skill } from 'src/entities/skill.entity';
 import { Teacher } from 'src/entities/teacher.entity';
+import { Curriculum } from 'src/entities/curriculum.entity';
 
 @Injectable()
 export class CoursesService {
@@ -33,6 +34,9 @@ export class CoursesService {
     @InjectRepository(SkillCollection)
     private readonly skillCollRepo: Repository<SkillCollection>,
 
+    @InjectRepository(Curriculum)
+    private readonly currRepo: Repository<Curriculum>,
+
     private readonly subjectsService: SubjectsService,
 
     private readonly studentsService: StudentsService, // Inject StudentsService
@@ -46,7 +50,7 @@ export class CoursesService {
       if (!subject) {
         throw new NotFoundException('Subject not found');
       }
-      const curriculum = await this.subjectsService.findOne(curriculumId);
+      const curriculum = await this.currRepo.findOneBy({ id: curriculumId });
       if (!curriculum) {
         throw new NotFoundException('Curriculum not found');
       }
