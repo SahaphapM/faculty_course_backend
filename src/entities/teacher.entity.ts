@@ -33,10 +33,10 @@ export class Teacher {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   officeRoom: string;
 
-  @Column()
+  @Column({ nullable: true })
   specialists: string;
 
   @Column({ nullable: true })

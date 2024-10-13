@@ -80,13 +80,15 @@ export class TeachersService {
   }
 
   async create(dto: CreateTeacherDto) {
-    const { email, branchId, curriculumsId, ...rest } = dto;
+    const { branchId, curriculumsId, ...rest } = dto;
 
     // Check if the teacher with this email already exists
-    const existingTeacher = await this.teaRepo.findOne({ where: { email } });
+    const existingTeacher = await this.teaRepo.findOne({
+      where: { email: rest.email },
+    });
     if (existingTeacher) {
       throw new BadRequestException(
-        `Teacher with Email ${email} already exists`,
+        `Teacher with Email ${rest.email} already exists`,
       );
     }
 
