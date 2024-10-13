@@ -5,7 +5,7 @@ import {
   JoinColumn,
   ManyToMany,
   OneToOne,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Curriculum } from 'src/entities/curriculum.entity';
 import { User } from './user.entity';
@@ -13,7 +13,7 @@ import { Branch } from './branch.entity';
 
 @Entity()
 export class Teacher {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
