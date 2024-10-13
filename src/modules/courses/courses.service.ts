@@ -130,34 +130,39 @@ export class CoursesService {
 
   // Find a single course by ID
   async findOne(id: string): Promise<Course> {
-    const course = await this.courseRepo
-      .createQueryBuilder('course')
-      .leftJoinAndSelect('course.courseStudentDetails', 'courseStudentDetails')
-      .leftJoinAndSelect('courseStudentDetails.student', 'student')
-      .leftJoinAndSelect('course.subject', 'subject')
-      .leftJoinAndSelect('subject.skillDetails', 'skillDetail')
-      .leftJoinAndSelect('skillDetail.skill', 'skill')
-      .select([
-        'course.id',
-        'course.name',
-        'course.description',
-        'course.active',
-        'courseStudentDetails.id',
-        'student.id', // Select only the student id
-        'student.name', // Select only the student name
-        'subject.id',
-        'subject.thaiName',
-        'subject.engName',
-        'subject.description',
-        'skillDetail.id',
-        'skillDetail.requiredLevel',
-        'skillDetail.description',
-        'skill.name',
-        'skill.description',
-        'skill.domain',
-      ])
-      .where('course.id = :id', { id })
-      .getOne();
+    // const course = await this.courseRepo
+    //   .createQueryBuilder('course')
+    //   .leftJoinAndSelect('course.courseStudentDetails', 'courseStudentDetails')
+    //   .leftJoinAndSelect('courseStudentDetails.student', 'student')
+    //   .leftJoinAndSelect('course.subject', 'subject')
+    //   .leftJoinAndSelect('subject.skillDetails', 'skillDetail')
+    //   .leftJoinAndSelect('skillDetail.skill', 'skill')
+    //   .select([
+    //     'course.id',
+    //     'course.name',
+    //     'course.description',
+    //     'course.active',
+    //     'courseStudentDetails.id',
+    //     'student.id', // Select only the student id
+    //     'student.name', // Select only the student name
+    //     'subject.id',
+    //     'subject.thaiName',
+    //     'subject.engName',
+    //     'subject.description',
+    //     'skillDetail.id',
+    //     'skillDetail.requiredLevel',
+    //     'skillDetail.description',
+    //     'skill.name',
+    //     'skill.description',
+    //     'skill.domain',
+    //   ])
+    //   .where('course.id = :id', { id })
+    //   .getOne();
+
+    const course = await this.courseRepo.findOne({
+      where: { id },
+      relations: { subject: true, courseEnrollment: true, teachers: true },
+    });
 
     if (!course) {
       throw new NotFoundException(`Course with ID ${id} not found`);
@@ -190,7 +195,7 @@ export class CoursesService {
     }
   }
 
-  async importStudents(
+  async importEnrollment(
     id: string,
     courseEnrolls: CourseEnrollment[],
   ): Promise<Course> {
@@ -222,15 +227,12 @@ export class CoursesService {
 
         courseEn.skillCollections = courseEn.skillCollections || [];
 
-        for (
-          let index = 0;
-          index < course.subject.skillDetails.length;
-          index++
-        ) {
-          const skillCollection = new SkillCollection();
-          skillCollection.skill = course.subject.skills[index];
-          skillCollection.student = student;
-          skillCollection.passed = false;
+        for (let index = 0; index < course.subject.skills.length; index++) {
+          const skillCollection = this.skillCollRepo.create({
+            skill: course.subject.skills[index],
+            passed: false,
+            student: student,
+          });
           const skillCollectionSaved =
             await this.skillCollRepo.save<SkillCollection>(skillCollection);
           courseEn.skillCollections.push(skillCollectionSaved);
@@ -248,8 +250,7 @@ export class CoursesService {
     // Save the updated course
     return await this.courseRepo.save(course);
   }
-
-  async removeStudent(
+  async removeEnrollment(
     courseId: string,
     courseStudentDetailId: number,
   ): Promise<Course> {
