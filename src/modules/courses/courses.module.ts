@@ -9,6 +9,7 @@ import { SkillCollection } from 'src/entities/skill-collection.entity';
 import { StudentsModule } from '../students/students.module';
 import { SubjectsModule } from '../subjects/subjects.module';
 import { Teacher } from 'src/entities/teacher.entity';
+import { Curriculum } from 'src/entities/curriculum.entity';
 
 @Module({
   imports: [
@@ -18,6 +19,7 @@ import { Teacher } from 'src/entities/teacher.entity';
       Student,
       SkillCollection,
       Teacher,
+      Curriculum,
     ]),
     StudentsModule,
     SubjectsModule,
