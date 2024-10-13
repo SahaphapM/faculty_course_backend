@@ -1,18 +1,27 @@
-import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateCourseDto {
   @IsString()
+  @IsOptional()
   description: string;
 
   @IsOptional()
+  @IsBoolean()
   active: boolean;
 
-  @IsNotEmpty()
+  @IsString()
   subjectId: string;
 
-  @IsNotEmpty()
+  @IsString()
   curriculumId: string;
 
-  @IsNotEmpty()
+  @IsArray()
+  @IsNumber({ allowNaN: false }, { each: true })
   teacherListId: number[];
 }
