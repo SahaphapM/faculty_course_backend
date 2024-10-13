@@ -41,7 +41,7 @@ export class Course {
   @OneToMany(() => CourseEnrollment, (c) => c.course)
   courseEnrollment: CourseEnrollment[];
 
-  @ManyToMany(() => Course, (c) => c.teachers)
+  @ManyToMany(() => Teacher, (c) => c.courses)
   @JoinTable()
   teachers: Teacher[];
 }
