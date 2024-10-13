@@ -37,6 +37,7 @@ export class CreateTeacherDto {
 
   @IsOptional()
   @IsArray()
+  @IsString({ each: true })
   specialists: string[];
 
   @IsOptional()
@@ -48,6 +49,7 @@ export class CreateTeacherDto {
 
   @IsOptional()
   @IsArray()
+  @IsString({ each: true })
   curriculumsId: string[];
 
   @IsOptional()

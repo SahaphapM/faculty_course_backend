@@ -82,41 +82,50 @@ export class TeachersService {
   async create(dto: CreateTeacherDto) {
     const { email, branchId, curriculumsId, ...rest } = dto;
 
-    const existingTeacher = await this.teaRepo.findOne({
-      where: { email },
-    });
+    // Check if the teacher with this email already exists
+    const existingTeacher = await this.teaRepo.findOne({ where: { email } });
     if (existingTeacher) {
       throw new BadRequestException(
         `Teacher with Email ${email} already exists`,
       );
     }
 
-    const [existBranch, existCurriculums] = await Promise.all([
-      this.braRepo.findOne({ where: { id: branchId } }),
-      this.curRepo.findBy({ id: In(curriculumsId) }),
-    ]);
+    let existBranch = null;
+    let existCurriculums = [];
 
-    if (!existBranch) {
-      throw new BadRequestException(
-        `Branch with ID ${branchId} does not exist`,
-      );
+    // Check for branch if branchId is provided
+    if (branchId) {
+      existBranch = await this.braRepo.findOne({ where: { id: branchId } });
+      if (!existBranch) {
+        throw new BadRequestException(
+          `Branch with ID ${branchId} does not exist`,
+        );
+      }
     }
 
-    if (existCurriculums.length !== curriculumsId.length) {
-      throw new BadRequestException(
-        `Curriculum with ID ${curriculumsId
-          .filter((id) => !existCurriculums.find((c) => c.id === id))
-          .join(', ')} does not exist`,
-      );
+    // Check for curriculums if curriculumsId is provided
+    if (curriculumsId && curriculumsId.length > 0) {
+      existCurriculums = await this.curRepo.findBy({ id: In(curriculumsId) });
+      if (existCurriculums.length !== curriculumsId.length) {
+        throw new BadRequestException(
+          `Curriculum with ID ${curriculumsId
+            .filter((id) => !existCurriculums.find((c) => c.id === id))
+            .join(', ')} does not exist`,
+        );
+      }
     }
 
+    // Create teacher instance, conditionally adding optional fields
     const teacher = this.teaRepo.create({
       ...rest,
-      specialists: dto.specialists.map((s) => s).join(', '),
-      socials: JSON.stringify(dto.socials),
-      curriculums: existCurriculums,
-      branch: existBranch,
+      specialists: dto.specialists
+        ? dto.specialists.map((s) => s).join(', ')
+        : '-',
+      socials: dto.socials ? JSON.stringify(dto.socials) : '-',
+      curriculums: existCurriculums.length > 0 ? existCurriculums : undefined,
+      branch: existBranch ?? undefined,
     });
+
     return await this.teaRepo.save(teacher);
   }
 
