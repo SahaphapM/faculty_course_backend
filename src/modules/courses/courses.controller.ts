@@ -56,19 +56,19 @@ export class CoursesController {
     return this.coursesService.selectSubject(id, subjectId);
   }
 
-  @Patch('importStudents/:id')
+  @Patch(':id/import-enrollment')
   importStudents(
-    @Param('id') id: string,
-    @Body() courseStudentDetails: CourseEnrollment[],
+    @Param('id') courseId: string,
+    @Body() enroll: CourseEnrollment[],
   ) {
-    return this.coursesService.importStudents(id, courseStudentDetails);
+    return this.coursesService.importEnrollment(courseId, enroll);
   }
 
-  @Delete('removeStudent/:courseId/:courseStudentDetailId')
+  @Delete(':id/remove-enrollment/:enId')
   removeStudent(
-    @Param('courseId') courseId: string,
-    @Param('courseStudentDetailId') courseStudentDetailId: number,
+    @Param('id') courseId: string,
+    @Param('enId') enrollId: number,
   ) {
-    return this.coursesService.removeStudent(courseId, courseStudentDetailId);
+    return this.coursesService.removeEnrollment(courseId, enrollId);
   }
 }
