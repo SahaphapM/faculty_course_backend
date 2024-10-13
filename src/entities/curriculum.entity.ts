@@ -52,9 +52,7 @@ export class Curriculum {
   @JoinTable()
   coordinators: Teacher[];
 
-  @ManyToMany(() => Subject, (subject) => subject.curriculums, {
-    cascade: false,
-  })
+  @ManyToMany(() => Subject, (subject) => subject.curriculums)
   @JoinTable()
   subjects: Subject[];
 }
