@@ -3,12 +3,15 @@ import {
   Column,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   OneToMany,
   PrimaryColumn,
 } from 'typeorm';
 import { CourseEnrollment } from './course-enrollment';
 import { Curriculum } from './curriculum.entity';
+import { Teacher } from './teacher.entity';
 
 @Entity()
 export class Course {
@@ -38,4 +41,8 @@ export class Course {
 
   @OneToMany(() => CourseEnrollment, (c) => c.course)
   courseEnrollment: CourseEnrollment[];
+
+  @ManyToMany(() => Course, (c) => c.teachers)
+  @JoinTable()
+  teachers: Teacher[];
 }

@@ -9,6 +9,7 @@ import {
 import { Curriculum } from 'src/entities/curriculum.entity';
 import { User } from './user.entity';
 import { Branch } from './branch.entity';
+import { Course } from './course.entity';
 
 @Entity()
 export class Teacher {
@@ -26,6 +27,9 @@ export class Teacher {
 
   @Column({ default: 'unknown.jpg' })
   picture: string;
+
+  @Column()
+  position: string;
 
   @OneToOne(() => User)
   user: User;
@@ -51,4 +55,7 @@ export class Teacher {
 
   @ManyToMany(() => Curriculum, (curriculum) => curriculum.coordinators)
   curriculums: Curriculum[];
+
+  @ManyToMany(() => Teacher, (teacher) => teacher.courses)
+  courses: Course[];
 }

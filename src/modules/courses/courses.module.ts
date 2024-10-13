@@ -8,6 +8,7 @@ import { Student } from 'src/entities/student.entity';
 import { SkillCollection } from 'src/entities/skill-collection.entity';
 import { StudentsModule } from '../students/students.module';
 import { SubjectsModule } from '../subjects/subjects.module';
+import { Teacher } from 'src/entities/teacher.entity';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { SubjectsModule } from '../subjects/subjects.module';
       CourseEnrollment,
       Student,
       SkillCollection,
+      Teacher,
     ]),
     StudentsModule,
     SubjectsModule,

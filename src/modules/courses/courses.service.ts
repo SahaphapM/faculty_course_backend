@@ -16,6 +16,7 @@ import { CreateCourseDto } from 'src/dto/course/create-course.dto';
 import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { Skill } from 'src/entities/skill.entity';
+import { Teacher } from 'src/entities/teacher.entity';
 
 @Injectable()
 export class CoursesService {
@@ -25,6 +26,9 @@ export class CoursesService {
 
     @InjectRepository(CourseEnrollment)
     private readonly courseEnrollRepo: Repository<CourseEnrollment>,
+
+    @InjectRepository(Teacher)
+    private readonly teaRepo: Repository<Teacher>,
 
     @InjectRepository(SkillCollection)
     private readonly skillCollRepo: Repository<SkillCollection>,
@@ -36,23 +40,33 @@ export class CoursesService {
 
   // Create a new course
   async create(dto: CreateCourseDto): Promise<Course> {
+    const { subjectId, curriculumId, teacherListId, ...rest } = dto;
     try {
-      const subject = await this.subjectsService.findOne(dto.subjectId);
+      const subject = await this.subjectsService.findOne(subjectId);
       if (!subject) {
         throw new NotFoundException('Subject not found');
       }
-      const curriculum = await this.subjectsService.findOne(dto.curriculumId);
+      const curriculum = await this.subjectsService.findOne(curriculumId);
       if (!curriculum) {
         throw new NotFoundException('Curriculum not found');
       }
+
+      const teachers = await Promise.all(
+        teacherListId.map(async (id) => {
+          const tea = await this.teaRepo.findOneBy({ id });
+          return tea;
+        }),
+      );
+
       const newCourse = this.courseRepo.create({
-        ...dto,
+        ...rest,
         subject,
         curriculum,
+        teachers,
       });
       return await this.courseRepo.save(newCourse);
     } catch (error) {
-      throw new BadRequestException('Failed to create course');
+      throw new BadRequestException(`Failed to create course ${error}`);
     }
   }
 
