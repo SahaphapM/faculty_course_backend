@@ -1,4 +1,3 @@
-import { IsEmail } from 'class-validator';
 import {
   Column,
   Entity,
@@ -31,8 +30,7 @@ export class Teacher {
   @OneToOne(() => User)
   user: User;
 
-  @Column({ unique: true })
-  @IsEmail()
+  @Column()
   email: string;
 
   @Column()
