@@ -18,8 +18,8 @@ export class CreateCourseDto {
   @IsString()
   subjectId: string;
 
-  @IsString()
-  curriculumId: string;
+  // @IsString()
+  // curriculumId: string;
 
   @IsArray()
   @IsNumber({ allowNaN: false }, { each: true })

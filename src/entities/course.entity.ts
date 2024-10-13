@@ -10,7 +10,6 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 import { CourseEnrollment } from './course-enrollment';
-import { Curriculum } from './curriculum.entity';
 import { Teacher } from './teacher.entity';
 
 @Entity()
@@ -33,11 +32,11 @@ export class Course {
   @JoinColumn({ name: 'subjectId' })
   subject: Subject;
 
-  @ManyToOne(() => Subject, (subject) => subject.courses, {
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn({ name: 'curriculumId' })
-  curriculum: Curriculum;
+  // @ManyToOne(() => Subject, (subject) => subject.courses, {
+  //   onDelete: 'CASCADE',
+  // })
+  // @JoinColumn({ name: 'curriculumId' })
+  // curriculum: Curriculum;
 
   @OneToMany(() => CourseEnrollment, (c) => c.course)
   courseEnrollment: CourseEnrollment[];
