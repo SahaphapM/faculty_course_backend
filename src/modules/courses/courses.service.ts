@@ -17,7 +17,6 @@ import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { Skill } from 'src/entities/skill.entity';
 import { Teacher } from 'src/entities/teacher.entity';
-import { Curriculum } from 'src/entities/curriculum.entity';
 
 @Injectable()
 export class CoursesService {
@@ -34,8 +33,8 @@ export class CoursesService {
     @InjectRepository(SkillCollection)
     private readonly skillCollRepo: Repository<SkillCollection>,
 
-    @InjectRepository(Curriculum)
-    private readonly currRepo: Repository<Curriculum>,
+    // @InjectRepository(Curriculum)
+    // private readonly currRepo: Repository<Curriculum>,
 
     private readonly subjectsService: SubjectsService,
 
@@ -44,16 +43,16 @@ export class CoursesService {
 
   // Create a new course
   async create(dto: CreateCourseDto): Promise<Course> {
-    const { subjectId, curriculumId, teacherListId, ...rest } = dto;
+    const { subjectId, teacherListId, ...rest } = dto;
     try {
       const subject = await this.subjectsService.findOne(subjectId);
       if (!subject) {
         throw new NotFoundException('Subject not found');
       }
-      const curriculum = await this.currRepo.findOneBy({ id: curriculumId });
-      if (!curriculum) {
-        throw new NotFoundException('Curriculum not found');
-      }
+      // const curriculum = await this.currRepo.findOneBy({ id: curriculumId });
+      // if (!curriculum) {
+      //   throw new NotFoundException('Curriculum not found');
+      // }
 
       const teachers = await Promise.all(
         teacherListId.map(async (id) => {
@@ -65,7 +64,6 @@ export class CoursesService {
       const newCourse = this.courseRepo.create({
         ...rest,
         subject,
-        curriculum,
         teachers,
       });
       return await this.courseRepo.save(newCourse);
