@@ -52,8 +52,8 @@ export class TeachersService {
     if (search) {
       queryBuilder.andWhere(
         new Brackets((qb) => {
-          qb.where('teacher.firstName LIKE :search', { search: `%${search}%` })
-            .orWhere('teacher.lastName LIKE :search', { search: `%${search}%` })
+          qb.where('teacher.name LIKE :search', { search: `%${search}%` })
+            .orWhere('teacher.engName LIKE :search', { search: `%${search}%` })
             .orWhere('teacher.email LIKE :search', { search: `%${search}%` });
         }),
       );
