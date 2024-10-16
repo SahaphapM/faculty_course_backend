@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsBoolean,
@@ -21,6 +22,7 @@ export class CreateCourseDto {
   // @IsString()
   // curriculumId: string;
 
+  @ApiProperty({ type: [Number] })
   @IsArray()
   @IsNumber({ allowNaN: false }, { each: true })
   teacherListId: number[];

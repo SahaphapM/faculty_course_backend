@@ -1,13 +1,18 @@
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { Skill } from 'src/entities/skill.entity';
-import { TechSkill } from 'src/entities/tech-skill.entity';
 
 export class CreateSkillDto {
-  id: number | null;
+  @IsOptional()
+  @IsNumber()
+  id: number;
 
+  @IsString()
   name: string;
 
+  @IsString()
   description: string;
 
+  @IsString()
   domain: string;
 
   // subjects: Subject[] | null;
@@ -16,5 +21,5 @@ export class CreateSkillDto {
 
   parent: Skill | null;
 
-  techSkills: TechSkill[] | null;
+  // techSkills: TechSkill[] | null;
 }

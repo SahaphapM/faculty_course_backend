@@ -10,7 +10,9 @@ import {
 import { DepartmentsService } from './departments.service';
 import { CreateDepartmentDto } from 'src/dto/department/create-department.dto';
 import { UpdateDepartmentDto } from 'src/dto/department/update-department.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('departments')
 export class DepartmentsController {
   constructor(private readonly departmentsService: DepartmentsService) {}

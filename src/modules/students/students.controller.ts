@@ -11,7 +11,9 @@ import {
 import { StudentsService } from './students.service';
 import { CreateStudentDto } from '../../dto/student/create-student.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}

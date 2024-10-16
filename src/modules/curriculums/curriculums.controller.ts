@@ -13,12 +13,13 @@ import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from '../../dto/curriculum/create-curriculum.dto';
 import { UpdateCurriculumDto } from '../../dto/curriculum/update-curriculum.dto';
 import { SubjectsService } from 'src/modules/subjects/subjects.service';
-
 import { CreatePloDto } from 'src/dto/plo/create-plo.dto';
 import { PlosService } from 'src/modules/plos/plos.service';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('curriculums')
 export class CurriculumsController {
   constructor(

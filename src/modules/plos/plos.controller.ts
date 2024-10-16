@@ -10,7 +10,9 @@ import {
 import { PlosService } from './plos.service';
 import { CreatePloDto } from '../../dto/plo/create-plo.dto';
 import { UpdatePloDto } from '../../dto/plo/update-plo.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('plos')
 export class PlosController {
   constructor(private readonly plosService: PlosService) {}

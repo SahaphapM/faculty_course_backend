@@ -98,10 +98,6 @@ export class UsersService {
     // const user = this.usersRepository.create(createUserDto);
     // user.roles = createUserDto.roles;
 
-    // // Hashing password
-    // const saltOrRounds = 10;
-    // user.password = await bcrypt.hash(createUserDto.password, saltOrRounds);
-
     // try {
     //   return await this.usersRepository.save(user);
     // } catch (error) {

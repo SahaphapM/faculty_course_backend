@@ -28,7 +28,7 @@ export class RolesService {
     return await this.rolesRepository.find();
   }
 
-  async findOne(id: string): Promise<Role> {
+  async findOne(id: number): Promise<Role> {
     const role = await this.rolesRepository.findOne({
       where: { id },
       // relations: ['users'],
@@ -39,7 +39,7 @@ export class RolesService {
     return role;
   }
 
-  async update(id: string, updateRoleDto: UpdateRoleDto): Promise<Role> {
+  async update(id: number, updateRoleDto: UpdateRoleDto): Promise<Role> {
     const role = await this.rolesRepository.preload({
       id,
       ...updateRoleDto,
@@ -56,7 +56,7 @@ export class RolesService {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const role = await this.findOne(id);
     if (!role) {
       throw new NotFoundException(`Role with ID ${id} not found`);

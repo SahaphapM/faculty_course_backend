@@ -22,10 +22,12 @@ import * as path from 'path';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
 import { UpdateUserDto } from 'src/dto/user/update-user.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 2 * 1024 * 1024; // 2 mb
 const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 
+@ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

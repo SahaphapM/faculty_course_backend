@@ -1,12 +1,20 @@
-import { Plo } from 'src/entities/plo.entity';
-import { Subject } from 'src/entities/subject.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateCloDto {
+  @ApiProperty()
+  @IsString()
   id: string;
 
+  @ApiProperty()
+  @IsString()
   description: string;
 
-  subject: Subject;
+  @ApiProperty()
+  @IsNotEmpty()
+  subjectId: string;
 
-  plo: Plo;
+  @ApiProperty()
+  @IsNotEmpty()
+  ploId: string;
 }

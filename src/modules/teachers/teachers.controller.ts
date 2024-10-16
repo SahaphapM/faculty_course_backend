@@ -22,10 +22,12 @@ import { CustomUploadFileTypeValidator } from './teachers.file.validators';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 2 * 1024 * 1024; // 2 mb
 const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 
+@ApiBearerAuth()
 @Controller('teachers')
 export class TeachersController {
   constructor(private readonly teachersService: TeachersService) {}

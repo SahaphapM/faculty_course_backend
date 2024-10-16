@@ -18,8 +18,7 @@ async function bootstrap() {
   const config = new DocumentBuilder()
     .setTitle('BUU APIs')
     .setDescription('The API description')
-    .setVersion('1.0')
-    .addTag('cats')
+    .setVersion('0.3')
     .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);

@@ -16,7 +16,9 @@ import { TechSkillsService } from 'src/modules/tech-skills/tech-skills.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSkillDto } from 'src/dto/skill/create-skill.dto';
 import { UpdateSkillDto } from 'src/dto/skill/update-skill.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('skills')
 export class SkillsController {
   constructor(
