@@ -79,9 +79,9 @@ export class UsersController {
     fs.writeFileSync(uploadPath, file.buffer);
 
     // set image name of user
-    const user = await this.usersService.findOne(+id);
-    user.avatarUrl = randomFileName;
-    await this.usersService.update(+id, user);
+    // const user = await this.usersService.findOne(+id);
+    // user.avatarUrl = randomFileName;
+    // await this.usersService.update(+id, user);
     return { message: 'File upload successful', filename: randomFileName };
   }
 

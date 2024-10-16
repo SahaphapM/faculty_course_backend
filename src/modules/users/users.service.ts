@@ -9,12 +9,21 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
 import { UpdateUserDto } from 'src/dto/user/update-user.dto';
+import { Role } from 'src/entities/role.entity';
+import { Student } from 'src/entities/student.entity';
+import { Teacher } from 'src/entities/teacher.entity';
 
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private UserRepo: Repository<User>,
+    @InjectRepository(Role)
+    private roleRepo: Repository<Role>,
+    @InjectRepository(Student)
+    private stuRepo: Repository<Student>,
+    @InjectRepository(Teacher)
+    private teaRepo: Repository<Teacher>,
   ) {}
 
   async findAllByPage(
@@ -102,7 +111,14 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return await this.UserRepo.find({
-      relations: { roles: true },
+      relations: { roles: true, student: true, teacher: true },
+      select: {
+        id: true,
+        email: true,
+        roles: { id: true, name: true },
+        student: { id: true, name: true },
+        teacher: { id: true, name: true },
+      },
     });
   }
 
@@ -124,20 +140,54 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+  async update(id: number, updateUserDto: UpdateUserDto) {
     const user = await this.findOne(id);
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+
+    const roles = await Promise.all(
+      updateUserDto.roles.map((role) => {
+        const res = this.roleRepo.findOneBy({ id: role.id });
+        if (!res) {
+          throw new NotFoundException(`Role with ID ${role.id} not found`);
+        }
+        return res;
+      }),
+    );
     // Update user properties
     Object.assign(user, updateUserDto);
-    user.roles = updateUserDto.roles;
+    user.roles = roles;
+
+    if (updateUserDto.studentId) {
+      const ent = await this.stuRepo.findOneBy({
+        id: updateUserDto.studentId,
+      });
+      if (!ent) {
+        throw new NotFoundException(
+          `User with ID ${updateUserDto.studentId} not found`,
+        );
+      }
+      user.student = ent;
+    }
+
+    if (updateUserDto.teacherId) {
+      const ent = await this.teaRepo.findOneBy({
+        id: updateUserDto.teacherId,
+      });
+      if (!ent) {
+        throw new NotFoundException(
+          `User with ID ${updateUserDto.teacherId} not found`,
+        );
+      }
+      user.teacher = ent;
+    }
 
     try {
       await this.UserRepo.save(user);
-      const userUpdated = await this.findOne(id);
-      return userUpdated;
+      // const userUpdated = await this.findOne(id);
+      // return userUpdated;
     } catch (error) {
       throw new BadRequestException('Failed to update user');
     }
@@ -145,7 +195,6 @@ export class UsersService {
 
   async remove(id: number) {
     const user = await this.findOne(id);
-    console.log(user);
     try {
       await this.UserRepo.remove(user);
       return `Success Delete ID ${id}`;
