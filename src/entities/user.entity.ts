@@ -40,7 +40,7 @@ export class User {
   @JoinTable()
   roles: Role[];
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, select: false })
   hashedRefreshToken: string;
 
   @BeforeInsert()
