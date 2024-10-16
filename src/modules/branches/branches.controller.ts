@@ -10,7 +10,9 @@ import {
 import { BranchesService } from './branches.service';
 import { CreateBranchDto } from '../../dto/branch/create-branch.dto';
 import { UpdateBranchDto } from '../../dto/branch/update-branch.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('branches')
 export class BranchesController {
   constructor(private readonly branchService: BranchesService) {}

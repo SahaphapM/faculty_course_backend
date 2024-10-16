@@ -1,30 +1,44 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsArray, IsNumber, IsString } from 'class-validator';
 import { Branch } from 'src/entities/branch.entity';
-import { Plo } from 'src/entities/plo.entity';
-import { Subject } from 'src/entities/subject.entity';
-import { Teacher } from 'src/entities/teacher.entity';
 
 export class CreateCurriculumDto {
+  @IsString()
   id: string;
 
-  thaiName: string;
+  @IsString()
+  name: string;
 
+  @IsString()
   engName: string;
 
-  thaiDegreeName: string;
+  @IsString()
+  degree: string;
 
-  engDegreeName: string;
+  @IsString()
+  engDegree: string;
 
-  branch: Branch;
+  @IsString()
+  branchId: string;
 
+  @IsString()
   description: string;
 
+  @IsNumber()
   period: number;
 
+  @IsNumber()
   minimumGrade: number;
 
-  coordinators: Teacher[];
+  @ApiProperty({ type: [Number] })
+  @IsArray()
+  coordinatorListId: number[];
 
-  plos: Plo[];
+  @ApiProperty({ type: [String] })
+  @IsString()
+  ploListId: string[];
 
-  subjects: Subject[];
+  @ApiProperty({ type: [String] })
+  @IsString()
+  subjectListId: string[];
 }

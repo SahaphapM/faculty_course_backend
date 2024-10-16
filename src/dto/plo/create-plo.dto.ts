@@ -1,11 +1,23 @@
-import { Clo } from 'src/entities/clo.entity';
-import { Curriculum } from 'src/entities/curriculum.entity';
+import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 export class CreatePloDto {
+  @IsString()
   id: string;
+
+  @IsString()
   num_plo: string;
+
+  @IsString()
   description: string;
+
+  @IsString()
   resultTypes: string;
-  curriculum: Curriculum;
-  clos: Clo[];
+
+  @IsString()
+  curriculumId: string;
+
+  @ApiProperty({ type: [String] })
+  @IsString()
+  cloListId: string[];
 }

@@ -6,10 +6,12 @@ import { Curriculum } from '../../entities/curriculum.entity';
 import { SubjectsModule } from 'src/modules/subjects/subjects.module';
 import { PlosModule } from 'src/modules/plos/plos.module';
 import { TeachersModule } from 'src/modules/teachers/teachers.module';
+import { BranchesModule } from '../branches/branches.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Curriculum]),
+    BranchesModule,
     SubjectsModule,
     TeachersModule,
     PlosModule,

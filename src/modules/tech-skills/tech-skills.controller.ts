@@ -10,7 +10,9 @@ import {
 import { TechSkillsService } from './tech-skills.service';
 import { CreateTechSkillDto } from './dto/create-tech-skill.dto';
 import { UpdateTechSkillDto } from './dto/update-tech-skill.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('techSkills')
 export class TechSkillsController {
   constructor(private readonly techSkillsService: TechSkillsService) {}

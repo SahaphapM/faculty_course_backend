@@ -16,7 +16,9 @@ import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
 import { UpdateSubjectDto } from 'src/dto/subject/update-subject.dto';
 import { ClosService } from '../clos/clos.service';
 import { SkillMapping } from 'src/entities/subject.entity';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('subjects')
 export class SubjectsController {
   constructor(

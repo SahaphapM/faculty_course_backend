@@ -14,7 +14,9 @@ import { ClosService } from './clos.service';
 import { CreateCloDto } from 'src/dto/clo/create-clo.dto';
 import { UpdateCloDto } from 'src/dto/clo/update-clo.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('clos')
 export class ClosController {
   constructor(private readonly closService: ClosService) {}

@@ -12,14 +12,20 @@ import { Subject } from 'src/entities/subject.entity';
 import { Plo } from 'src/entities/plo.entity';
 import { TeachersService } from 'src/modules/teachers/teachers.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
+import { BranchesService } from '../branches/branches.service';
+import { SubjectsService } from '../subjects/subjects.service';
+import { PlosService } from '../plos/plos.service';
 
 @Injectable()
 export class CurriculumsService {
   constructor(
     @InjectRepository(Curriculum)
-    private curriculumsRepository: Repository<Curriculum>,
+    private currRepo: Repository<Curriculum>,
 
-    private readonly teachersService: TeachersService,
+    private readonly ploService: PlosService,
+    private readonly subjectsService: SubjectsService,
+    private readonly branchService: BranchesService,
+    private readonly teacherService: TeachersService,
   ) {}
 
   async findAllByPage(
@@ -50,18 +56,17 @@ export class CurriculumsService {
       ];
     }
 
-    const [result, total] =
-      await this.curriculumsRepository.findAndCount(options);
+    const [result, total] = await this.currRepo.findAndCount(options);
 
     return { data: result, total };
   }
 
   async create(createCurriculumDto: CreateCurriculumDto): Promise<Curriculum> {
-    const curriculum = this.curriculumsRepository.create(createCurriculumDto);
+    const curriculum = this.currRepo.create(createCurriculumDto);
     try {
-      await this.curriculumsRepository.save(curriculum);
+      await this.currRepo.save(curriculum);
       const id = curriculum.id;
-      return this.curriculumsRepository.findOne({
+      return this.currRepo.findOne({
         where: { id },
       });
     } catch (error) {
@@ -73,7 +78,7 @@ export class CurriculumsService {
   }
 
   async findAll(): Promise<Curriculum[]> {
-    return await this.curriculumsRepository.find({
+    return await this.currRepo.find({
       relations: {
         plos: true,
         subjects: true,
@@ -83,7 +88,7 @@ export class CurriculumsService {
   }
 
   async findOne(id: string): Promise<Curriculum> {
-    const curriculum = await this.curriculumsRepository.findOne({
+    const curriculum = await this.currRepo.findOne({
       where: { id },
       relations: {
         plos: true,
@@ -98,26 +103,40 @@ export class CurriculumsService {
     return curriculum;
   }
 
-  async update(
-    id: string,
-    updateCurriculumDto: UpdateCurriculumDto,
-  ): Promise<Curriculum> {
-    const curriculum = await this.findOne(id);
+  async update(id: string, dto: UpdateCurriculumDto) {
+    let curriculum = await this.findOne(id);
 
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
 
-    this.curriculumsRepository.merge(curriculum, updateCurriculumDto); // directly merge is not to delete the first data.
-    curriculum.plos = updateCurriculumDto.plos;
-    curriculum.subjects = updateCurriculumDto.subjects;
+    curriculum = this.currRepo.merge(curriculum, dto);
+
+    if (dto.branchId) {
+      const branch = await this.branchService.findOne(dto.branchId);
+      curriculum.branch = branch;
+    }
+
+    if (dto.coordinatorListId) {
+      const coordinators = await Promise.all(
+        dto.coordinatorListId.map((c) => this.teacherService.findOne(c)),
+      );
+      curriculum.coordinators = coordinators;
+    }
+
+    if (dto.ploListId) {
+      const plos = await Promise.all(
+        dto.ploListId.map((p) => this.ploService.findOne(p)),
+      );
+      curriculum.plos = plos;
+    }
     // Object.assign(curriculum, updateCurriculumDto); // directly create new delete the first data to new value.
 
     try {
-      await this.curriculumsRepository.save(curriculum);
-      return this.curriculumsRepository.findOne({
-        where: { id },
-      });
+      await this.currRepo.save(curriculum);
+      // return this.currRepo.findOne({
+      //   where: { id },
+      // });
     } catch (error) {
       throw new BadRequestException(
         'Failed to update Curriculum',
@@ -136,8 +155,8 @@ export class CurriculumsService {
     curriculum.subjects = subjects;
 
     try {
-      await this.curriculumsRepository.save(curriculum);
-      return this.curriculumsRepository.findOne({
+      await this.currRepo.save(curriculum);
+      return this.currRepo.findOne({
         where: { id },
         relations: { subjects: true },
       });
@@ -156,8 +175,8 @@ export class CurriculumsService {
     }
     curriculum.subjects = subjects;
     try {
-      await this.curriculumsRepository.save(curriculum);
-      return this.curriculumsRepository.findOne({
+      await this.currRepo.save(curriculum);
+      return this.currRepo.findOne({
         where: { id },
         relations: { subjects: true },
       });
@@ -181,15 +200,13 @@ export class CurriculumsService {
     curriculum.coordinators = [];
     if (teacherListId) {
       for (let index = 0; index < teacherListId.length; index++) {
-        const teacher = await this.teachersService.findOne(
-          teacherListId[index],
-        );
+        const teacher = await this.teacherService.findOne(teacherListId[index]);
         curriculum.coordinators.push(teacher);
       }
     }
     try {
-      await this.curriculumsRepository.save(curriculum);
-      return this.curriculumsRepository.findOne({
+      await this.currRepo.save(curriculum);
+      return this.currRepo.findOne({
         where: { id },
       });
     } catch (error) {
@@ -210,8 +227,8 @@ export class CurriculumsService {
     }
     curriculum.plos.push(plo);
     try {
-      await this.curriculumsRepository.save(curriculum);
-      return this.curriculumsRepository.findOne({
+      await this.currRepo.save(curriculum);
+      return this.currRepo.findOne({
         where: { id },
         relations: { plos: true },
       });
@@ -226,7 +243,7 @@ export class CurriculumsService {
   async remove(id: string): Promise<void> {
     const curriculum = await this.findOne(id);
     try {
-      await this.curriculumsRepository.remove(curriculum);
+      await this.currRepo.remove(curriculum);
     } catch (error) {
       throw new BadRequestException('Failed to remove user');
     }

@@ -10,7 +10,9 @@ import {
 import { FacultiesService } from './faculties.service';
 import { CreateFacultyDto } from '../../dto/faculty/create-faculty.dto';
 import { UpdateFacultyDto } from '../../dto/faculty/update-faculty.dto';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('faculties')
 export class FacultiesController {
   constructor(private readonly facultiesService: FacultiesService) {}
