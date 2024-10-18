@@ -5,27 +5,27 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Like, Repository } from 'typeorm';
-import { SkillMapping, Subject } from '../../entities/subject.entity';
+import { Subject } from '../../entities/subject.entity';
 import { SkillDetail } from 'src/entities/skillDetail.entity';
-import { SkillsService } from 'src/modules/skills/skills.service';
 import { Clo } from '../../entities/clo.entity';
 import { Curriculum } from '../../entities/curriculum.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { CreateSkillDto } from 'src/dto/skill/create-skill.dto';
 import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
 import { UpdateSubjectDto } from 'src/dto/subject/update-subject.dto';
+import { CreateSkillCollection } from 'src/dto/skill/skill-collection.dto';
+import { Skill } from 'src/entities/skill.entity';
 
 @Injectable()
 export class SubjectsService {
   constructor(
     @InjectRepository(Subject)
-    private subjectsRepository: Repository<Subject>,
+    private subRepo: Repository<Subject>,
     @InjectRepository(Curriculum)
-    private curriculumsRepository: Repository<Curriculum>,
+    private curRepo: Repository<Curriculum>,
     @InjectRepository(SkillDetail)
     private readonly SkillDetailsRepository: Repository<SkillDetail>,
-
-    private readonly skillsService: SkillsService,
+    @InjectRepository(Skill)
+    private readonly skillRepo: Repository<Skill>,
   ) {}
 
   async findAllByPage(
@@ -43,7 +43,7 @@ export class SubjectsService {
 
     if (search) {
       options.where = [
-        { thaiName: Like(`%${search}%`) },
+        { name: Like(`%${search}%`) },
         { engName: Like(`%${search}%`) },
         { id: Like(`%${search}%`) },
       ];
@@ -51,17 +51,26 @@ export class SubjectsService {
 
     // console.log('Query options:', options); // Debugging line
 
-    const [result, total] = await this.subjectsRepository.findAndCount(options);
+    const [result, total] = await this.subRepo.findAndCount(options);
 
     // console.log('Result:', result); // Debugging line
     // console.log('Total:', total); // Debugging line
 
     return { data: result, total };
   }
-  async create(createSubjectDto: CreateSubjectDto): Promise<Subject> {
-    const subject = this.subjectsRepository.create(createSubjectDto);
+  async create(dto: CreateSubjectDto): Promise<Subject> {
+    let skills: Skill[];
+    if (dto.skillListId && dto.skillListId.length > 0) {
+      skills = await Promise.all(
+        dto.skillListId.map((id) => this.skillRepo.findOneBy({ id })),
+      );
+      if (!skills) {
+        throw new NotFoundException('Skills not found');
+      }
+    }
+    const subject = this.subRepo.create({ ...dto, skills });
     try {
-      return await this.subjectsRepository.save(subject);
+      return await this.subRepo.save(subject);
     } catch (error) {
       throw new BadRequestException('Failed to create subject', error.message);
     }
@@ -69,7 +78,7 @@ export class SubjectsService {
 
   async findAll(): Promise<Subject[]> {
     try {
-      return await this.subjectsRepository.find({
+      return await this.subRepo.find({
         // relations: { curriculums: true },
         // select: { curriculums: { id: true } },
       });
@@ -79,7 +88,7 @@ export class SubjectsService {
   }
 
   async findOne(id: string): Promise<Subject> {
-    const subject = await this.subjectsRepository.findOne({
+    const subject = await this.subRepo.findOne({
       where: { id },
       relations: { skillDetails: { skill: { parent: true } } },
     });
@@ -89,20 +98,17 @@ export class SubjectsService {
     return subject;
   }
 
-  async update(
-    id: string,
-    updateSubjectDto: UpdateSubjectDto,
-  ): Promise<Subject> {
-    const subject = await this.subjectsRepository.preload({
+  async update(id: string, dto: UpdateSubjectDto): Promise<Subject> {
+    const subject = await this.subRepo.preload({
       id,
-      ...updateSubjectDto,
+      ...dto,
     });
     if (!subject) {
       throw new NotFoundException(`Subject with id ${id} not found`);
     }
     try {
-      await this.subjectsRepository.save(subject);
-      return this.subjectsRepository.findOne({
+      await this.subRepo.save(subject);
+      return this.subRepo.findOne({
         where: { id },
         relations: { clos: true, curriculums: true },
       });
@@ -112,7 +118,7 @@ export class SubjectsService {
   }
 
   async addCLO(id: string, clo: Clo): Promise<Subject> {
-    const subject = await this.subjectsRepository.findOne({ where: { id } });
+    const subject = await this.subRepo.findOne({ where: { id } });
     if (!subject) {
       throw new NotFoundException(`Subject with ID ${id} not found`);
     }
@@ -121,8 +127,8 @@ export class SubjectsService {
     }
     subject.clos.push(clo);
     try {
-      await this.subjectsRepository.save(subject);
-      return this.subjectsRepository.findOne({
+      await this.subRepo.save(subject);
+      return this.subRepo.findOne({
         where: { id },
         relations: { clos: true },
       });
@@ -161,7 +167,7 @@ export class SubjectsService {
     }
 
     try {
-      return await this.subjectsRepository.save(subject);
+      return await this.subRepo.save(subject);
     } catch (error) {
       throw new BadRequestException(
         'Failed to update SkillDetail in Subject',
@@ -183,7 +189,7 @@ export class SubjectsService {
 
   async removeSkill(id: string, skillDetailId: number): Promise<Subject> {
     // Fetch the subject with the associated skillDetails
-    const subject = await this.subjectsRepository.findOne({
+    const subject = await this.subRepo.findOne({
       where: { id },
       relations: { skillDetails: true },
     });
@@ -213,10 +219,10 @@ export class SubjectsService {
       await this.SkillDetailsRepository.delete(skillDetailId);
 
       // Save the updated subject
-      await this.subjectsRepository.save(subject);
+      await this.subRepo.save(subject);
 
       // Return the updated subject with the remaining skillDetails
-      return await this.subjectsRepository.findOne({
+      return await this.subRepo.findOne({
         where: { id },
         relations: { skillDetails: true },
       });
@@ -236,16 +242,16 @@ export class SubjectsService {
     }
 
     // Remove the subject from related curriculums
-    const curriculums = await this.curriculumsRepository.find({
+    const curriculums = await this.curRepo.find({
       relations: ['subjects'],
     });
     curriculums.forEach((curriculum) => {
       curriculum.subjects = curriculum.subjects.filter((sub) => sub.id !== id);
     });
-    await this.curriculumsRepository.save(curriculums);
+    await this.curRepo.save(curriculums);
 
     try {
-      await this.subjectsRepository.remove(subject);
+      await this.subRepo.remove(subject);
     } catch (error) {
       throw new BadRequestException(
         `Failed to remove subject: ${error.message}`,
@@ -253,14 +259,14 @@ export class SubjectsService {
     }
   }
 
-  async skillMappings(skillMapping: SkillMapping[]) {
+  async skillMappings(dto: CreateSkillCollection[]) {
     //////////// Should sort the skillMapping array on the SubjectID  ////////////
-    if (!skillMapping) {
+    if (!dto) {
       throw new BadRequestException('Skill Mapping data not provided');
     }
 
     const distinctSubjectIds = Array.from(
-      new Set(skillMapping.map((map) => map.subjectId)),
+      new Set(dto.map((map) => map.subjectId)),
     ); // get distinct subject IDs to map with skills with same subject ID
 
     // Loop through distinct subject IDs
@@ -269,43 +275,45 @@ export class SubjectsService {
 
       if (!subject) {
         throw new NotFoundException(
-          `Subject with ID ${skillMapping[index].subjectId} not found`,
+          `Subject with ID ${dto[index].subjectId} not found`,
         );
       }
 
       // Filter skillMapping array to get skills of the current subject
-      const skillMapingOfSubjects = skillMapping.filter(
-        (map) => map.subjectId === subject.id,
-      );
+      const groupSkill = dto.filter((map) => map.subjectId === subject.id);
 
       // Loop through skillMapping array of the current subject
-      for (let i = 0; i < skillMapingOfSubjects.length; i++) {
-        let skill = await this.skillsService.findOne(
-          skillMapingOfSubjects[i].skillId.toString(),
-        );
+      for (let i = 0; i < groupSkill.length; i++) {
+        const skill = await this.skillRepo.findOneBy({
+          id: Number(groupSkill[i].skillId),
+        });
 
         if (!skill) {
-          // throw new NotFoundException(`Skill with ID ${skillMaping[index].skillId} not found`);
+          throw new NotFoundException(
+            `Skill with ID ${dto[index].skillId} not found`,
+          );
 
           // Create new skill if not found
-          const createSkillDto = new CreateSkillDto();
-          createSkillDto.name = skillMapingOfSubjects[index].skillName;
-          createSkillDto.description = '';
-          createSkillDto.domain = skillMapingOfSubjects[index].skillDomain;
-          skill = await this.skillsService.create(createSkillDto);
+          // const createSkillDto = new CreateSkillDto();
+          // createSkillDto.name = skillMapingOfSubjects[index].skillName;
+          // createSkillDto.description = '';
+          // createSkillDto.domain = skillMapingOfSubjects[index].skillDomain;
+          // skill = await this.skillsService.create(createSkillDto);
         }
 
         // Create skillDetail for the subject
-        let skillDetail = new SkillDetail();
-        skillDetail.requiredLevel = skillMapingOfSubjects[index].expectedLevel;
-        skillDetail.skill.id = skillMapingOfSubjects[index].skillId;
-        skillDetail = this.SkillDetailsRepository.create({
-          skill: { id: skillMapingOfSubjects[index].skillId },
-        });
-        subject.skillDetails.push(skillDetail);
+        // let skillDetail = new SkillDetail();
+        // skillDetail.requiredLevel = skillMapingOfSubjects[index].expectedLevel;
+        // skillDetail.skill.id = skillMapingOfSubjects[index].skillId;
+        // skillDetail = this.SkillDetailsRepository.create({
+        //   skill: { id: skillMapingOfSubjects[index].skillId },
+        // });
+        // subject.skillDetails.push(skillDetail);
+
+        subject.skills.push(skill);
       }
       try {
-        await this.subjectsRepository.save(subject);
+        await this.subRepo.save(subject);
       } catch (error) {
         throw new BadRequestException('Failed to create and select techSkills');
       }

@@ -1,4 +1,4 @@
-import { IsString, IsNumber, IsArray, IsOptional } from 'class-validator';
+import { IsString, IsArray, IsOptional, IsNumber } from 'class-validator';
 import { Clo } from 'src/entities/clo.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
 import { SkillDetail } from 'src/entities/skillDetail.entity';
@@ -8,7 +8,7 @@ export class CreateSubjectDto {
   id: string;
 
   @IsString()
-  thaiName: string;
+  name: string;
 
   @IsString()
   engName: string;
@@ -16,14 +16,11 @@ export class CreateSubjectDto {
   @IsString()
   description: string;
 
-  @IsNumber()
-  credit: number;
+  @IsString()
+  credit: string;
 
   @IsString()
   type: string;
-
-  @IsString()
-  studyTime: string;
 
   @IsOptional()
   @IsArray()
@@ -36,4 +33,8 @@ export class CreateSubjectDto {
   @IsOptional()
   @IsArray()
   skillDetails?: SkillDetail[];
+
+  @IsOptional()
+  @IsNumber({ allowNaN: false }, { each: true })
+  skillListId: number[];
 }
