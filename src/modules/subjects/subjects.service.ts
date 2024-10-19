@@ -79,7 +79,7 @@ export class SubjectsService {
   async findAll(): Promise<Subject[]> {
     try {
       return await this.subRepo.find({
-        // relations: { curriculums: true },
+        relations: { skills: true },
         // select: { curriculums: { id: true } },
       });
     } catch (error) {
@@ -87,7 +87,17 @@ export class SubjectsService {
     }
   }
 
-  async findOne(id: string): Promise<Subject> {
+  /*************  ✨ Codeium Command ⭐  *************/
+  /**
+   * Finds a single subject by ID with its skill details and
+   * their parent skills.
+   * @param id The ID of the subject to find.
+   * @returns The found subject with its skill details and their parent skills.
+   * @throws {NotFoundException} If the subject with the given ID is not found.
+   */
+  /******  c869ccf1-4949-426e-b0a9-84376f70e830  *******/ async findOne(
+    id: string,
+  ): Promise<Subject> {
     const subject = await this.subRepo.findOne({
       where: { id },
       relations: { skillDetails: { skill: { parent: true } } },
