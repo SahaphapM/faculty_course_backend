@@ -4,15 +4,14 @@ import { SubjectsController } from './subjects.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Subject } from '../../entities/subject.entity';
 import { SkillDetail } from 'src/entities/skillDetail.entity';
-import { SkillsModule } from 'src/modules/skills/skills.module';
 import { Curriculum } from '../../entities/curriculum.entity';
 import { ClosModule } from '../clos/clos.module';
+import { Skill } from 'src/entities/skill.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Subject, Curriculum, SkillDetail]),
+    TypeOrmModule.forFeature([Subject, Curriculum, SkillDetail, Skill]),
     ClosModule,
-    SkillsModule,
   ],
   controllers: [SubjectsController],
   providers: [SubjectsService],

@@ -15,8 +15,8 @@ import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
 import { UpdateSubjectDto } from 'src/dto/subject/update-subject.dto';
 import { ClosService } from '../clos/clos.service';
-import { SkillMapping } from 'src/entities/subject.entity';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateSkillCollection } from 'src/dto/skill/skill-collection.dto';
 
 @ApiBearerAuth()
 @Controller('subjects')
@@ -88,7 +88,7 @@ export class SubjectsController {
   }
 
   @Post('skill-mappings')
-  async skillMappings(@Body() skill: SkillMapping[]) {
+  async skillMappings(@Body() skill: CreateSkillCollection[]) {
     return this.subjectsService.skillMappings(skill); // mapping skill with skill detail
   }
 }

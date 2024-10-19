@@ -71,7 +71,7 @@ export class FacultiesService {
             name: curriculum.thaiName || curriculum.engName,
             subjects: curriculum.subjects.map((subject) => ({
               id: subject.id,
-              name: subject.thaiName || subject.engName,
+              name: subject.name || subject.engName,
               skills: subject.skillDetails.map((skillDetail) => ({
                 id: skillDetail.skill.id, // Access skill through skillDetail
                 name: skillDetail.skill.name,
