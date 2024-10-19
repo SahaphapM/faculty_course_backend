@@ -9,12 +9,12 @@ import { Repository } from 'typeorm';
 export class FacultiesService {
   constructor(
     @InjectRepository(Faculty)
-    private facultiesRepository: Repository<Faculty>,
+    private facRepo: Repository<Faculty>,
   ) {}
   async create(createFacultyDto: CreateFacultyDto): Promise<Faculty> {
     try {
-      const faculty = this.facultiesRepository.create(createFacultyDto);
-      return await this.facultiesRepository.save(faculty);
+      const faculty = this.facRepo.create(createFacultyDto);
+      return await this.facRepo.save(faculty);
     } catch (error) {
       // Handle specific error types here
       throw new Error('Failed to create faculty');
@@ -23,7 +23,7 @@ export class FacultiesService {
 
   async findAll(): Promise<Faculty[]> {
     try {
-      return await this.facultiesRepository.find({
+      return await this.facRepo.find({
         relations: { branches: true },
       });
     } catch (error) {
@@ -32,66 +32,66 @@ export class FacultiesService {
     }
   }
 
-  async findAllDetails(): Promise<any[]> {
-    try {
-      const faculties = await this.facultiesRepository
-        .createQueryBuilder('faculty')
-        .leftJoinAndSelect('faculty.branches', 'branch')
-        .leftJoinAndSelect('branch.curriculums', 'curriculum')
-        .leftJoinAndSelect('curriculum.subjects', 'subject')
-        .leftJoinAndSelect('subject.skillDetails', 'skillDetail') // Changed from 'subject.skills' to 'subject.skillDetails'
-        .leftJoinAndSelect('skillDetail.skill', 'skill') // Join through skillDetail to skill
-        .leftJoinAndSelect('skill.techSkills', 'techSkill')
-        .select([
-          'faculty.id',
-          'faculty.name',
-          'branch.id',
-          'branch.name',
-          'curriculum.id',
-          'curriculum.thaiName',
-          'subject.id',
-          'subject.thaiName',
-          'skillDetail.id', // Include skillDetail ID if needed
-          'skill.id',
-          'skill.name',
-          'techSkill.id',
-          'techSkill.name',
-        ])
-        .getMany();
-
-      // Transform the result into a hierarchical structure
-      return faculties.map((faculty) => ({
-        id: faculty.id,
-        name: faculty.name,
-        branches: faculty.branches.map((branch) => ({
-          id: branch.id,
-          name: branch.name,
-          curriculums: branch.curriculums.map((curriculum) => ({
-            id: curriculum.id,
-            name: curriculum.thaiName || curriculum.engName,
-            subjects: curriculum.subjects.map((subject) => ({
-              id: subject.id,
-              name: subject.name || subject.engName,
-              skills: subject.skillDetails.map((skillDetail) => ({
-                id: skillDetail.skill.id, // Access skill through skillDetail
-                name: skillDetail.skill.name,
-                techSkills: skillDetail.skill.techSkills.map((techSkill) => ({
-                  id: techSkill.id,
-                  name: techSkill.name,
-                })),
-              })),
-            })),
-          })),
-        })),
-      }));
-    } catch (error) {
-      throw new Error('Failed to fetch details');
-    }
+  async findAllDetails() {
+    // need to refactor
+    // try {
+    //   const faculties = await this.facRepo
+    //     .createQueryBuilder('faculty')
+    //     .leftJoinAndSelect('faculty.branches', 'branch')
+    //     .leftJoinAndSelect('branch.curriculums', 'curriculum')
+    //     .leftJoinAndSelect('curriculum.subjects', 'subject')
+    //     .leftJoinAndSelect('subject.skillDetails', 'skillDetail') // Changed from 'subject.skills' to 'subject.skillDetails'
+    //     .leftJoinAndSelect('skillDetail.skill', 'skill') // Join through skillDetail to skill
+    //     .leftJoinAndSelect('skill.techSkills', 'techSkill')
+    //     .select([
+    //       'faculty.id',
+    //       'faculty.name',
+    //       'branch.id',
+    //       'branch.name',
+    //       'curriculum.id',
+    //       'curriculum.thaiName',
+    //       'subject.id',
+    //       'subject.thaiName',
+    //       'skillDetail.id', // Include skillDetail ID if needed
+    //       'skill.id',
+    //       'skill.name',
+    //       'techSkill.id',
+    //       'techSkill.name',
+    //     ])
+    //     .getMany();
+    //   // Transform the result into a hierarchical structure
+    //   return faculties.map((faculty) => ({
+    //     id: faculty.id,
+    //     name: faculty.name,
+    //     branches: faculty.branches.map((branch) => ({
+    //       id: branch.id,
+    //       name: branch.name,
+    //       curriculums: branch.curriculums.map((curriculum) => ({
+    //         id: curriculum.id,
+    //         name: curriculum.thaiName || curriculum.engName,
+    //         subjects: curriculum.subjects.map((subject) => ({
+    //           id: subject.id,
+    //           name: subject.name || subject.engName,
+    //           skills: subject.skillDetails.map((skillDetail) => ({
+    //             id: skillDetail.skill.id, // Access skill through skillDetail
+    //             name: skillDetail.skill.name,
+    //             techSkills: skillDetail.skill.techSkills.map((techSkill) => ({
+    //               id: techSkill.id,
+    //               name: techSkill.name,
+    //             })),
+    //           })),
+    //         })),
+    //       })),
+    //     })),
+    //   }));
+    // } catch (error) {
+    //   throw new Error('Failed to fetch details');
+    // }
   }
 
   async findOne(id: string): Promise<Faculty> {
     try {
-      const faculty = await this.facultiesRepository.findOne({
+      const faculty = await this.facRepo.findOne({
         where: { id },
         relations: { branches: true },
       });
@@ -110,15 +110,15 @@ export class FacultiesService {
     updateFacultyDto: UpdateFacultyDto,
   ): Promise<Faculty> {
     try {
-      const existingFaculty = await this.facultiesRepository.findOne({
+      const existingFaculty = await this.facRepo.findOne({
         where: { id },
       });
       if (!existingFaculty) {
         throw new NotFoundException('Faculty not found');
       }
       Object.assign(existingFaculty, updateFacultyDto);
-      await this.facultiesRepository.save(existingFaculty);
-      return await this.facultiesRepository.findOne({
+      await this.facRepo.save(existingFaculty);
+      return await this.facRepo.findOne({
         where: { id },
         relations: { branches: true },
       });
@@ -130,7 +130,7 @@ export class FacultiesService {
 
   async remove(id: string): Promise<void> {
     try {
-      const result = await this.facultiesRepository.delete(id);
+      const result = await this.facRepo.delete(id);
       if (result.affected === 0) {
         throw new NotFoundException('Faculty not found');
       }
