@@ -1,7 +1,14 @@
-import { IsString, IsArray, IsOptional, IsNumber } from 'class-validator';
+import {
+  IsString,
+  IsArray,
+  IsOptional,
+  IsNumber,
+  IsEnum,
+} from 'class-validator';
 import { Clo } from 'src/entities/clo.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
 import { SkillDetail } from 'src/entities/skillDetail.entity';
+import { SubjectType } from 'src/enums/subject-types.enum';
 
 export class CreateSubjectDto {
   @IsString()
@@ -19,8 +26,8 @@ export class CreateSubjectDto {
   @IsString()
   credit: string;
 
-  @IsString()
-  type: string;
+  @IsEnum(SubjectType)
+  type: SubjectType;
 
   @IsOptional()
   @IsArray()

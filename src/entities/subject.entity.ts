@@ -11,6 +11,7 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 import { Skill } from './skill.entity';
+import { SubjectType } from 'src/enums/subject-types.enum';
 
 @Entity()
 export class Subject {
@@ -29,8 +30,12 @@ export class Subject {
   @Column()
   credit: string; //3 (2-2-5)
 
-  @Column()
-  type: string;
+  @Column({
+    type: 'enum',
+    enum: SubjectType,
+    default: SubjectType.Compulsory,
+  })
+  type: SubjectType;
 
   @OneToMany(() => SkillDetail, (skillDetail) => skillDetail.subjects, {
     cascade: false,
