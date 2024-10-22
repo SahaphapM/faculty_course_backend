@@ -15,7 +15,7 @@ export class SkillCollection {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, enum: SkillLevel })
   level: SkillLevel;
 
   @Column({ default: 0 })

@@ -13,6 +13,7 @@ import {
 import { SkillDetail } from './skillDetail.entity';
 import { SkillCollection } from './skill-collection.entity';
 import { Subject } from './subject.entity';
+import { LearningDomain } from 'src/enums/learning-domain.enum';
 
 @Entity()
 @Tree('closure-table')
@@ -26,8 +27,12 @@ export class Skill {
   @Column()
   description: string;
 
-  @Column({ nullable: true })
-  domain: string;
+  @Column({
+    type: 'enum',
+    enum: LearningDomain,
+    default: LearningDomain.Psychomotor,
+  })
+  domain: LearningDomain;
   // @ManyToMany(() => Subject, (subject) => subject.skills)
   // subjects: Subject[] | null;
 
@@ -76,11 +81,4 @@ export class Skill {
     cascade: false,
   })
   skillCollections: SkillCollection[];
-}
-
-export enum SkillDomain {
-  Ability = 'Ability',
-  Knowledge = 'Knowledge',
-  Personality = 'Personality',
-  Ethics = 'Ethics',
 }

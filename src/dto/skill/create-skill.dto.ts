@@ -1,5 +1,6 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Skill } from 'src/entities/skill.entity';
+import { LearningDomain } from 'src/enums/learning-domain.enum';
 
 export class CreateSkillDto {
   @IsOptional()
@@ -12,13 +13,14 @@ export class CreateSkillDto {
   @IsString()
   description: string;
 
-  @IsString()
-  domain: string;
+  @IsEnum(LearningDomain)
+  domain: LearningDomain;
 
   // subjects: Subject[] | null;
-
+  @IsOptional()
   children: Skill[] | null;
 
+  @IsOptional()
   parent: Skill | null;
 
   // techSkills: TechSkill[] | null;
