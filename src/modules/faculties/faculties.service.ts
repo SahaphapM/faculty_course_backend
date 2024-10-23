@@ -88,7 +88,7 @@ export class FacultiesService {
   // }
   // }
 
-  async fillters(): Promise<Faculty[]> {
+  async filters(): Promise<Faculty[]> {
     // query faculty names and ids
     try {
       const faculties = await this.facRepo

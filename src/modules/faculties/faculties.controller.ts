@@ -32,9 +32,9 @@ export class FacultiesController {
   //   return this.facultiesService.findAllDetails();
   // }
 
-  @Get('fillters')
-  findAllDetails() {
-    return this.facultiesService.fillters();
+  @Get('filters')
+  filters() {
+    return this.facultiesService.filters();
   }
 
   @Get(':id')

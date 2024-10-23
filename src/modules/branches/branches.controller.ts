@@ -41,4 +41,10 @@ export class BranchesController {
   remove(@Param('id') id: string) {
     return this.branchService.remove(id);
   }
+
+  @Get('filters/:facultyId')
+  filters(@Param('facultyId') facultyId: string) {
+    console.log(facultyId);
+    return this.branchService.filters(facultyId);
+  }
 }
