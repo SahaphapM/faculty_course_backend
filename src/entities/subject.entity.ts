@@ -18,10 +18,10 @@ export class Subject {
   @PrimaryColumn()
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   engName: string;
 
   @Column()
@@ -31,7 +31,6 @@ export class Subject {
   credit: string; //3 (2-2-5)
 
   @Column({
-    type: 'enum',
     enum: SubjectType,
     default: SubjectType.Compulsory,
   })

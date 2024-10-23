@@ -28,9 +28,9 @@ export class Skill {
   description: string;
 
   @Column({
-    type: 'enum',
     enum: LearningDomain,
     default: LearningDomain.Psychomotor,
+    nullable: true,
   })
   domain: LearningDomain;
   // @ManyToMany(() => Subject, (subject) => subject.skills)

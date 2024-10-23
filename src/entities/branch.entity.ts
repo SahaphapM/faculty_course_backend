@@ -16,10 +16,10 @@ export class Branch {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   engName: string;
 
-  @Column()
+  @Column({ nullable: true })
   abbrev: string;
 
   @ManyToOne(() => Faculty, (faculty) => faculty.branches)
