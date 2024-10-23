@@ -78,11 +78,10 @@ export class BranchesService {
   }
 
   async filters(facultyId: string): Promise<Branch[]> {
-    console.log(facultyId);
     try {
       const branches = await this.braRepo
         .createQueryBuilder('branch')
-        .select(['branch.id', 'branch.name'])
+        .select(['branch.id', 'branch.name', 'branch.engName'])
         .where('branch.facultyId = :facultyId', { facultyId })
         .getMany();
       return branches;

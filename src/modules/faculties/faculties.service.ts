@@ -93,7 +93,7 @@ export class FacultiesService {
     try {
       const faculties = await this.facRepo
         .createQueryBuilder('faculty')
-        .select(['faculty.id', 'faculty.name'])
+        .select(['faculty.id', 'faculty.name', 'faculty.engName'])
         .getMany();
       return faculties;
     } catch (error) {
