@@ -27,9 +27,14 @@ export class FacultiesController {
     return this.facultiesService.findAll();
   }
 
-  @Get('getAllDetails')
+  // @Get('getAllDetails')
+  // findAllDetails() {
+  //   return this.facultiesService.findAllDetails();
+  // }
+
+  @Get('fillters')
   findAllDetails() {
-    return this.facultiesService.findAllDetails();
+    return this.facultiesService.fillters();
   }
 
   @Get(':id')
