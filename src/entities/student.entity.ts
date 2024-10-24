@@ -21,14 +21,14 @@ export class Student {
   @Column()
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   engName: string;
 
   @OneToOne(() => Branch)
   @JoinColumn()
   branch: Branch;
 
-  @Column()
+  @Column({ nullable: true })
   dateEnrollment: Date;
 
   @Column({ nullable: true })

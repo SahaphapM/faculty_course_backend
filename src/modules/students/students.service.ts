@@ -34,8 +34,11 @@ export class StudentsService {
     // Join relations to include courseDetails, courses, and subjects
     queryBuilder
       .leftJoinAndSelect('student.skillCollection', 'skillCollection')
-      .leftJoinAndSelect('skillCollection.skillDetail', 'skillDetail')
-      .leftJoinAndSelect('skillDetail.skill', 'skill')
+      .leftJoinAndSelect(
+        'skillCollection.skillExpectedLevels',
+        'skillExpectedLevels',
+      )
+      .leftJoinAndSelect('skillExpectedLevels.skill', 'skill')
       .innerJoin('student.courseDetails', 'courseDetails')
       .leftJoin('courseDetails.course', 'course')
       .leftJoin('course.subject', 'subject');
@@ -133,14 +136,17 @@ export class StudentsService {
     const distinctParentSkills: Skill[] = [];
 
     for (let index = 0; index < skillCollections.length; index++) {
-      if (skillCollections[index].skill.parent) {
+      if (skillCollections[index].skillExpectedLevels.skill.parent) {
         if (
           !distinctParentSkills.some(
             (parentSkill) =>
-              parentSkill.id === skillCollections[index].skill.parent.id,
+              parentSkill.id ===
+              skillCollections[index].skillExpectedLevels.skill.parent.id,
           )
         ) {
-          distinctParentSkills.push(skillCollections[index].skill.parent);
+          distinctParentSkills.push(
+            skillCollections[index].skillExpectedLevels.skill.parent,
+          );
         }
       }
     }
@@ -152,9 +158,9 @@ export class StudentsService {
         const skillCollectionTree = new SkillCollectionTree();
         skillCollectionTree.id = parentSkill.id;
         skillCollectionTree.name = parentSkill.name;
-        skillCollectionTree.acquiredLevel = null;
-        skillCollectionTree.requiredLevel = null;
-        skillCollectionTree.pass = null;
+        skillCollectionTree.gainedLevel = null;
+        skillCollectionTree.expectedLevel = null;
+        skillCollectionTree.passed = null;
         skillCollectionMapParent.push(skillCollectionTree);
       }
     });
@@ -165,21 +171,23 @@ export class StudentsService {
       // find children skillCollection by parent skill id
       const childrenSkillCollections = skillCollections.filter(
         (skillCollection) =>
-          skillCollection.skill.parent &&
-          skillCollection.skill.parent.id ===
+          skillCollection.skillExpectedLevels.skill.parent &&
+          skillCollection.skillExpectedLevels.skill.parent.id ===
             skillCollectionMapParent[index].id,
       );
 
       if (childrenSkillCollections) {
         for (let index = 0; index < childrenSkillCollections.length; index++) {
           const skillCollectionTree = new SkillCollectionTree();
-          skillCollectionTree.id = childrenSkillCollections[index].skill.id;
-          skillCollectionTree.name = childrenSkillCollections[index].skill.name;
-          // skillCollectionTree.acquiredLevel =
-          //   childrenSkillCollections[index].level;
-          // skillCollectionTree.requiredLevel =
-          //   childrenSkillCollections[index].skill.requiredLevel;
-          skillCollectionTree.pass = childrenSkillCollections[index].passed;
+          skillCollectionTree.id =
+            childrenSkillCollections[index].skillExpectedLevels.id;
+          skillCollectionTree.name =
+            childrenSkillCollections[index].skillExpectedLevels.skill.name;
+          skillCollectionTree.gainedLevel =
+            childrenSkillCollections[index].gainedLevel;
+          skillCollectionTree.expectedLevel =
+            childrenSkillCollections[index].skillExpectedLevels.expectedLevel;
+          skillCollectionTree.passed = childrenSkillCollections[index].passed;
           skillCollectionMapParent[index].children =
             skillCollectionMapParent[index].children || [];
           skillCollectionMapParent[index].children.push(skillCollectionTree);
@@ -191,13 +199,15 @@ export class StudentsService {
       // if skillCollection is in skillCollectionMapParent
       const chilSkillInParentMap = skillCollections.find(
         (skillCollection) =>
-          skillCollection.skill.id === skillCollectionMapParent[index].id,
+          skillCollection.skillExpectedLevels.skill.id ===
+          skillCollectionMapParent[index].id,
       );
       if (chilSkillInParentMap) {
         const parentSkillIndex = skillCollectionMapParent.findIndex(
           (skill) =>
-            chilSkillInParentMap.skill.parent &&
-            skill.id === chilSkillInParentMap.skill.parent.id,
+            chilSkillInParentMap.skillExpectedLevels.skill.parent &&
+            skill.id ===
+              chilSkillInParentMap.skillExpectedLevels.skill.parent.id,
         );
         if (parentSkillIndex > -1) {
           skillCollectionMapParent[parentSkillIndex].children.push(

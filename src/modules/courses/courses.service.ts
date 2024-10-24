@@ -15,8 +15,8 @@ import { StudentsService } from '../students/students.service';
 import { CreateCourseDto } from 'src/dto/course/create-course.dto';
 import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { Skill } from 'src/entities/skill.entity';
 import { Teacher } from 'src/entities/teacher.entity';
+import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
 
 @Injectable()
 export class CoursesService {
@@ -123,7 +123,7 @@ export class CoursesService {
   async findAll(): Promise<Course[]> {
     return await this.courseRepo.find({
       relations: {
-        subject: { skillDetails: true },
+        subject: { skillExpectedLevels: true },
       },
     });
   }
@@ -135,8 +135,8 @@ export class CoursesService {
     //   .leftJoinAndSelect('course.courseStudentDetails', 'courseStudentDetails')
     //   .leftJoinAndSelect('courseStudentDetails.student', 'student')
     //   .leftJoinAndSelect('course.subject', 'subject')
-    //   .leftJoinAndSelect('subject.skillDetails', 'skillDetail')
-    //   .leftJoinAndSelect('skillDetail.skill', 'skill')
+    //   .leftJoinAndSelect('subject.skillExpectedLevels', 'skillExpectedLevel')
+    //   .leftJoinAndSelect('skillExpectedLevel.skill', 'skill')
     //   .select([
     //     'course.id',
     //     'course.name',
@@ -149,9 +149,9 @@ export class CoursesService {
     //     'subject.thaiName',
     //     'subject.engName',
     //     'subject.description',
-    //     'skillDetail.id',
-    //     'skillDetail.requiredLevel',
-    //     'skillDetail.description',
+    //     'skillExpectedLevel.id',
+    //     'skillExpectedLevel.requiredLevel',
+    //     'skillExpectedLevel.description',
     //     'skill.name',
     //     'skill.description',
     //     'skill.domain',
@@ -227,16 +227,16 @@ export class CoursesService {
 
         courseEn.skillCollections = courseEn.skillCollections || [];
 
-        for (let index = 0; index < course.subject.skills.length; index++) {
-          const skillCollection = this.skillCollRepo.create({
-            skill: course.subject.skills[index],
-            passed: false,
-            student: student,
-          });
-          const skillCollectionSaved =
-            await this.skillCollRepo.save<SkillCollection>(skillCollection);
-          courseEn.skillCollections.push(skillCollectionSaved);
-        }
+        // for (let index = 0; index < course.subject.skills.length; index++) {
+        //   const skillCollection = this.skillCollRepo.create({
+        //     skillExpectedLevel: course.subject.skills[index],
+        //     passed: false,
+        //     student: student,
+        //   });
+        //   const skillCollectionSaved =
+        //     await this.skillCollRepo.save<SkillCollection>(skillCollection);
+        //   courseEn.skillCollections.push(skillCollectionSaved);
+        // }
         // Save and add new course detail
         course.courseEnrollment.push(
           await this.courseEnrollRepo.save<CourseEnrollment>(courseEn),
@@ -288,7 +288,10 @@ export class CoursesService {
     const course = await this.findOne(id);
     const subject = await this.subjectsService.findOne(subjectId);
     if (course.subject && course.courseEnrollment) {
-      await this.createSkillCollection(subject.skills, course.courseEnrollment);
+      await this.createSkillCollection(
+        subject.skillExpectedLevels,
+        course.courseEnrollment,
+      );
     }
     delete course.courseEnrollment;
     course.subject = subject;
@@ -296,7 +299,10 @@ export class CoursesService {
     // Save the updated course
     return await this.courseRepo.save(course);
   }
-  async createSkillCollection(skills: Skill[], courseEnr: CourseEnrollment[]) {
+  async createSkillCollection(
+    skillExpectedLevels: SkillExpectedLevel[],
+    courseEnr: CourseEnrollment[],
+  ) {
     // Create array of skill collections to be saved
     const skillCollectionsToSave: SkillCollection[] = [];
 
@@ -310,10 +316,10 @@ export class CoursesService {
       }
 
       // Iterate through each skill
-      for (let index = 0; index < skills.length; index++) {
+      for (let index = 0; index < skillExpectedLevels.length; index++) {
         const skillCollection = this.skillCollRepo.create({
           courseEnrollment: courseEnr[i],
-          skill: skills[index],
+          skillExpectedLevels: skillExpectedLevels[index],
           passed: false,
           student: courseEnr[i].student,
         });

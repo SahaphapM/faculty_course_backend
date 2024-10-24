@@ -1,16 +1,8 @@
 import { Clo } from 'src/entities/clo.entity';
 import { Course } from 'src/entities/course.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
-import { SkillDetail } from 'src/entities/skillDetail.entity';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  PrimaryColumn,
-} from 'typeorm';
-import { Skill } from './skill.entity';
+import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
+import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
 import { SubjectType } from 'src/enums/subject-types.enum';
 
 @Entity()
@@ -18,10 +10,10 @@ export class Subject {
   @PrimaryColumn()
   id: string;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   engName: string;
 
   @Column()
@@ -31,22 +23,19 @@ export class Subject {
   credit: string; //3 (2-2-5)
 
   @Column({
-    type: 'enum',
     enum: SubjectType,
     default: SubjectType.Compulsory,
   })
   type: SubjectType;
 
-  @OneToMany(() => SkillDetail, (skillDetail) => skillDetail.subjects, {
-    cascade: false,
-  })
-  skillDetails: SkillDetail[];
-
-  @ManyToMany(() => Skill, (s) => s.subjects, {
-    cascade: false,
-  })
-  @JoinTable()
-  skills: Skill[];
+  @OneToMany(
+    () => SkillExpectedLevel,
+    (skillExpectedLevel) => skillExpectedLevel.subjects,
+    {
+      cascade: false,
+    },
+  )
+  skillExpectedLevels: SkillExpectedLevel[];
 
   @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
   curriculums: Curriculum[];

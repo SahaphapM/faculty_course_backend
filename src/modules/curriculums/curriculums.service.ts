@@ -248,4 +248,17 @@ export class CurriculumsService {
       throw new BadRequestException('Failed to remove user');
     }
   }
+
+  async filters(branchId: string): Promise<Curriculum[]> {
+    try {
+      const curriculums = await this.currRepo
+        .createQueryBuilder('curriculum')
+        .select(['curriculum.id', 'curriculum.thaiName', 'curriculum.engName'])
+        .where('curriculum.branchId = :branchId', { branchId })
+        .getMany();
+      return curriculums;
+    } catch (error) {
+      throw new Error(`Failed to fetch details: ${error.message}`);
+    }
+  }
 }

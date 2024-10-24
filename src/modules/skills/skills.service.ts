@@ -41,8 +41,8 @@ export class SkillsService {
     // Join relations to include them in the result
     queryBuilder
       .where('skill.parentId IS NULL') // Correctly check for NULL
-      .leftJoinAndSelect('skill.skillDetail', 'skillDetail')
-      .leftJoinAndSelect('skillDetail.subjects', 'subject')
+      .leftJoinAndSelect('skill.skillExpectedLevels', 'skillExpectedLevels')
+      .leftJoinAndSelect('skillExpectedLevels.subjects', 'subject')
       .leftJoinAndSelect('skill.children', 'children') // For direct children
       .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
       .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
@@ -83,15 +83,15 @@ export class SkillsService {
 
     queryBuilder
       .where('skill.parentId IS NULL') // Correctly check for NULL
-      .leftJoinAndSelect('skill.skillDetail', 'skillDetail')
-      .leftJoinAndSelect('skillDetail.subjects', 'subject')
+      .leftJoinAndSelect('skill.skillExpectedLevels', 'skillExpectedLevels')
+      .leftJoinAndSelect('skillExpectedLevels.subjects', 'subject')
       .leftJoinAndSelect('skill.children', 'children') // For direct children
       .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
       .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
       .leftJoinAndSelect('skill.techSkills', 'techSkills');
 
     // .where('skill.parentId IS NULL') // Check where parentId is null
-    // .leftJoinAndSelect['skill.skillDetail', 'skillDetail']
+    // .leftJoinAndSelect['skill.skillExpectedLevels', 'skillExpectedLevels']
     const skills = await queryBuilder.getMany();
 
     return skills;

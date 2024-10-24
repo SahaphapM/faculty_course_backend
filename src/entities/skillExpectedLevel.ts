@@ -5,25 +5,22 @@ import { OneToMany } from 'typeorm';
 import { SkillCollection } from 'src/entities/skill-collection.entity';
 
 @Entity()
-export class SkillDetail {
+export class SkillExpectedLevel {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
-  description: string;
-
   @Column({ nullable: true })
-  requiredLevel: number; // level 1-5
+  expectedLevel: number; // level 1-5
 
-  @ManyToOne(() => Subject, (subject) => subject.skillDetails)
+  @ManyToOne(() => Subject, (subject) => subject.skillExpectedLevels)
   subjects: Subject;
 
-  @ManyToOne(() => Skill, (skill) => skill.skillDetail)
+  @ManyToOne(() => Skill, (skill) => skill.skillExpectedLevels)
   skill: Skill;
 
   @OneToMany(
     () => SkillCollection,
-    (skillCollection) => skillCollection.skill,
+    (skillCollection) => skillCollection.skillExpectedLevels,
     {
       cascade: false,
     },

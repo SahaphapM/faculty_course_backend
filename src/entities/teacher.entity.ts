@@ -16,19 +16,19 @@ export class Teacher {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
-  @Column()
+  @Column({ nullable: true })
   engName: string;
 
-  @Column()
+  @Column({ nullable: true })
   tel: string;
 
   @Column({ default: 'unknown.jpg' })
   picture: string;
 
-  @Column()
+  @Column({ nullable: true })
   position: string;
 
   @OneToOne(() => User)

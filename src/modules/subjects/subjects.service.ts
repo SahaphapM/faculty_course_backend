@@ -6,7 +6,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Like, Repository } from 'typeorm';
 import { Subject } from '../../entities/subject.entity';
-import { SkillDetail } from 'src/entities/skillDetail.entity';
 import { Clo } from '../../entities/clo.entity';
 import { Curriculum } from '../../entities/curriculum.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
@@ -14,6 +13,7 @@ import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
 import { UpdateSubjectDto } from 'src/dto/subject/update-subject.dto';
 import { CreateSkillCollection } from 'src/dto/skill/skill-collection.dto';
 import { Skill } from 'src/entities/skill.entity';
+import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
 
 @Injectable()
 export class SubjectsService {
@@ -22,8 +22,8 @@ export class SubjectsService {
     private subRepo: Repository<Subject>,
     @InjectRepository(Curriculum)
     private curRepo: Repository<Curriculum>,
-    @InjectRepository(SkillDetail)
-    private readonly SkillDetailsRepository: Repository<SkillDetail>,
+    @InjectRepository(SkillExpectedLevel)
+    private readonly SkillExpectedLevelsRepository: Repository<SkillExpectedLevel>,
     @InjectRepository(Skill)
     private readonly skillRepo: Repository<Skill>,
     // @InjectDataSource()
@@ -70,7 +70,7 @@ export class SubjectsService {
         throw new NotFoundException('Skills not found');
       }
     }
-    const subject = this.subRepo.create({ ...dto, skills });
+    const subject = this.subRepo.create({ ...dto });
     try {
       return await this.subRepo.save(subject);
     } catch (error) {
@@ -81,7 +81,9 @@ export class SubjectsService {
   async findAll(): Promise<Subject[]> {
     try {
       return await this.subRepo.find({
-        relations: { skills: { children: { children: true } } },
+        relations: {
+          skillExpectedLevels: { skill: true },
+        },
       });
     } catch (error) {
       throw new BadRequestException('Failed to get subjects', error.message);
@@ -91,7 +93,7 @@ export class SubjectsService {
   async findOne(id: string): Promise<Subject> {
     const subject = await this.subRepo.findOne({
       where: { id },
-      relations: { skillDetails: { skill: { parent: true } } },
+      relations: { skillExpectedLevels: { skill: { parent: true } } },
     });
     if (!subject) {
       throw new NotFoundException(`Subject with id ${id} not found`);
@@ -140,92 +142,99 @@ export class SubjectsService {
 
   async selectSkills(
     id: string,
-    skillDetails: SkillDetail[],
+    skillExpectedLevels: SkillExpectedLevel[],
   ): Promise<Subject> {
     const subject = await this.findOne(id);
     if (!subject) {
       throw new NotFoundException(`Subject with ID ${id} not found`);
     }
 
-    // Ensure skillDetails is initialized
-    subject.skillDetails = subject.skillDetails || [];
+    // Ensure skillExpectedLevels is initialized
+    subject.skillExpectedLevels = subject.skillExpectedLevels || [];
 
-    const notSameSkillDetails = skillDetails.filter(
-      (newSkillDetail) =>
-        !subject.skillDetails.some(
-          (subjectSkillDetail) =>
-            subjectSkillDetail.skill.id === newSkillDetail.skill.id,
+    const notSameSkillExpectedLevels = skillExpectedLevels.filter(
+      (newSkillExpectedLevel) =>
+        !subject.skillExpectedLevels.some(
+          (subjectSkillExpectedLevel) =>
+            subjectSkillExpectedLevel.skill.id ===
+            newSkillExpectedLevel.skill.id,
         ),
     );
 
-    for (let index = 0; index < notSameSkillDetails.length; index++) {
-      let skillDetail = this.SkillDetailsRepository.create(
-        notSameSkillDetails[index],
+    for (let index = 0; index < notSameSkillExpectedLevels.length; index++) {
+      let skillExpectedLevel = this.SkillExpectedLevelsRepository.create(
+        notSameSkillExpectedLevels[index],
       );
-      skillDetail = await this.SkillDetailsRepository.save(skillDetail);
+      skillExpectedLevel =
+        await this.SkillExpectedLevelsRepository.save(skillExpectedLevel);
 
-      subject.skillDetails.push(skillDetail);
+      subject.skillExpectedLevels.push(skillExpectedLevel);
     }
 
     try {
       return await this.subRepo.save(subject);
     } catch (error) {
       throw new BadRequestException(
-        'Failed to update SkillDetail in Subject',
+        'Failed to update SkillExpectedLevel in Subject',
         error.message,
       );
     }
   }
 
-  async updateSkillDetail(skillDetail: SkillDetail): Promise<SkillDetail> {
+  async updateSkillExpectedLevel(
+    skillExpectedLevel: SkillExpectedLevel,
+  ): Promise<SkillExpectedLevel> {
     try {
-      return await this.SkillDetailsRepository.save(skillDetail);
+      return await this.SkillExpectedLevelsRepository.save(skillExpectedLevel);
     } catch (error) {
       throw new BadRequestException(
-        `Failed to update SkillDetail ID : ${skillDetail.id}`,
+        `Failed to update SkillExpectedLevel ID : ${skillExpectedLevel.id}`,
         error.message,
       );
     }
   }
 
-  async removeSkill(id: string, skillDetailId: number): Promise<Subject> {
-    // Fetch the subject with the associated skillDetails
+  async removeSkill(
+    id: string,
+    skillExpectedLevelId: number,
+  ): Promise<Subject> {
+    // Fetch the subject with the associated skillExpectedLevels
     const subject = await this.subRepo.findOne({
       where: { id },
-      relations: { skillDetails: true },
+      relations: { skillExpectedLevels: true },
     });
 
     if (!subject) {
       throw new NotFoundException(`Subject with ID ${id} not found`);
     }
 
-    // Find the skillDetail to remove
-    const skillDetailToRemove = subject.skillDetails.find(
-      (skillDetail) => skillDetail.id === skillDetailId,
+    // Find the skillExpectedLevel to remove
+    const skillExpectedLevelToRemove = subject.skillExpectedLevels.find(
+      (skillExpectedLevel) => skillExpectedLevel.id === skillExpectedLevelId,
     );
 
-    if (!skillDetailToRemove) {
+    if (!skillExpectedLevelToRemove) {
       throw new NotFoundException(
-        `SkillDetail with ID ${skillDetailId} not found`,
+        `SkillExpectedLevel with ID ${skillExpectedLevelId} not found`,
       );
     }
 
-    // Filter out the skillDetail from the subject
-    subject.skillDetails = subject.skillDetails.filter(
-      (skillDetail) => skillDetail.id !== skillDetailId,
+    // Filter out the skillExpectedLevel from the subject
+    subject.skillExpectedLevels = subject.skillExpectedLevels.filter(
+      (skillExpectedLevel) => skillExpectedLevel.id !== skillExpectedLevelId,
     );
 
     try {
-      // Delete the skillDetail from the database
-      await this.SkillDetailsRepository.delete(skillDetailId);
+      // Delete the skillExpectedLevel from the database
+      await this.SkillExpectedLevelsRepository.delete(skillExpectedLevelId);
 
       // Save the updated subject
       await this.subRepo.save(subject);
 
-      // Return the updated subject with the remaining skillDetails
+      // Return the updated subject with the remaining skillExpectedLevels
       return await this.subRepo.findOne({
         where: { id },
-        relations: { skillDetails: true },
+        relations: { skillExpectedLevels: true },
       });
     } catch (error) {
       throw new BadRequestException(
@@ -302,16 +311,16 @@ export class SubjectsService {
           // skill = await this.skillsService.create(createSkillDto);
         }
 
-        // Create skillDetail for the subject
-        // let skillDetail = new SkillDetail();
-        // skillDetail.requiredLevel = skillMapingOfSubjects[index].expectedLevel;
-        // skillDetail.skill.id = skillMapingOfSubjects[index].skillId;
-        // skillDetail = this.SkillDetailsRepository.create({
+        // Create skillExpectedLevel for the subject
+        // let skillExpectedLevel = new SkillExpectedLevel();
+        // skillExpectedLevel.requiredLevel = skillMapingOfSubjects[index].expectedLevel;
+        // skillExpectedLevel.skill.id = skillMapingOfSubjects[index].skillId;
+        // skillExpectedLevel = this.SkillExpectedLevelsRepository.create({
         //   skill: { id: skillMapingOfSubjects[index].skillId },
         // });
-        // subject.skillDetails.push(skillDetail);
+        // subject.skillExpectedLevels.push(skillExpectedLevel);
 
-        subject.skills.push(skill);
+        // subject.skills.push(skill);
       }
       try {
         await this.subRepo.save(subject);
@@ -320,5 +329,22 @@ export class SubjectsService {
       }
     }
     return 'Skill Mapping completed successfully!!!!';
+  }
+
+  async filters(curriculumId: string): Promise<Subject[]> {
+    // query subject ids and names
+    try {
+      const subjects = await this.subRepo
+        .createQueryBuilder('subject')
+        .select(['subject.id', 'subject.name', 'subject.engName'])
+        .innerJoin('subject.curriculums', 'curriculum')
+        .where('curriculum.id = :curriculumId', { curriculumId })
+        .getMany();
+      return subjects;
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to filter subjects: ${error.message}`,
+      );
+    }
   }
 }

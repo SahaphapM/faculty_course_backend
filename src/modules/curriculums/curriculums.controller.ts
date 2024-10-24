@@ -113,4 +113,9 @@ export class CurriculumsController {
   remove(@Param('id') id: string) {
     return this.curriculumsService.remove(id);
   }
+
+  @Get('filters/:branchId')
+  async filters(@Param('branchId') branchId: string) {
+    return this.curriculumsService.filters(branchId);
+  }
 }

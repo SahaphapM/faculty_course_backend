@@ -76,4 +76,17 @@ export class BranchesService {
       throw new Error('Failed to remove branch');
     }
   }
+
+  async filters(facultyId: string): Promise<Branch[]> {
+    try {
+      const branches = await this.braRepo
+        .createQueryBuilder('branch')
+        .select(['branch.id', 'branch.name', 'branch.engName'])
+        .where('branch.facultyId = :facultyId', { facultyId })
+        .getMany();
+      return branches;
+    } catch (error) {
+      throw new Error('Failed to fetch branches');
+    }
+  }
 }

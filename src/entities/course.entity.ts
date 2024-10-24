@@ -23,7 +23,7 @@ export class Course {
   @Column()
   description: string;
 
-  @Column({ default: true })
+  @Column({ default: true, nullable: true })
   active: boolean;
 
   @ManyToOne(() => Subject, (subject) => subject.courses, {
