@@ -12,7 +12,6 @@ import {
 } from 'typeorm';
 import { SkillExpectedLevel } from './skillExpectedLevel';
 import { SkillCollection } from './skill-collection.entity';
-import { Subject } from './subject.entity';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 
 @Entity()
@@ -46,11 +45,6 @@ export class Skill {
   })
   @JoinTable()
   techSkills: TechSkill[] | null;
-
-  @ManyToMany(() => Subject, (s) => s.skills, {
-    cascade: false,
-  })
-  subjects: Subject[];
 
   @OneToMany(
     () => SkillExpectedLevel,

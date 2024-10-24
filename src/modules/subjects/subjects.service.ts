@@ -70,7 +70,7 @@ export class SubjectsService {
         throw new NotFoundException('Skills not found');
       }
     }
-    const subject = this.subRepo.create({ ...dto, skills });
+    const subject = this.subRepo.create({ ...dto });
     try {
       return await this.subRepo.save(subject);
     } catch (error) {
@@ -81,7 +81,9 @@ export class SubjectsService {
   async findAll(): Promise<Subject[]> {
     try {
       return await this.subRepo.find({
-        relations: { skills: { children: { children: true } } },
+        relations: {
+          skillExpectedLevels: { skill: true },
+        },
       });
     } catch (error) {
       throw new BadRequestException('Failed to get subjects', error.message);
@@ -318,7 +320,7 @@ export class SubjectsService {
         // });
         // subject.skillExpectedLevels.push(skillExpectedLevel);
 
-        subject.skills.push(skill);
+        // subject.skills.push(skill);
       }
       try {
         await this.subRepo.save(subject);

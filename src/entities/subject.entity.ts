@@ -2,15 +2,7 @@ import { Clo } from 'src/entities/clo.entity';
 import { Course } from 'src/entities/course.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
 import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
-import {
-  Column,
-  Entity,
-  JoinTable,
-  ManyToMany,
-  OneToMany,
-  PrimaryColumn,
-} from 'typeorm';
-import { Skill } from './skill.entity';
+import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
 import { SubjectType } from 'src/enums/subject-types.enum';
 
 @Entity()
@@ -44,12 +36,6 @@ export class Subject {
     },
   )
   skillExpectedLevels: SkillExpectedLevel[];
-
-  @ManyToMany(() => Skill, (s) => s.subjects, {
-    cascade: false,
-  })
-  @JoinTable()
-  skills: Skill[];
 
   @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
   curriculums: Curriculum[];

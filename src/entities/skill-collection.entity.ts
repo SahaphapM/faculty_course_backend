@@ -7,7 +7,6 @@ import {
 } from 'typeorm';
 import { Student } from './student.entity';
 import { CourseEnrollment } from './course-enrollment';
-import { SkillLevel } from 'src/enums/skill-level.enum';
 import { SkillExpectedLevel } from './skillExpectedLevel';
 
 @Entity()
@@ -15,8 +14,8 @@ export class SkillCollection {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true, enum: SkillLevel })
-  level: SkillLevel;
+  @Column({ nullable: true })
+  gainedLevel: number;
 
   @Column({ default: 0 })
   score: number;
@@ -56,11 +55,11 @@ export class SkillCollectionTree {
 
   name: string;
 
-  acquiredLevel: number;
+  gainedLevel: number;
 
-  requiredLevel: number;
+  expectedLevel: number;
 
-  pass: boolean;
+  passed: boolean;
 
   children: SkillCollectionTree[];
 }
