@@ -10,7 +10,7 @@ import {
   TreeChildren,
   TreeParent,
 } from 'typeorm';
-import { SkillDetail } from './skillDetail.entity';
+import { SkillExpectedLevel } from './skillExpectedLevel';
 import { SkillCollection } from './skill-collection.entity';
 import { Subject } from './subject.entity';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
@@ -33,20 +33,6 @@ export class Skill {
     nullable: true,
   })
   domain: LearningDomain;
-  // @ManyToMany(() => Subject, (subject) => subject.skills)
-  // subjects: Subject[] | null;
-
-  // Self Relation
-  // @ManyToMany(() => Skill, (skill) => skill.subSkills)
-  // @JoinTable({
-  //   name: 'skill_relations', // Table to store the relations
-  //   joinColumn: { name: 'skillId', referencedColumnName: 'id' },
-  //   inverseJoinColumn: { name: 'relatedSkillId', referencedColumnName: 'id' },
-  // })
-  // subSkills: Skill[] | null;
-
-  // @ManyToMany(() => Skill, (skill) => skill.relatedSkills)
-  // inverseRelatedSkills: Skill[];
 
   // Tree relation
   @TreeChildren({ cascade: false }) // delete parent not effect childs
@@ -66,16 +52,14 @@ export class Skill {
   })
   subjects: Subject[];
 
-  // @ManyToMany(() => Course, (course) => course.skills, {
-  //   cascade: false,
-  // })
-  // @JoinTable()
-  // courses: Course[];
-
-  @OneToMany(() => SkillDetail, (skillDetail) => skillDetail.skill, {
-    cascade: false,
-  })
-  skillDetail: SkillDetail[];
+  @OneToMany(
+    () => SkillExpectedLevel,
+    (skillExpectedLevel) => skillExpectedLevel.skill,
+    {
+      cascade: false,
+    },
+  )
+  skillExpectedLevels: SkillExpectedLevel[];
 
   @OneToMany(() => SkillCollection, (s) => s.courseEnrollment, {
     cascade: false,

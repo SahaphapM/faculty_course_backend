@@ -8,7 +8,7 @@ import {
 import { Student } from './student.entity';
 import { CourseEnrollment } from './course-enrollment';
 import { SkillLevel } from 'src/enums/skill-level.enum';
-import { Skill } from './skill.entity';
+import { SkillExpectedLevel } from './skillExpectedLevel';
 
 @Entity()
 export class SkillCollection {
@@ -30,33 +30,24 @@ export class SkillCollection {
   @JoinColumn({ name: 'studentId' })
   student: Student;
 
-  // @ManyToOne(() => SkillDetail, (sd) => sd.skillCollection, {
-  //   cascade: false,
-  // })
-  // skillDetail: SkillDetail;
-
-  @ManyToOne(() => Skill, (s) => s.skillCollections, {
+  @ManyToOne(() => SkillExpectedLevel, (sd) => sd.skillCollection, {
     cascade: false,
   })
-  @JoinColumn({ name: 'skillId' })
-  skill: Skill;
+  @JoinColumn({ name: 'ExpectedLevelId' })
+  skillExpectedLevels: SkillExpectedLevel;
 
   @ManyToOne(
     () => CourseEnrollment,
     (courseStudentDetail) => courseStudentDetail.skillCollections,
-    // {
-    //   cascade: true,
-    //   onDelete: 'CASCADE',
-    // },
   )
   @JoinColumn({ name: 'courseEnrollmentId' })
   courseEnrollment: CourseEnrollment;
 
-  // // before insert skillCollection, also set name and requiredLevel from skillDetail
+  // // before insert skillCollection, also set name and requiredLevel from expectedLevel
   // @BeforeInsert()
   // async setAttribute() {
-  //   this.name = this.skillDetail.skill.name;
-  //   this.requiredLevel = this.skillDetail.requiredLevel;
+  //   this.name = this.expectedLevel.skill.name;
+  //   this.requiredLevel = this.expectedLevel.requiredLevel;
   // }
 }
 

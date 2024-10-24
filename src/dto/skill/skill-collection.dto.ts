@@ -12,7 +12,7 @@ export class CreateSkillCollection {
   level: SkillLevel;
 
   @IsNumber()
-  score: number;
+  gainedLevel: number;
 
   @IsBoolean()
   passed: boolean;

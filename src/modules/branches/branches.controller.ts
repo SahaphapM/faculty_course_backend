@@ -44,7 +44,6 @@ export class BranchesController {
 
   @Get('filters/:facultyId')
   filters(@Param('facultyId') facultyId: string) {
-    console.log(facultyId);
     return this.branchService.filters(facultyId);
   }
 }

@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 import { Clo } from 'src/entities/clo.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
-import { SkillDetail } from 'src/entities/skillDetail.entity';
+import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
 import { SubjectType } from 'src/enums/subject-types.enum';
 
 export class CreateSubjectDto {
@@ -39,7 +39,7 @@ export class CreateSubjectDto {
 
   @IsOptional()
   @IsArray()
-  skillDetails?: SkillDetail[];
+  expectedLevels?: SkillExpectedLevel[];
 
   @IsOptional()
   @IsNumber({ allowNaN: false }, { each: true })

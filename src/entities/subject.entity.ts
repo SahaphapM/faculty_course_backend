@@ -1,7 +1,7 @@
 import { Clo } from 'src/entities/clo.entity';
 import { Course } from 'src/entities/course.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
-import { SkillDetail } from 'src/entities/skillDetail.entity';
+import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
 import {
   Column,
   Entity,
@@ -36,10 +36,14 @@ export class Subject {
   })
   type: SubjectType;
 
-  @OneToMany(() => SkillDetail, (skillDetail) => skillDetail.subjects, {
-    cascade: false,
-  })
-  skillDetails: SkillDetail[];
+  @OneToMany(
+    () => SkillExpectedLevel,
+    (skillExpectedLevel) => skillExpectedLevel.subjects,
+    {
+      cascade: false,
+    },
+  )
+  skillExpectedLevels: SkillExpectedLevel[];
 
   @ManyToMany(() => Skill, (s) => s.subjects, {
     cascade: false,
