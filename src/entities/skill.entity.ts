@@ -27,7 +27,7 @@ export class Skill {
   description: string;
 
   @Column({
-    enum: LearningDomain,
+    // enum: LearningDomain, //mysql/mariaDB not support
     default: LearningDomain.Psychomotor,
     nullable: true,
   })
