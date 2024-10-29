@@ -23,7 +23,7 @@ export class Subject {
   credit: string; //3 (2-2-5)
 
   @Column({
-    enum: SubjectType,
+    // enum: SubjectType, // DB not support
     default: SubjectType.Compulsory,
   })
   type: SubjectType;
