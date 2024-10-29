@@ -14,11 +14,11 @@ export class SkillCollection {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ nullable: true })
+  @Column({ default: 0 })
   gainedLevel: number;
 
-  @Column({ default: 0 })
-  score: number;
+  // @Column({ default: 0 })
+  // score: number;
 
   @Column({ default: false })
   passed: boolean;

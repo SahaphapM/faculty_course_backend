@@ -12,7 +12,6 @@ import { Query } from '@nestjs/common';
 import { CreateCourseDto } from 'src/dto/course/create-course.dto';
 import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { CourseEnrollment } from 'src/entities/course-enrollment';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth()
@@ -58,12 +57,12 @@ export class CoursesController {
     return this.coursesService.selectSubject(id, subjectId);
   }
 
-  @Patch(':id/import-enrollment')
+  @Patch(':id/import-students')
   importStudents(
     @Param('id') courseId: string,
-    @Body() enroll: CourseEnrollment[],
+    @Body() studentListId: string[],
   ) {
-    return this.coursesService.importEnrollment(courseId, enroll);
+    return this.coursesService.importStudents(courseId, studentListId);
   }
 
   @Delete(':id/remove-enrollment/:enId')
