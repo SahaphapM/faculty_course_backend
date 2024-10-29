@@ -1,5 +1,4 @@
-import { IsBoolean, IsEnum, IsNumber, IsString } from 'class-validator';
-import { SkillLevel } from 'src/enums/skill-level.enum';
+import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class CreateSkillCollection {
   @IsString()
@@ -8,8 +7,8 @@ export class CreateSkillCollection {
   @IsString()
   skillId: string;
 
-  @IsEnum(SkillLevel)
-  level: SkillLevel;
+  @IsNumber()
+  level: number;
 
   @IsNumber()
   gainedLevel: number;
