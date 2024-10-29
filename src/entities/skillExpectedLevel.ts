@@ -1,5 +1,11 @@
 import { Subject } from 'src/entities/subject.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { Skill } from './skill.entity';
 import { OneToMany } from 'typeorm';
 import { SkillCollection } from 'src/entities/skill-collection.entity';
@@ -13,9 +19,11 @@ export class SkillExpectedLevel {
   expectedLevel: number; // level 1-5
 
   @ManyToOne(() => Subject, (subject) => subject.skillExpectedLevels)
+  @JoinColumn({ name: 'subjectId' })
   subjects: Subject;
 
   @ManyToOne(() => Skill, (skill) => skill.skillExpectedLevels)
+  @JoinColumn({ name: 'skillId' })
   skill: Skill;
 
   @OneToMany(
