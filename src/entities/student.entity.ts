@@ -29,7 +29,7 @@ export class Student {
   branch: Branch;
 
   @Column({ nullable: true })
-  dateEnrollment: Date;
+  enrollmentDate: Date;
 
   @Column({ nullable: true })
   socials: string;

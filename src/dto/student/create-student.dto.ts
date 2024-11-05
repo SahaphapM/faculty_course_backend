@@ -1,4 +1,4 @@
-import { IsString, IsNotEmpty } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
 import { SkillCollection } from '../../entities/skill-collection.entity';
 import { CourseEnrollment } from 'src/entities/course-enrollment';
 
@@ -13,12 +13,19 @@ export class CreateStudentDto {
 
   @IsString()
   @IsNotEmpty()
-  nameInEnglish: string; // e.g., "MR. SAHAPHAP RITNETIKUL"
+  nameEnglish: string; // e.g., "MR. SAHAPHAP RITNETIKUL"
 
+  @IsOptional()
   @IsString()
   status: string | null; // e.g., null if no status
 
+  @IsOptional()
+  @IsString()
+  enrollmentDate: string // yyyy-mm-dd
+
+  @IsOptional()
   courseStudentDetails: CourseEnrollment[];
 
+  @IsOptional()
   skillCollection: SkillCollection[];
 }
