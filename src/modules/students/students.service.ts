@@ -25,10 +25,15 @@ export class StudentsService {
   }
 
   async importStudents(students: CreateStudentDto[]) {
-    const newStudents = students.map((student) =>
-      this.studentRepository.create({ ...student, enrollmentDate: new Date(student.enrollmentDate) }),
-    );
-    await this.studentRepository.insert(newStudents);
+    if (Array.isArray(students)) {
+      const newStudents = students.map((student) =>
+        this.studentRepository.create({ ...student, enrollmentDate: new Date(student.enrollmentDate) }),
+      );
+      await this.studentRepository.insert(newStudents);
+    } else {
+      // Handle the case where `students` is not an array
+      console.error('Expected students to be an array, but got:', students);
+    }
   }
 
   async findAllByPage(
