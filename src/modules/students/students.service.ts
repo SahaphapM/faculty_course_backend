@@ -12,15 +12,23 @@ import { PaginationDto } from 'src/dto/pagination.dto';
 
 @Injectable()
 export class StudentsService {
+
   constructor(
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
-  ) {}
+  ) { }
 
   // Create a new student
   async create(studentDto: CreateStudentDto): Promise<Student> {
     const newStudent = this.studentRepository.create(studentDto);
     return await this.studentRepository.save(newStudent);
+  }
+
+  async importStudents(students: CreateStudentDto[]) {
+    const newStudents = students.map((student) =>
+      this.studentRepository.create({ ...student, enrollmentDate: new Date(student.enrollmentDate) }),
+    );
+    await this.studentRepository.insert(newStudents);
   }
 
   async findAllByPage(
@@ -173,7 +181,7 @@ export class StudentsService {
         (skillCollection) =>
           skillCollection.skillExpectedLevels.skill.parent &&
           skillCollection.skillExpectedLevels.skill.parent.id ===
-            skillCollectionMapParent[index].id,
+          skillCollectionMapParent[index].id,
       );
 
       if (childrenSkillCollections) {
@@ -207,7 +215,7 @@ export class StudentsService {
           (skill) =>
             chilSkillInParentMap.skillExpectedLevels.skill.parent &&
             skill.id ===
-              chilSkillInParentMap.skillExpectedLevels.skill.parent.id,
+            chilSkillInParentMap.skillExpectedLevels.skill.parent.id,
         );
         if (parentSkillIndex > -1) {
           skillCollectionMapParent[parentSkillIndex].children.push(

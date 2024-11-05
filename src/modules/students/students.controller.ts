@@ -16,11 +16,16 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('students')
 export class StudentsController {
-  constructor(private readonly studentsService: StudentsService) {}
+  constructor(private readonly studentsService: StudentsService) { }
 
   @Post()
   create(@Body() createStudentDto: CreateStudentDto) {
     return this.studentsService.create(createStudentDto);
+  }
+
+  @Post('import')
+  importStudents(@Body() students: CreateStudentDto[]) {
+    return this.studentsService.importStudents(students);
   }
 
   @Get('pages')
