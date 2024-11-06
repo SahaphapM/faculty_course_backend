@@ -38,6 +38,9 @@ export class SkillCollection {
   @ManyToOne(
     () => CourseEnrollment,
     (courseStudentDetail) => courseStudentDetail.skillCollections,
+    {
+      onDelete: 'CASCADE',
+    },
   )
   @JoinColumn({ name: 'courseEnrollmentId' })
   courseEnrollment: CourseEnrollment;

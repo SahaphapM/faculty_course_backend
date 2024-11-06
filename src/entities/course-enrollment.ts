@@ -28,6 +28,9 @@ export class CourseEnrollment {
   @OneToMany(
     () => SkillCollection,
     (skillCollection) => skillCollection.courseEnrollment,
+    {
+      cascade: true,
+    }
   )
   skillCollections: SkillCollection[];
 }

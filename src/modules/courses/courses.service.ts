@@ -161,7 +161,7 @@ export class CoursesService {
 
     const course = await this.courseRepo.findOne({
       where: { id },
-      relations: { subject: true, courseEnrollment: true, teachers: true },
+      relations: { subject: { skillExpectedLevels: true }, courseEnrollment: true, teachers: true },
     });
 
     if (!course) {
@@ -229,8 +229,6 @@ export class CoursesService {
 
       course.courseEnrollment.push(courseEnrollment);
     }
-
-    this.courseRepo.save(course);
 
     // Create a set of existing student IDs for quick lookup
     // const existingStudentIds = new Set(
