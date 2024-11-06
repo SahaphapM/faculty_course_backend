@@ -65,7 +65,7 @@ export class SubjectsService {
 
     const skillExpectedLevels = await Promise.all(
       dto.skillExpectedLevels.map((s) => {
-        if (!s.subject.id) {
+        if (!s.subject && !s.subject.id) {
           throw new BadRequestException('Subject ID in SkillExpectedLevel is required');
         }
         const existSkill = this.skillRepo.findOneBy({ id: s.skill.id });
@@ -80,7 +80,6 @@ export class SubjectsService {
     if (!skillExpectedLevels) {
       throw new NotFoundException('Skills not found');
     }
-
     const subject = this.subRepo.create({ ...dto, skillExpectedLevels });
     try {
       return await this.subRepo.save(subject);
@@ -123,16 +122,13 @@ export class SubjectsService {
     if (dto.skillExpectedLevels.length > 0) {
       const skillExpectedLevels = await Promise.all(
         dto.skillExpectedLevels.map((s) => {
-          if (!s.subject.id) {
-            throw new BadRequestException('Subject ID in SkillExpectedLevel is required');
-          }
           const existSkill = this.skillRepo.findOneBy({ id: s.skill.id });
           if (!existSkill) {
             throw new BadRequestException(
               `Skill with ID ${s.skill.id} not found`,
             );
           }
-          return this.SkillExpectedLevelsRepository.create(s);
+          return this.SkillExpectedLevelsRepository.create({ ...s, subject: { id: subject.id } });
         }),
       );
       if (!skillExpectedLevels) {
