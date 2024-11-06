@@ -32,8 +32,7 @@ export class Subject {
     () => SkillExpectedLevel,
     (skillExpectedLevel) => skillExpectedLevel.subject,
     {
-      cascade: ['insert', 'update', 'remove'],
-      onDelete: 'CASCADE',
+      cascade: true,
     },
   )
   skillExpectedLevels: SkillExpectedLevel[];
