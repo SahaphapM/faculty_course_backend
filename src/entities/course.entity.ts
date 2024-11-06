@@ -38,7 +38,7 @@ export class Course {
   // @JoinColumn({ name: 'curriculumId' })
   // curriculum: Curriculum;
 
-  @OneToMany(() => CourseEnrollment, (c) => c.course)
+  @OneToMany(() => CourseEnrollment, (c) => c.course, { cascade: true })
   courseEnrollment: CourseEnrollment[];
 
   @ManyToMany(() => Teacher, (c) => c.courses)
