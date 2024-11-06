@@ -20,7 +20,7 @@ export class SkillExpectedLevel {
 
   @ManyToOne(() => Subject, (subject) => subject.skillExpectedLevels)
   @JoinColumn({ name: 'subjectId' })
-  subjects: Subject;
+  subject: Subject;
 
   @ManyToOne(() => Skill, (skill) => skill.skillExpectedLevels)
   @JoinColumn({ name: 'skillId' })

@@ -2,7 +2,6 @@ import {
   IsString,
   IsArray,
   IsOptional,
-  IsNumber,
   IsEnum,
 } from 'class-validator';
 import { Clo } from 'src/entities/clo.entity';
@@ -37,11 +36,10 @@ export class CreateSubjectDto {
   @IsArray()
   clos?: Clo[];
 
-  @IsOptional()
   @IsArray()
-  expectedLevels?: SkillExpectedLevel[];
+  skillExpectedLevels?: SkillExpectedLevel[];
 
-  @IsOptional()
-  @IsNumber({ allowNaN: false }, { each: true })
-  skillListId: number[];
+  // @IsOptional()
+  // @IsNumber({ allowNaN: false }, { each: true })
+  // skillListId: number[];
 }
