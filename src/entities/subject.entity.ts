@@ -1,7 +1,7 @@
 import { Clo } from 'src/entities/clo.entity';
 import { Course } from 'src/entities/course.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
-import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
+import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
 import { SubjectType } from 'src/enums/subject-types.enum';
 
@@ -32,7 +32,7 @@ export class Subject {
     () => SkillExpectedLevel,
     (skillExpectedLevel) => skillExpectedLevel.subject,
     {
-      cascade: ['insert', 'update'],
+      cascade: ['insert', 'update', 'remove'],
     },
   )
   skillExpectedLevels: SkillExpectedLevel[];

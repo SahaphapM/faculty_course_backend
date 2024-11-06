@@ -3,7 +3,7 @@ import { SubjectsService } from './subjects.service';
 import { SubjectsController } from './subjects.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Subject } from '../../entities/subject.entity';
-import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
+import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 import { Curriculum } from '../../entities/curriculum.entity';
 import { ClosModule } from '../clos/clos.module';
 import { Skill } from 'src/entities/skill.entity';
@@ -17,4 +17,4 @@ import { Skill } from 'src/entities/skill.entity';
   providers: [SubjectsService],
   exports: [SubjectsService],
 })
-export class SubjectsModule {}
+export class SubjectsModule { }

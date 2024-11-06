@@ -16,7 +16,7 @@ import { CreateCourseDto } from 'src/dto/course/create-course.dto';
 import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { Teacher } from 'src/entities/teacher.entity';
-import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
+import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 
 @Injectable()
 export class CoursesService {
@@ -39,7 +39,7 @@ export class CoursesService {
     private readonly subjectsService: SubjectsService,
 
     private readonly studentsService: StudentsService, // Inject StudentsService
-  ) {}
+  ) { }
 
   // Create a new course
   async create(dto: CreateCourseDto): Promise<Course> {

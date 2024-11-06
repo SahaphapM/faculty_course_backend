@@ -6,7 +6,7 @@ import {
 } from 'class-validator';
 import { Clo } from 'src/entities/clo.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
-import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
+import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 import { SubjectType } from 'src/enums/subject-types.enum';
 
 export class CreateSubjectDto {

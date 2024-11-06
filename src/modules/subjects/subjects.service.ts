@@ -13,7 +13,7 @@ import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
 import { UpdateSubjectDto } from 'src/dto/subject/update-subject.dto';
 import { CreateSkillCollection } from 'src/dto/skill/skill-collection.dto';
 import { Skill } from 'src/entities/skill.entity';
-import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
+import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 
 @Injectable()
 export class SubjectsService {

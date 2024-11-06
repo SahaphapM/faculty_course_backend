@@ -7,7 +7,7 @@ import {
 } from 'typeorm';
 import { Student } from './student.entity';
 import { CourseEnrollment } from './course-enrollment';
-import { SkillExpectedLevel } from './skillExpectedLevel';
+import { SkillExpectedLevel } from './skill-exp-lvl';
 
 @Entity()
 export class SkillCollection {

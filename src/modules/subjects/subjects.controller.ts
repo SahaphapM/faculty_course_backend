@@ -16,7 +16,7 @@ import { UpdateSubjectDto } from 'src/dto/subject/update-subject.dto';
 import { ClosService } from '../clos/clos.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateSkillCollection } from 'src/dto/skill/skill-collection.dto';
-import { SkillExpectedLevel } from 'src/entities/skillExpectedLevel';
+import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 
 @ApiBearerAuth()
 @Controller('subjects')
@@ -24,7 +24,7 @@ export class SubjectsController {
   constructor(
     private readonly subjectsService: SubjectsService,
     private readonly closService: ClosService,
-  ) {}
+  ) { }
 
   @Get('pages')
   findAllByPage(@Query() paginationDto: PaginationDto) {
