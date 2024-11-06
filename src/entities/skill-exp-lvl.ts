@@ -18,7 +18,7 @@ export class SkillExpectedLevel {
   @Column({ nullable: true })
   expectedLevel: number; // level 1-5
 
-  @ManyToOne(() => Subject, (subject) => subject.skillExpectedLevels)
+  @ManyToOne(() => Subject, (subject) => subject.skillExpectedLevels, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'subjectId' })
   subject: Subject;
 
