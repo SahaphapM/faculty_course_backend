@@ -16,7 +16,7 @@ export class SkillsService {
   constructor(
     @InjectRepository(Skill)
     private skillsRepository: TreeRepository<Skill>,
-  ) {}
+  ) { }
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
     console.log(createSkillDto);
@@ -78,23 +78,31 @@ export class SkillsService {
     return { data, total };
   }
 
+  // async findAll(): Promise<Skill[]> {
+  //   const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
+
+  //   queryBuilder
+  //     .where('skill.parentId IS NULL') // Correctly check for NULL
+  //     .leftJoinAndSelect('skill.skillExpectedLevels', 'skillExpectedLevels')
+  //     .leftJoinAndSelect('skillExpectedLevels.subjects', 'subject')
+  //     .leftJoinAndSelect('skill.children', 'children') // For direct children
+  //     .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
+  //     .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
+  //     .leftJoinAndSelect('skill.techSkills', 'techSkills');
+
+  //   // .where('skill.parentId IS NULL') // Check where parentId is null
+  //   // .leftJoinAndSelect['skill.skillExpectedLevels', 'skillExpectedLevels']
+  //   const skills = await queryBuilder.getMany();
+
+  //   return skills;
+  // }
+
   async findAll(): Promise<Skill[]> {
-    const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
-
-    queryBuilder
-      .where('skill.parentId IS NULL') // Correctly check for NULL
-      .leftJoinAndSelect('skill.skillExpectedLevels', 'skillExpectedLevels')
-      .leftJoinAndSelect('skillExpectedLevels.subjects', 'subject')
-      .leftJoinAndSelect('skill.children', 'children') // For direct children
-      .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
-      .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
-      .leftJoinAndSelect('skill.techSkills', 'techSkills');
-
-    // .where('skill.parentId IS NULL') // Check where parentId is null
-    // .leftJoinAndSelect['skill.skillExpectedLevels', 'skillExpectedLevels']
-    const skills = await queryBuilder.getMany();
-
-    return skills;
+    const exist = this.skillsRepository.find({ relations: { children: true } });
+    if (!exist) {
+      throw new NotFoundException(`Skills not found`);
+    }
+    return exist;
   }
 
   async findOne(id: string): Promise<Skill> {
