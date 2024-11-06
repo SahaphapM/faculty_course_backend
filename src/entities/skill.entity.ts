@@ -10,7 +10,7 @@ import {
   TreeChildren,
   TreeParent,
 } from 'typeorm';
-import { SkillExpectedLevel } from './skillExpectedLevel';
+import { SkillExpectedLevel } from './skill-exp-lvl';
 import { SkillCollection } from './skill-collection.entity';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 
