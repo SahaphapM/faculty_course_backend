@@ -28,7 +28,7 @@ export class SubjectsService {
     private readonly skillRepo: Repository<Skill>,
     // @InjectDataSource()
     // private dataSource: DataSource,
-  ) {}
+  ) { }
 
   async findAllByPage(
     paginationDto: PaginationDto,
@@ -61,16 +61,27 @@ export class SubjectsService {
     return { data: result, total };
   }
   async create(dto: CreateSubjectDto): Promise<Subject> {
-    let skills: Skill[];
-    if (dto.skillListId && dto.skillListId.length > 0) {
-      skills = await Promise.all(
-        dto.skillListId.map((id) => this.skillRepo.findOneBy({ id })),
-      );
-      if (!skills) {
-        throw new NotFoundException('Skills not found');
-      }
+    if (!dto.skillExpectedLevels.length) return
+
+    const skillExpectedLevels = await Promise.all(
+      dto.skillExpectedLevels.map((s) => {
+        if (!s.subject.id) {
+          throw new BadRequestException('Subject ID in SkillExpectedLevel is required');
+        }
+        const existSkill = this.skillRepo.findOneBy({ id: s.skill.id });
+        if (!existSkill) {
+          throw new BadRequestException(
+            `Skill with ID ${s.skill.id} not found`,
+          );
+        }
+        return this.SkillExpectedLevelsRepository.create(s);
+      }),
+    );
+    if (!skillExpectedLevels) {
+      throw new NotFoundException('Skills not found');
     }
-    const subject = this.subRepo.create({ ...dto });
+
+    const subject = this.subRepo.create({ ...dto, skillExpectedLevels });
     try {
       return await this.subRepo.save(subject);
     } catch (error) {
@@ -108,6 +119,26 @@ export class SubjectsService {
     });
     if (!subject) {
       throw new NotFoundException(`Subject with id ${id} not found`);
+    }
+    if (dto.skillExpectedLevels.length > 0) {
+      const skillExpectedLevels = await Promise.all(
+        dto.skillExpectedLevels.map((s) => {
+          if (!s.subject.id) {
+            throw new BadRequestException('Subject ID in SkillExpectedLevel is required');
+          }
+          const existSkill = this.skillRepo.findOneBy({ id: s.skill.id });
+          if (!existSkill) {
+            throw new BadRequestException(
+              `Skill with ID ${s.skill.id} not found`,
+            );
+          }
+          return this.SkillExpectedLevelsRepository.create(s);
+        }),
+      );
+      if (!skillExpectedLevels) {
+        throw new NotFoundException('Skills not found');
+      }
+      subject.skillExpectedLevels = skillExpectedLevels;
     }
     try {
       await this.subRepo.save(subject);

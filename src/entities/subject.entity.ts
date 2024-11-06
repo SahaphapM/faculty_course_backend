@@ -30,9 +30,9 @@ export class Subject {
 
   @OneToMany(
     () => SkillExpectedLevel,
-    (skillExpectedLevel) => skillExpectedLevel.subjects,
+    (skillExpectedLevel) => skillExpectedLevel.subject,
     {
-      cascade: false,
+      cascade: ['insert', 'update'],
     },
   )
   skillExpectedLevels: SkillExpectedLevel[];
