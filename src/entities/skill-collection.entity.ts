@@ -24,13 +24,16 @@ export class SkillCollection {
   passed: boolean;
 
   @ManyToOne(() => Student, (student) => student.skillCollection, {
-    cascade: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
   })
   @JoinColumn({ name: 'studentId' })
   student: Student;
 
+  // skill expected level + skill + subject
   @ManyToOne(() => SkillExpectedLevel, (sd) => sd.skillCollection, {
-    cascade: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
   })
   @JoinColumn({ name: 'ExpectedLevelId' })
   skillExpectedLevels: SkillExpectedLevel;
