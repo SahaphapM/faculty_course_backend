@@ -143,6 +143,18 @@ export class CoursesService {
           description: true,
           skillExpectedLevels: { id: true, expectedLevel: true, skill: { id: true, name: true } }
         },
+        courseEnrollment: {
+          student: { id: true, name: true },
+          skillCollections:
+          {
+            gainedLevel: true,
+            skillExpectedLevels: {
+              expectedLevel: true,
+              skill: { id: true, name: true }
+            },
+            passed: true
+          }
+        },
         teachers: { id: true, name: true }
       },
       relationLoadStrategy: 'query'
