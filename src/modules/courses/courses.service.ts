@@ -161,7 +161,20 @@ export class CoursesService {
 
     const course = await this.courseRepo.findOne({
       where: { id },
-      relations: { subject: { skillExpectedLevels: true }, courseEnrollment: true, teachers: true },
+      relations: { subject: { skillExpectedLevels: { skill: true } }, courseEnrollment: true, teachers: true },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        subject: {
+          id: true,
+          name: true,
+          description: true,
+          skillExpectedLevels: { id: true, skill: { id: true, name: true } }
+        },
+        courseEnrollment: true,
+        teachers: { id: true, name: true }
+      },
     });
 
     if (!course) {
@@ -215,6 +228,7 @@ export class CoursesService {
       const courseEnrollment = this.courseEnrollRepo.create({
         student,
         course,
+        skillCollections: []
       });
 
       for (const skill of course.subject.skillExpectedLevels) {
