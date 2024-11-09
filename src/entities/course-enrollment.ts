@@ -7,7 +7,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Course } from './course.entity';
-import { SkillCollection } from 'src/entities/skill-collection.entity';
+import { SkillCollection } from './skill-collection.entity';
 
 @Entity()
 export class CourseEnrollment {
@@ -20,7 +20,8 @@ export class CourseEnrollment {
   course: Course;
 
   @ManyToOne(() => Student, (student) => student.courseEnrollment, {
-    cascade: false,
+    onUpdate: 'CASCADE',
+    onDelete: 'CASCADE'
   })
   @JoinColumn({ name: 'studentId' })
   student: Student;

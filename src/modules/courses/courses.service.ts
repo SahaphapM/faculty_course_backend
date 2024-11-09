@@ -144,16 +144,18 @@ export class CoursesService {
           skillExpectedLevels: { id: true, expectedLevel: true, skill: { id: true, name: true } }
         },
         courseEnrollment: {
-          student: { id: true, name: true },
-          skillCollections:
-          {
-            gainedLevel: true,
-            skillExpectedLevels: {
-              expectedLevel: true,
-              skill: { id: true, name: true }
-            },
-            passed: true
-          }
+          student: {
+            id: true, name: true,
+            skillCollection:
+            {
+              gainedLevel: true,
+              skillExpectedLevels: {
+                expectedLevel: true,
+                skill: { id: true, name: true }
+              },
+              passed: true
+            }
+          },
         },
         teachers: { id: true, name: true }
       },
