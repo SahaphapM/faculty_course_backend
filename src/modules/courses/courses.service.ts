@@ -170,7 +170,7 @@ export class CoursesService {
           id: true,
           name: true,
           description: true,
-          skillExpectedLevels: { id: true, skill: { id: true, name: true } }
+          skillExpectedLevels: { id: true, expectedLevel: true, skill: { id: true, name: true } }
         },
         courseEnrollment: true,
         teachers: { id: true, name: true }
@@ -219,69 +219,31 @@ export class CoursesService {
 
     course.courseEnrollment = course.courseEnrollment || [];
 
-    for (const studentId of studentListId) {
-      const student = await this.studentsService.findOne(studentId);
-      if (!student) {
-        throw new NotFoundException(`Student with ID ${studentId} not found`);
-      }
+    const students = await this.studentsService.findManyByIds(studentListId);
+    const missingStudents = studentListId.filter(
+      (id) => !students.some((student) => student.id === id),
+    );
+    if (missingStudents.length > 0) {
+      throw new NotFoundException(`Students with IDs ${missingStudents.join(', ')} not found`);
+    }
 
+    const newEnrollments = students.map((student) => {
       const courseEnrollment = this.courseEnrollRepo.create({
         student,
         course,
-        skillCollections: []
+        skillCollections: course.subject.skillExpectedLevels.map((skill) =>
+          this.skillCollRepo.create({
+            skillExpectedLevels: skill,
+            gainedLevel: 0,
+            passed: false,
+          }),
+        ),
       });
+      return courseEnrollment;
+    });
 
-      for (const skill of course.subject.skillExpectedLevels) {
-        const skillCollection = this.skillCollRepo.create({
-          courseEnrollment,
-          skillExpectedLevels: skill,
-          gainedLevel: 0,
-          passed: false,
-        });
-        courseEnrollment.skillCollections.push(skillCollection);
-      }
+    course.courseEnrollment.push(...newEnrollments);
 
-      course.courseEnrollment.push(courseEnrollment);
-    }
-
-    // Create a set of existing student IDs for quick lookup
-    // const existingStudentIds = new Set(
-    //   course.courseEnrollment.map((c) => c.student.id),
-    // );
-
-    // Process each student to add if not already present
-    // for (const courseEn of courseEnrolls) {
-    //   if (!existingStudentIds.has(courseEn.student.id)) {
-    //     const student = await this.studentsService.findOne(courseEn.student.id);
-    //     if (!student) {
-    //       throw new NotFoundException(
-    //         `Student with ID ${student.id} not found`,
-    //       );
-    //     }
-
-    //     courseEn.skillCollections = courseEn.skillCollections || [];
-
-    //     // for (let index = 0; index < course.subject.skills.length; index++) {
-    //     //   const skillCollection = this.skillCollRepo.create({
-    //     //     skillExpectedLevel: course.subject.skills[index],
-    //     //     passed: false,
-    //     //     student: student,
-    //     //   });
-    //     //   const skillCollectionSaved =
-    //     //     await this.skillCollRepo.save<SkillCollection>(skillCollection);
-    //     //   courseEn.skillCollections.push(skillCollectionSaved);
-    //     // }
-    //     // Save and add new course detail
-    //     course.courseEnrollment.push(
-    //       await this.courseEnrollRepo.save<CourseEnrollment>(courseEn),
-    //     );
-
-    //     // Update the set with the newly added student ID
-    //     existingStudentIds.add(courseEn.student.id);
-    //   }
-    // }
-
-    // Save the updated course
     return await this.courseRepo.save(course);
   }
   async removeEnrollment(
