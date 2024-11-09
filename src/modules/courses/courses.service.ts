@@ -143,20 +143,20 @@ export class CoursesService {
           description: true,
           skillExpectedLevels: { id: true, expectedLevel: true, skill: { id: true, name: true } }
         },
-        courseEnrollment: {
-          student: {
-            id: true, name: true,
-            skillCollection:
-            {
-              gainedLevel: true,
-              skillExpectedLevels: {
-                expectedLevel: true,
-                skill: { id: true, name: true }
-              },
-              passed: true
-            }
-          },
-        },
+        // courseEnrollment: {
+        //   student: {
+        //     id: true, name: true,
+        //     skillCollection:
+        //     {
+        //       gainedLevel: true,
+        //       skillExpectedLevels: {
+        //         expectedLevel: true,
+        //         skill: { id: true, name: true }
+        //       },
+        //       passed: true
+        //     }
+        //   },
+        // },
         teachers: { id: true, name: true }
       },
       relationLoadStrategy: 'query'
@@ -169,8 +169,8 @@ export class CoursesService {
     return course;
   }
 
-  async findCourseEnrolmentByCourseId(id: string): Promise<CourseEnrollment> {
-    const courseEnrollment = await this.courseEnrollRepo.findOne({
+  async findCourseEnrolmentByCourseId(id: string): Promise<CourseEnrollment[]> {
+    const courseEnrollment = await this.courseEnrollRepo.find({
       where: { course: { id } },
       relations: { student: true, skillCollections: { skillExpectedLevels: { skill: true } } },
       select: {
