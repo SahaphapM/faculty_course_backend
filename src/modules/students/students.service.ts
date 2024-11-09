@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateStudentDto } from '../../dto/student/create-student.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from '../../entities/student.entity';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, In, Repository } from 'typeorm';
 import {
   SkillCollection,
   SkillCollectionTree,
@@ -12,6 +12,7 @@ import { PaginationDto } from 'src/dto/pagination.dto';
 
 @Injectable()
 export class StudentsService {
+
 
   constructor(
     @InjectRepository(Student)
@@ -106,6 +107,12 @@ export class StudentsService {
       relations: {
         skillCollection: true,
       },
+    });
+  }
+
+  async findManyByIds(studentListId: string[]) {
+    return await this.studentRepository.find({
+      where: { id: In(studentListId) },
     });
   }
 
