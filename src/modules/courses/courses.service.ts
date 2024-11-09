@@ -143,19 +143,9 @@ export class CoursesService {
           description: true,
           skillExpectedLevels: { id: true, expectedLevel: true, skill: { id: true, name: true } }
         },
-        courseEnrollment: {
-          student:
-          {
-            id: true, name: true,
-            skillCollection: {
-              id: true,
-              gainedLevel: true,
-              skillExpectedLevels: { expectedLevel: true, skill: { name: true } }
-            }
-          }
-        },
         teachers: { id: true, name: true }
       },
+      relationLoadStrategy: 'query'
     });
 
     if (!course) {
@@ -163,6 +153,28 @@ export class CoursesService {
     }
 
     return course;
+  }
+
+  async findCourseEnrolmentByCourseId(id: string): Promise<CourseEnrollment> {
+    const courseEnrollment = await this.courseEnrollRepo.findOne({
+      where: { course: { id } },
+      relations: { student: true, skillCollections: { skillExpectedLevels: { skill: true } } },
+      select: {
+        id: true,
+        student: { id: true, name: true },
+        skillCollections: {
+          id: true,
+          skillExpectedLevels: { id: true, expectedLevel: true, skill: { id: true, name: true } }
+        }
+      },
+      relationLoadStrategy: 'query'
+    })
+
+    if (!courseEnrollment) {
+      throw new NotFoundException(`Course Enrollment with Course ID ${id} not found`);
+    }
+
+    return courseEnrollment;
   }
 
   // Update an existing course
@@ -214,9 +226,8 @@ export class CoursesService {
         course,
         skillCollections: course.subject.skillExpectedLevels.map((skill) =>
           this.skillCollRepo.create({
+            student: student,
             skillExpectedLevels: skill,
-            gainedLevel: 0,
-            passed: false,
           }),
         ),
       });
