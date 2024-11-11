@@ -42,18 +42,18 @@ export class SkillsService {
     queryBuilder
       .where('skill.parentId IS NULL') // Correctly check for NULL
       .leftJoinAndSelect('skill.skillExpectedLevels', 'skillExpectedLevels')
-      .leftJoinAndSelect('skillExpectedLevels.subjects', 'subject')
+      .leftJoinAndSelect('skillExpectedLevels.subject', 'subject')
       .leftJoinAndSelect('skill.children', 'children') // For direct children
       .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
       .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
       .leftJoinAndSelect('skill.techSkills', 'techSkills');
 
     // Conditionally add joins based on bySubject
-    // if (bySubject) {
-    //   queryBuilder.andWhere('subject.id = :subjectId', {
-    //     subjectId: bySubject,
-    //   });
-    // }
+    if (bySubject) {
+      queryBuilder.andWhere('subject.id = :subjectId', {
+        subjectId: bySubject,
+      });
+    }
     // Add search condition if provided
 
     if (search) {
