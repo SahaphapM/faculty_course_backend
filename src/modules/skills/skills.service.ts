@@ -16,7 +16,7 @@ export class SkillsService {
   constructor(
     @InjectRepository(Skill)
     private skillsRepository: TreeRepository<Skill>,
-  ) { }
+  ) {}
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
     console.log(createSkillDto);
@@ -49,11 +49,11 @@ export class SkillsService {
       .leftJoinAndSelect('skill.techSkills', 'techSkills');
 
     // Conditionally add joins based on bySubject
-    if (bySubject) {
-      queryBuilder.andWhere('subject.id = :subjectId', {
-        subjectId: bySubject,
-      });
-    }
+    // if (bySubject) {
+    //   queryBuilder.andWhere('subject.id = :subjectId', {
+    //     subjectId: bySubject,
+    //   });
+    // }
     // Add search condition if provided
 
     if (search) {
