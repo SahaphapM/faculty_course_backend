@@ -178,6 +178,7 @@ export class CoursesService {
         student: { id: true, name: true },
         skillCollections: {
           id: true,
+          gainedLevel: true,
           skillExpectedLevels: { id: true, expectedLevel: true, skill: { id: true, name: true } }
         }
       },
