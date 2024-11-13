@@ -121,17 +121,19 @@ export class StudentsService {
     const student = await this.studentRepository.findOne({
       where: { id },
       relations: {
-        skillCollection: true,
+        courseEnrollment: { course: true },
+        skillCollection: { skillExpectedLevels: true },
       },
+      relationLoadStrategy: 'query'
     });
     if (!student) {
       throw new NotFoundException(`Student with ID "${id}" not found`);
     }
 
-    student.skillCollectionTree = this.buildSkillCollectionTree(
-      student.skillCollection,
-    );
-    delete student.skillCollection;
+    // student.skillCollectionTree = this.buildSkillCollectionTree(
+    //   student.skillCollection,
+    // );
+    // delete student.skillCollection;
 
     return student;
   }
