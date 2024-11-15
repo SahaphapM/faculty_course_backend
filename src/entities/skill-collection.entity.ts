@@ -17,15 +17,12 @@ export class SkillCollection {
   @Column({ default: 0 })
   gainedLevel: number;
 
-  // @Column({ default: 0 })
-  // score: number;
-
   @Column({ default: false })
   passed: boolean;
 
   @ManyToOne(() => Student, (student) => student.skillCollection, {
     onUpdate: 'CASCADE',
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'studentId' })
   student: Student;
@@ -33,7 +30,7 @@ export class SkillCollection {
   // skill expected level + skill + subject
   @ManyToOne(() => SkillExpectedLevel, (sd) => sd.skillCollection, {
     onUpdate: 'CASCADE',
-    onDelete: 'CASCADE'
+    onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'ExpectedLevelId' })
   skillExpectedLevels: SkillExpectedLevel;
@@ -58,6 +55,8 @@ export class SkillCollection {
 
 export class SkillCollectionTree {
   id: number;
+
+  skillId: number;
 
   name: string;
 

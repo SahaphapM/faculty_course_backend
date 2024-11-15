@@ -63,3 +63,8 @@ db
 
 docker-compose.yml
 docker-compose.yml
+
+# Ignoring for Testing with sqlite and local testing 
+src/app/app.module.ts
+src/auth/auth.controller.ts
+src/auth/auth.module.ts

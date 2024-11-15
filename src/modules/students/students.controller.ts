@@ -16,7 +16,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('students')
 export class StudentsController {
-  constructor(private readonly studentsService: StudentsService) { }
+  constructor(private readonly studentsService: StudentsService) {}
 
   @Post()
   create(@Body() createStudentDto: CreateStudentDto) {
@@ -41,6 +41,11 @@ export class StudentsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.studentsService.findOne(id);
+  }
+
+  @Get('skill-tree/:id')
+  findProfile(@Param('id') id: string) {
+    return this.studentsService.buildSkillCollectionTree(id);
   }
 
   @Patch(':id')
