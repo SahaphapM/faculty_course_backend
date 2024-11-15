@@ -1,10 +1,11 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { User } from '../../entities/user.entity';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
@@ -84,42 +85,60 @@ export class UsersService {
 
     const user = this.userRepo.create(createUserDto);
     return await this.userRepo.save(user);
+
+    // const user = this.usersRepository.create(createUserDto);
+    // user.roles = createUserDto.roles;
+
+    // try {
+    //   return await this.usersRepository.save(user);
+    // } catch (error) {
+    //   throw new BadRequestException('Failed to create user');
+    // }
   }
 
   async findAll(pag?: PaginationDto) {
-    const queryBuilder = this.userRepo.createQueryBuilder('user');
+    const defaultLimit = 10;
+    const defaultPage = 1;
 
-    if (pag?.search) {
-      queryBuilder.andWhere('user.id LIKE :search', {
-        search: `%${pag.search}%`,
-      });
+    const options: FindManyOptions = {
+      relations: { student: true, teacher: true },
+      select: {
+        id: true,
+        email: true,
+        role: true,
+        student: { id: true, name: true },
+        teacher: { id: true, name: true },
+      },
+    };
+
+    if (pag) {
+      const { search, limit, page, order } = pag;
+
+      options.take = limit || defaultLimit;
+      options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
+      options.order = { id: order || 'ASC' };
+
+      if (search) {
+        options.where = [
+          // { id: Like(`%${search}%`) },
+          { email: Like(`%${search}%`) }
+        ];
+      }
     }
 
-    if (pag?.page && pag?.limit) {
-      queryBuilder.take(pag.limit).skip((pag.page - 1) * pag.limit);
-    }
-
-    if (pag?.order) {
-      queryBuilder.orderBy('user.id', pag.order);
-    }
-
-    queryBuilder
-      .select('user.id', 'id')
-      .addSelect('user.email', 'email')
-      .addSelect('user.role', 'role')
-      .leftJoinAndSelect('user.student', 'student', 'student.id = user.id')
-      .addSelect('student.id', 'studentId')
-      .addSelect('student.name', 'studentName')
-      .leftJoinAndSelect('user.teacher', 'teacher', 'teacher.id = user.id')
-      .addSelect('teacher.id', 'teacherId')
-      .addSelect('teacher.name', 'teacherName');
-
-    if (!pag) {
-      return await queryBuilder.getMany();
-    } else {
-      return await queryBuilder.getManyAndCount();
+    try {
+      if (pag) {
+        return await this.userRepo.findAndCount(options);
+      } else {
+        return await this.userRepo.find(options);
+      }
+    } catch (error) {
+      // Log the error for debugging
+      console.error('Error fetching users:', error);
+      throw new InternalServerErrorException('Failed to fetch users');
     }
   }
+
 
   async findOne(id: number): Promise<User> {
     const user = await this.userRepo.findOne({
