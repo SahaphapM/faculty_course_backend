@@ -28,7 +28,7 @@ export class SubjectsService {
     private readonly skillRepo: Repository<Skill>,
     // @InjectDataSource()
     // private dataSource: DataSource,
-  ) { }
+  ) {}
 
   async findAllByPage(
     paginationDto: PaginationDto,
@@ -61,12 +61,14 @@ export class SubjectsService {
     return { data: result, total };
   }
   async create(dto: CreateSubjectDto): Promise<Subject> {
-    if (!dto.skillExpectedLevels.length) return
+    // if (!dto.skillExpectedLevels.length) return ===> Set to can create subject without skill
 
     const skillExpectedLevels = await Promise.all(
       dto.skillExpectedLevels.map((s) => {
         if (!s.subject && !s.subject.id) {
-          throw new BadRequestException('Subject ID in SkillExpectedLevel is required');
+          throw new BadRequestException(
+            'Subject ID in SkillExpectedLevel is required',
+          );
         }
         const existSkill = this.skillRepo.findOneBy({ id: s.skill.id });
         if (!existSkill) {
@@ -128,7 +130,10 @@ export class SubjectsService {
               `Skill with ID ${s.skill.id} not found`,
             );
           }
-          return this.SkillExpectedLevelsRepository.create({ ...s, subject: { id: subject.id } });
+          return this.SkillExpectedLevelsRepository.create({
+            ...s,
+            subject: { id: subject.id },
+          });
         }),
       );
       if (!skillExpectedLevels) {
