@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { User } from '../../entities/user.entity';
-import { Brackets, Repository } from 'typeorm';
+import { Brackets, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
@@ -16,7 +16,7 @@ import { Teacher } from 'src/entities/teacher.entity';
 export class UsersService {
   constructor(
     @InjectRepository(User)
-    private UserRepo: Repository<User>,
+    private userRepo: Repository<User>,
     @InjectRepository(Student)
     private stuRepo: Repository<Student>,
     @InjectRepository(Teacher)
@@ -29,7 +29,7 @@ export class UsersService {
     const { page, limit, sort, order, search, columnId, columnName } =
       paginationDto;
 
-    const queryBuilder = this.UserRepo.createQueryBuilder('user');
+    const queryBuilder = this.userRepo.createQueryBuilder('user');
 
     // Conditionally add joins if columnId and columnName are provided
     if (columnId && columnName === 'branch') {
@@ -47,9 +47,7 @@ export class UsersService {
     if (search) {
       queryBuilder.andWhere(
         new Brackets((qb) => {
-          qb.where('user.firstName LIKE :search', { search: `%${search}%` })
-            .orWhere('user.lastName LIKE :search', { search: `%${search}%` })
-            .orWhere('user.email LIKE :search', { search: `%${search}%` });
+          qb.where('user.email LIKE :search', { search: `%${search}%` });
         }),
       );
     }
@@ -75,7 +73,7 @@ export class UsersService {
   }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.UserRepo.findOne({
+    const existingUser = await this.userRepo.findOne({
       where: { email: createUserDto.email },
     });
     if (existingUser) {
@@ -84,8 +82,8 @@ export class UsersService {
       );
     }
 
-    const user = this.UserRepo.create(createUserDto);
-    return await this.UserRepo.save(user);
+    const user = this.userRepo.create(createUserDto);
+    return await this.userRepo.save(user);
 
     // const user = this.usersRepository.create(createUserDto);
     // user.roles = createUserDto.roles;
@@ -97,20 +95,43 @@ export class UsersService {
     // }
   }
 
-  async findAll(): Promise<User[]> {
-    return await this.UserRepo.find({
-      relations: { student: true, teacher: true },
-      select: {
-        id: true,
-        email: true,
-        student: { id: true, name: true },
-        teacher: { id: true, name: true },
-      },
-    });
+  async findAll(pag?: PaginationDto) {
+    if (!pag) {
+      return await this.userRepo.find({
+        relations: { student: true, teacher: true },
+        select: {
+          id: true,
+          email: true,
+          role: true,
+          student: { id: true, name: true },
+          teacher: { id: true, name: true },
+        },
+      });
+    } else {
+      return await this.userRepo.findAndCount(
+        {
+          relationLoadStrategy: 'query',
+          relations: { student: true, teacher: true },
+          where: { id: Number(Like(`%${pag.search}%`).value) },
+          select: {
+            id: true,
+            email: true,
+            role: true,
+            student: { id: true, name: true },
+            teacher: { id: true, name: true },
+          },
+          take: pag.limit,
+          skip: (pag.page - 1) * pag.limit,
+          order: {
+            id: pag.order
+          }
+        }
+      )
+    }
   }
 
   async findOne(id: number): Promise<User> {
-    const user = await this.UserRepo.findOne({
+    const user = await this.userRepo.findOne({
       where: { id },
     });
     if (!user) {
@@ -120,7 +141,7 @@ export class UsersService {
   }
 
   async findByEmail(email: string): Promise<User> {
-    const user = await this.UserRepo.findOne({
+    const user = await this.userRepo.findOne({
       where: { email },
     });
     return user;
@@ -161,7 +182,7 @@ export class UsersService {
     }
 
     try {
-      return await this.UserRepo.save(user);
+      return await this.userRepo.save(user);
     } catch (error) {
       throw new BadRequestException('Failed to update user');
     }
@@ -170,7 +191,7 @@ export class UsersService {
   async remove(id: number) {
     const user = await this.findOne(id);
     try {
-      await this.UserRepo.remove(user);
+      await this.userRepo.remove(user);
       return `Success Delete ID ${id}`;
     } catch (error) {
       throw new BadRequestException('Failed to remove user');
@@ -178,6 +199,6 @@ export class UsersService {
   }
 
   async updateHashedRefreshToken(userId: any, hashedRefreshToken: string) {
-    return await this.UserRepo.update({ id: userId }, { hashedRefreshToken });
+    return await this.userRepo.update({ id: userId }, { hashedRefreshToken });
   }
 }
