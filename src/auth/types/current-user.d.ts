@@ -1,6 +1,7 @@
-export type CurrentUser = {
+
+export type ProfilePayload = {
   id: number;
   email: string;
   avatarUrl: string;
-  roles: Role[];
+  role: string;
 };

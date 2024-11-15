@@ -1,5 +1,5 @@
 import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { Role } from 'src/entities/role.entity';
+import { UserRole } from 'src/enums/role.enum';
 
 export class CreateUserDto {
   @IsString()
@@ -14,7 +14,6 @@ export class CreateUserDto {
   avatarUrl: string;
 
   @IsNotEmpty()
-  roles: Role[];
+  role: UserRole
 
-  // curriculums: Curriculum[];
 }

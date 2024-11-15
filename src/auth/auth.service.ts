@@ -6,7 +6,7 @@ import { JwtService } from '@nestjs/jwt';
 // import { Payload } from './types/payload';
 import { compare } from 'bcrypt';
 import * as argon2 from 'argon2';
-import { CurrentUser } from './types/current-user';
+import { ProfilePayload } from './types/current-user';
 import { AuthJwtPayload } from './types/auth-jwtPayload';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
@@ -20,7 +20,7 @@ export class AuthService {
     private jwtService: JwtService,
     @Inject(refreshJwtConfig.KEY)
     private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
-  ) {}
+  ) { }
 
   async validateUser(email: string, password: string): Promise<any> {
     const user = await this.usersService.findByEmail(email);
@@ -113,9 +113,9 @@ export class AuthService {
   async validateJwtUser(userId: number) {
     const user = await this.usersService.findOne(userId);
     if (!user) throw new UnauthorizedException('User not found!');
-    const currentUser: CurrentUser = {
+    const currentUser: ProfilePayload = {
       id: user.id,
-      roles: user.roles,
+      role: user.role,
       email: user.email,
       avatarUrl: user.avatarUrl,
     };
