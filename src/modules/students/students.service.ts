@@ -3,13 +3,8 @@ import { CreateStudentDto } from '../../dto/student/create-student.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from '../../entities/student.entity';
 import { Brackets, In, Repository } from 'typeorm';
-import {
-  SkillCollection,
-  SkillCollectionTree,
-} from '../../entities/skill-collection.entity';
-import { Skill } from 'src/entities/skill.entity';
+import { SkillCollectionTree } from '../../entities/skill-collection.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @Injectable()
 export class StudentsService {
@@ -124,9 +119,9 @@ export class StudentsService {
       where: { id },
       relations: {
         courseEnrollment: { course: true },
-        skillCollection: { skillExpectedLevels: true },
+        skillCollection: true,
       },
-      relationLoadStrategy: 'query',
+      // relationLoadStrategy: 'query',
     });
     if (!student) {
       throw new NotFoundException(`Student with ID "${id}" not found`);
@@ -154,12 +149,11 @@ export class StudentsService {
   }
 
   async buildSkillCollectionTree(id: string): Promise<SkillCollectionTree[]> {
-    let skillCollections: SkillCollection[] = [];
-    try {
-      const student = await this.studentRepository.findOne({
-        where: { id },
-        relations: {
-          skillCollection: {
+    const student = await this.studentRepository.findOne({
+      where: { id },
+      relations: {
+        courseEnrollment: {
+          skillCollections: {
             skillExpectedLevels: {
               skill: {
                 parent: true,
@@ -167,116 +161,68 @@ export class StudentsService {
             },
           },
         },
-      });
-      skillCollections = student.skillCollection;
-    } catch (error) {
-      throw new ExceptionsHandler(error);
-    }
-
-    // get distinct skill parent
-    const distinctParentSkills: Skill[] = [];
-
-    for (let index = 0; index < skillCollections.length; index++) {
-      if (skillCollections[index].skillExpectedLevels.skill.parent) {
-        if (
-          !distinctParentSkills.some(
-            (parentSkill) =>
-              parentSkill.id ===
-              skillCollections[index].skillExpectedLevels.skill.parent.id,
-          )
-        ) {
-          distinctParentSkills.push(
-            skillCollections[index].skillExpectedLevels.skill.parent,
-          );
-        }
-      }
-    }
-
-    const skillCollectionMapParent: SkillCollectionTree[] = [];
-
-    distinctParentSkills.forEach((parentSkill) => {
-      if (parentSkill) {
-        const skillCollectionTree = new SkillCollectionTree();
-
-        const skillCollection = skillCollections.find(
-          (skillCollections) =>
-            skillCollections.skillExpectedLevels.skill.id === parentSkill.id,
-        );
-        if (skillCollection) {
-          skillCollectionTree.id = parentSkill.id;
-          skillCollectionTree.name = parentSkill.name;
-          skillCollectionTree.gainedLevel = skillCollection.gainedLevel;
-          skillCollectionTree.expectedLevel =
-            skillCollection.skillExpectedLevels.expectedLevel;
-          skillCollectionTree.passed = skillCollection.passed;
-          skillCollectionMapParent.push(skillCollectionTree);
-        } else {
-          skillCollectionTree.id = parentSkill.id;
-          skillCollectionTree.name = parentSkill.name;
-          skillCollectionTree.gainedLevel = null;
-          skillCollectionTree.expectedLevel = null;
-          skillCollectionTree.passed = null;
-          skillCollectionMapParent.push(skillCollectionTree);
-        }
-      }
+      },
     });
 
-    //////////////////////////////////////////////////////////////// Passs //////////////////////////////////////////////////////////////////
+    let idCounter = 1; // Initialize a counter for auto-incremented IDs
+    const result: SkillCollectionTree[] = [];
 
-    for (let index = 0; index < skillCollectionMapParent.length; index++) {
-      // find children skillCollection by parent skill id
-      const childrenSkillCollections = skillCollections.filter(
-        (skillCollection) =>
-          skillCollection.skillExpectedLevels.skill.parent &&
-          skillCollection.skillExpectedLevels.skill.parent.id ===
-            skillCollectionMapParent[index].id,
-      );
-
-      if (childrenSkillCollections) {
-        for (let index = 0; index < childrenSkillCollections.length; index++) {
-          const skillCollectionTree = new SkillCollectionTree();
-          skillCollectionTree.id =
-            childrenSkillCollections[index].skillExpectedLevels.skill.id;
-          skillCollectionTree.name =
-            childrenSkillCollections[index].skillExpectedLevels.skill.name;
-          skillCollectionTree.gainedLevel =
-            childrenSkillCollections[index].gainedLevel;
-          skillCollectionTree.expectedLevel =
-            childrenSkillCollections[index].skillExpectedLevels.expectedLevel;
-          skillCollectionTree.passed = childrenSkillCollections[index].passed;
-          skillCollectionMapParent[index].children =
-            skillCollectionMapParent[index].children || [];
-          skillCollectionMapParent[index].children.push(skillCollectionTree);
-        }
+    for (let i = 0; i < student.courseEnrollment.length; i++) {
+      if (!student.courseEnrollment[i].skillCollections) {
+        throw new NotFoundException(`SkillCollections" not found`);
       }
-    }
+      const skillCollections = student.courseEnrollment[i].skillCollections;
 
-    for (let index = 0; index < skillCollectionMapParent.length; index++) {
-      // if skillCollection is in skillCollectionMapParent
-      const chilSkillInParentMap = skillCollections.find(
-        (skillCollection) =>
-          skillCollection.skillExpectedLevels.skill.id ===
-          skillCollectionMapParent[index].id,
-      );
-      if (chilSkillInParentMap) {
-        const parentSkillIndex = skillCollectionMapParent.findIndex(
-          (skill) =>
-            chilSkillInParentMap.skillExpectedLevels.skill.parent &&
-            skill.id ===
-              chilSkillInParentMap.skillExpectedLevels.skill.parent.id,
-        );
-        if (parentSkillIndex > -1) {
-          skillCollectionMapParent[parentSkillIndex].children.push(
-            skillCollectionMapParent[index],
-          );
-          // remove parent skill
-          skillCollectionMapParent.splice(index, 1);
+      const skillMap: { [skillId: number]: SkillCollectionTree } = {};
+
+      // Initialize SkillCollectionTree nodes and populate the skillMap
+      skillCollections.forEach((skillCollection) => {
+        const { gainedLevel, passed, skillExpectedLevels } = skillCollection;
+        const { id: skillId, name } = skillExpectedLevels.skill;
+
+        skillMap[skillId] = {
+          id: idCounter++, // Assign and increment the auto-increment ID
+          skillId,
+          name,
+          gainedLevel,
+          expectedLevel: skillExpectedLevels.expectedLevel,
+          passed,
+          children: [],
+        };
+      });
+
+      // Build the tree structure, adding missing parents if necessary
+      skillCollections.forEach((skillCollection) => {
+        const { skillExpectedLevels } = skillCollection;
+        const { skill } = skillExpectedLevels;
+        const { id: skillId, parent } = skill;
+
+        if (parent) {
+          const parentId = parent.id;
+
+          // If the parent isn't in skillMap, add a placeholder for it
+          if (!skillMap[parentId]) {
+            skillMap[parentId] = {
+              id: idCounter++, // Assign and increment the auto-increment ID
+              skillId: parentId,
+              name: parent.name,
+              gainedLevel: null,
+              expectedLevel: null,
+              passed: null,
+              children: [],
+            };
+            result.push(skillMap[parentId]);
+          }
+
+          // Add current skill as a child of its parent
+          skillMap[parentId].children.push(skillMap[skillId]);
+          console.log(skillMap);
+        } else {
+          // If no parent, it's a root skill
+          result.push(skillMap[skillId]);
         }
-      }
+      });
     }
-    ////////////////////////////////// if skillCollection is not have children and parent //////////////////////////////////
-    //// i will be back to write this function
-
-    return skillCollectionMapParent;
+    return result;
   }
 }
