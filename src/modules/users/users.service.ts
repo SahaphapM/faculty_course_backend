@@ -31,13 +31,8 @@ export class UsersService {
 
     const queryBuilder = this.UserRepo.createQueryBuilder('user');
 
-    // Include roles in the query
-    queryBuilder.leftJoinAndSelect('user.roles', 'roles');
-
     // Conditionally add joins if columnId and columnName are provided
     if (columnId && columnName === 'branch') {
-      // Join user with curriculum
-      queryBuilder.innerJoin('user.curriculums', 'curriculum');
       // Join curriculum with branch
       queryBuilder.innerJoin('curriculum.branch', 'branch');
       // Filter by branchId
