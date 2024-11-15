@@ -89,8 +89,8 @@ export class UsersController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll() {
-    return this.usersService.findAll();
+  findAll(@Query('pag') pag?: PaginationDto) {
+    return this.usersService.findAll(pag);
   }
 
   @Get(':id')
