@@ -11,7 +11,6 @@ import {
   TreeParent,
 } from 'typeorm';
 import { SkillExpectedLevel } from './skill-exp-lvl';
-import { SkillCollection } from './skill-collection.entity';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 
 @Entity()
@@ -55,8 +54,9 @@ export class Skill {
   )
   skillExpectedLevels: SkillExpectedLevel[];
 
-  @OneToMany(() => SkillCollection, (s) => s.courseEnrollment, {
-    cascade: false,
-  })
-  skillCollections: SkillCollection[];
+  // I think it is not needed. We have skillExpectedLevels to relate to skill already.
+  // @OneToMany(() => SkillCollection, (s) => s.courseEnrollment, {
+  //   cascade: false,
+  // })
+  // skillCollections: SkillCollection[];
 }
