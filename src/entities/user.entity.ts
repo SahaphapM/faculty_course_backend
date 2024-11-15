@@ -4,13 +4,10 @@ import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Role } from 'src/entities/role.entity';
 import { Teacher } from './teacher.entity';
 import { Student } from './student.entity';
 
@@ -36,9 +33,9 @@ export class User {
   @IsString()
   avatarUrl: string;
 
-  @ManyToMany(() => Role, (role) => role.users, { cascade: false })
-  @JoinTable()
-  roles: Role[];
+  @Column({ nullable: true })
+  @IsString()
+  role: string;
 
   @Column({ nullable: true, select: false })
   hashedRefreshToken: string;

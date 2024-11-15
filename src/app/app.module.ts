@@ -13,7 +13,6 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { TechSkillsModule } from '../modules/tech-skills/tech-skills.module';
 import { StudentsModule } from '../modules/students/students.module';
-import { RolesModule } from '../modules/roles/roles.module';
 import { CurriculumsModule } from 'src/modules/curriculums/curriculums.module';
 import { BranchesModule } from 'src/modules/branches/branches.module';
 import { ClosModule } from 'src/modules/clos/clos.module';
@@ -52,7 +51,6 @@ import { CoursesModule } from 'src/modules/courses/courses.module';
       }),
       inject: [ConfigService],
     }),
-    RolesModule,
     UsersModule,
     CurriculumsModule,
     BranchesModule,
@@ -70,4 +68,4 @@ import { CoursesModule } from 'src/modules/courses/courses.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

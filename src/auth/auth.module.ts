@@ -18,27 +18,18 @@ import jwtConfig from './config/jwt.config';
 import { UsersService } from 'src/modules/users/users.service';
 import { RefreshJwtStrategy } from './strategies/refresh.strategy';
 import { JwtModule } from '@nestjs/jwt';
-import { Role } from 'src/entities/role.entity';
 import { Student } from 'src/entities/student.entity';
 import { Teacher } from 'src/entities/teacher.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role, Student, Teacher]),
+    TypeOrmModule.forFeature([User, Student, Teacher]),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
     ConfigModule.forFeature(googleOauthConfig),
     UsersModule,
     PassportModule,
     JwtModule.registerAsync(jwtConfig.asProvider()),
-    // JwtModule.registerAsync({
-    //   imports: [ConfigModule],
-    //   useFactory: async (configService: ConfigService) => ({
-    //     secret: configService.get('JWT_SECRET'),
-    //     signOptions: { expiresIn: '8h' },
-    //   }),
-    //   inject: [ConfigService],
-    // }),
   ],
   controllers: [AuthController],
   providers: [
@@ -60,4 +51,4 @@ import { Teacher } from 'src/entities/teacher.entity';
 
   exports: [AuthService],
 })
-export class AuthModule {}
+export class AuthModule { }

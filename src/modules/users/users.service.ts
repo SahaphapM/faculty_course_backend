@@ -9,7 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
 import { UpdateUserDto } from 'src/dto/user/update-user.dto';
-import { Role } from 'src/entities/role.entity';
 import { Student } from 'src/entities/student.entity';
 import { Teacher } from 'src/entities/teacher.entity';
 
@@ -18,13 +17,11 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private UserRepo: Repository<User>,
-    @InjectRepository(Role)
-    private roleRepo: Repository<Role>,
     @InjectRepository(Student)
     private stuRepo: Repository<Student>,
     @InjectRepository(Teacher)
     private teaRepo: Repository<Teacher>,
-  ) {}
+  ) { }
 
   async findAllByPage(
     paginationDto: PaginationDto,
@@ -107,11 +104,10 @@ export class UsersService {
 
   async findAll(): Promise<User[]> {
     return await this.UserRepo.find({
-      relations: { roles: true, student: true, teacher: true },
+      relations: { student: true, teacher: true },
       select: {
         id: true,
         email: true,
-        roles: { id: true, name: true },
         student: { id: true, name: true },
         teacher: { id: true, name: true },
       },
@@ -121,7 +117,6 @@ export class UsersService {
   async findOne(id: number): Promise<User> {
     const user = await this.UserRepo.findOne({
       where: { id },
-      relations: { roles: true },
     });
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -136,54 +131,42 @@ export class UsersService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto) {
+  async update(id: number, dto: UpdateUserDto) {
     const user = await this.findOne(id);
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    const roles = await Promise.all(
-      updateUserDto.roles.map((role) => {
-        const res = this.roleRepo.findOneBy({ id: role.id });
-        if (!res) {
-          throw new NotFoundException(`Role with ID ${role.id} not found`);
-        }
-        return res;
-      }),
-    );
     // Update user properties
-    Object.assign(user, updateUserDto);
-    user.roles = roles;
+    Object.assign(user, dto);
 
-    if (updateUserDto.studentId) {
+    if (dto.studentId) {
       const ent = await this.stuRepo.findOneBy({
-        id: updateUserDto.studentId,
+        id: dto.studentId,
       });
       if (!ent) {
         throw new NotFoundException(
-          `User with ID ${updateUserDto.studentId} not found`,
+          `User with ID ${dto.studentId} not found`,
         );
       }
       user.student = ent;
     }
 
-    if (updateUserDto.teacherId) {
+    if (dto.teacherId) {
       const ent = await this.teaRepo.findOneBy({
-        id: updateUserDto.teacherId,
+        id: dto.teacherId,
       });
       if (!ent) {
         throw new NotFoundException(
-          `User with ID ${updateUserDto.teacherId} not found`,
+          `User with ID ${dto.teacherId} not found`,
         );
       }
       user.teacher = ent;
     }
 
     try {
-      await this.UserRepo.save(user);
-      // const userUpdated = await this.findOne(id);
-      // return userUpdated;
+      return await this.UserRepo.save(user);
     } catch (error) {
       throw new BadRequestException('Failed to update user');
     }
