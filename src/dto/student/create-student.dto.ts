@@ -13,7 +13,7 @@ export class CreateStudentDto {
 
   @IsString()
   @IsNotEmpty()
-  nameEnglish: string; // e.g., "MR. SAHAPHAP RITNETIKUL"
+  engName: string; // e.g., "MR. SAHAPHAP RITNETIKUL"
 
   @IsOptional()
   @IsString()
@@ -21,7 +21,7 @@ export class CreateStudentDto {
 
   @IsOptional()
   @IsString()
-  enrollmentDate: string // yyyy-mm-dd
+  enrollmentDate: string; // yyyy-mm-dd
 
   @IsOptional()
   courseStudentDetails: CourseEnrollment[];
