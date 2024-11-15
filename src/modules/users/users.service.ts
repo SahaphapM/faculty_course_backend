@@ -120,10 +120,10 @@ export class UsersService {
             student: { id: true, name: true },
             teacher: { id: true, name: true },
           },
-          take: pag.limit,
-          skip: (pag.page - 1) * pag.limit,
+          take: pag.limit || 10,
+          skip: (pag.page - 1) * pag.limit || 0,
           order: {
-            id: pag.order
+            id: pag.order || 'ASC'
           }
         }
       )
