@@ -9,15 +9,14 @@ import {
 } from '../../entities/skill-collection.entity';
 import { Skill } from 'src/entities/skill.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
+import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @Injectable()
 export class StudentsService {
-
-
   constructor(
     @InjectRepository(Student)
     private readonly studentRepository: Repository<Student>,
-  ) { }
+  ) {}
 
   // Create a new student
   async create(studentDto: CreateStudentDto): Promise<Student> {
@@ -28,7 +27,10 @@ export class StudentsService {
   async importStudents(students: CreateStudentDto[]) {
     if (Array.isArray(students)) {
       const newStudents = students.map((student) =>
-        this.studentRepository.create({ ...student, enrollmentDate: new Date(student.enrollmentDate) }),
+        this.studentRepository.create({
+          ...student,
+          enrollmentDate: new Date(student.enrollmentDate),
+        }),
       );
       await this.studentRepository.insert(newStudents);
     } else {
@@ -124,7 +126,7 @@ export class StudentsService {
         courseEnrollment: { course: true },
         skillCollection: { skillExpectedLevels: true },
       },
-      relationLoadStrategy: 'query'
+      relationLoadStrategy: 'query',
     });
     if (!student) {
       throw new NotFoundException(`Student with ID "${id}" not found`);
@@ -151,9 +153,26 @@ export class StudentsService {
     await this.studentRepository.remove(student);
   }
 
-  private buildSkillCollectionTree(
-    skillCollections: SkillCollection[],
-  ): SkillCollectionTree[] {
+  async buildSkillCollectionTree(id: string): Promise<SkillCollectionTree[]> {
+    let skillCollections: SkillCollection[] = [];
+    try {
+      const student = await this.studentRepository.findOne({
+        where: { id },
+        relations: {
+          skillCollection: {
+            skillExpectedLevels: {
+              skill: {
+                parent: true,
+              },
+            },
+          },
+        },
+      });
+      skillCollections = student.skillCollection;
+    } catch (error) {
+      throw new ExceptionsHandler(error);
+    }
+
     // get distinct skill parent
     const distinctParentSkills: Skill[] = [];
 
@@ -178,12 +197,27 @@ export class StudentsService {
     distinctParentSkills.forEach((parentSkill) => {
       if (parentSkill) {
         const skillCollectionTree = new SkillCollectionTree();
-        skillCollectionTree.id = parentSkill.id;
-        skillCollectionTree.name = parentSkill.name;
-        skillCollectionTree.gainedLevel = null;
-        skillCollectionTree.expectedLevel = null;
-        skillCollectionTree.passed = null;
-        skillCollectionMapParent.push(skillCollectionTree);
+
+        const skillCollection = skillCollections.find(
+          (skillCollections) =>
+            skillCollections.skillExpectedLevels.skill.id === parentSkill.id,
+        );
+        if (skillCollection) {
+          skillCollectionTree.id = parentSkill.id;
+          skillCollectionTree.name = parentSkill.name;
+          skillCollectionTree.gainedLevel = skillCollection.gainedLevel;
+          skillCollectionTree.expectedLevel =
+            skillCollection.skillExpectedLevels.expectedLevel;
+          skillCollectionTree.passed = skillCollection.passed;
+          skillCollectionMapParent.push(skillCollectionTree);
+        } else {
+          skillCollectionTree.id = parentSkill.id;
+          skillCollectionTree.name = parentSkill.name;
+          skillCollectionTree.gainedLevel = null;
+          skillCollectionTree.expectedLevel = null;
+          skillCollectionTree.passed = null;
+          skillCollectionMapParent.push(skillCollectionTree);
+        }
       }
     });
 
@@ -195,14 +229,14 @@ export class StudentsService {
         (skillCollection) =>
           skillCollection.skillExpectedLevels.skill.parent &&
           skillCollection.skillExpectedLevels.skill.parent.id ===
-          skillCollectionMapParent[index].id,
+            skillCollectionMapParent[index].id,
       );
 
       if (childrenSkillCollections) {
         for (let index = 0; index < childrenSkillCollections.length; index++) {
           const skillCollectionTree = new SkillCollectionTree();
           skillCollectionTree.id =
-            childrenSkillCollections[index].skillExpectedLevels.id;
+            childrenSkillCollections[index].skillExpectedLevels.skill.id;
           skillCollectionTree.name =
             childrenSkillCollections[index].skillExpectedLevels.skill.name;
           skillCollectionTree.gainedLevel =
@@ -229,7 +263,7 @@ export class StudentsService {
           (skill) =>
             chilSkillInParentMap.skillExpectedLevels.skill.parent &&
             skill.id ===
-            chilSkillInParentMap.skillExpectedLevels.skill.parent.id,
+              chilSkillInParentMap.skillExpectedLevels.skill.parent.id,
         );
         if (parentSkillIndex > -1) {
           skillCollectionMapParent[parentSkillIndex].children.push(
