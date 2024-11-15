@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { User } from '../../entities/user.entity';
-import { Brackets, Like, Repository } from 'typeorm';
+import { Brackets, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
@@ -84,49 +84,40 @@ export class UsersService {
 
     const user = this.userRepo.create(createUserDto);
     return await this.userRepo.save(user);
-
-    // const user = this.usersRepository.create(createUserDto);
-    // user.roles = createUserDto.roles;
-
-    // try {
-    //   return await this.usersRepository.save(user);
-    // } catch (error) {
-    //   throw new BadRequestException('Failed to create user');
-    // }
   }
 
   async findAll(pag?: PaginationDto) {
-    if (!pag) {
-      return await this.userRepo.find({
-        relations: { student: true, teacher: true },
-        select: {
-          id: true,
-          email: true,
-          role: true,
-          student: { id: true, name: true },
-          teacher: { id: true, name: true },
-        },
+    const queryBuilder = this.userRepo.createQueryBuilder('user');
+
+    if (pag?.search) {
+      queryBuilder.andWhere('user.id LIKE :search', {
+        search: `%${pag.search}%`,
       });
+    }
+
+    if (pag?.page && pag?.limit) {
+      queryBuilder.take(pag.limit).skip((pag.page - 1) * pag.limit);
+    }
+
+    if (pag?.order) {
+      queryBuilder.orderBy('user.id', pag.order);
+    }
+
+    queryBuilder
+      .select('user.id', 'id')
+      .addSelect('user.email', 'email')
+      .addSelect('user.role', 'role')
+      .leftJoinAndSelect('user.student', 'student', 'student.id = user.id')
+      .addSelect('student.id', 'studentId')
+      .addSelect('student.name', 'studentName')
+      .leftJoinAndSelect('user.teacher', 'teacher', 'teacher.id = user.id')
+      .addSelect('teacher.id', 'teacherId')
+      .addSelect('teacher.name', 'teacherName');
+
+    if (!pag) {
+      return await queryBuilder.getMany();
     } else {
-      return await this.userRepo.findAndCount(
-        {
-          relationLoadStrategy: 'query',
-          relations: { student: true, teacher: true },
-          where: { id: Number(Like(`%${pag.search}%`).value) },
-          select: {
-            id: true,
-            email: true,
-            role: true,
-            student: { id: true, name: true },
-            teacher: { id: true, name: true },
-          },
-          take: pag.limit || 10,
-          skip: (pag.page - 1) * pag.limit || 0,
-          order: {
-            id: pag.order || 'ASC'
-          }
-        }
-      )
+      return await queryBuilder.getManyAndCount();
     }
   }
 
