@@ -112,8 +112,8 @@ export class CurriculumsService {
 
     curriculum = this.currRepo.merge(curriculum, dto);
 
-    if (dto.branchId) {
-      const branch = await this.branchService.findOne(dto.branchId);
+    if (dto.branch.id) {
+      const branch = await this.branchService.findOne(dto.branch.id);
       curriculum.branch = branch;
     }
 
@@ -254,7 +254,7 @@ export class CurriculumsService {
       const curriculums = await this.currRepo
         .createQueryBuilder('curriculum')
         .select(['curriculum.id', 'curriculum.thaiName', 'curriculum.engName'])
-        .where('curriculum.branchId = :branchId', { branchId })
+        .where('curriculum.branch.id = :branch.id', { branchId })
         .getMany();
       return curriculums;
     } catch (error) {
