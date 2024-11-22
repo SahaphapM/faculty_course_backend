@@ -19,7 +19,7 @@ export class CreateCurriculumDto {
   engDegree: string;
 
   @IsString()
-  branch: Branch;
+  branchId: string;
 
   @IsString()
   description: string;
