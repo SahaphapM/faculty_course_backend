@@ -36,7 +36,7 @@ export class TeachersService {
       // Join teacher with curriculum
       queryBuilder.innerJoin('teacher.curriculums', 'curriculum');
       // Join curriculum with branch
-      queryBuilder.innerJoin('curriculum.branch', 'branch');
+      queryBuilder.innerJoin('curriculum.branchId', 'branchId');
       // Filter by branchId
       queryBuilder.andWhere('branchId = :branchId', { branchId: columnId });
     } else if (columnId && columnName === 'curriculum') {
