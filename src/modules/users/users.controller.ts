@@ -30,12 +30,7 @@ const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 @ApiBearerAuth()
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
-
-  @Get('pages')
-  findAllByPage(@Query() paginationDto: PaginationDto) {
-    return this.usersService.findAllByPage(paginationDto);
-  }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)

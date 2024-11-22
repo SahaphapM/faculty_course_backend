@@ -32,11 +32,6 @@ const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 export class TeachersController {
   constructor(private readonly teachersService: TeachersService) {}
 
-  @Get('pages')
-  findAllByPage(@Query() paginationDto: PaginationDto) {
-    return this.teachersService.findAllByPage(paginationDto);
-  }
-
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createTeacherDto: CreateTeacherDto) {
@@ -91,7 +86,8 @@ export class TeachersController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll() {
+  findAll(@Query() paginationDto: PaginationDto) {
+    if (paginationDto) return this.teachersService.findAllByPage(paginationDto);
     return this.teachersService.findAll();
   }
 

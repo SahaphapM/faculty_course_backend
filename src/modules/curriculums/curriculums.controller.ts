@@ -28,18 +28,15 @@ export class CurriculumsController {
     private readonly plosService: PlosService,
   ) {}
 
-  @Get('pages')
-  findAllByPage(@Query() paginationDto: PaginationDto) {
-    return this.curriculumsService.findAllByPage(paginationDto);
-  }
-
   @Post()
   create(@Body() createCurriculumDto: CreateCurriculumDto) {
     return this.curriculumsService.create(createCurriculumDto);
   }
 
   @Get()
-  findAll() {
+  findAll(@Query() paginationDto: PaginationDto) {
+    if (paginationDto)
+      return this.curriculumsService.findAllByPage(paginationDto);
     return this.curriculumsService.findAll();
   }
 

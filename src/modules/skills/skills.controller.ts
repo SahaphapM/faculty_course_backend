@@ -32,14 +32,10 @@ export class SkillsController {
     return this.skillsService.create(createSkillDto);
   }
 
-  @Get('pages')
-  @HttpCode(HttpStatus.OK)
-  findAllByPage(@Query() paginationDto: PaginationDto) {
-    return this.skillsService.findAllByPage(paginationDto);
-  }
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll() {
+  findAll(@Query() paginationDto: PaginationDto) {
+    if (paginationDto) return this.skillsService.findAllByPage(paginationDto);
     return this.skillsService.findAll();
   }
 

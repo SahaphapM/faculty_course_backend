@@ -24,12 +24,7 @@ export class SubjectsController {
   constructor(
     private readonly subjectsService: SubjectsService,
     private readonly closService: ClosService,
-  ) { }
-
-  @Get('pages')
-  findAllByPage(@Query() paginationDto: PaginationDto) {
-    return this.subjectsService.findAllByPage(paginationDto);
-  }
+  ) {}
 
   @Post()
   create(@Body() createSubjectDto: CreateSubjectDto) {
@@ -37,7 +32,8 @@ export class SubjectsController {
   }
 
   @Get()
-  findAll() {
+  findAll(@Query() paginationDto: PaginationDto) {
+    if (paginationDto) return this.subjectsService.findAllByPage(paginationDto);
     return this.subjectsService.findAll();
   }
 
