@@ -28,13 +28,9 @@ export class StudentsController {
     return this.studentsService.importStudents(students);
   }
 
-  @Get('pages')
-  findAllByPage(@Query() paginationDto: PaginationDto) {
-    return this.studentsService.findAllByPage(paginationDto);
-  }
-
   @Get()
-  findAll() {
+  findAll(@Query() paginationDto?: PaginationDto) {
+    if (paginationDto) return this.studentsService.findAllByPage(paginationDto);
     return this.studentsService.findAll();
   }
 
