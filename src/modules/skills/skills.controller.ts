@@ -24,7 +24,7 @@ export class SkillsController {
   constructor(
     private readonly skillsService: SkillsService,
     private readonly techSkillsService: TechSkillsService,
-  ) {}
+  ) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -34,9 +34,8 @@ export class SkillsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() paginationDto: PaginationDto) {
-    if (paginationDto) return this.skillsService.findAllByPage(paginationDto);
-    return this.skillsService.findAll();
+  findAll(@Query() pag?: PaginationDto) {
+    return this.skillsService.findAll(pag);
   }
 
   @Get(':id')
