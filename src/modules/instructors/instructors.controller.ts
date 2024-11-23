@@ -28,7 +28,7 @@ const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 2 * 1024 * 1024; // 2 mb
 const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 
 @ApiBearerAuth()
-@Controller('teachers')
+@Controller('instructors')
 export class InstructorsController {
   constructor(private readonly teachersService: InstructorsService) { }
 
