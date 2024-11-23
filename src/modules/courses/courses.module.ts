@@ -8,7 +8,7 @@ import { Student } from 'src/entities/student.entity';
 import { SkillCollection } from 'src/entities/skill-collection.entity';
 import { StudentsModule } from '../students/students.module';
 import { SubjectsModule } from '../subjects/subjects.module';
-import { Teacher } from 'src/entities/teacher.entity';
+import { Instructor } from 'src/entities/instructor.entity';
 
 @Module({
   imports: [
@@ -17,7 +17,7 @@ import { Teacher } from 'src/entities/teacher.entity';
       CourseEnrollment,
       Student,
       SkillCollection,
-      Teacher,
+      Instructor,
       // Curriculum,
     ]),
     StudentsModule,
@@ -26,4 +26,4 @@ import { Teacher } from 'src/entities/teacher.entity';
   controllers: [CoursesController],
   providers: [CoursesService],
 })
-export class CoursesModule {}
+export class CoursesModule { }

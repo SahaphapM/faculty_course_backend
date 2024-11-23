@@ -5,13 +5,13 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { User } from '../../entities/user.entity';
-import { Brackets, FindManyOptions, Like, Repository } from 'typeorm';
+import { FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateUserDto } from 'src/dto/user/create-user.dto';
 import { UpdateUserDto } from 'src/dto/user/update-user.dto';
 import { Student } from 'src/entities/student.entity';
-import { Teacher } from 'src/entities/teacher.entity';
+import { Instructor } from 'src/entities/instructor.entity';
 
 @Injectable()
 export class UsersService {
@@ -20,58 +20,9 @@ export class UsersService {
     private userRepo: Repository<User>,
     @InjectRepository(Student)
     private stuRepo: Repository<Student>,
-    @InjectRepository(Teacher)
-    private teaRepo: Repository<Teacher>,
+    @InjectRepository(Instructor)
+    private teaRepo: Repository<Instructor>,
   ) { }
-
-  async findAllByPage(
-    paginationDto: PaginationDto,
-  ): Promise<{ data: User[]; total: number }> {
-    const { page, limit, sort, order, search, columnId, columnName } =
-      paginationDto;
-
-    const queryBuilder = this.userRepo.createQueryBuilder('user');
-
-    // Conditionally add joins if columnId and columnName are provided
-    if (columnId && columnName === 'branch') {
-      // Join curriculum with branch
-      queryBuilder.innerJoin('curriculum.branch', 'branch');
-      // Filter by branchId
-      queryBuilder.andWhere('branch.id = :branchId', { branchId: columnId });
-    } else if (columnId && columnName === 'curriculum') {
-      queryBuilder.innerJoinAndSelect(`user.${columnName}s`, `${columnName}`);
-      queryBuilder.andWhere(`${columnName}.id = :columnId`, {
-        columnId,
-      });
-    }
-
-    if (search) {
-      queryBuilder.andWhere(
-        new Brackets((qb) => {
-          qb.where('user.email LIKE :search', { search: `%${search}%` });
-        }),
-      );
-    }
-
-    if (sort && order) {
-      queryBuilder.orderBy(`user.${sort}`, order);
-    }
-
-    // Log the generated SQL query and its parameters
-    // console.log('Generated SQL:', queryBuilder.getSql());
-    // console.log('Query Parameters:', queryBuilder.getParameters());
-
-    const [data, total] = await queryBuilder
-      .take(limit)
-      .skip((page - 1) * limit)
-      .getManyAndCount();
-
-    // console.log('PaginationDto:', paginationDto);
-    // console.log('Data:', data);
-    // console.log('Total:', total);
-
-    return { data, total };
-  }
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.userRepo.findOne({
@@ -85,22 +36,14 @@ export class UsersService {
 
     const user = this.userRepo.create(createUserDto);
     return await this.userRepo.save(user);
-
-    // const user = this.usersRepository.create(createUserDto);
-    // user.roles = createUserDto.roles;
-
-    // try {
-    //   return await this.usersRepository.save(user);
-    // } catch (error) {
-    //   throw new BadRequestException('Failed to create user');
-    // }
   }
 
   async findAll(pag?: PaginationDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const options: FindManyOptions = {
+    const options: FindManyOptions<User> = {
+      relationLoadStrategy: 'query',
       relations: { student: true, teacher: true },
       select: {
         id: true,
@@ -110,24 +53,20 @@ export class UsersService {
         teacher: { id: true, name: true },
       },
     };
-
-    if (pag) {
-      const { search, limit, page, order } = pag;
-
-      options.take = limit || defaultLimit;
-      options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-      options.order = { id: order || 'ASC' };
-
-      if (search) {
-        options.where = [
-          // { id: Like(`%${search}%`) },
-          { email: Like(`%${search}%`) }
-        ];
-      }
-    }
-
     try {
       if (pag) {
+        const { search, limit, page, order } = pag;
+
+        options.take = limit || defaultLimit;
+        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
+        options.order = { id: order || 'ASC' };
+
+        if (search) {
+          options.where = [
+            // { id: Like(`%${search}%`) },
+            { email: Like(`%${search}%`) }
+          ];
+        }
         return await this.userRepo.findAndCount(options);
       } else {
         return await this.userRepo.find(options);

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -26,40 +27,38 @@ export class SubjectsService {
     private readonly SkillExpectedLevelsRepository: Repository<SkillExpectedLevel>,
     @InjectRepository(Skill)
     private readonly skillRepo: Repository<Skill>,
-    // @InjectDataSource()
-    // private dataSource: DataSource,
-  ) {}
+  ) { }
 
-  async findAllByPage(
-    paginationDto: PaginationDto,
-  ): Promise<{ data: Subject[]; total: number }> {
-    // console.log(paginationDto);
-    const { page, limit, sort, order, search } = paginationDto;
-    // console.log(search);
+  // async findAllByPage(
+  //   paginationDto: PaginationDto,
+  // ): Promise<{ data: Subject[]; total: number }> {
+  //   // console.log(paginationDto);
+  //   const { page, limit, sort, order, search } = paginationDto;
+  //   // console.log(search);
 
-    const options: FindManyOptions<Subject> = {
-      take: limit,
-      skip: (page - 1) * limit,
-      order: sort ? { [sort]: order } : {},
-    };
+  //   const options: FindManyOptions<Subject> = {
+  //     take: limit,
+  //     skip: (page - 1) * limit,
+  //     order: sort ? { [sort]: order } : {},
+  //   };
 
-    if (search) {
-      options.where = [
-        { name: Like(`%${search}%`) },
-        { engName: Like(`%${search}%`) },
-        { id: Like(`%${search}%`) },
-      ];
-    }
+  //   if (search) {
+  //     options.where = [
+  //       { name: Like(`%${search}%`) },
+  //       { engName: Like(`%${search}%`) },
+  //       { id: Like(`%${search}%`) },
+  //     ];
+  //   }
 
-    // console.log('Query options:', options); // Debugging line
+  //   // console.log('Query options:', options); // Debugging line
 
-    const [result, total] = await this.subRepo.findAndCount(options);
+  //   const [result, total] = await this.subRepo.findAndCount(options);
 
-    // console.log('Result:', result); // Debugging line
-    // console.log('Total:', total); // Debugging line
+  //   // console.log('Result:', result); // Debugging line
+  //   // console.log('Total:', total); // Debugging line
 
-    return { data: result, total };
-  }
+  //   return { data: result, total };
+  // }
   async create(dto: CreateSubjectDto): Promise<Subject> {
     // if (!dto.skillExpectedLevels.length) return ===> Set to can create subject without skill
 
@@ -90,15 +89,48 @@ export class SubjectsService {
     }
   }
 
-  async findAll(): Promise<Subject[]> {
+  async findAll(pag?: PaginationDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const options: FindManyOptions<Subject> = {
+      relationLoadStrategy: 'query',
+      relations: { skillExpectedLevels: true },
+      select: {
+        id: true,
+        name: true,
+        engName: true,
+        description: true,
+        type: true,
+        credit: true,
+        skillExpectedLevels: {
+          id: true,
+          expectedLevel: true,
+          skill: { id: true, name: true }
+        }
+      },
+    };
     try {
-      return await this.subRepo.find({
-        relations: {
-          skillExpectedLevels: { skill: true },
-        },
-      });
+      if (pag) {
+        const { search, limit, page, order } = pag;
+
+        options.take = limit || defaultLimit;
+        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
+        options.order = { id: order || 'ASC' };
+
+        if (search) {
+          options.where = [
+            { name: Like(`%${search}%`) },
+          ];
+        }
+        return await this.subRepo.findAndCount(options);
+      } else {
+        return await this.subRepo.find(options);
+      }
     } catch (error) {
-      throw new BadRequestException('Failed to get subjects', error.message);
+      // Log the error for debugging
+      console.error('Error fetching users:', error);
+      throw new InternalServerErrorException('Failed to fetch users');
     }
   }
 

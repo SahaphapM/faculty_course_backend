@@ -30,7 +30,7 @@ const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 @ApiBearerAuth()
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UsersService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -85,10 +85,7 @@ export class UsersController {
   @Get()
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: PaginationDto) {
-    if (pag) {
-      return this.usersService.findAll(pag);
-    }
-    return this.usersService.findAll();
+    return this.usersService.findAll(pag);
   }
 
   @Get(':id')

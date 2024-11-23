@@ -20,7 +20,7 @@ export class Branch {
   engName: string;
 
   @Column({ nullable: true })
-  abbrev: string;
+  abbrev: string; //CS, AI, SE etc.
 
   @ManyToOne(() => Faculty, (faculty) => faculty.branches)
   @JoinColumn({ name: 'facultyId' })
