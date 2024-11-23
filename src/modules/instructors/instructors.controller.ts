@@ -13,12 +13,12 @@ import {
   UploadedFile,
   ParseFilePipeBuilder,
 } from '@nestjs/common';
-import { TeachersService } from './teachers.service';
+import { InstructorsService } from './instructors.service';
 import { CreateTeacherDto } from '../../dto/teacher/create-teacher.dto';
 import { UpdateTeacherDto } from '../../dto/teacher/update-teacher.dto';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { CustomUploadFileTypeValidator } from './teachers.file.validators';
+import { CustomUploadFileTypeValidator } from './instructors.file.validators';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -29,8 +29,8 @@ const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 
 @ApiBearerAuth()
 @Controller('teachers')
-export class TeachersController {
-  constructor(private readonly teachersService: TeachersService) {}
+export class InstructorsController {
+  constructor(private readonly teachersService: InstructorsService) { }
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -86,9 +86,8 @@ export class TeachersController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() paginationDto: PaginationDto) {
-    if (paginationDto) return this.teachersService.findAllByPage(paginationDto);
-    return this.teachersService.findAll();
+  findAll(@Query() pag?: PaginationDto) {
+    return this.teachersService.findAll(pag);
   }
 
   @Get(':id')

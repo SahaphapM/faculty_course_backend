@@ -10,7 +10,7 @@ import {
   PrimaryColumn,
 } from 'typeorm';
 import { CourseEnrollment } from './course-enrollment';
-import { Teacher } from './teacher.entity';
+import { Instructor } from './instructor.entity';
 
 @Entity()
 export class Course {
@@ -41,7 +41,7 @@ export class Course {
   @OneToMany(() => CourseEnrollment, (c) => c.course, { cascade: true })
   courseEnrollment: CourseEnrollment[];
 
-  @ManyToMany(() => Teacher, (c) => c.courses)
+  @ManyToMany(() => Instructor, (c) => c.courses)
   @JoinTable()
-  teachers: Teacher[];
+  instructors: Instructor[];
 }

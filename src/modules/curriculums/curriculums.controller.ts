@@ -26,7 +26,7 @@ export class CurriculumsController {
     private readonly curriculumsService: CurriculumsService,
     private readonly subjectsService: SubjectsService,
     private readonly plosService: PlosService,
-  ) {}
+  ) { }
 
   @Post()
   create(@Body() createCurriculumDto: CreateCurriculumDto) {
@@ -34,10 +34,8 @@ export class CurriculumsController {
   }
 
   @Get()
-  findAll(@Query() paginationDto: PaginationDto) {
-    if (paginationDto)
-      return this.curriculumsService.findAllByPage(paginationDto);
-    return this.curriculumsService.findAll();
+  findAll(@Query() pag?: PaginationDto) {
+    return this.curriculumsService.findAll(pag);
   }
 
   @Get(':id')

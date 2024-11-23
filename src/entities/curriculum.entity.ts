@@ -1,6 +1,6 @@
 import { Plo } from 'src/entities/plo.entity';
 import { Subject } from 'src/entities/subject.entity';
-import { Teacher } from 'src/entities/teacher.entity';
+import { Instructor } from 'src/entities/instructor.entity';
 import {
   Column,
   Entity,
@@ -19,13 +19,13 @@ export class Curriculum {
   id: string;
 
   @Column()
-  thaiName: string;
+  name: string;
 
   @Column()
   engName: string;
 
   @Column()
-  thaiDegreeName: string;
+  degreeName: string;
 
   @Column()
   engDegreeName: string;
@@ -46,11 +46,11 @@ export class Curriculum {
   @OneToMany(() => Plo, (plo) => plo.curriculum, { cascade: true })
   plos: Plo[];
 
-  @ManyToMany(() => Teacher, (teacher) => teacher.curriculums, {
+  @ManyToMany(() => Instructor, (teacher) => teacher.curriculums, {
     cascade: false,
   })
   @JoinTable()
-  coordinators: Teacher[];
+  coordinators: Instructor[];
 
   @ManyToMany(() => Subject, (subject) => subject.curriculums)
   @JoinTable()

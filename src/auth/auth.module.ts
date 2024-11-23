@@ -19,11 +19,11 @@ import { UsersService } from 'src/modules/users/users.service';
 import { RefreshJwtStrategy } from './strategies/refresh.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { Student } from 'src/entities/student.entity';
-import { Teacher } from 'src/entities/teacher.entity';
+import { Instructor } from 'src/entities/instructor.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Student, Teacher]),
+    TypeOrmModule.forFeature([User, Student, Instructor]),
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
     ConfigModule.forFeature(googleOauthConfig),

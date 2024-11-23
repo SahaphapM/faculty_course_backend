@@ -17,7 +17,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('courses')
 export class CoursesController {
-  constructor(private readonly coursesService: CoursesService) {}
+  constructor(private readonly coursesService: CoursesService) { }
 
   @Post()
   create(@Body() createCourseDto: CreateCourseDto) {
@@ -25,9 +25,8 @@ export class CoursesController {
   }
 
   @Get()
-  findAll(@Query() paginationDto: PaginationDto) {
-    if (paginationDto) return this.coursesService.findAllByPage(paginationDto);
-    return this.coursesService.findAll();
+  findAll(@Query() pag?: PaginationDto) {
+    return this.coursesService.findAll(pag);
   }
 
   @Get(':id')

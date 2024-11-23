@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import * as bcrypt from 'bcrypt';
-import { Teacher } from './teacher.entity';
+import { Instructor } from './instructor.entity';
 import { Student } from './student.entity';
 
 @Entity()
@@ -45,9 +45,9 @@ export class User {
     this.password = await bcrypt.hash(this.password, 10);
   }
 
-  @OneToOne(() => Teacher)
+  @OneToOne(() => Instructor)
   @JoinColumn()
-  teacher: Teacher;
+  teacher: Instructor;
 
   @OneToOne(() => Student)
   @JoinColumn()

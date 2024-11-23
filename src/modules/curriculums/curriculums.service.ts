@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateCurriculumDto } from '../../dto/curriculum/create-curriculum.dto';
@@ -10,7 +11,7 @@ import { FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Subject } from 'src/entities/subject.entity';
 import { Plo } from 'src/entities/plo.entity';
-import { TeachersService } from 'src/modules/teachers/teachers.service';
+import { InstructorsService } from 'src/modules/instructors/instructors.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { BranchesService } from '../branches/branches.service';
 import { SubjectsService } from '../subjects/subjects.service';
@@ -25,41 +26,41 @@ export class CurriculumsService {
     private readonly ploService: PlosService,
     private readonly subjectsService: SubjectsService,
     private readonly branchService: BranchesService,
-    private readonly teacherService: TeachersService,
-  ) {}
+    private readonly teacherService: InstructorsService,
+  ) { }
 
-  async findAllByPage(
-    paginationDto: PaginationDto,
-  ): Promise<{ data: Curriculum[]; total: number }> {
-    const { page, limit, sort, order, search } = paginationDto;
+  // async findAllByPage(
+  //   paginationDto: PaginationDto,
+  // ): Promise<{ data: Curriculum[]; total: number }> {
+  //   const { page, limit, sort, order, search } = paginationDto;
 
-    const options: FindManyOptions<Curriculum> = {
-      relations: [
-        'coordinators',
-        'plos',
-        'subjects',
-        'branch',
-        'branch.faculty',
-      ],
-      take: limit,
-      skip: (page - 1) * limit,
-      order: sort ? { [sort]: order } : {},
-    };
+  //   const options: FindManyOptions<Curriculum> = {
+  //     relations: [
+  //       'coordinators',
+  //       'plos',
+  //       'subjects',
+  //       'branch',
+  //       'branch.faculty',
+  //     ],
+  //     take: limit,
+  //     skip: (page - 1) * limit,
+  //     order: sort ? { [sort]: order } : {},
+  //   };
 
-    if (search) {
-      options.where = [
-        { id: Like(`%${search}%`) },
-        { thaiName: Like(`%${search}%`) },
-        { engName: Like(`%${search}%`) },
-        { branch: { name: Like(`%${search}%`) } }, // Corrected for nested relation
-        { branch: { faculty: { name: Like(`%${search}%`) } } },
-      ];
-    }
+  //   if (search) {
+  //     options.where = [
+  //       { id: Like(`%${search}%`) },
+  //       { thaiName: Like(`%${search}%`) },
+  //       { engName: Like(`%${search}%`) },
+  //       { branch: { name: Like(`%${search}%`) } }, // Corrected for nested relation
+  //       { branch: { faculty: { name: Like(`%${search}%`) } } },
+  //     ];
+  //   }
 
-    const [result, total] = await this.currRepo.findAndCount(options);
+  //   const [result, total] = await this.currRepo.findAndCount(options);
 
-    return { data: result, total };
-  }
+  //   return { data: result, total };
+  // }
 
   async create(createCurriculumDto: CreateCurriculumDto): Promise<Curriculum> {
     const curriculum = this.currRepo.create(createCurriculumDto);
@@ -77,14 +78,48 @@ export class CurriculumsService {
     }
   }
 
-  async findAll(): Promise<Curriculum[]> {
-    return await this.currRepo.find({
-      relations: {
-        plos: true,
-        subjects: true,
-        branch: true,
-      },
-    });
+  async findAll(pag?: PaginationDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const options: FindManyOptions<Curriculum> = {
+      relationLoadStrategy: 'query',
+      relations: { plos: true, subjects: true, branch: true, coordinators: true },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        minimumGrade: true,
+        degreeName: true,
+        engDegreeName: true,
+        engName: true,
+        period: true,
+        branch: { id: true, name: true },
+        coordinators: { id: true, name: true },
+      }
+    };
+    try {
+      if (pag) {
+        const { search, limit, page, order } = pag;
+
+        options.take = limit || defaultLimit;
+        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
+        options.order = { id: order || 'ASC' };
+
+        if (search) {
+          options.where = [
+            { id: Like(`%${search}%`) },
+          ];
+        }
+        return await this.currRepo.findAndCount(options);
+      } else {
+        return await this.currRepo.find(options);
+      }
+    } catch (error) {
+      // Log the error for debugging
+      console.error('Error fetching users:', error);
+      throw new InternalServerErrorException('Failed to fetch users');
+    }
   }
 
   async findOne(id: string): Promise<Curriculum> {

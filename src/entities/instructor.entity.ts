@@ -12,7 +12,7 @@ import { Branch } from './branch.entity';
 import { Course } from './course.entity';
 
 @Entity()
-export class Teacher {
+export class Instructor {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -56,6 +56,6 @@ export class Teacher {
   @ManyToMany(() => Curriculum, (curriculum) => curriculum.coordinators)
   curriculums: Curriculum[];
 
-  @ManyToMany(() => Course, (c) => c.teachers)
+  @ManyToMany(() => Course, (c) => c.instructors)
   courses: Course[];
 }

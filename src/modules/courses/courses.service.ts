@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -15,7 +16,7 @@ import { StudentsService } from '../students/students.service';
 import { CreateCourseDto } from 'src/dto/course/create-course.dto';
 import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { Teacher } from 'src/entities/teacher.entity';
+import { Instructor } from 'src/entities/instructor.entity';
 import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 
 @Injectable()
@@ -27,8 +28,8 @@ export class CoursesService {
     @InjectRepository(CourseEnrollment)
     private readonly courseEnrollRepo: Repository<CourseEnrollment>,
 
-    @InjectRepository(Teacher)
-    private readonly teaRepo: Repository<Teacher>,
+    @InjectRepository(Instructor)
+    private readonly teaRepo: Repository<Instructor>,
 
     @InjectRepository(SkillCollection)
     private readonly skillCollRepo: Repository<SkillCollection>,
@@ -64,7 +65,7 @@ export class CoursesService {
       const newCourse = this.courseRepo.create({
         ...rest,
         subject,
-        teachers,
+        instructors: teachers,
       });
       return await this.courseRepo.save(newCourse);
     } catch (error) {
@@ -72,67 +73,97 @@ export class CoursesService {
     }
   }
 
-  async findAllByPage(
-    paginationDto: PaginationDto,
-  ): Promise<{ data: Course[]; total: number }> {
-    const { page, limit, sort, order, search } = paginationDto;
+  // async findAllByPage(
+  //   paginationDto: PaginationDto,
+  // ): Promise<{ data: Course[]; total: number }> {
+  //   const { page, limit, sort, order, search } = paginationDto;
 
-    // const queryBuilder = this.courseRepository.createQueryBuilder('course');
+  // const queryBuilder = this.courseRepository.createQueryBuilder('course');
 
-    // Include roles in the query
-    // queryBuilder.leftJoinAndSelect('course.roles', 'roles');
-    // .leftJoinAndSelect('course.courseStudentDetails', 'courseStudentDetails')
-    // .leftJoinAndSelect('courseStudentDetails.student', 'student')
+  // Include roles in the query
+  // queryBuilder.leftJoinAndSelect('course.roles', 'roles');
+  // .leftJoinAndSelect('course.courseStudentDetails', 'courseStudentDetails')
+  // .leftJoinAndSelect('courseStudentDetails.student', 'student')
 
-    // // Conditionally add joins if columnId and columnName are provided
-    // if (columnId && columnName === 'branch') {
-    //   // Join user with curriculum
-    //   queryBuilder.innerJoin('user.curriculums', 'curriculum');
-    //   // Join curriculum with branch
-    //   queryBuilder.innerJoin('curriculum.branch', 'branch');
-    //   // Filter by branchId
-    //   queryBuilder.andWhere('branch.id = :branchId', { branchId: columnId });
-    // } else if (columnId && columnName === 'curriculum') {
-    //   queryBuilder.innerJoinAndSelect(`user.${columnName}s`, `${columnName}`);
-    //   queryBuilder.andWhere(`${columnName}.id = :columnId`, {
-    //     columnId,
-    //   });
-    // }
+  // // Conditionally add joins if columnId and columnName are provided
+  // if (columnId && columnName === 'branch') {
+  //   // Join user with curriculum
+  //   queryBuilder.innerJoin('user.curriculums', 'curriculum');
+  //   // Join curriculum with branch
+  //   queryBuilder.innerJoin('curriculum.branch', 'branch');
+  //   // Filter by branchId
+  //   queryBuilder.andWhere('branch.id = :branchId', { branchId: columnId });
+  // } else if (columnId && columnName === 'curriculum') {
+  //   queryBuilder.innerJoinAndSelect(`user.${columnName}s`, `${columnName}`);
+  //   queryBuilder.andWhere(`${columnName}.id = :columnId`, {
+  //     columnId,
+  //   });
+  // }
+
+  //   const options: FindManyOptions<Course> = {
+  //     take: limit,
+  //     skip: (page - 1) * limit,
+  //     order: sort ? { [sort]: order } : {},
+  //   };
+
+  //   if (search) {
+  //     options.where = [
+  //       { id: Like(`%${search}%`) },
+  //       { name: Like(`%${search}%`) },
+
+  //       // { branch: { name: Like(`%${search}%`) } }, // Corrected for nested relation
+  //       // { branch: { faculty: { name: Like(`%${search}%`) } } },
+  //     ];
+  //   }
+
+  //   const [result, total] = await this.courseRepo.findAndCount(options);
+
+  //   return { data: result, total };
+  // }
+
+  async findAll(pag?: PaginationDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
 
     const options: FindManyOptions<Course> = {
-      take: limit,
-      skip: (page - 1) * limit,
-      order: sort ? { [sort]: order } : {},
+      relationLoadStrategy: 'query',
+      relations: { subject: true, courseEnrollment: { student: true }, instructors: true },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        active: true
+      }
     };
+    try {
+      if (pag) {
+        const { search, limit, page, order } = pag;
 
-    if (search) {
-      options.where = [
-        { id: Like(`%${search}%`) },
-        { name: Like(`%${search}%`) },
+        options.take = limit || defaultLimit;
+        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
+        options.order = { id: order || 'ASC' };
 
-        // { branch: { name: Like(`%${search}%`) } }, // Corrected for nested relation
-        // { branch: { faculty: { name: Like(`%${search}%`) } } },
-      ];
+        if (search) {
+          options.where = [
+            { id: Like(`%${search}%`) },
+          ];
+        }
+        return await this.courseRepo.findAndCount(options);
+      } else {
+        return await this.courseRepo.find(options);
+      }
+    } catch (error) {
+      // Log the error for debugging
+      console.error('Error fetching users:', error);
+      throw new InternalServerErrorException('Failed to fetch users');
     }
-
-    const [result, total] = await this.courseRepo.findAndCount(options);
-
-    return { data: result, total };
-  }
-
-  async findAll(): Promise<Course[]> {
-    return await this.courseRepo.find({
-      relations: {
-        subject: { skillExpectedLevels: true },
-      },
-    });
   }
 
   // Find a single course by ID
   async findOne(id: string): Promise<Course> {
     const course = await this.courseRepo.findOne({
       where: { id },
-      relations: { subject: { skillExpectedLevels: { skill: true } }, courseEnrollment: { student: true }, teachers: true },
+      relations: { subject: { skillExpectedLevels: { skill: true } }, courseEnrollment: { student: true }, instructors: true },
       select: {
         id: true,
         name: true,
@@ -157,7 +188,7 @@ export class CoursesService {
         //     }
         //   },
         // },
-        teachers: { id: true, name: true }
+        instructors: { id: true, name: true }
       },
       relationLoadStrategy: 'query'
     });

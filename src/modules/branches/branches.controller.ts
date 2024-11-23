@@ -6,16 +6,18 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
 import { CreateBranchDto } from '../../dto/branch/create-branch.dto';
 import { UpdateBranchDto } from '../../dto/branch/update-branch.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { PaginationDto } from 'src/dto/pagination.dto';
 
 @ApiBearerAuth()
 @Controller('branches')
 export class BranchesController {
-  constructor(private readonly branchService: BranchesService) {}
+  constructor(private readonly branchService: BranchesService) { }
 
   @Post()
   create(@Body() createBranchDto: CreateBranchDto) {
@@ -23,8 +25,8 @@ export class BranchesController {
   }
 
   @Get()
-  findAll() {
-    return this.branchService.findAll();
+  findAll(@Query() pag?: PaginationDto) {
+    return this.branchService.findAll(pag);
   }
 
   @Get(':id')

@@ -1,16 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateBranchDto } from '../../dto/branch/create-branch.dto';
 import { UpdateBranchDto } from '../../dto/branch/update-branch.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Like, Repository } from 'typeorm';
 import { Branch } from '../../entities/branch.entity';
+import { PaginationDto } from 'src/dto/pagination.dto';
 
 @Injectable()
 export class BranchesService {
   constructor(
     @InjectRepository(Branch)
     private braRepo: Repository<Branch>,
-  ) {}
+  ) { }
 
   async create(createBranchDto: CreateBranchDto): Promise<Branch> {
     try {
@@ -29,13 +30,40 @@ export class BranchesService {
     }
   }
 
-  async findAll(): Promise<Branch[]> {
+  async findAll(pag?: PaginationDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const options: FindManyOptions<Branch> = {
+      relationLoadStrategy: 'query',
+      select: {
+        id: true,
+        name: true,
+        engName: true,
+        abbrev: true
+      },
+    };
     try {
-      return await this.braRepo.find({
-        relations: { curriculums: true, faculty: true },
-      });
+      if (pag) {
+        const { search, limit, page, order } = pag;
+
+        options.take = limit || defaultLimit;
+        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
+        options.order = { id: order || 'ASC' };
+
+        if (search) {
+          options.where = [
+            { name: Like(`%${search}%`) }
+          ];
+        }
+        return await this.braRepo.findAndCount(options);
+      } else {
+        return await this.braRepo.find(options);
+      }
     } catch (error) {
-      throw new Error('Failed to fetch branches');
+      // Log the error for debugging
+      console.error('Error fetching users:', error);
+      throw new InternalServerErrorException('Failed to fetch users');
     }
   }
 
