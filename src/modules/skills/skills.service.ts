@@ -1,10 +1,11 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Skill } from '../../entities/skill.entity';
-import { Brackets, TreeRepository } from 'typeorm';
+import { FindManyOptions, Like, TreeRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TechSkill } from 'src/entities/tech-skill.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
@@ -15,14 +16,14 @@ import { UpdateSkillDto } from 'src/dto/skill/update-skill.dto';
 export class SkillsService {
   constructor(
     @InjectRepository(Skill)
-    private skillsRepository: TreeRepository<Skill>,
-  ) {}
+    private skRepo: TreeRepository<Skill>,
+  ) { }
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
     console.log(createSkillDto);
 
     try {
-      return await this.skillsRepository.save(createSkillDto);
+      return await this.skRepo.save(createSkillDto);
     } catch (error) {
       throw new BadRequestException(
         'Failed to create skill',
@@ -31,52 +32,52 @@ export class SkillsService {
     }
   }
 
-  async findAllByPage(
-    paginationDto: PaginationDto,
-  ): Promise<{ data: Skill[]; total: number }> {
-    const { page, limit, sort, order, search, bySubject } = paginationDto;
+  // async findAllByPage(
+  //   paginationDto: PaginationDto,
+  // ): Promise<{ data: Skill[]; total: number }> {
+  //   const { page, limit, sort, order, search, bySubject } = paginationDto;
 
-    const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
+  //   const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
 
-    // Join relations to include them in the result
-    queryBuilder
-      .where('skill.parentId IS NULL') // Correctly check for NULL
-      .leftJoinAndSelect('skill.skillExpectedLevels', 'skillExpectedLevels')
-      .leftJoinAndSelect('skillExpectedLevels.subject', 'subject')
-      .leftJoinAndSelect('skill.children', 'children') // For direct children
-      .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
-      .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
-      .leftJoinAndSelect('skill.techSkills', 'techSkills');
+  //   // Join relations to include them in the result
+  //   queryBuilder
+  //     .where('skill.parentId IS NULL') // Correctly check for NULL
+  //     .leftJoinAndSelect('skill.skillExpectedLevels', 'skillExpectedLevels')
+  //     .leftJoinAndSelect('skillExpectedLevels.subject', 'subject')
+  //     .leftJoinAndSelect('skill.children', 'children') // For direct children
+  //     .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
+  //     .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
+  //     .leftJoinAndSelect('skill.techSkills', 'techSkills');
 
-    // Conditionally add joins based on bySubject
-    if (bySubject) {
-      queryBuilder.andWhere('subject.id = :subjectId', {
-        subjectId: bySubject,
-      });
-    }
-    // Add search condition if provided
+  //   // Conditionally add joins based on bySubject
+  //   if (bySubject) {
+  //     queryBuilder.andWhere('subject.id = :subjectId', {
+  //       subjectId: bySubject,
+  //     });
+  //   }
+  //   // Add search condition if provided
 
-    if (search) {
-      queryBuilder.andWhere(
-        new Brackets((qb) => {
-          qb.where('skill.name LIKE :search', {
-            search: `%${search}%`,
-          }).orWhere('skill.description LIKE :search', {
-            search: `%${search}%`,
-          });
-        }),
-      );
-    }
+  //   if (search) {
+  //     queryBuilder.andWhere(
+  //       new Brackets((qb) => {
+  //         qb.where('skill.name LIKE :search', {
+  //           search: `%${search}%`,
+  //         }).orWhere('skill.description LIKE :search', {
+  //           search: `%${search}%`,
+  //         });
+  //       }),
+  //     );
+  //   }
 
-    // Pagination
-    const [data, total] = await queryBuilder
-      .skip((page - 1) * limit)
-      .take(limit)
-      .orderBy(`skill.${sort || 'id'}`, order || 'ASC')
-      .getManyAndCount();
+  //   // Pagination
+  //   const [data, total] = await queryBuilder
+  //     .skip((page - 1) * limit)
+  //     .take(limit)
+  //     .orderBy(`skill.${sort || 'id'}`, order || 'ASC')
+  //     .getManyAndCount();
 
-    return { data, total };
-  }
+  //   return { data, total };
+  // }
 
   // async findAll(): Promise<Skill[]> {
   //   const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
@@ -97,16 +98,48 @@ export class SkillsService {
   //   return skills;
   // }
 
-  async findAll(): Promise<Skill[]> {
-    const exist = this.skillsRepository.find({ relations: { children: true } });
-    if (!exist) {
-      throw new NotFoundException(`Skills not found`);
+  async findAll(pag?: PaginationDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const options: FindManyOptions<Skill> = {
+      relationLoadStrategy: 'query',
+      relations: { children: true },
+      select: {
+        id: true,
+        name: true,
+        description: true,
+        domain: true,
+        parent: { id: true, name: true },
+        children: true,
+      },
+    };
+    try {
+      if (pag) {
+        const { search, limit, page, order } = pag;
+
+        options.take = limit || defaultLimit;
+        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
+        options.order = { id: order || 'ASC' };
+
+        if (search) {
+          options.where = [
+            { name: Like(`%${search}%`) }
+          ];
+        }
+        return await this.skRepo.findAndCount(options);
+      } else {
+        return await this.skRepo.find(options);
+      }
+    } catch (error) {
+      // Log the error for debugging
+      console.error('Error fetching users:', error);
+      throw new InternalServerErrorException('Failed to fetch users');
     }
-    return exist;
   }
 
   async findOne(id: string): Promise<Skill> {
-    const skill = await this.skillsRepository.findOne({
+    const skill = await this.skRepo.findOne({
       where: { id: Number(id) },
       relations: {
         children: { children: { children: { children: { children: true } } } },
@@ -122,7 +155,7 @@ export class SkillsService {
 
   async update(id: string, updateSkillDto: UpdateSkillDto): Promise<Skill> {
     await this.findOne(id); // Ensure the skill exists
-    const skill = await this.skillsRepository.preload({
+    const skill = await this.skRepo.preload({
       id: Number(id),
       ...updateSkillDto,
     });
@@ -132,7 +165,7 @@ export class SkillsService {
     }
 
     try {
-      return await this.skillsRepository.save(skill);
+      return await this.skRepo.save(skill);
     } catch (error) {
       throw new BadRequestException('Failed to update skill');
     }
@@ -142,7 +175,7 @@ export class SkillsService {
     const skill = await this.findOne(id); // Ensure the skill exists
     console.log(skill);
     try {
-      await this.skillsRepository.remove(skill);
+      await this.skRepo.remove(skill);
     } catch (error) {
       throw new BadRequestException('Failed to remove skill');
     }
@@ -169,7 +202,7 @@ export class SkillsService {
     if (!isAlreadyRelated) {
       parentSkill.children.push(subSkill);
       try {
-        return await this.skillsRepository.save(parentSkill);
+        return await this.skRepo.save(parentSkill);
       } catch (error) {
         throw new BadRequestException('Failed to select childSkill');
       }
@@ -184,12 +217,12 @@ export class SkillsService {
 
     parentSkill.children = parentSkill.children || []; // initialize children
 
-    const subSkill = await this.skillsRepository.save(createSkillDto);
+    const subSkill = await this.skRepo.save(createSkillDto);
 
     parentSkill.children.push(subSkill);
 
     try {
-      return await this.skillsRepository.save(parentSkill);
+      return await this.skRepo.save(parentSkill);
     } catch (error) {
       throw new BadRequestException('Failed to create childSkill');
     }
@@ -203,8 +236,8 @@ export class SkillsService {
     );
     childSkill.parent = null; // Parent of child = null
     try {
-      this.skillsRepository.save(childSkill);
-      return await this.skillsRepository.save(parentSkill);
+      this.skRepo.save(childSkill);
+      return await this.skRepo.save(parentSkill);
     } catch (error) {
       throw new BadRequestException('Failed to remove subSkill');
     }
@@ -225,7 +258,7 @@ export class SkillsService {
     }
 
     try {
-      return await this.skillsRepository.save(skill);
+      return await this.skRepo.save(skill);
     } catch (error) {
       throw new BadRequestException('Failed to create and select techSkills');
     }
@@ -237,7 +270,7 @@ export class SkillsService {
       (techSkill) => techSkill.id !== techId,
     );
     try {
-      return await this.skillsRepository.save(skill);
+      return await this.skRepo.save(skill);
     } catch (error) {
       throw new BadRequestException('Failed to remove subSkill');
     }
