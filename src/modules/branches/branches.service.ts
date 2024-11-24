@@ -62,8 +62,8 @@ export class BranchesService {
       }
     } catch (error) {
       // Log the error for debugging
-      console.error('Error fetching users:', error);
-      throw new InternalServerErrorException('Failed to fetch users');
+      console.error('Error fetching branches:', error);
+      throw new InternalServerErrorException('Failed to fetch branches');
     }
   }
 

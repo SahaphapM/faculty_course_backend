@@ -1,16 +1,17 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateFacultyDto } from '../../dto/faculty/create-faculty.dto';
 import { UpdateFacultyDto } from '../../dto/faculty/update-faculty.dto';
 import { Faculty } from '../../entities/faculty.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindManyOptions, Like, Repository } from 'typeorm';
+import { PaginationDto } from 'src/dto/pagination.dto';
 
 @Injectable()
 export class FacultiesService {
   constructor(
     @InjectRepository(Faculty)
     private facRepo: Repository<Faculty>,
-  ) {}
+  ) { }
   async create(createFacultyDto: CreateFacultyDto): Promise<Faculty> {
     try {
       const faculty = this.facRepo.create(createFacultyDto);
@@ -21,14 +22,58 @@ export class FacultiesService {
     }
   }
 
-  async findAll(): Promise<Faculty[]> {
+  async findFilters(): Promise<Faculty[]> {
     try {
       return await this.facRepo.find({
         relations: { branches: true },
+        select: {
+          id: true,
+          name: true,
+          engName: true,
+          branches: { id: true, name: true, engName: true },
+        }
       });
     } catch (error) {
       // Handle specific error types here
       throw new Error('Failed to fetch faculties');
+    }
+  }
+
+  async findAll(pag?: PaginationDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const options: FindManyOptions<Faculty> = {
+      relationLoadStrategy: 'query',
+      relations: { branches: true },
+      select: {
+        id: true,
+        name: true,
+        engName: true,
+        branches: { id: true, name: true, engName: true, abbrev: true },
+      },
+    };
+    try {
+      if (pag) {
+        const { search, limit, page, order } = pag;
+
+        options.take = limit || defaultLimit;
+        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
+        options.order = { id: order || 'ASC' };
+
+        if (search) {
+          options.where = [
+            { name: Like(`%${search}%`) }
+          ];
+        }
+        return await this.facRepo.findAndCount(options);
+      } else {
+        return await this.facRepo.find(options);
+      }
+    } catch (error) {
+      // Log the error for debugging
+      console.error('Error fetching faculties:', error);
+      throw new InternalServerErrorException('Failed to fetch faculties');
     }
   }
 
@@ -88,18 +133,18 @@ export class FacultiesService {
   // }
   // }
 
-  async filters(): Promise<Faculty[]> {
-    // query faculty names and ids
-    try {
-      const faculties = await this.facRepo
-        .createQueryBuilder('faculty')
-        .select(['faculty.id', 'faculty.name', 'faculty.engName'])
-        .getMany();
-      return faculties;
-    } catch (error) {
-      throw new Error('Failed to fetch details');
-    }
-  }
+  // async filters(): Promise<Faculty[]> {
+  //   // query faculty names and ids
+  //   try {
+  //     const faculties = await this.facRepo
+  //       .createQueryBuilder('faculty')
+  //       .select(['faculty.id', 'faculty.name', 'faculty.engName'])
+  //       .getMany();
+  //     return faculties;
+  //   } catch (error) {
+  //     throw new Error('Failed to fetch details');
+  //   }
+  // }
 
   async findOne(id: string): Promise<Faculty> {
     try {

@@ -154,8 +154,8 @@ export class CoursesService {
       }
     } catch (error) {
       // Log the error for debugging
-      console.error('Error fetching users:', error);
-      throw new InternalServerErrorException('Failed to fetch users');
+      console.error('Error fetching courses:', error);
+      throw new InternalServerErrorException('Failed to fetch courses');
     }
   }
 
@@ -172,22 +172,15 @@ export class CoursesService {
           id: true,
           name: true,
           description: true,
-          skillExpectedLevels: { id: true, expectedLevel: true, skill: { id: true, name: true } }
+          skillExpectedLevels: {
+            id: true, expectedLevel: true,
+            skill: {
+              id: true, name: true,
+              parent: { id: true, name: true },
+              children: { id: true, name: true }
+            }
+          }
         },
-        // courseEnrollment: {
-        //   student: {
-        //     id: true, name: true,
-        //     skillCollection:
-        //     {
-        //       gainedLevel: true,
-        //       skillExpectedLevels: {
-        //         expectedLevel: true,
-        //         skill: { id: true, name: true }
-        //       },
-        //       passed: true
-        //     }
-        //   },
-        // },
         instructors: { id: true, name: true }
       },
       relationLoadStrategy: 'query'
@@ -210,7 +203,13 @@ export class CoursesService {
         skillCollections: {
           id: true,
           gainedLevel: true,
-          skillExpectedLevels: { id: true, expectedLevel: true, skill: { id: true, name: true } }
+          skillExpectedLevels: {
+            id: true, expectedLevel: true,
+            skill: {
+              id: true, name: true,
+              parent: { id: true, name: true }, children: { id: true, name: true }
+            }
+          }
         }
       },
       relationLoadStrategy: 'query'

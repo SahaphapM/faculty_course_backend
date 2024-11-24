@@ -95,7 +95,7 @@ export class SubjectsService {
 
     const options: FindManyOptions<Subject> = {
       relationLoadStrategy: 'query',
-      relations: { skillExpectedLevels: true },
+      relations: { skillExpectedLevels: { skill: true } },
       select: {
         id: true,
         name: true,
@@ -106,7 +106,7 @@ export class SubjectsService {
         skillExpectedLevels: {
           id: true,
           expectedLevel: true,
-          skill: { id: true, name: true }
+          skill: { id: true, name: true, parent: { id: true, name: true }, children: { id: true, name: true } }
         }
       },
     };
@@ -129,15 +129,15 @@ export class SubjectsService {
       }
     } catch (error) {
       // Log the error for debugging
-      console.error('Error fetching users:', error);
-      throw new InternalServerErrorException('Failed to fetch users');
+      console.error('Error fetching subjects:', error);
+      throw new InternalServerErrorException('Failed to fetch subjects');
     }
   }
 
   async findOne(id: string): Promise<Subject> {
     const subject = await this.subRepo.findOne({
       where: { id },
-      relations: { skillExpectedLevels: { skill: { parent: true } } },
+      relations: { skillExpectedLevels: { skill: true } },
     });
     if (!subject) {
       throw new NotFoundException(`Subject with id ${id} not found`);
