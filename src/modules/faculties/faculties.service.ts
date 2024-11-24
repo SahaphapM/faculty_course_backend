@@ -187,12 +187,15 @@ export class FacultiesService {
 
   async remove(id: string): Promise<void> {
     try {
-      const result = await this.facRepo.delete(id);
-      if (result.affected === 0) {
+      const exist = await this.facRepo.findOne({ where: { id } });
+      if (!exist) {
         throw new NotFoundException('Faculty not found');
+      } else {
+        await this.facRepo.remove(exist);
       }
     } catch (error) {
       // Handle specific error types here
+      console.error('Error removing faculty:', error);
       throw new Error('Failed to remove faculty');
     }
   }
