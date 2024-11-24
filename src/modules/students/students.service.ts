@@ -132,8 +132,8 @@ export class StudentsService {
       }
     } catch (error) {
       // Log the error for debugging
-      console.error('Error fetching users:', error);
-      throw new InternalServerErrorException('Failed to fetch users');
+      console.error('Error fetching students:', error);
+      throw new InternalServerErrorException('Failed to fetch students');
     }
   }
 
