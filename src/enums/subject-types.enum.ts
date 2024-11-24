@@ -1,8 +1,8 @@
 export enum SubjectType {
-  Compulsory = 'Compulsory',
-  Core = 'Core',
-  General = 'General',
-  Elective = 'Elective',
-  FreeElective = 'Free Elective',
+  Compulsory = 'บังคับ',
+  Core = 'แกน',
+  General = 'ทั่วไป',
+  Elective = 'บังคับเลือก',
+  FreeElective = 'เสรี',
   CWIE = 'CWIE',
 }
