@@ -15,7 +15,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('faculties')
 export class FacultiesController {
-  constructor(private readonly facultiesService: FacultiesService) {}
+  constructor(private readonly facultiesService: FacultiesService) { }
 
   @Post()
   create(@Body() createFacultyDto: CreateFacultyDto) {
@@ -33,8 +33,8 @@ export class FacultiesController {
   // }
 
   @Get('filters')
-  filters() {
-    return this.facultiesService.filters();
+  findFilters() {
+    return this.facultiesService.findFilters();
   }
 
   @Get(':id')
