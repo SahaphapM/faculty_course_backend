@@ -163,7 +163,7 @@ export class CoursesService {
   async findOne(id: string): Promise<Course> {
     const course = await this.courseRepo.findOne({
       where: { id },
-      relations: { subject: { skillExpectedLevels: { skill: true } }, courseEnrollment: { student: true }, instructors: true },
+      relations: { subject: { skillExpectedLevels: { skill: { parent: true, children: true } } }, courseEnrollment: { student: true }, instructors: true },
       select: {
         id: true,
         name: true,
