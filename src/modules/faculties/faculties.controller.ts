@@ -6,11 +6,13 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { FacultiesService } from './faculties.service';
 import { CreateFacultyDto } from '../../dto/faculty/create-faculty.dto';
 import { UpdateFacultyDto } from '../../dto/faculty/update-faculty.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { PaginationDto } from 'src/dto/pagination.dto';
 
 @ApiBearerAuth()
 @Controller('faculties')
@@ -23,8 +25,8 @@ export class FacultiesController {
   }
 
   @Get()
-  findAll() {
-    return this.facultiesService.findAll();
+  findAll(@Query() pag?: PaginationDto) {
+    return this.facultiesService.findAll(pag);
   }
 
   // @Get('getAllDetails')
