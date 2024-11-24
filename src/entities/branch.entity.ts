@@ -20,17 +20,14 @@ export class Branch {
   engName: string;
 
   @Column({ nullable: true })
+  description: string;
+
+  @Column({ nullable: true, length: 10 })
   abbrev: string; //CS, AI, SE etc.
 
   @ManyToOne(() => Faculty, (faculty) => faculty.branches, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn({ name: 'facultyId' })
   faculty: Faculty;
-
-  // @ManyToOne(() => Department, (department) => department.branches, {
-  //   cascade: false,
-  // })
-  // @JoinColumn({ name: 'departmentId' })
-  // department: Department;
 
   @OneToMany(() => Curriculum, (curriculum) => curriculum.branch, {
     cascade: false,

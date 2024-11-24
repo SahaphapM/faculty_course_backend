@@ -15,16 +15,29 @@ export class BranchesService {
 
   async create(createBranchDto: CreateBranchDto): Promise<Branch> {
     try {
-      const existingBranch = await this.braRepo.findOne({
+      const { facultyId, ...rest } = createBranchDto
+      const existBranch = await this.braRepo.findOne({
         where: { name: createBranchDto.name },
       });
-      if (existingBranch) {
+      if (existBranch) {
         throw new Error(
           `Branch with name ${createBranchDto.name} already exists`,
         );
       }
-      const branch = this.braRepo.create(createBranchDto);
-      return await this.braRepo.save(branch);
+      const existFaculty = await this.braRepo.findOne({
+        where: { id: facultyId }
+      })
+      if (existFaculty) {
+        const branch = this.braRepo.create({
+          ...rest,
+          faculty: existFaculty
+        })
+        return await this.braRepo.save(branch);
+      } else {
+        throw new Error(
+          `Faculty with ID ${facultyId} does not exist`,
+        );
+      }
     } catch (error) {
       throw new Error(`Failed to create branch ${error.message}`);
     }

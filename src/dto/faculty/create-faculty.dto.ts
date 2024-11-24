@@ -1,15 +1,23 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsString } from 'class-validator';
+import { IsArray, IsOptional, IsString, Length } from 'class-validator';
 
 export class CreateFacultyDto {
-  // id: number;
-
   @IsString()
   name: string;
 
+  @IsString()
+  engName: string;
+
+  @IsOptional()
+  @IsString()
+  description: string;
+
+  @IsOptional()
+  @Length(2, 10)
+  abbrev: string;
+
+  @IsOptional()
   @ApiProperty({ type: [Number] })
   @IsArray()
   branchListId: number[];
-
-  // departments: Department[];
 }

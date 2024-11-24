@@ -12,6 +12,12 @@ export class Faculty {
   @Column({ nullable: true })
   engName: string;
 
+  @Column({ nullable: true })
+  description: string;
+
+  @Column({ nullable: true, length: 10 })
+  abbrev: string; //CS, AI, SE etc.
+
   @OneToMany(() => Branch, (branch) => branch.faculty)
   branches: Branch[];
 
