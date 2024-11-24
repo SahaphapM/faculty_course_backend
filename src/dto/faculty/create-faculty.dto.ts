@@ -2,8 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsString } from 'class-validator';
 
 export class CreateFacultyDto {
-  @IsString()
-  id: string;
+  // id: number;
 
   @IsString()
   name: string;

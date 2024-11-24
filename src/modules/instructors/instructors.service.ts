@@ -8,8 +8,8 @@ import { Instructor } from '../../entities/instructor.entity';
 import { FindManyOptions, In, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from '../../dto/pagination.dto';
-import { CreateTeacherDto } from '../../dto/teacher/create-teacher.dto';
-import { UpdateTeacherDto } from '../../dto/teacher/update-teacher.dto';
+import { CreateInstructorDto } from '../../dto/instructor/create-instructor.dto';
+import { UpdateTeacherDto } from '../../dto/instructor/update-instructor.dto';
 import { Curriculum } from 'src/entities/curriculum.entity';
 import { Branch } from 'src/entities/branch.entity';
 
@@ -80,7 +80,7 @@ export class InstructorsService {
   //   return { data, total };
   // }
 
-  async create(dto: CreateTeacherDto) {
+  async create(dto: CreateInstructorDto) {
     const { branchId, curriculumsId, ...rest } = dto;
 
     // Check if the teacher with this email already exists
