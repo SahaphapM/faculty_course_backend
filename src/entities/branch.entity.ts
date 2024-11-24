@@ -22,7 +22,7 @@ export class Branch {
   @Column({ nullable: true })
   abbrev: string; //CS, AI, SE etc.
 
-  @ManyToOne(() => Faculty, (faculty) => faculty.branches)
+  @ManyToOne(() => Faculty, (faculty) => faculty.branches, { onDelete: 'CASCADE', onUpdate: 'CASCADE' })
   @JoinColumn({ name: 'facultyId' })
   faculty: Faculty;
 
