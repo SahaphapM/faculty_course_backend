@@ -161,30 +161,33 @@ export class CoursesService {
 
   // Find a single course by ID
   async findOne(id: string): Promise<Course> {
-    const course = await this.courseRepo.findOne({
-      where: { id },
-      relations: { subject: { skillExpectedLevels: { skill: { parent: true, children: true } } }, courseEnrollment: { student: true }, instructors: true },
-      select: {
-        id: true,
-        name: true,
-        description: true,
-        subject: {
-          id: true,
-          name: true,
-          description: true,
-          skillExpectedLevels: {
-            id: true, expectedLevel: true,
-            skill: {
-              id: true, name: true,
-              parent: { id: true, name: true },
-              children: { id: true, name: true }
-            }
-          }
-        },
-        instructors: { id: true, name: true }
-      },
-      relationLoadStrategy: 'query'
-    });
+    const course = await this.courseRepo.createQueryBuilder('course')
+      .leftJoinAndSelect('course.subject', 'subject')
+      .leftJoinAndSelect('subject.skillExpectedLevels', 'skillExpectedLevels')
+      .leftJoinAndSelect('skillExpectedLevels.skill', 'skill')
+      .leftJoinAndSelect('skill.parent', 'parentSkill')
+      .leftJoinAndSelect('skill.children', 'childSkills')
+      .leftJoinAndSelect('course.instructors', 'instructors')
+      .select([
+        'course.id',
+        'course.name',
+        'course.description',
+        'subject.id',
+        'subject.name',
+        'subject.description',
+        'skillExpectedLevels.id',
+        'skillExpectedLevels.expectedLevel',
+        'skill.id',
+        'skill.name',
+        'parentSkill.id',
+        'parentSkill.name',
+        'childSkills.id',
+        'childSkills.name',
+        'instructors.id',
+        'instructors.name',
+      ])
+      .where('course.id = :id', { id })
+      .getOne();
 
     if (!course) {
       throw new NotFoundException(`Course with ID ${id} not found`);
@@ -192,6 +195,7 @@ export class CoursesService {
 
     return course;
   }
+
 
   async findCourseEnrolmentByCourseId(id: string): Promise<CourseEnrollment[]> {
     const courseEnrollment = await this.courseEnrollRepo.find({
