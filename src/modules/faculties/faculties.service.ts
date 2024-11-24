@@ -46,12 +46,14 @@ export class FacultiesService {
     const options: FindManyOptions<Faculty> = {
       relationLoadStrategy: 'query',
       relations: { branches: true },
-      select: {
-        id: true,
-        name: true,
-        engName: true,
-        branches: { id: true, name: true, engName: true, abbrev: true },
-      },
+      // select: {
+      //   id: true,
+      //   name: true,
+      //   engName: true,
+      //   description: true,
+      //   abbrev: true,
+      //   branches: { id: true, name: true, engName: true, abbrev: true, description: true },
+      // },
     };
     try {
       if (pag) {

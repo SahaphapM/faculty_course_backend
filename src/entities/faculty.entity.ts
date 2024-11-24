@@ -18,7 +18,7 @@ export class Faculty {
   @Column({ nullable: true, length: 10 })
   abbrev: string; //CS, AI, SE etc.
 
-  @OneToMany(() => Branch, (branch) => branch.faculty)
+  @OneToMany(() => Branch, (branch) => branch.faculty, { cascade: true })
   branches: Branch[];
 
   // @OneToMany(() => Department, (department) => department.faculty)
