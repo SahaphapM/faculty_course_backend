@@ -12,7 +12,7 @@ export class Faculty {
   @Column({ nullable: true })
   engName: string;
 
-  @OneToMany(() => Branch, (branch) => branch.faculty)
+  @OneToMany(() => Branch, (branch) => branch.faculty, { cascade: true })
   branches: Branch[];
 
   // @OneToMany(() => Department, (department) => department.faculty)
