@@ -5,12 +5,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, Like, Repository } from 'typeorm';
 import { Branch } from '../../entities/branch.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
+import { Faculty } from 'src/entities/faculty.entity';
 
 @Injectable()
 export class BranchesService {
   constructor(
     @InjectRepository(Branch)
     private braRepo: Repository<Branch>,
+    @InjectRepository(Faculty)
+    private facRepo: Repository<Faculty>,
   ) { }
 
   async create(createBranchDto: CreateBranchDto): Promise<Branch> {
@@ -24,7 +27,7 @@ export class BranchesService {
           `Branch with name ${createBranchDto.name} already exists`,
         );
       }
-      const existFaculty = await this.braRepo.findOne({
+      const existFaculty = await this.facRepo.findOne({
         where: { id: facultyId }
       })
       if (existFaculty) {
