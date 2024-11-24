@@ -14,8 +14,8 @@ import {
   ParseFilePipeBuilder,
 } from '@nestjs/common';
 import { InstructorsService } from './instructors.service';
-import { CreateTeacherDto } from '../../dto/teacher/create-teacher.dto';
-import { UpdateTeacherDto } from '../../dto/teacher/update-teacher.dto';
+import { CreateInstructorDto } from '../../dto/instructor/create-instructor.dto';
+import { UpdateTeacherDto } from '../../dto/instructor/update-instructor.dto';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomUploadFileTypeValidator } from './instructors.file.validators';
@@ -34,7 +34,7 @@ export class InstructorsController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  create(@Body() createTeacherDto: CreateTeacherDto) {
+  create(@Body() createTeacherDto: CreateInstructorDto) {
     return this.teachersService.create(createTeacherDto);
   }
 

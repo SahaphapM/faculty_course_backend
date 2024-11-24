@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNumber, IsString } from 'class-validator';
-import { Branch } from 'src/entities/branch.entity';
 
 export class CreateCurriculumDto {
   @IsString()
@@ -19,7 +18,7 @@ export class CreateCurriculumDto {
   engDegree: string;
 
   @IsString()
-  branchId: string;
+  branchId: number;
 
   @IsString()
   description: string;

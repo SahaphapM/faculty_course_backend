@@ -146,7 +146,7 @@ export class FacultiesService {
   //   }
   // }
 
-  async findOne(id: string): Promise<Faculty> {
+  async findOne(id: number): Promise<Faculty> {
     try {
       const faculty = await this.facRepo.findOne({
         where: { id },
@@ -163,7 +163,7 @@ export class FacultiesService {
   }
 
   async update(
-    id: string,
+    id: number,
     updateFacultyDto: UpdateFacultyDto,
   ): Promise<Faculty> {
     try {
@@ -185,7 +185,7 @@ export class FacultiesService {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     try {
       const exist = await this.facRepo.findOne({ where: { id } });
       if (!exist) {

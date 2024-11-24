@@ -6,7 +6,7 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CreateTeacherDto {
+export class CreateInstructorDto {
   @IsEmail()
   email: string;
 
@@ -45,7 +45,7 @@ export class CreateTeacherDto {
 
   @IsOptional()
   @IsString()
-  branchId: string;
+  branchId: number;
 
   @IsOptional()
   @IsArray()

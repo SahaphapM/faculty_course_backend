@@ -67,7 +67,7 @@ export class BranchesService {
     }
   }
 
-  async findOne(id: string): Promise<Branch> {
+  async findOne(id: number): Promise<Branch> {
     try {
       const branch = await this.braRepo.findOne({
         where: { id },
@@ -82,7 +82,7 @@ export class BranchesService {
     }
   }
 
-  async update(id: string, updateBranchDto: UpdateBranchDto): Promise<Branch> {
+  async update(id: number, updateBranchDto: UpdateBranchDto): Promise<Branch> {
     try {
       const branch = await this.findOne(id);
       Object.assign(branch, updateBranchDto);
@@ -96,7 +96,7 @@ export class BranchesService {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     try {
       const branch = await this.findOne(id);
       await this.braRepo.remove(branch);
