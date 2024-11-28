@@ -33,9 +33,9 @@ export class CreateCurriculumDto {
   @IsArray()
   coordinatorListId: number[];
 
-  @ApiProperty({ type: [String] })
-  @IsString()
-  ploListId: string[];
+  // @ApiProperty({ type: [String] })
+  // @IsString()
+  // ploListId: string[];
 
   @ApiProperty({ type: [String] })
   @IsString()

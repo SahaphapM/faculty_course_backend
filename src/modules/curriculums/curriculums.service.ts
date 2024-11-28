@@ -10,7 +10,7 @@ import { Curriculum } from '../../entities/curriculum.entity';
 import { FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Subject } from 'src/entities/subject.entity';
-import { Plo } from 'src/entities/plo.entity';
+// import { Plo } from 'src/entities/plo.entity';
 import { InstructorsService } from 'src/modules/instructors/instructors.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { BranchesService } from '../branches/branches.service';
@@ -84,7 +84,12 @@ export class CurriculumsService {
 
     const options: FindManyOptions<Curriculum> = {
       relationLoadStrategy: 'query',
-      relations: { plos: true, subjects: true, branch: true, coordinators: true },
+      relations: {
+        // plos: true,
+        subjects: true,
+        branch: true,
+        coordinators: true
+      },
       select: {
         id: true,
         name: true,
@@ -126,7 +131,7 @@ export class CurriculumsService {
     const curriculum = await this.currRepo.findOne({
       where: { id },
       relations: {
-        plos: true,
+        // plos: true,
         subjects: true,
         branch: true,
         coordinators: true,
@@ -159,12 +164,12 @@ export class CurriculumsService {
       curriculum.coordinators = coordinators;
     }
 
-    if (dto.ploListId) {
-      const plos = await Promise.all(
-        dto.ploListId.map((p) => this.ploService.findOne(p)),
-      );
-      curriculum.plos = plos;
-    }
+    // if (dto.ploListId) {
+    //   const plos = await Promise.all(
+    //     dto.ploListId.map((p) => this.ploService.findOne(p)),
+    //   );
+    //   curriculum.plos = plos;
+    // }
     // Object.assign(curriculum, updateCurriculumDto); // directly create new delete the first data to new value.
 
     try {
@@ -252,28 +257,28 @@ export class CurriculumsService {
     }
   }
 
-  async addPLO(id: string, plo: Plo): Promise<Curriculum> {
-    const curriculum = await this.findOne(id);
-    if (!curriculum) {
-      throw new NotFoundException(`Curriculum with ID ${id} not found`);
-    }
-    if (!curriculum.plos) {
-      curriculum.plos = [];
-    }
-    curriculum.plos.push(plo);
-    try {
-      await this.currRepo.save(curriculum);
-      return this.currRepo.findOne({
-        where: { id },
-        relations: { plos: true },
-      });
-    } catch (error) {
-      throw new BadRequestException(
-        'Failed to update Curriculum',
-        error.message,
-      );
-    }
-  }
+  // async addPLO(id: string, plo: Plo): Promise<Curriculum> {
+  //   const curriculum = await this.findOne(id);
+  //   if (!curriculum) {
+  //     throw new NotFoundException(`Curriculum with ID ${id} not found`);
+  //   }
+  //   if (!curriculum.plos) {
+  //     curriculum.plos = [];
+  //   }
+  //   curriculum.plos.push(plo);
+  //   try {
+  //     await this.currRepo.save(curriculum);
+  //     return this.currRepo.findOne({
+  //       where: { id },
+  //       relations: { plos: true },
+  //     });
+  //   } catch (error) {
+  //     throw new BadRequestException(
+  //       'Failed to update Curriculum',
+  //       error.message,
+  //     );
+  //   }
+  // }
 
   async remove(id: string): Promise<void> {
     const curriculum = await this.findOne(id);

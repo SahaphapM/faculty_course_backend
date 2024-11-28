@@ -1,6 +1,5 @@
-import { Column, Entity, ManyToOne, OneToMany, PrimaryColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryColumn } from 'typeorm';
 import { Clo } from './clo.entity';
-import { Curriculum } from './curriculum.entity';
 
 @Entity()
 // PLO Program Learning Outcome
@@ -17,8 +16,8 @@ export class Plo {
   @Column()
   resultTypes: string;
 
-  @ManyToOne(() => Curriculum, (curriculum) => curriculum.plos)
-  curriculum: Curriculum;
+  // @ManyToOne(() => Curriculum, (curriculum) => curriculum.plos)
+  // curriculum: Curriculum;
 
   @OneToMany(() => Clo, (clo) => clo.plo, { cascade: true })
   clos: Clo[];

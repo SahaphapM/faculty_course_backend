@@ -13,7 +13,6 @@ import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from '../../dto/curriculum/create-curriculum.dto';
 import { UpdateCurriculumDto } from '../../dto/curriculum/update-curriculum.dto';
 import { SubjectsService } from 'src/modules/subjects/subjects.service';
-import { CreatePloDto } from 'src/dto/plo/create-plo.dto';
 import { PlosService } from 'src/modules/plos/plos.service';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
@@ -98,11 +97,11 @@ export class CurriculumsController {
     return this.curriculumsService.addCoordinator(id, dto); // Add teacher to curriculum
   }
 
-  @Patch(':id/plos')
-  async addPLO(@Param('id') id: string, @Body() createPloDto: CreatePloDto) {
-    const plo = await this.plosService.create(createPloDto); // create plo to database
-    return this.curriculumsService.addPLO(id, plo); // add plo to curriculum
-  }
+  // @Patch(':id/plos')
+  // async addPLO(@Param('id') id: string, @Body() createPloDto: CreatePloDto) {
+  //   const plo = await this.plosService.create(createPloDto); // create plo to database
+  //   return this.curriculumsService.addPLO(id, plo); // add plo to curriculum
+  // }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
