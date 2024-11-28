@@ -24,10 +24,10 @@ export class Curriculum {
   engName: string;
 
   @Column()
-  degreeName: string;
+  degree: string;
 
   @Column()
-  engDegreeName: string;
+  engDegree: string;
 
   @ManyToOne(() => Branch, (branch) => branch.curriculums)
   @JoinColumn({ name: 'branchId' })
