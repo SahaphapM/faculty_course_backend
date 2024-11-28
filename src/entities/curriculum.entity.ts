@@ -1,4 +1,4 @@
-import { Plo } from 'src/entities/plo.entity';
+
 import { Subject } from 'src/entities/subject.entity';
 import { Instructor } from 'src/entities/instructor.entity';
 import {
@@ -8,7 +8,6 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryColumn,
 } from 'typeorm';
 import { Branch } from './branch.entity';
@@ -43,8 +42,8 @@ export class Curriculum {
   @Column()
   minimumGrade: number;
 
-  @OneToMany(() => Plo, (plo) => plo.curriculum, { cascade: true })
-  plos: Plo[];
+  // @OneToMany(() => Plo, (plo) => plo.curriculum, { cascade: true })
+  // plos: Plo[];
 
   @ManyToMany(() => Instructor, (teacher) => teacher.curriculums, {
     cascade: false,
