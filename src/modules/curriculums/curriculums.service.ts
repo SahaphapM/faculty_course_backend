@@ -65,11 +65,7 @@ export class CurriculumsService {
   async create(createCurriculumDto: CreateCurriculumDto): Promise<Curriculum> {
     const curriculum = this.currRepo.create(createCurriculumDto);
     try {
-      await this.currRepo.save(curriculum);
-      const id = curriculum.id;
-      return this.currRepo.findOne({
-        where: { id },
-      });
+      return await this.currRepo.save(curriculum);
     } catch (error) {
       throw new BadRequestException(
         'Failed to create Curriculum ',
@@ -95,8 +91,8 @@ export class CurriculumsService {
         name: true,
         description: true,
         minimumGrade: true,
-        degreeName: true,
-        engDegreeName: true,
+        degree: true,
+        engDegree: true,
         engName: true,
         period: true,
         branch: { id: true, name: true },
