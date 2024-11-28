@@ -38,6 +38,6 @@ export class CreateCurriculumDto {
   // ploListId: string[];
 
   @ApiProperty({ type: [String] })
-  @IsString()
+  @IsArray()
   subjectListId: string[];
 }
