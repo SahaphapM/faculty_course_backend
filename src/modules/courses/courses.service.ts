@@ -16,8 +16,8 @@ import { StudentsService } from '../students/students.service';
 import { CreateCourseDto } from 'src/dto/course/create-course.dto';
 import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { Instructor } from 'src/entities/instructor.entity';
 import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
+import { InstructorsService } from '../instructors/instructors.service';
 
 @Injectable()
 export class CoursesService {
@@ -28,9 +28,6 @@ export class CoursesService {
     @InjectRepository(CourseEnrollment)
     private readonly courseEnrollRepo: Repository<CourseEnrollment>,
 
-    @InjectRepository(Instructor)
-    private readonly teaRepo: Repository<Instructor>,
-
     @InjectRepository(SkillCollection)
     private readonly skillCollRepo: Repository<SkillCollection>,
 
@@ -39,12 +36,14 @@ export class CoursesService {
 
     private readonly subjectsService: SubjectsService,
 
+    private readonly instructorsService: InstructorsService,
+
     private readonly studentsService: StudentsService, // Inject StudentsService
   ) { }
 
   // Create a new course
   async create(dto: CreateCourseDto): Promise<Course> {
-    const { subjectId, teacherListId, ...rest } = dto;
+    const { subjectId, instructorListId: teacherListId, ...rest } = dto;
     try {
       const subject = await this.subjectsService.findOne(subjectId);
       if (!subject) {
@@ -55,17 +54,12 @@ export class CoursesService {
       //   throw new NotFoundException('Curriculum not found');
       // }
 
-      const teachers = await Promise.all(
-        teacherListId.map(async (id) => {
-          const tea = await this.teaRepo.findOneBy({ id });
-          return tea;
-        }),
-      );
+      const instructors = await this.instructorsService.findByList(teacherListId);
 
       const newCourse = this.courseRepo.create({
         ...rest,
         subject,
-        instructors: teachers,
+        instructors: instructors,
       });
       return await this.courseRepo.save(newCourse);
     } catch (error) {

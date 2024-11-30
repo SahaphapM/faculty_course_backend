@@ -9,6 +9,7 @@ import { SkillCollection } from 'src/entities/skill-collection.entity';
 import { StudentsModule } from '../students/students.module';
 import { SubjectsModule } from '../subjects/subjects.module';
 import { Instructor } from 'src/entities/instructor.entity';
+import { InstructorsModule } from '../instructors/instructors.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { Instructor } from 'src/entities/instructor.entity';
     ]),
     StudentsModule,
     SubjectsModule,
+    InstructorsModule
   ],
   controllers: [CoursesController],
   providers: [CoursesService],

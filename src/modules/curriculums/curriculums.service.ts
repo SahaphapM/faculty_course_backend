@@ -15,7 +15,6 @@ import { InstructorsService } from 'src/modules/instructors/instructors.service'
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { BranchesService } from '../branches/branches.service';
 import { SubjectsService } from '../subjects/subjects.service';
-import { PlosService } from '../plos/plos.service';
 
 @Injectable()
 export class CurriculumsService {
@@ -23,10 +22,10 @@ export class CurriculumsService {
     @InjectRepository(Curriculum)
     private currRepo: Repository<Curriculum>,
 
-    private readonly ploService: PlosService,
-    private readonly subjectsService: SubjectsService,
-    private readonly branchService: BranchesService,
-    private readonly teacherService: InstructorsService,
+    // private readonly ploService: PlosService,
+    private readonly subService: SubjectsService,
+    private readonly braService: BranchesService,
+    private readonly insService: InstructorsService,
   ) { }
 
   // async findAllByPage(
@@ -62,9 +61,24 @@ export class CurriculumsService {
   //   return { data: result, total };
   // }
 
-  async create(createCurriculumDto: CreateCurriculumDto): Promise<Curriculum> {
-    const curriculum = this.currRepo.create(createCurriculumDto);
+  async create(dto: CreateCurriculumDto): Promise<Curriculum> {
+    const curriculum = this.currRepo.create(dto);
     try {
+      if (dto.branchId) {
+        const branch = await this.braService.findOne(dto.branchId);
+        curriculum.branch = branch;
+      }
+
+      if (dto.coordinatorListId) {
+        const coordinators = await this.insService.findByList(dto.coordinatorListId);
+        curriculum.coordinators = coordinators
+      }
+
+      if (dto.subjectListId) {
+        const subjects = await this.subService.findByList(dto.subjectListId);
+        curriculum.subjects = subjects;
+      }
+
       return await this.currRepo.save(curriculum);
     } catch (error) {
       throw new BadRequestException(
@@ -149,15 +163,19 @@ export class CurriculumsService {
     curriculum = this.currRepo.merge(curriculum, dto);
 
     if (dto.branchId) {
-      const branch = await this.branchService.findOne(dto.branchId);
+      const branch = await this.braService.findOne(dto.branchId);
       curriculum.branch = branch;
     }
 
+
     if (dto.coordinatorListId) {
-      const coordinators = await Promise.all(
-        dto.coordinatorListId.map((c) => this.teacherService.findOne(c)),
-      );
-      curriculum.coordinators = coordinators;
+      const coordinators = await this.insService.findByList(dto.coordinatorListId);
+      curriculum.coordinators = coordinators
+    }
+
+    if (dto.subjectListId) {
+      const subjects = await this.subService.findByList(dto.subjectListId);
+      curriculum.subjects = subjects;
     }
 
     // if (dto.ploListId) {
@@ -224,34 +242,34 @@ export class CurriculumsService {
     }
   }
 
-  async addCoordinator(
-    id: string,
-    teacherListId: number[],
-  ): Promise<Curriculum> {
-    console.log('addCoordinator', teacherListId);
-    const curriculum = await this.findOne(id);
-    if (!curriculum) {
-      throw new NotFoundException(`Curriculum with ID ${id} not found`);
-    }
-    curriculum.coordinators = [];
-    if (teacherListId) {
-      for (let index = 0; index < teacherListId.length; index++) {
-        const teacher = await this.teacherService.findOne(teacherListId[index]);
-        curriculum.coordinators.push(teacher);
-      }
-    }
-    try {
-      await this.currRepo.save(curriculum);
-      return this.currRepo.findOne({
-        where: { id },
-      });
-    } catch (error) {
-      throw new BadRequestException(
-        'Failed to update Curriculum',
-        error.message,
-      );
-    }
-  }
+  // async addCoordinator(
+  //   id: string,
+  //   teacherListId: number[],
+  // ): Promise<Curriculum> {
+  //   console.log('addCoordinator', teacherListId);
+  //   const curriculum = await this.findOne(id);
+  //   if (!curriculum) {
+  //     throw new NotFoundException(`Curriculum with ID ${id} not found`);
+  //   }
+  //   curriculum.coordinators = [];
+  //   if (teacherListId) {
+  //     for (let index = 0; index < teacherListId.length; index++) {
+  //       const teacher = await this.insService.findOne(teacherListId[index]);
+  //       curriculum.coordinators.push(teacher);
+  //     }
+  //   }
+  //   try {
+  //     await this.currRepo.save(curriculum);
+  //     return this.currRepo.findOne({
+  //       where: { id },
+  //     });
+  //   } catch (error) {
+  //     throw new BadRequestException(
+  //       'Failed to update Curriculum',
+  //       error.message,
+  //     );
+  //   }
+  // }
 
   // async addPLO(id: string, plo: Plo): Promise<Curriculum> {
   //   const curriculum = await this.findOne(id);

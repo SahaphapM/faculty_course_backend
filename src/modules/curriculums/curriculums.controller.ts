@@ -92,10 +92,10 @@ export class CurriculumsController {
     return this.curriculumsService.selectSubject(id, subjects); // add subject to curriculum
   }
 
-  @Patch(':id/coordinators')
-  async addCoordinator(@Param('id') id: string, @Body() dto: number[]) {
-    return this.curriculumsService.addCoordinator(id, dto); // Add teacher to curriculum
-  }
+  // @Patch(':id/coordinators')
+  // async addCoordinator(@Param('id') id: string, @Body() dto: number[]) {
+  //   return this.curriculumsService.addCoordinator(id, dto); // Add teacher to curriculum
+  // }
 
   // @Patch(':id/plos')
   // async addPLO(@Param('id') id: string, @Body() createPloDto: CreatePloDto) {

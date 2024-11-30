@@ -22,8 +22,8 @@ export class CreateCourseDto {
   // @IsString()
   // curriculumId: string;
 
-  @ApiProperty({ type: [Number] })
+  @ApiProperty({ type: [String] })
   @IsArray()
   @IsNumber({ allowNaN: false }, { each: true })
-  teacherListId: number[];
+  instructorListId: string[];
 }

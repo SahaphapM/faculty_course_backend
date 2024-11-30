@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Like, Repository } from 'typeorm';
+import { FindManyOptions, In, Like, Repository } from 'typeorm';
 import { Subject } from '../../entities/subject.entity';
 import { Clo } from '../../entities/clo.entity';
 import { Curriculum } from '../../entities/curriculum.entity';
@@ -18,6 +18,7 @@ import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 
 @Injectable()
 export class SubjectsService {
+
   constructor(
     @InjectRepository(Subject)
     private subRepo: Repository<Subject>,
@@ -59,6 +60,10 @@ export class SubjectsService {
 
   //   return { data: result, total };
   // }
+
+  findByList(subjectListId: string[]) {
+    return this.subRepo.findBy({ id: In(subjectListId) });
+  }
   async create(dto: CreateSubjectDto): Promise<Subject> {
     // if (!dto.skillExpectedLevels.length) return ===> Set to can create subject without skill
 

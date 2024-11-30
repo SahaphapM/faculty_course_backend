@@ -12,4 +12,4 @@ import { Curriculum } from 'src/entities/curriculum.entity';
   providers: [InstructorsService],
   exports: [InstructorsService],
 })
-export class TeachersModule { }
+export class InstructorsModule { }
