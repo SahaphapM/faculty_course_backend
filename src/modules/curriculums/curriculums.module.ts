@@ -5,7 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Curriculum } from '../../entities/curriculum.entity';
 import { SubjectsModule } from 'src/modules/subjects/subjects.module';
 import { PlosModule } from 'src/modules/plos/plos.module';
-import { TeachersModule } from 'src/modules/instructors/instructors.module';
+import { InstructorsModule } from 'src/modules/instructors/instructors.module';
 import { BranchesModule } from '../branches/branches.module';
 
 @Module({
@@ -13,7 +13,7 @@ import { BranchesModule } from '../branches/branches.module';
     TypeOrmModule.forFeature([Curriculum]),
     BranchesModule,
     SubjectsModule,
-    TeachersModule,
+    InstructorsModule,
     PlosModule,
   ],
   controllers: [CurriculumsController],

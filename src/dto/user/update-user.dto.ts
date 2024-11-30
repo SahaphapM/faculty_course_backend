@@ -9,5 +9,5 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
 
   @IsNumber()
   @IsOptional()
-  teacherId: number;
+  teacherId: string;
 }

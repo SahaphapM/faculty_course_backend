@@ -18,7 +18,7 @@ export class CreateCurriculumDto {
   engDegree: string;
 
   @IsString()
-  branchId: number;
+  branchId: string;
 
   @IsString()
   description: string;
@@ -29,9 +29,9 @@ export class CreateCurriculumDto {
   @IsNumber()
   minimumGrade: number;
 
-  @ApiProperty({ type: [Number] })
+  @ApiProperty({ type: [String] })
   @IsArray()
-  coordinatorListId: number[];
+  coordinatorListId: string[];
 
   // @ApiProperty({ type: [String] })
   // @IsString()

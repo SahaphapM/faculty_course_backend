@@ -11,7 +11,7 @@ import { Curriculum } from './curriculum.entity';
 @Entity()
 export class Branch {
   @PrimaryGeneratedColumn()
-  id: number;
+  id: string;
 
   @Column()
   name: string;

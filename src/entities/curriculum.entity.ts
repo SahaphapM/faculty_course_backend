@@ -29,7 +29,7 @@ export class Curriculum {
   @Column()
   engDegree: string;
 
-  @ManyToOne(() => Branch, (branch) => branch.curriculums)
+  @ManyToOne(() => Branch, (branch) => branch.curriculums, { cascade: ['insert', 'update'] })
   @JoinColumn({ name: 'branchId' })
   branch: Branch;
 
@@ -45,13 +45,11 @@ export class Curriculum {
   // @OneToMany(() => Plo, (plo) => plo.curriculum, { cascade: true })
   // plos: Plo[];
 
-  @ManyToMany(() => Instructor, (teacher) => teacher.curriculums, {
-    cascade: false,
-  })
+  @ManyToMany(() => Instructor, (teacher) => teacher.curriculums, { cascade: ['insert', 'update'] })
   @JoinTable()
   coordinators: Instructor[];
 
-  @ManyToMany(() => Subject, (subject) => subject.curriculums)
+  @ManyToMany(() => Subject, (subject) => subject.curriculums, { cascade: ['insert', 'update'] })
   @JoinTable()
   subjects: Subject[];
 }

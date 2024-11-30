@@ -15,6 +15,7 @@ import { Branch } from 'src/entities/branch.entity';
 
 @Injectable()
 export class InstructorsService {
+
   constructor(
     @InjectRepository(Branch)
     private braRepo: Repository<Branch>,
@@ -79,6 +80,10 @@ export class InstructorsService {
 
   //   return { data, total };
   // }
+
+  findByList(c: string[]) {
+    return this.insRepo.findBy({ id: In(c) });
+  }
 
   async create(dto: CreateInstructorDto) {
     const { branchId, curriculumsId, ...rest } = dto;
@@ -171,7 +176,7 @@ export class InstructorsService {
     }
   }
 
-  async findOne(id: number): Promise<Instructor> {
+  async findOne(id: string): Promise<Instructor> {
     const teacher = await this.insRepo.findOne({
       where: { id },
     });
@@ -189,7 +194,7 @@ export class InstructorsService {
   }
 
   async update(
-    id: number,
+    id: string,
     updateTeacherDto: UpdateTeacherDto,
   ): Promise<Instructor> {
     const teacher = await this.findOne(id);
@@ -210,7 +215,7 @@ export class InstructorsService {
     }
   }
 
-  async remove(id: number) {
+  async remove(id: string) {
     const teacher = await this.findOne(id);
     try {
       await this.insRepo.remove(teacher);
