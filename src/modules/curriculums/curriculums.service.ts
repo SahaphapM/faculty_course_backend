@@ -132,7 +132,7 @@ export class CurriculumsService {
         options.where = []
 
         if (search) {
-          options.where.push({ id: Like(`%${search}%`) },)
+          options.where.push({ name: Like(`%${search}%`) },)
         }
         if (facultyName) {
           options.where.push({ branch: { faculty: { name: Like(`%${facultyName}%`) } } })
