@@ -66,16 +66,25 @@ export class CurriculumsService {
     try {
       if (dto.branchId) {
         const branch = await this.braService.findOne(dto.branchId);
+        if (!branch) {
+          throw new NotFoundException(`Branch with IDs ${dto.branchId} not found`);
+        }
         curriculum.branch = branch;
       }
 
       if (dto.coordinatorListId) {
         const coordinators = await this.insService.findByList(dto.coordinatorListId);
+        if (!coordinators) {
+          throw new NotFoundException(`Instructor with IDs ${dto.coordinatorListId} not found`);
+        }
         curriculum.coordinators = coordinators
       }
 
       if (dto.subjectListId) {
         const subjects = await this.subService.findByList(dto.subjectListId);
+        if (!subjects) {
+          throw new NotFoundException(`Subject with IDs ${dto.subjectListId} not found`);
+        }
         curriculum.subjects = subjects;
       }
 
@@ -164,17 +173,25 @@ export class CurriculumsService {
 
     if (dto.branchId) {
       const branch = await this.braService.findOne(dto.branchId);
+      if (!branch) {
+        throw new NotFoundException(`Branch with IDs ${dto.branchId} not found`);
+      }
       curriculum.branch = branch;
     }
 
-
     if (dto.coordinatorListId) {
       const coordinators = await this.insService.findByList(dto.coordinatorListId);
+      if (!coordinators) {
+        throw new NotFoundException(`Instructor with IDs ${dto.coordinatorListId} not found`);
+      }
       curriculum.coordinators = coordinators
     }
 
     if (dto.subjectListId) {
       const subjects = await this.subService.findByList(dto.subjectListId);
+      if (!subjects) {
+        throw new NotFoundException(`Subject with IDs ${dto.subjectListId} not found`);
+      }
       curriculum.subjects = subjects;
     }
 
