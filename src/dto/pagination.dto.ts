@@ -37,4 +37,16 @@ export class PaginationDto {
   @IsOptional()
   @IsString()
   bySubject?: string;
+
+  @IsOptional()
+  @IsString()
+  facultyName?: string;
+
+  @IsOptional()
+  @IsString()
+  branchName?: string;
+
+  @IsOptional()
+  @IsString()
+  curriculumName?: string;
 }
