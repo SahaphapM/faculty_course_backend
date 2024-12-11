@@ -66,16 +66,25 @@ export class CurriculumsService {
     try {
       if (dto.branchId) {
         const branch = await this.braService.findOne(dto.branchId);
+        if (!branch) {
+          throw new NotFoundException(`Branch with IDs ${dto.branchId} not found`);
+        }
         curriculum.branch = branch;
       }
 
       if (dto.coordinatorListId) {
         const coordinators = await this.insService.findByList(dto.coordinatorListId);
+        if (!coordinators) {
+          throw new NotFoundException(`Instructor with IDs ${dto.coordinatorListId} not found`);
+        }
         curriculum.coordinators = coordinators
       }
 
       if (dto.subjectListId) {
         const subjects = await this.subService.findByList(dto.subjectListId);
+        if (!subjects) {
+          throw new NotFoundException(`Subject with IDs ${dto.subjectListId} not found`);
+        }
         curriculum.subjects = subjects;
       }
 
@@ -115,17 +124,23 @@ export class CurriculumsService {
     };
     try {
       if (pag) {
-        const { search, limit, page, order } = pag;
+        const { search, limit, page, order, facultyName, branchName } = pag;
 
         options.take = limit || defaultLimit;
         options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
         options.order = { id: order || 'ASC' };
+        options.where = []
 
         if (search) {
-          options.where = [
-            { id: Like(`%${search}%`) },
-          ];
+          options.where.push({ id: Like(`%${search}%`) },)
         }
+        if (facultyName) {
+          options.where.push({ branch: { faculty: { name: Like(`%${facultyName}%`) } } })
+        }
+        if (branchName) {
+          options.where.push({ branch: { name: Like(`%${branchName}%`) } })
+        }
+
         return await this.currRepo.findAndCount(options);
       } else {
         return await this.currRepo.find(options);
@@ -164,17 +179,25 @@ export class CurriculumsService {
 
     if (dto.branchId) {
       const branch = await this.braService.findOne(dto.branchId);
+      if (!branch) {
+        throw new NotFoundException(`Branch with IDs ${dto.branchId} not found`);
+      }
       curriculum.branch = branch;
     }
 
-
     if (dto.coordinatorListId) {
       const coordinators = await this.insService.findByList(dto.coordinatorListId);
+      if (!coordinators) {
+        throw new NotFoundException(`Instructor with IDs ${dto.coordinatorListId} not found`);
+      }
       curriculum.coordinators = coordinators
     }
 
     if (dto.subjectListId) {
       const subjects = await this.subService.findByList(dto.subjectListId);
+      if (!subjects) {
+        throw new NotFoundException(`Subject with IDs ${dto.subjectListId} not found`);
+      }
       curriculum.subjects = subjects;
     }
 
