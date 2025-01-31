@@ -68,3 +68,5 @@ docker-compose.yml
 src/app/app.module.ts
 src/auth/auth.controller.ts
 src/auth/auth.module.ts
+
+.vscode
