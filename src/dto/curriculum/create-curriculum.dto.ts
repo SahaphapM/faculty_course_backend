@@ -26,16 +26,15 @@ export class CreateCurriculumDto {
   @IsNumber()
   period: number;
 
-  @IsNumber()
-  minimumGrade: number;
+  @IsNumber() minimumGrade: number;
 
   @ApiProperty({ type: [String] })
   @IsArray()
   coordinatorListId: string[];
 
-  // @ApiProperty({ type: [String] })
-  // @IsString()
-  // ploListId: string[];
+  @ApiProperty({ type: [String] })
+  @IsString()
+  ploListId: string[];
 
   @ApiProperty({ type: [String] })
   @IsArray()

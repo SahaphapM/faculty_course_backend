@@ -2,9 +2,11 @@ import { TechSkill } from 'src/entities/tech-skill.entity';
 import {
   Column,
   Entity,
+  JoinColumn,
   JoinTable,
   ManyToMany,
   OneToMany,
+  OneToOne,
   PrimaryGeneratedColumn,
   Tree,
   TreeChildren,
@@ -12,6 +14,8 @@ import {
 } from 'typeorm';
 import { SkillExpectedLevel } from './skill-exp-lvl';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
+import { Curriculum } from './curriculum.entity';
+import { Clo } from './clo.entity';
 
 @Entity()
 @Tree('closure-table')
@@ -45,6 +49,11 @@ export class Skill {
   @JoinTable()
   techSkills: TechSkill[] | null;
 
+  @OneToMany(() => Curriculum, (cr) => cr.skills, {
+    cascade: false,
+  })
+  curriculums: Curriculum[];
+
   @OneToMany(
     () => SkillExpectedLevel,
     (skillExpectedLevel) => skillExpectedLevel.skill,
@@ -53,6 +62,10 @@ export class Skill {
     },
   )
   skillExpectedLevels: SkillExpectedLevel[];
+
+  @OneToOne(() => Clo)
+  @JoinColumn()
+  clo: Clo;
 
   // I think it is not needed. We have skillExpectedLevels to relate to skill already.
   // @OneToMany(() => SkillCollection, (s) => s.courseEnrollment, {

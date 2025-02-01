@@ -1,4 +1,3 @@
-
 import { Subject } from 'src/entities/subject.entity';
 import { Instructor } from 'src/entities/instructor.entity';
 import {
@@ -8,9 +7,12 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
 } from 'typeorm';
 import { Branch } from './branch.entity';
+import { Plo } from './plo.entity';
+import { Skill } from './skill.entity';
 
 @Entity()
 export class Curriculum {
@@ -29,7 +31,9 @@ export class Curriculum {
   @Column()
   engDegree: string;
 
-  @ManyToOne(() => Branch, (branch) => branch.curriculums, { cascade: ['insert', 'update'] })
+  @ManyToOne(() => Branch, (branch) => branch.curriculums, {
+    cascade: ['insert', 'update'],
+  })
   @JoinColumn({ name: 'branchId' })
   branch: Branch;
 
@@ -42,14 +46,24 @@ export class Curriculum {
   @Column()
   minimumGrade: number;
 
-  // @OneToMany(() => Plo, (plo) => plo.curriculum, { cascade: true })
-  // plos: Plo[];
+  @OneToMany(() => Plo, (plo) => plo.curriculum, { cascade: true })
+  plos: Plo[];
 
-  @ManyToMany(() => Instructor, (ins) => ins.curriculums, { cascade: ['insert', 'update'] })
+  @ManyToMany(() => Instructor, (ins) => ins.curriculums, {
+    cascade: ['insert', 'update'],
+  })
   @JoinTable()
   coordinators: Instructor[];
 
-  @ManyToMany(() => Subject, (sub) => sub.curriculums, { cascade: ['insert', 'update'] })
+  @ManyToMany(() => Subject, (sub) => sub.curriculums, {
+    cascade: ['insert', 'update'],
+  })
   @JoinTable()
   subjects: Subject[];
+
+  @OneToMany(() => Skill, (sk) => sk.curriculums, {
+    cascade: ['insert', 'update'],
+  })
+  @JoinTable()
+  skills: Skill[];
 }
