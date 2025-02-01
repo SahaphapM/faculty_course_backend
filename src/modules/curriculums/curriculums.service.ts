@@ -121,10 +121,11 @@ export class CurriculumsService {
     const curriculum = await this.currRepo.findOne({
       where: { id },
       relations: {
-        // plos: true,
+        plos: true,
         subjects: true,
         branch: true,
         coordinators: true,
+        skills: true,
       },
     });
     if (!curriculum) {
