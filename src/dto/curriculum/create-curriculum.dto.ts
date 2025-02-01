@@ -6,31 +6,32 @@ import { Skill } from 'src/entities/skill.entity';
 import { Subject } from 'src/entities/subject.entity';
 
 export class CreateCurriculumDto {
-  @IsString()
-  id: string;
+  // @IsString()
+  // id: string;
 
   @IsString()
-  name: string;
+  name: string | '';
 
   @IsString()
-  engName: string;
+  engName: string | '';
 
   @IsString()
-  degree: string;
+  degree: string | 'ปริญญาตรี';
 
   @IsString()
-  engDegree: string;
+  engDegree: string | 'Bachelor';
 
   @IsString()
+  @IsOptional()
   branchId: string;
 
   @IsString()
-  description: string;
+  description: string | '';
 
   @IsNumber()
-  period: number;
+  period: number | 3;
 
-  @IsNumber() minimumGrade: number;
+  @IsNumber() minimumGrade: number | 3;
 
   // @ApiProperty({ type: [String] })
   // @IsArray()
