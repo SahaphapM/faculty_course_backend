@@ -13,7 +13,6 @@ import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from '../../dto/curriculum/create-curriculum.dto';
 import { UpdateCurriculumDto } from '../../dto/curriculum/update-curriculum.dto';
 import { SubjectsService } from 'src/modules/subjects/subjects.service';
-import { PlosService } from 'src/modules/plos/plos.service';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -24,9 +23,12 @@ export class CurriculumsController {
   constructor(
     private readonly curriculumsService: CurriculumsService,
     private readonly subjectsService: SubjectsService,
-    private readonly plosService: PlosService,
-  ) { }
+  ) {}
 
+  @Get('auto_id')
+  getId() {
+    return this.curriculumsService.insert();
+  }
   @Post()
   create(@Body() createCurriculumDto: CreateCurriculumDto) {
     return this.curriculumsService.create(createCurriculumDto);
