@@ -10,12 +10,8 @@ import { Curriculum } from '../../entities/curriculum.entity';
 import { FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Subject } from 'src/entities/subject.entity';
-// import { Plo } from 'src/entities/plo.entity';
-import { InstructorsService } from 'src/modules/instructors/instructors.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { BranchesService } from '../branches/branches.service';
-import { SubjectsService } from '../subjects/subjects.service';
-import { PlosService } from '../plos/plos.service';
 
 @Injectable()
 export class CurriculumsService {
@@ -23,11 +19,17 @@ export class CurriculumsService {
     @InjectRepository(Curriculum)
     private currRepo: Repository<Curriculum>,
 
-    private readonly ploService: PlosService,
-    private readonly subService: SubjectsService,
+    // private readonly ploService: PlosService,
+    // private readonly subService: SubjectsService,
     private readonly braService: BranchesService,
-    private readonly insService: InstructorsService,
+    // private readonly insService: InstructorsService,
   ) {}
+
+  // just pure empty insert for get id
+  async insert() {
+    const insertResult = await this.currRepo.insert({});
+    return insertResult.identifiers[0].id;
+  }
 
   async create(dto: CreateCurriculumDto): Promise<Curriculum> {
     const curriculum = this.currRepo.create(dto);
