@@ -27,7 +27,15 @@ export class CurriculumsController {
 
   @Get('auto_id')
   getId() {
-    return this.curriculumsService.insert();
+    return this.curriculumsService.insert({
+      name: 'ชื่อหลักสูตร',
+      engName: 'english name',
+      degree: 'ปริญญาตรี',
+      engDegree: 'Bachelor',
+      description: 'คำอธิบายหลักสูตร',
+      period: 4,
+      minimumGrade: 3,
+    });
   }
   @Post()
   create(@Body() createCurriculumDto: CreateCurriculumDto) {

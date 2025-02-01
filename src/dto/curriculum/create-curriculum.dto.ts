@@ -10,23 +10,23 @@ export class CreateCurriculumDto {
   // id: string;
 
   @IsString()
-  name: string | '';
+  name: string;
 
   @IsString()
-  engName: string | '';
+  engName: string;
 
   @IsString()
-  degree: string | 'ปริญญาตรี';
+  degree: string;
 
   @IsString()
-  engDegree: string | 'Bachelor';
+  engDegree: string;
 
   @IsString()
   @IsOptional()
   branchId: string;
 
   @IsString()
-  description: string | '';
+  description: string;
 
   @IsNumber()
   period: number | 3;
