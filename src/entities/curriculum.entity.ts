@@ -8,7 +8,7 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Branch } from './branch.entity';
 import { Plo } from './plo.entity';
@@ -17,7 +17,7 @@ import { Coordinator } from './coordinator.entity';
 
 @Entity()
 export class Curriculum {
-  @PrimaryColumn()
+  @PrimaryGeneratedColumn()
   id: string;
 
   @Column()
