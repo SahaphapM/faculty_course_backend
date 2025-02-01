@@ -1,5 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNumber, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import { Instructor } from 'src/entities/instructor.entity';
+import { Plo } from 'src/entities/plo.entity';
+import { Skill } from 'src/entities/skill.entity';
+import { Subject } from 'src/entities/subject.entity';
 
 export class CreateCurriculumDto {
   @IsString()
@@ -28,15 +32,35 @@ export class CreateCurriculumDto {
 
   @IsNumber() minimumGrade: number;
 
-  @ApiProperty({ type: [String] })
-  @IsArray()
-  coordinatorListId: string[];
+  // @ApiProperty({ type: [String] })
+  // @IsArray()
+  // coordinatorListId: string[];
 
-  @ApiProperty({ type: [String] })
+  // @ApiProperty({ type: [String] })
+  // @IsString()
+  // ploListId: string[];
+
+  // @ApiProperty({ type: [String] })
+  // @IsArray()
+  // subjectListId: string[];
+
+  @ApiProperty({ type: [Instructor] })
+  @IsArray()
+  @IsOptional()
+  coordinators: Instructor[];
+
+  @ApiProperty({ type: [Plo] })
   @IsString()
-  ploListId: string[];
+  @IsOptional()
+  plos: Plo[];
 
-  @ApiProperty({ type: [String] })
+  @ApiProperty({ type: [Subject] })
   @IsArray()
-  subjectListId: string[];
+  @IsOptional()
+  subjects: Subject[];
+
+  @ApiProperty({ type: [Skill] })
+  @IsArray()
+  @IsOptional()
+  skills: Skill[];
 }

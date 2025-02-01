@@ -15,6 +15,7 @@ import { InstructorsService } from 'src/modules/instructors/instructors.service'
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { BranchesService } from '../branches/branches.service';
 import { SubjectsService } from '../subjects/subjects.service';
+import { PlosService } from '../plos/plos.service';
 
 @Injectable()
 export class CurriculumsService {
@@ -22,44 +23,11 @@ export class CurriculumsService {
     @InjectRepository(Curriculum)
     private currRepo: Repository<Curriculum>,
 
-    // private readonly ploService: PlosService,
+    private readonly ploService: PlosService,
     private readonly subService: SubjectsService,
     private readonly braService: BranchesService,
     private readonly insService: InstructorsService,
-  ) { }
-
-  // async findAllByPage(
-  //   paginationDto: PaginationDto,
-  // ): Promise<{ data: Curriculum[]; total: number }> {
-  //   const { page, limit, sort, order, search } = paginationDto;
-
-  //   const options: FindManyOptions<Curriculum> = {
-  //     relations: [
-  //       'coordinators',
-  //       'plos',
-  //       'subjects',
-  //       'branch',
-  //       'branch.faculty',
-  //     ],
-  //     take: limit,
-  //     skip: (page - 1) * limit,
-  //     order: sort ? { [sort]: order } : {},
-  //   };
-
-  //   if (search) {
-  //     options.where = [
-  //       { id: Like(`%${search}%`) },
-  //       { thaiName: Like(`%${search}%`) },
-  //       { engName: Like(`%${search}%`) },
-  //       { branch: { name: Like(`%${search}%`) } }, // Corrected for nested relation
-  //       { branch: { faculty: { name: Like(`%${search}%`) } } },
-  //     ];
-  //   }
-
-  //   const [result, total] = await this.currRepo.findAndCount(options);
-
-  //   return { data: result, total };
-  // }
+  ) {}
 
   async create(dto: CreateCurriculumDto): Promise<Curriculum> {
     const curriculum = this.currRepo.create(dto);
@@ -67,27 +35,12 @@ export class CurriculumsService {
       if (dto.branchId) {
         const branch = await this.braService.findOne(dto.branchId);
         if (!branch) {
-          throw new NotFoundException(`Branch with IDs ${dto.branchId} not found`);
+          throw new NotFoundException(
+            `Branch with IDs ${dto.branchId} not found`,
+          );
         }
         curriculum.branch = branch;
       }
-
-      if (dto.coordinatorListId) {
-        const coordinators = await this.insService.findByList(dto.coordinatorListId);
-        if (!coordinators) {
-          throw new NotFoundException(`Instructor with IDs ${dto.coordinatorListId} not found`);
-        }
-        curriculum.coordinators = coordinators
-      }
-
-      if (dto.subjectListId) {
-        const subjects = await this.subService.findByList(dto.subjectListId);
-        if (!subjects) {
-          throw new NotFoundException(`Subject with IDs ${dto.subjectListId} not found`);
-        }
-        curriculum.subjects = subjects;
-      }
-
       return await this.currRepo.save(curriculum);
     } catch (error) {
       throw new BadRequestException(
@@ -104,10 +57,10 @@ export class CurriculumsService {
     const options: FindManyOptions<Curriculum> = {
       relationLoadStrategy: 'query',
       relations: {
-        // plos: true,
+        plos: true,
         subjects: true,
         branch: true,
-        coordinators: true
+        coordinators: true,
       },
       select: {
         id: true,
@@ -120,7 +73,7 @@ export class CurriculumsService {
         period: true,
         branch: { id: true, name: true },
         coordinators: { id: true, name: true },
-      }
+      },
     };
     try {
       if (pag) {
@@ -129,16 +82,18 @@ export class CurriculumsService {
         options.take = limit || defaultLimit;
         options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
         options.order = { id: order || 'ASC' };
-        options.where = []
+        options.where = [];
 
         if (search) {
-          options.where.push({ id: Like(`%${search}%`) },)
+          options.where.push({ id: Like(`%${search}%`) });
         }
         if (facultyName) {
-          options.where.push({ branch: { faculty: { name: Like(`%${facultyName}%`) } } })
+          options.where.push({
+            branch: { faculty: { name: Like(`%${facultyName}%`) } },
+          });
         }
         if (branchName) {
-          options.where.push({ branch: { name: Like(`%${branchName}%`) } })
+          options.where.push({ branch: { name: Like(`%${branchName}%`) } });
         }
 
         return await this.currRepo.findAndCount(options);
@@ -147,8 +102,8 @@ export class CurriculumsService {
       }
     } catch (error) {
       // Log the error for debugging
-      console.error('Error fetching users:', error);
-      throw new InternalServerErrorException('Failed to fetch users');
+      console.error('Error fetching curriculums:', error);
+      throw new InternalServerErrorException('Failed to fetch curriculums');
     }
   }
 
@@ -180,40 +135,15 @@ export class CurriculumsService {
     if (dto.branchId) {
       const branch = await this.braService.findOne(dto.branchId);
       if (!branch) {
-        throw new NotFoundException(`Branch with IDs ${dto.branchId} not found`);
+        throw new NotFoundException(
+          `Branch with IDs ${dto.branchId} not found`,
+        );
       }
       curriculum.branch = branch;
     }
 
-    if (dto.coordinatorListId) {
-      const coordinators = await this.insService.findByList(dto.coordinatorListId);
-      if (!coordinators) {
-        throw new NotFoundException(`Instructor with IDs ${dto.coordinatorListId} not found`);
-      }
-      curriculum.coordinators = coordinators
-    }
-
-    if (dto.subjectListId) {
-      const subjects = await this.subService.findByList(dto.subjectListId);
-      if (!subjects) {
-        throw new NotFoundException(`Subject with IDs ${dto.subjectListId} not found`);
-      }
-      curriculum.subjects = subjects;
-    }
-
-    // if (dto.ploListId) {
-    //   const plos = await Promise.all(
-    //     dto.ploListId.map((p) => this.ploService.findOne(p)),
-    //   );
-    //   curriculum.plos = plos;
-    // }
-    // Object.assign(curriculum, updateCurriculumDto); // directly create new delete the first data to new value.
-
     try {
       await this.currRepo.save(curriculum);
-      // return this.currRepo.findOne({
-      //   where: { id },
-      // });
     } catch (error) {
       throw new BadRequestException(
         'Failed to update Curriculum',
