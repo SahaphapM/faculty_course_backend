@@ -51,7 +51,7 @@ export class CreateCurriculumDto {
   coordinators: Instructor[];
 
   @ApiProperty({ type: [Plo] })
-  @IsString()
+  @IsArray()
   @IsOptional()
   plos: Plo[];
 
