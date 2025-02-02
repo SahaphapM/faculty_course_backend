@@ -21,7 +21,8 @@ export class CreateSkillDto {
   children: Skill[] | null;
 
   @IsOptional()
-  parent: Skill | null;
+  @IsNumber()
+  parentId: number | null;
 
   // techSkills: TechSkill[] | null;
 }

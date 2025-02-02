@@ -12,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Subject } from 'src/entities/subject.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { BranchesService } from '../branches/branches.service';
+import { Skill } from 'src/entities/skill.entity';
 
 @Injectable()
 export class CurriculumsService {
@@ -22,6 +23,7 @@ export class CurriculumsService {
     // private readonly ploService: PlosService,
     // private readonly subService: SubjectsService,
     private readonly braService: BranchesService,
+    private readonly skillRepo: Repository<Skill>,
     // private readonly insService: InstructorsService,
   ) {}
 
@@ -145,6 +147,42 @@ export class CurriculumsService {
 
     // Merge existing entity with new data
     this.currRepo.merge(curriculum, dto);
+
+    // ✅ Handle Skills (Tree Structure)
+    if (dto.skills) {
+      curriculum.skills = await Promise.all(
+        dto.skills.map(async (skillDto) => {
+          let skill = await this.skillRepo.findOne({
+            where: { id: skillDto.id },
+            relations: ['parent', 'children'],
+          });
+
+          if (!skill) {
+            skill = this.skillRepo.create(skillDto);
+          } else {
+            this.skillRepo.merge(skill, skillDto);
+          }
+
+          skill.curriculum = curriculum;
+
+          // If skillDto has a parent, set it
+          if (skillDto.parentId) {
+            const parentSkill = await this.skillRepo.findOne({
+              where: { id: skillDto.parentId },
+            });
+
+            if (!parentSkill) {
+              throw new NotFoundException(
+                `Parent skill with ID ${skillDto.parentId} not found`,
+              );
+            }
+            skill.parent = parentSkill;
+          }
+
+          return skill;
+        }),
+      );
+    }
 
     if (dto.branchId) {
       const branch = await this.braService.findOne(dto.branchId);

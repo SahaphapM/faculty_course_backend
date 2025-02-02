@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 import { Instructor } from 'src/entities/instructor.entity';
 import { Plo } from 'src/entities/plo.entity';
-import { Skill } from 'src/entities/skill.entity';
 import { Subject } from 'src/entities/subject.entity';
+import { CreateSkillDto } from '../skill/create-skill.dto';
 
 export class CreateCurriculumDto {
   // @IsString()
@@ -60,8 +60,8 @@ export class CreateCurriculumDto {
   @IsOptional()
   subjects: Subject[];
 
-  @ApiProperty({ type: [Skill] })
+  @ApiProperty({ type: [CreateSkillDto] })
   @IsArray()
   @IsOptional()
-  skills: Skill[];
+  skills: CreateSkillDto[];
 }
