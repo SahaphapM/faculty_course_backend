@@ -17,7 +17,7 @@ import { Coordinator } from './coordinator.entity';
 
 @Entity()
 export class Curriculum {
-  @PrimaryGeneratedColumn()
+  @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()

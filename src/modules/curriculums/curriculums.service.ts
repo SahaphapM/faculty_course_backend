@@ -153,7 +153,7 @@ export class CurriculumsService {
     }
 
     try {
-      await this.currRepo.save(curriculum); // ✅ Save the updated entity
+      await this.currRepo.save(curriculum); //  Save the updated entity
     } catch (error) {
       throw new BadRequestException(
         'Failed to update Curriculum',
