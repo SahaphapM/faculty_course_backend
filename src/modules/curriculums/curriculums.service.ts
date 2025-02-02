@@ -143,7 +143,7 @@ export class CurriculumsService {
 
     // curriculum = this.currRepo.merge(curriculum, dto);
 
-    const entity = this.currRepo.create(dto);
+    const entity = this.currRepo.create({ id: id, ...dto });
 
     if (dto.branchId) {
       const branch = await this.braService.findOne(dto.branchId);
@@ -156,8 +156,8 @@ export class CurriculumsService {
     }
 
     try {
-      // await this.currRepo.save(dto);
-      await this.currRepo.update(id, entity);
+      await this.currRepo.save(entity);
+      // await this.currRepo.update(id, entity);
     } catch (error) {
       throw new BadRequestException(
         'Failed to update Curriculum',
