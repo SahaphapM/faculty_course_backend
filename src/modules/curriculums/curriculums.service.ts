@@ -135,13 +135,13 @@ export class CurriculumsService {
   }
 
   async update(id: string, dto: UpdateCurriculumDto) {
-    let curriculum = await this.findOne(id);
+    const curriculum = await this.findOne(id);
 
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
 
-    curriculum = this.currRepo.merge(curriculum, dto);
+    // curriculum = this.currRepo.merge(curriculum, dto);
 
     if (dto.branchId) {
       const branch = await this.braService.findOne(dto.branchId);
@@ -154,7 +154,7 @@ export class CurriculumsService {
     }
 
     try {
-      await this.currRepo.save(curriculum);
+      await this.currRepo.save(dto);
     } catch (error) {
       throw new BadRequestException(
         'Failed to update Curriculum',
