@@ -7,14 +7,12 @@ import {
   Param,
   Delete,
   Query,
-  BadRequestException,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from '../../dto/curriculum/create-curriculum.dto';
 import { UpdateCurriculumDto } from '../../dto/curriculum/update-curriculum.dto';
 import { SubjectsService } from 'src/modules/subjects/subjects.service';
 import { PaginationDto } from '../../dto/pagination.dto';
-import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth()
@@ -49,7 +47,7 @@ export class CurriculumsController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.curriculumsService.findOne(id);
+    return this.curriculumsService.findOne(+id);
   }
 
   @Patch(':id')
@@ -57,50 +55,50 @@ export class CurriculumsController {
     @Param('id') id: string,
     @Body() updateCurriculumDto: UpdateCurriculumDto,
   ) {
-    return this.curriculumsService.update(id, updateCurriculumDto);
+    return this.curriculumsService.update(+id, updateCurriculumDto);
   }
 
-  @Patch(':id/subjects')
-  async addSubject(
-    @Param('id') id: string,
-    @Body() createSubjectDtos: CreateSubjectDto[],
-  ) {
-    console.log('Received data:', createSubjectDtos); // Log the received data
+  // @Patch(':id/subjects')
+  // async addSubject(
+  //   @Param('id') id: string,
+  //   @Body() createSubjectDtos: CreateSubjectDto[],
+  // ) {
+  //   console.log('Received data:', createSubjectDtos); // Log the received data
 
-    // Ensure createSubjectDtos is an array
-    if (!Array.isArray(createSubjectDtos)) {
-      throw new BadRequestException('Invalid data format: Expected an array');
-    }
+  //   // Ensure createSubjectDtos is an array
+  //   if (!Array.isArray(createSubjectDtos)) {
+  //     throw new BadRequestException('Invalid data format: Expected an array');
+  //   }
 
-    // Validate each item in the array
-    createSubjectDtos.forEach((dto) => {
-      if (typeof dto.id !== 'string' || dto.id.trim() === '') {
-        throw new BadRequestException('Invalid subject name format');
-      }
-    });
+  //   // Validate each item in the array
+  //   createSubjectDtos.forEach((dto) => {
+  //     if (typeof dto.id !== 'string' || dto.id.trim() === '') {
+  //       throw new BadRequestException('Invalid subject name format');
+  //     }
+  //   });
 
-    const subjects = await Promise.all(
-      createSubjectDtos.map((dto) => this.subjectsService.create(dto)),
-    );
+  //   const subjects = await Promise.all(
+  //     createSubjectDtos.map((dto) => this.subjectsService.create(dto)),
+  //   );
 
-    await Promise.all(
-      subjects.map(() => this.curriculumsService.addSubject(id, subjects)),
-    );
+  //   await Promise.all(
+  //     subjects.map(() => this.curriculumsService.addSubject(id, subjects)),
+  //   );
 
-    return this.curriculumsService.findOne(id); // add subject to curriculum
-  }
+  //   return this.curriculumsService.findOne(id); // add subject to curriculum
+  // }
 
-  @Patch(':id/selectSubjects')
-  async selectSubject(
-    @Param('id') id: string,
-    @Body() createSubjectDtos: CreateSubjectDto[],
-  ) {
-    // option and select the former subjects
-    const subjects = await Promise.all(
-      createSubjectDtos.map((dto) => this.subjectsService.findOne(dto.id)),
-    );
-    return this.curriculumsService.selectSubject(id, subjects); // add subject to curriculum
-  }
+  // @Patch(':id/selectSubjects')
+  // async selectSubject(
+  //   @Param('id') id: string,
+  //   @Body() createSubjectDtos: CreateSubjectDto[],
+  // ) {
+  //   // option and select the former subjects
+  //   const subjects = await Promise.all(
+  //     createSubjectDtos.map((dto) => this.subjectsService.findOne(dto.id)),
+  //   );
+  //   return this.curriculumsService.selectSubject(id, subjects); // add subject to curriculum
+  // }
 
   // @Patch(':id/coordinators')
   // async addCoordinator(@Param('id') id: string, @Body() dto: number[]) {
@@ -115,7 +113,7 @@ export class CurriculumsController {
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.curriculumsService.remove(id);
+    return this.curriculumsService.remove(+id);
   }
 
   @Get('filters/:branchId')

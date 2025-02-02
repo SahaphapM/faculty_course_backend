@@ -6,8 +6,8 @@ import { Subject } from 'src/entities/subject.entity';
 import { CreateSkillDto } from '../skill/create-skill.dto';
 
 export class CreateCurriculumDto {
-  // @IsString()
-  // id: string;
+  @IsString()
+  code: string;
 
   @IsString()
   name: string;

@@ -9,22 +9,19 @@ import { UpdateCurriculumDto } from '../../dto/curriculum/update-curriculum.dto'
 import { Curriculum } from '../../entities/curriculum.entity';
 import { FindManyOptions, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Subject } from 'src/entities/subject.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { BranchesService } from '../branches/branches.service';
 import { Skill } from 'src/entities/skill.entity';
+import { Branch } from 'src/entities/branch.entity';
 
 @Injectable()
 export class CurriculumsService {
   constructor(
     @InjectRepository(Curriculum)
     private currRepo: Repository<Curriculum>,
-
-    // private readonly ploService: PlosService,
-    // private readonly subService: SubjectsService,
-    private readonly braService: BranchesService,
-    private readonly skillRepo: Repository<Skill>,
-    // private readonly insService: InstructorsService,
+    @InjectRepository(Skill)
+    private skillRepo: Repository<Skill>,
+    @InjectRepository(Branch)
+    private braRepo: Repository<Branch>,
   ) {}
 
   // just pure empty insert for get id
@@ -45,7 +42,7 @@ export class CurriculumsService {
     const curriculum = this.currRepo.create(dto);
     try {
       if (dto.branchId) {
-        const branch = await this.braService.findOne(dto.branchId);
+        const branch = await this.braRepo.findOneBy({ id: dto.branchId });
         if (!branch) {
           throw new NotFoundException(
             `Branch with IDs ${dto.branchId} not found`,
@@ -97,7 +94,7 @@ export class CurriculumsService {
         options.where = [];
 
         if (search) {
-          options.where.push({ id: Like(`%${search}%`) });
+          options.where.push({ name: Like(`%${search}%`) });
         }
         if (facultyName) {
           options.where.push({
@@ -119,7 +116,7 @@ export class CurriculumsService {
     }
   }
 
-  async findOne(id: string): Promise<Curriculum> {
+  async findOne(id: number): Promise<Curriculum> {
     const curriculum = await this.currRepo.findOne({
       where: { id },
       relations: {
@@ -138,7 +135,7 @@ export class CurriculumsService {
     return curriculum;
   }
 
-  async update(id: string, dto: UpdateCurriculumDto) {
+  async update(id: number, dto: UpdateCurriculumDto) {
     const curriculum = await this.findOne(id);
 
     if (!curriculum) {
@@ -185,7 +182,7 @@ export class CurriculumsService {
     }
 
     if (dto.branchId) {
-      const branch = await this.braService.findOne(dto.branchId);
+      const branch = await this.braRepo.findOneBy({ id: dto.branchId });
       if (!branch) {
         throw new NotFoundException(`Branch with ID ${dto.branchId} not found`);
       }
@@ -202,48 +199,48 @@ export class CurriculumsService {
     }
   }
 
-  async addSubject(id: string, subjects: Subject[]): Promise<Curriculum> {
-    const curriculum = await this.findOne(id);
-    if (!curriculum) {
-      throw new NotFoundException(`Curriculum with ID ${id} not found`);
-    }
+  // async addSubject(id: number, subjects: Subject[]): Promise<Curriculum> {
+  //   const curriculum = await this.findOne(id);
+  //   if (!curriculum) {
+  //     throw new NotFoundException(`Curriculum with ID ${id} not found`);
+  //   }
 
-    // Assign subjects directly to the curriculum
-    curriculum.subjects = subjects;
+  //   // Assign subjects directly to the curriculum
+  //   curriculum.subjects = subjects;
 
-    try {
-      await this.currRepo.save(curriculum);
-      return this.currRepo.findOne({
-        where: { id },
-        relations: { subjects: true },
-      });
-    } catch (error) {
-      throw new BadRequestException(
-        'Failed to update Curriculum',
-        error.message,
-      );
-    }
-  }
+  //   try {
+  //     await this.currRepo.save(curriculum);
+  //     return this.currRepo.findOne({
+  //       where: { id },
+  //       relations: { subjects: true },
+  //     });
+  //   } catch (error) {
+  //     throw new BadRequestException(
+  //       'Failed to update Curriculum',
+  //       error.message,
+  //     );
+  //   }
+  // }
 
-  async selectSubject(id: string, subjects: Subject[]): Promise<Curriculum> {
-    const curriculum = await this.findOne(id);
-    if (!curriculum) {
-      throw new NotFoundException(`Curriculum with ID ${id} not found`);
-    }
-    curriculum.subjects = subjects;
-    try {
-      await this.currRepo.save(curriculum);
-      return this.currRepo.findOne({
-        where: { id },
-        relations: { subjects: true },
-      });
-    } catch (error) {
-      throw new BadRequestException(
-        'Failed to update Curriculum',
-        error.message,
-      );
-    }
-  }
+  // async selectSubject(id: number, subjects: Subject[]): Promise<Curriculum> {
+  //   const curriculum = await this.findOne(id);
+  //   if (!curriculum) {
+  //     throw new NotFoundException(`Curriculum with ID ${id} not found`);
+  //   }
+  //   curriculum.subjects = subjects;
+  //   try {
+  //     await this.currRepo.save(curriculum);
+  //     return this.currRepo.findOne({
+  //       where: { id },
+  //       relations: { subjects: true },
+  //     });
+  //   } catch (error) {
+  //     throw new BadRequestException(
+  //       'Failed to update Curriculum',
+  //       error.message,
+  //     );
+  //   }
+  // }
 
   // async addCoordinator(
   //   id: string,
@@ -297,7 +294,7 @@ export class CurriculumsService {
   //   }
   // }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const curriculum = await this.findOne(id);
     try {
       await this.currRepo.remove(curriculum);
