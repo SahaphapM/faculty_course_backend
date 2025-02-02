@@ -125,7 +125,9 @@ export class CurriculumsService {
         subjects: true,
         branch: true,
         coordinators: true,
-        skills: true,
+        skills: {
+          children: true,
+        },
       },
     });
     if (!curriculum) {
