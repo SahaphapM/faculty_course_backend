@@ -5,6 +5,7 @@ import {
   JoinColumn,
   JoinTable,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -49,10 +50,11 @@ export class Skill {
   @JoinTable()
   techSkills: TechSkill[] | null;
 
-  @OneToMany(() => Curriculum, (cr) => cr.skills, {
+  @ManyToOne(() => Curriculum, (cr) => cr.skills, {
     cascade: false,
   })
-  curriculums: Curriculum[];
+  @JoinColumn()
+  curriculum: Curriculum;
 
   @OneToMany(
     () => SkillExpectedLevel,
