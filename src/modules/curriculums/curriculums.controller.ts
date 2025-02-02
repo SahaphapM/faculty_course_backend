@@ -22,6 +22,7 @@ export class CurriculumsController {
   @Get('auto_id')
   getId() {
     return this.curriculumsService.insert({
+      code: '00000000',
       name: 'ชื่อหลักสูตร',
       engName: 'english name',
       degree: 'ปริญญาตรี',
