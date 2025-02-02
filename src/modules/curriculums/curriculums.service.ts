@@ -26,6 +26,7 @@ export class CurriculumsService {
 
   // just pure empty insert for get id
   async insert(p0: {
+    code: string;
     name: string;
     engName: string;
     degree: string;
