@@ -20,7 +20,7 @@ export class Curriculum {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ unique: true, generated: 'uuid' })
   code: string;
 
   @Column()

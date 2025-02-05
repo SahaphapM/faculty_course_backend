@@ -11,22 +11,17 @@ import {
 import { CurriculumsService } from './curriculums.service';
 import { CreateCurriculumDto } from '../../dto/curriculum/create-curriculum.dto';
 import { UpdateCurriculumDto } from '../../dto/curriculum/update-curriculum.dto';
-import { SubjectsService } from 'src/modules/subjects/subjects.service';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth()
 @Controller('curriculums')
 export class CurriculumsController {
-  constructor(
-    private readonly curriculumsService: CurriculumsService,
-    private readonly subjectsService: SubjectsService,
-  ) {}
+  constructor(private readonly curriculumsService: CurriculumsService) {}
 
   @Get('auto_id')
   getId() {
     return this.curriculumsService.insert({
-      code: '00000000',
       name: 'ชื่อหลักสูตร',
       engName: 'english name',
       degree: 'ปริญญาตรี',
