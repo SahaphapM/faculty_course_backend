@@ -24,20 +24,6 @@ export class CurriculumsService {
     private braRepo: Repository<Branch>,
   ) {}
 
-  // just pure empty insert for get id
-  async insert(p0: {
-    name: string;
-    engName: string;
-    degree: string;
-    engDegree: string;
-    description: string;
-    period: number;
-    minimumGrade: number;
-  }) {
-    const insertResult = await this.currRepo.insert(p0);
-    return insertResult.identifiers[0].id;
-  }
-
   async create(dto: CreateCurriculumDto): Promise<Curriculum> {
     const curriculum = this.currRepo.create(dto);
     try {
