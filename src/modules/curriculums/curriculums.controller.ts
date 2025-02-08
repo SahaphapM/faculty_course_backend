@@ -29,10 +29,10 @@ export class CurriculumsController {
     return this.curriculumsService.findAll(pag);
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.curriculumsService.findOne(+id);
-  }
+  // @Get(':id')
+  // findOne(@Param('id') id: string) {
+  //   return this.curriculumsService.findOne(+id);
+  // }
 
   @Get(':code')
   findOneByCode(@Param('code') code: string) {
