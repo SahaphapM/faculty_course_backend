@@ -34,6 +34,11 @@ export class CurriculumsController {
     return this.curriculumsService.findOne(+id);
   }
 
+  @Get(':code')
+  findOneByCode(@Param('code') code: string) {
+    return this.curriculumsService.findOneByCode(code);
+  }
+
   @Patch(':id')
   update(
     @Param('id') id: string,

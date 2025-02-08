@@ -59,6 +59,7 @@ export class CurriculumsService {
       },
       select: {
         id: true,
+        code: true,
         name: true,
         description: true,
         minimumGrade: true,
@@ -117,6 +118,25 @@ export class CurriculumsService {
     });
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID '${id}' not found`);
+    }
+    return curriculum;
+  }
+
+  async findOneByCode(code: string) {
+    const curriculum = await this.currRepo.findOne({
+      where: { code },
+      relations: {
+        plos: true,
+        subjects: true,
+        branch: true,
+        coordinators: true,
+        skills: {
+          children: true,
+        },
+      },
+    });
+    if (!curriculum) {
+      throw new NotFoundException(`Curriculum with code '${code}' not found`);
     }
     return curriculum;
   }
