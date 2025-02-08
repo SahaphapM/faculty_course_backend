@@ -1,5 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { Instructor } from 'src/entities/instructor.entity';
 import { Plo } from 'src/entities/plo.entity';
 import { Subject } from 'src/entities/subject.entity';
@@ -7,6 +13,7 @@ import { CreateSkillDto } from '../skill/create-skill.dto';
 
 export class CreateCurriculumDto {
   @IsString()
+  @IsNotEmpty()
   code: string;
 
   @IsString()

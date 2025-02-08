@@ -19,18 +19,6 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 export class CurriculumsController {
   constructor(private readonly curriculumsService: CurriculumsService) {}
 
-  @Get('auto_id')
-  getId() {
-    return this.curriculumsService.insert({
-      name: 'ชื่อหลักสูตร',
-      engName: 'english name',
-      degree: 'ปริญญาตรี',
-      engDegree: 'Bachelor',
-      description: 'คำอธิบายหลักสูตร',
-      period: 4,
-      minimumGrade: 3,
-    });
-  }
   @Post()
   create(@Body() createCurriculumDto: CreateCurriculumDto) {
     return this.curriculumsService.create(createCurriculumDto);
