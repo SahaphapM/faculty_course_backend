@@ -2,7 +2,7 @@ import { IsBoolean, IsNumber, IsString } from 'class-validator';
 
 export class CreateSkillCollection {
   @IsString()
-  subjectId: string;
+  subjectCode: string;
 
   @IsString()
   skillId: string;

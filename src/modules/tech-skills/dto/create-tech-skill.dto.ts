@@ -2,7 +2,7 @@ import { IsString } from 'class-validator';
 
 export class CreateTechSkillDto {
   @IsString()
-  id: string;
+  slug: string;
 
   @IsString()
   name: string;

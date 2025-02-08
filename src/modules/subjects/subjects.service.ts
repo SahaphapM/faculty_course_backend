@@ -18,7 +18,6 @@ import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 
 @Injectable()
 export class SubjectsService {
-
   constructor(
     @InjectRepository(Subject)
     private subRepo: Repository<Subject>,
@@ -28,7 +27,7 @@ export class SubjectsService {
     private readonly SkillExpectedLevelsRepository: Repository<SkillExpectedLevel>,
     @InjectRepository(Skill)
     private readonly skillRepo: Repository<Skill>,
-  ) { }
+  ) {}
 
   // async findAllByPage(
   //   paginationDto: PaginationDto,
@@ -111,8 +110,13 @@ export class SubjectsService {
         skillExpectedLevels: {
           id: true,
           expectedLevel: true,
-          skill: { id: true, name: true, parent: { id: true, name: true }, children: { id: true, name: true } }
-        }
+          skill: {
+            id: true,
+            name: true,
+            parent: { id: true, name: true },
+            children: { id: true, name: true },
+          },
+        },
       },
     };
     try {
@@ -124,9 +128,7 @@ export class SubjectsService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [
-            { name: Like(`%${search}%`) },
-          ];
+          options.where = [{ name: Like(`%${search}%`) }];
         }
         return await this.subRepo.findAndCount(options);
       } else {
@@ -139,24 +141,25 @@ export class SubjectsService {
     }
   }
 
-  async findOne(id: string): Promise<Subject> {
+  async findOne(code: string): Promise<Subject> {
     const subject = await this.subRepo.findOne({
-      where: { id },
+      where: { code },
       relations: { skillExpectedLevels: { skill: true } },
     });
     if (!subject) {
-      throw new NotFoundException(`Subject with id ${id} not found`);
+      throw new NotFoundException(`Subject with id ${code} not found`);
     }
     return subject;
   }
 
-  async update(id: string, dto: UpdateSubjectDto): Promise<Subject> {
-    const subject = await this.subRepo.preload({
-      id,
-      ...dto,
-    });
+  async update(code: string, dto: UpdateSubjectDto) {
+    // const subject = await this.subRepo.preload({
+    //   id,
+    //   ...dto,
+    // });
+    const subject = await this.subRepo.findOne({ where: { code } });
     if (!subject) {
-      throw new NotFoundException(`Subject with id ${id} not found`);
+      throw new NotFoundException(`Subject with id ${code} not found`);
     }
     if (dto.skillExpectedLevels.length > 0) {
       const skillExpectedLevels = await Promise.all(
@@ -180,19 +183,15 @@ export class SubjectsService {
     }
     try {
       await this.subRepo.save(subject);
-      return this.subRepo.findOne({
-        where: { id },
-        relations: { clos: true, curriculums: true },
-      });
     } catch (error) {
       throw new BadRequestException('Failed to update subject');
     }
   }
 
-  async addCLO(id: string, clo: Clo): Promise<Subject> {
-    const subject = await this.subRepo.findOne({ where: { id } });
+  async addCLO(code: string, clo: Clo): Promise<Subject> {
+    const subject = await this.subRepo.findOne({ where: { code } });
     if (!subject) {
-      throw new NotFoundException(`Subject with ID ${id} not found`);
+      throw new NotFoundException(`Subject with ID ${code} not found`);
     }
     if (!subject.clos) {
       subject.clos = [];
@@ -201,7 +200,7 @@ export class SubjectsService {
     try {
       await this.subRepo.save(subject);
       return this.subRepo.findOne({
-        where: { id },
+        where: { code },
         relations: { clos: true },
       });
     } catch (error) {
@@ -264,17 +263,17 @@ export class SubjectsService {
   }
 
   async removeSkill(
-    id: string,
+    code: string,
     skillExpectedLevelId: number,
   ): Promise<Subject> {
     // Fetch the subject with the associated skillExpectedLevels
     const subject = await this.subRepo.findOne({
-      where: { id },
+      where: { code },
       relations: { skillExpectedLevels: true },
     });
 
     if (!subject) {
-      throw new NotFoundException(`Subject with ID ${id} not found`);
+      throw new NotFoundException(`Subject with ID ${code} not found`);
     }
 
     // Find the skillExpectedLevel to remove
@@ -302,7 +301,7 @@ export class SubjectsService {
 
       // Return the updated subject with the remaining skillExpectedLevels
       return await this.subRepo.findOne({
-        where: { id },
+        where: { code },
         relations: { skillExpectedLevels: true },
       });
     } catch (error) {
@@ -313,11 +312,11 @@ export class SubjectsService {
     }
   }
 
-  async remove(id: string): Promise<void> {
-    const subject = await this.findOne(id);
+  async remove(code: string): Promise<void> {
+    const subject = await this.findOne(code);
 
     if (!subject) {
-      throw new NotFoundException(`Subject with id ${id} not found`);
+      throw new NotFoundException(`Subject with id ${code} not found`);
     }
 
     // Remove the subject from related curriculums
@@ -325,7 +324,9 @@ export class SubjectsService {
       relations: ['subjects'],
     });
     curriculums.forEach((curriculum) => {
-      curriculum.subjects = curriculum.subjects.filter((sub) => sub.id !== id);
+      curriculum.subjects = curriculum.subjects.filter(
+        (sub) => sub.code !== code,
+      );
     });
     await this.curRepo.save(curriculums);
 
@@ -345,7 +346,7 @@ export class SubjectsService {
     }
 
     const distinctSubjectIds = Array.from(
-      new Set(dto.map((map) => map.subjectId)),
+      new Set(dto.map((map) => map.subjectCode)),
     ); // get distinct subject IDs to map with skills with same subject ID
 
     // Loop through distinct subject IDs
@@ -354,12 +355,12 @@ export class SubjectsService {
 
       if (!subject) {
         throw new NotFoundException(
-          `Subject with ID ${dto[index].subjectId} not found`,
+          `Subject with ID ${dto[index].subjectCode} not found`,
         );
       }
 
       // Filter skillMapping array to get skills of the current subject
-      const groupSkill = dto.filter((map) => map.subjectId === subject.id);
+      const groupSkill = dto.filter((map) => map.subjectCode === subject.code);
 
       // Loop through skillMapping array of the current subject
       for (let i = 0; i < groupSkill.length; i++) {

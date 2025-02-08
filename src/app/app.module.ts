@@ -16,7 +16,6 @@ import { StudentsModule } from '../modules/students/students.module';
 import { CurriculumsModule } from 'src/modules/curriculums/curriculums.module';
 import { BranchesModule } from 'src/modules/branches/branches.module';
 import { ClosModule } from 'src/modules/clos/clos.module';
-import { DepartmentsModule } from 'src/modules/departments/departments.module';
 import { CoursesModule } from 'src/modules/courses/courses.module';
 
 @Module({
@@ -58,7 +57,6 @@ import { CoursesModule } from 'src/modules/courses/courses.module';
     PlosModule,
     ClosModule,
     SkillsModule,
-    DepartmentsModule,
     FacultiesModule,
     AuthModule,
     TechSkillsModule,
@@ -68,4 +66,4 @@ import { CoursesModule } from 'src/modules/courses/courses.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}

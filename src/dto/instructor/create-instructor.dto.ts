@@ -1,6 +1,7 @@
 import {
   IsArray,
   IsEmail,
+  IsNumber,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -43,13 +44,12 @@ export class CreateInstructorDto {
   socials: Partial<SocialForm>;
 
   @IsOptional()
-  @IsString()
-  branchId: string;
+  branchId: number;
 
   @IsOptional()
   @IsArray()
-  @IsString({ each: true })
-  curriculumsId: string[];
+  @IsNumber({ allowNaN: false }, { each: true })
+  curriculumsId: [];
 
   @IsOptional()
   @IsString()

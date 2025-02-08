@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { InstructorsService } from './instructors.service';
 import { CreateInstructorDto } from '../../dto/instructor/create-instructor.dto';
-import { UpdateTeacherDto } from '../../dto/instructor/update-instructor.dto';
+import { UpdateInstructorDto } from '../../dto/instructor/update-instructor.dto';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomUploadFileTypeValidator } from './instructors.file.validators';
@@ -30,12 +30,12 @@ const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 @ApiBearerAuth()
 @Controller('instructors')
 export class InstructorsController {
-  constructor(private readonly teachersService: InstructorsService) { }
+  constructor(private readonly insService: InstructorsService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createTeacherDto: CreateInstructorDto) {
-    return this.teachersService.create(createTeacherDto);
+    return this.insService.create(createTeacherDto);
   }
 
   @Post(':id/image/upload')
@@ -75,11 +75,11 @@ export class InstructorsController {
     fs.writeFileSync(uploadPath, file.buffer);
 
     // set image name of teacher
-    const teacher = await this.teachersService.findOne(id);
+    const teacher = await this.insService.findOne(+id);
     teacher.picture = randomFileName;
-    await this.teachersService.update(
-      id,
-      teacher as unknown as Partial<UpdateTeacherDto>,
+    await this.insService.update(
+      +id,
+      teacher as unknown as Partial<UpdateInstructorDto>,
     );
     return { message: 'File upload successful', filename: randomFileName };
   }
@@ -87,25 +87,28 @@ export class InstructorsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: PaginationDto) {
-    return this.teachersService.findAll(pag);
+    return this.insService.findAll(pag);
   }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
-    return this.teachersService.findOne(id);
+    return this.insService.findOne(+id);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  update(@Param('id') id: string, @Body() updateTeacherDto: UpdateTeacherDto) {
-    return this.teachersService.update(id, updateTeacherDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateTeacherDto: UpdateInstructorDto,
+  ) {
+    return this.insService.update(+id, updateTeacherDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   // @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
-    return this.teachersService.remove(id);
+    return this.insService.remove(+id);
   }
 }

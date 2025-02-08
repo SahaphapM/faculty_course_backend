@@ -44,7 +44,6 @@ export class ClosService {
 
     if (search) {
       options.where = [
-        { id: Like(`%${search}%`) },
         { name: Like(`%${search}%`) },
         { description: Like(`%${search}%`) },
         { subject: Like(`%${search}%`) },
@@ -68,7 +67,7 @@ export class ClosService {
     });
   }
 
-  async findOne(id: string): Promise<Clo> {
+  async findOne(id: number): Promise<Clo> {
     const clo = await this.closRepository.findOne({
       where: { id },
       relations: { subject: true, plo: true },
@@ -79,7 +78,7 @@ export class ClosService {
     return clo;
   }
 
-  async update(id: string, updateCloDto: UpdateCloDto): Promise<Clo> {
+  async update(id: number, updateCloDto: UpdateCloDto): Promise<Clo> {
     await this.findOne(id); // Ensure the CLO exists
     console.log(updateCloDto);
 
@@ -99,7 +98,7 @@ export class ClosService {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const clo = await this.findOne(id); // Ensure the CLO exists
     try {
       await this.closRepository.remove(clo);

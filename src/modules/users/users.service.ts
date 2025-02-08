@@ -22,7 +22,7 @@ export class UsersService {
     private stuRepo: Repository<Student>,
     @InjectRepository(Instructor)
     private teaRepo: Repository<Instructor>,
-  ) { }
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
     const existingUser = await this.userRepo.findOne({
@@ -64,7 +64,7 @@ export class UsersService {
         if (search) {
           options.where = [
             // { id: Like(`%${search}%`) },
-            { email: Like(`%${search}%`) }
+            { email: Like(`%${search}%`) },
           ];
         }
         return await this.userRepo.findAndCount(options);
@@ -77,7 +77,6 @@ export class UsersService {
       throw new InternalServerErrorException('Failed to fetch users');
     }
   }
-
 
   async findOne(id: number): Promise<User> {
     const user = await this.userRepo.findOne({
@@ -106,25 +105,25 @@ export class UsersService {
     // Update user properties
     Object.assign(user, dto);
 
-    if (dto.studentId) {
+    if (dto.studentCode) {
       const ent = await this.stuRepo.findOneBy({
-        id: dto.studentId,
+        code: dto.studentCode,
       });
       if (!ent) {
         throw new NotFoundException(
-          `User with ID ${dto.studentId} not found`,
+          `User with ID ${dto.studentCode} not found`,
         );
       }
       user.student = ent;
     }
 
-    if (dto.teacherId) {
+    if (dto.instructorCode) {
       const ent = await this.teaRepo.findOneBy({
-        id: dto.teacherId,
+        code: dto.instructorCode,
       });
       if (!ent) {
         throw new NotFoundException(
-          `User with ID ${dto.teacherId} not found`,
+          `User with Code ${dto.instructorCode} not found`,
         );
       }
       user.teacher = ent;

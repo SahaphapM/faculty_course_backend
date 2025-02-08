@@ -17,7 +17,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('courses')
 export class CoursesController {
-  constructor(private readonly coursesService: CoursesService) { }
+  constructor(private readonly coursesService: CoursesService) {}
 
   @Post()
   create(@Body() createCourseDto: CreateCourseDto) {
@@ -36,17 +36,17 @@ export class CoursesController {
 
   @Get(':id/enrollments')
   findCourseEnrollment(@Param('id') id: string) {
-    return this.coursesService.findCourseEnrolmentByCourseId(id);
+    return this.coursesService.findCourseEnrolmentByCourseId(+id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
-    return this.coursesService.update(id, updateCourseDto);
+    return this.coursesService.update(+id, updateCourseDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.coursesService.remove(id);
+    return this.coursesService.remove(+id);
   }
 
   @Patch('selectSubject/:id/:subjectId')

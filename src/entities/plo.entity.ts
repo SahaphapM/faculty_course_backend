@@ -4,7 +4,7 @@ import {
   JoinColumn,
   ManyToOne,
   OneToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { Curriculum } from './curriculum.entity';
 import { Clo } from './clo.entity';
@@ -12,8 +12,8 @@ import { Clo } from './clo.entity';
 @Entity()
 // PLO Program Learning Outcome
 export class Plo {
-  @PrimaryColumn()
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column({ nullable: true })
   num_plo: string;

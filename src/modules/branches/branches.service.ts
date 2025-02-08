@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateBranchDto } from '../../dto/branch/create-branch.dto';
 import { UpdateBranchDto } from '../../dto/branch/update-branch.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -14,11 +18,11 @@ export class BranchesService {
     private braRepo: Repository<Branch>,
     @InjectRepository(Faculty)
     private facRepo: Repository<Faculty>,
-  ) { }
+  ) {}
 
   async create(createBranchDto: CreateBranchDto): Promise<Branch> {
     try {
-      const { facultyId, ...rest } = createBranchDto
+      const { facultyId, ...rest } = createBranchDto;
       const existBranch = await this.braRepo.findOne({
         where: { name: createBranchDto.name },
       });
@@ -28,18 +32,16 @@ export class BranchesService {
         );
       }
       const existFaculty = await this.facRepo.findOne({
-        where: { id: facultyId }
-      })
+        where: { id: facultyId },
+      });
       if (existFaculty) {
         const branch = this.braRepo.create({
           ...rest,
-          faculty: existFaculty
-        })
+          faculty: existFaculty,
+        });
         return await this.braRepo.save(branch);
       } else {
-        throw new Error(
-          `Faculty with ID ${facultyId} does not exist`,
-        );
+        throw new Error(`Faculty with ID ${facultyId} does not exist`);
       }
     } catch (error) {
       throw new Error(`Failed to create branch ${error.message}`);
@@ -56,7 +58,7 @@ export class BranchesService {
         id: true,
         name: true,
         engName: true,
-        abbrev: true
+        abbrev: true,
       },
     };
     try {
@@ -68,9 +70,7 @@ export class BranchesService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [
-            { name: Like(`%${search}%`) }
-          ];
+          options.where = [{ name: Like(`%${search}%`) }];
         }
         return await this.braRepo.findAndCount(options);
       } else {
@@ -83,7 +83,7 @@ export class BranchesService {
     }
   }
 
-  async findOne(id: string): Promise<Branch> {
+  async findOne(id: number): Promise<Branch> {
     try {
       const branch = await this.braRepo.findOne({
         where: { id },
@@ -98,7 +98,7 @@ export class BranchesService {
     }
   }
 
-  async update(id: string, updateBranchDto: UpdateBranchDto): Promise<Branch> {
+  async update(id: number, updateBranchDto: UpdateBranchDto): Promise<Branch> {
     try {
       const branch = await this.findOne(id);
       Object.assign(branch, updateBranchDto);
@@ -112,7 +112,7 @@ export class BranchesService {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     try {
       const branch = await this.findOne(id);
       await this.braRepo.remove(branch);

@@ -7,15 +7,15 @@ import {
   ManyToMany,
   ManyToOne,
   OneToMany,
-  PrimaryColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CourseEnrollment } from './course-enrollment';
 import { Instructor } from './instructor.entity';
 
 @Entity()
 export class Course {
-  @PrimaryColumn()
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
 
   @Column()
   name: string;
