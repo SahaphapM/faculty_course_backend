@@ -38,17 +38,17 @@ export class ClosController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.closService.findOne(id);
+    return this.closService.findOne(+id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCloDto: UpdateCloDto) {
-    return this.closService.update(id, updateCloDto);
+    return this.closService.update(+id, updateCloDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
-    return this.closService.remove(id);
+    return this.closService.remove(+id);
   }
 }

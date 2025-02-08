@@ -9,13 +9,12 @@ import { FindManyOptions, In, Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { CreateInstructorDto } from '../../dto/instructor/create-instructor.dto';
-import { UpdateTeacherDto } from '../../dto/instructor/update-instructor.dto';
+import { UpdateInstructorDto } from '../../dto/instructor/update-instructor.dto';
 import { Curriculum } from 'src/entities/curriculum.entity';
 import { Branch } from 'src/entities/branch.entity';
 
 @Injectable()
 export class InstructorsService {
-
   constructor(
     @InjectRepository(Branch)
     private braRepo: Repository<Branch>,
@@ -23,7 +22,7 @@ export class InstructorsService {
     private curRepo: Repository<Curriculum>,
     @InjectRepository(Instructor)
     private insRepo: Repository<Instructor>,
-  ) { }
+  ) {}
 
   // async findAllByPage(
   //   paginationDto: PaginationDto,
@@ -149,7 +148,7 @@ export class InstructorsService {
         name: true,
         engName: true,
         tel: true,
-        position: true
+        position: true,
       },
     };
     try {
@@ -161,9 +160,7 @@ export class InstructorsService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [
-            { name: Like(`%${search}%`) }
-          ];
+          options.where = [{ name: Like(`%${search}%`) }];
         }
         return await this.insRepo.findAndCount(options);
       } else {
@@ -176,7 +173,7 @@ export class InstructorsService {
     }
   }
 
-  async findOne(id: string): Promise<Instructor> {
+  async findOne(id: number): Promise<Instructor> {
     const teacher = await this.insRepo.findOne({
       where: { id },
     });
@@ -194,8 +191,8 @@ export class InstructorsService {
   }
 
   async update(
-    id: string,
-    updateTeacherDto: UpdateTeacherDto,
+    id: number,
+    updateTeacherDto: UpdateInstructorDto,
   ): Promise<Instructor> {
     const teacher = await this.findOne(id);
 
@@ -215,7 +212,7 @@ export class InstructorsService {
     }
   }
 
-  async remove(id: string) {
+  async remove(id: number) {
     const teacher = await this.findOne(id);
     try {
       await this.insRepo.remove(teacher);

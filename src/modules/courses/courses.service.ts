@@ -31,15 +31,12 @@ export class CoursesService {
     @InjectRepository(SkillCollection)
     private readonly skillCollRepo: Repository<SkillCollection>,
 
-    // @InjectRepository(Curriculum)
-    // private readonly currRepo: Repository<Curriculum>,
-
     private readonly subjectsService: SubjectsService,
 
     private readonly instructorsService: InstructorsService,
 
     private readonly studentsService: StudentsService, // Inject StudentsService
-  ) { }
+  ) {}
 
   // Create a new course
   async create(dto: CreateCourseDto): Promise<Course> {
@@ -54,7 +51,8 @@ export class CoursesService {
       //   throw new NotFoundException('Curriculum not found');
       // }
 
-      const instructors = await this.instructorsService.findByList(teacherListId);
+      const instructors =
+        await this.instructorsService.findByList(teacherListId);
 
       const newCourse = this.courseRepo.create({
         ...rest,
@@ -121,13 +119,17 @@ export class CoursesService {
 
     const options: FindManyOptions<Course> = {
       relationLoadStrategy: 'query',
-      relations: { subject: true, courseEnrollment: { student: true }, instructors: true },
+      relations: {
+        subject: true,
+        courseEnrollment: { student: true },
+        instructors: true,
+      },
       select: {
         id: true,
         name: true,
         description: true,
-        active: true
-      }
+        active: true,
+      },
     };
     try {
       if (pag) {
@@ -138,9 +140,7 @@ export class CoursesService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [
-            { id: Like(`%${search}%`) },
-          ];
+          options.where = [{ name: Like(`%${search}%`) }];
         }
         return await this.courseRepo.findAndCount(options);
       } else {
@@ -155,7 +155,8 @@ export class CoursesService {
 
   // Find a single course by ID
   async findOne(id: string): Promise<Course> {
-    const course = await this.courseRepo.createQueryBuilder('course')
+    const course = await this.courseRepo
+      .createQueryBuilder('course')
       .leftJoinAndSelect('course.subject', 'subject')
       .leftJoinAndSelect('subject.skillExpectedLevels', 'skillExpectedLevels')
       .leftJoinAndSelect('skillExpectedLevels.skill', 'skill')
@@ -190,11 +191,13 @@ export class CoursesService {
     return course;
   }
 
-
-  async findCourseEnrolmentByCourseId(id: string): Promise<CourseEnrollment[]> {
+  async findCourseEnrolmentByCourseId(id: number): Promise<CourseEnrollment[]> {
     const courseEnrollment = await this.courseEnrollRepo.find({
       where: { course: { id } },
-      relations: { student: true, skillCollections: { skillExpectedLevels: { skill: true } } },
+      relations: {
+        student: true,
+        skillCollections: { skillExpectedLevels: { skill: true } },
+      },
       select: {
         id: true,
         student: { id: true, name: true },
@@ -202,27 +205,32 @@ export class CoursesService {
           id: true,
           gainedLevel: true,
           skillExpectedLevels: {
-            id: true, expectedLevel: true,
+            id: true,
+            expectedLevel: true,
             skill: {
-              id: true, name: true,
-              parent: { id: true, name: true }, children: { id: true, name: true }
-            }
-          }
-        }
+              id: true,
+              name: true,
+              parent: { id: true, name: true },
+              children: { id: true, name: true },
+            },
+          },
+        },
       },
-      relationLoadStrategy: 'query'
-    })
+      relationLoadStrategy: 'query',
+    });
 
     if (!courseEnrollment) {
-      throw new NotFoundException(`Course Enrollment with Course ID ${id} not found`);
+      throw new NotFoundException(
+        `Course Enrollment with Course ID ${id} not found`,
+      );
     }
 
     return courseEnrollment;
   }
 
   // Update an existing course
-  async update(id: string, updateCourseDto: UpdateCourseDto): Promise<Course> {
-    const course = await this.findOne(id); // Ensure the course exists
+  async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
+    const course = await this.courseRepo.findOne({ where: { id } }); // Ensure the course exists
     if (!course) {
       throw new NotFoundException(`Course with ID ${id} not found`);
     }
@@ -236,7 +244,7 @@ export class CoursesService {
   }
 
   // Delete a course by ID
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const result = await this.courseRepo.delete(id);
 
     if (result.affected === 0) {
@@ -244,7 +252,7 @@ export class CoursesService {
     }
   }
 
-  async importStudents(id: string, studentListId: string[]) {
+  async importStudents(id: string, studentListCode: string[]) {
     const course = await this.findOne(id);
 
     if (!course.subject) {
@@ -255,12 +263,14 @@ export class CoursesService {
 
     course.courseEnrollment = course.courseEnrollment || [];
 
-    const students = await this.studentsService.findManyByIds(studentListId);
-    const missingStudents = studentListId.filter(
-      (id) => !students.some((student) => student.id === id),
+    const students = await this.studentsService.findManyByIds(studentListCode);
+    const missingStudents = studentListCode.filter(
+      (code) => !students.some((student) => student.code === code),
     );
     if (missingStudents.length > 0) {
-      throw new NotFoundException(`Students with IDs ${missingStudents.join(', ')} not found`);
+      throw new NotFoundException(
+        `Students with IDs ${missingStudents.join(', ')} not found`,
+      );
     }
 
     const newEnrollments = students.map((student) => {

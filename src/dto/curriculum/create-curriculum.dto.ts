@@ -21,9 +21,9 @@ export class CreateCurriculumDto {
   @IsString()
   engDegree: string;
 
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  branchId: string;
+  branchId: number;
 
   @IsString()
   description: string;

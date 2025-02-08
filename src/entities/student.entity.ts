@@ -1,10 +1,10 @@
 import {
   Entity,
   Column,
-  PrimaryColumn,
   OneToMany,
   OneToOne,
   JoinColumn,
+  PrimaryGeneratedColumn,
 } from 'typeorm';
 import {
   SkillCollection,
@@ -15,8 +15,12 @@ import { Branch } from './branch.entity';
 
 @Entity()
 export class Student {
-  @PrimaryColumn()
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
+  // define id by user
+
+  @Column()
+  code: string;
 
   @Column()
   name: string;

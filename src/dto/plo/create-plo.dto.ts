@@ -3,9 +3,6 @@ import { IsString } from 'class-validator';
 
 export class CreatePloDto {
   @IsString()
-  id: string;
-
-  @IsString()
   num_plo: string;
 
   @IsString()

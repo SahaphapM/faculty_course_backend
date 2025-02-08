@@ -17,7 +17,7 @@ import { PaginationDto } from 'src/dto/pagination.dto';
 @ApiBearerAuth()
 @Controller('branches')
 export class BranchesController {
-  constructor(private readonly branchService: BranchesService) { }
+  constructor(private readonly branchService: BranchesService) {}
 
   @Post()
   create(@Body() createBranchDto: CreateBranchDto) {
@@ -31,17 +31,17 @@ export class BranchesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.branchService.findOne(id);
+    return this.branchService.findOne(+id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBranchDto: UpdateBranchDto) {
-    return this.branchService.update(id, updateBranchDto);
+    return this.branchService.update(+id, updateBranchDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.branchService.remove(id);
+    return this.branchService.remove(+id);
   }
 
   @Get('filters/:facultyId')

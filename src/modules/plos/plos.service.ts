@@ -25,7 +25,7 @@ export class PlosService {
     return this.ploRepository.find({ relations: ['curriculum', 'clos'] });
   }
 
-  async findOne(id: string): Promise<Plo> {
+  async findOne(id: number): Promise<Plo> {
     const plo = await this.ploRepository.findOne({
       where: { id },
       relations: ['curriculum', 'clos'],
@@ -36,13 +36,13 @@ export class PlosService {
     return plo;
   }
 
-  async update(id: string, updatePloDto: UpdatePloDto): Promise<Plo> {
+  async update(id: number, updatePloDto: UpdatePloDto): Promise<Plo> {
     const plo = await this.findOne(id);
     Object.assign(plo, updatePloDto);
     return this.ploRepository.save(plo);
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const plo = await this.findOne(id);
     await this.ploRepository.remove(plo);
   }

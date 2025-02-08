@@ -20,10 +20,4 @@ export class Faculty {
 
   @OneToMany(() => Branch, (branch) => branch.faculty, { cascade: true })
   branches: Branch[];
-
-  // @OneToMany(() => Department, (department) => department.faculty)
-  // departments: Department[];
-
-  // @OneToMany(() => Student, (student) => student.faculty)
-  // students: Student[];
 }

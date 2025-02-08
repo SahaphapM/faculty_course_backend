@@ -24,7 +24,7 @@ export class SkillsController {
   constructor(
     private readonly skillsService: SkillsService,
     private readonly techSkillsService: TechSkillsService,
-  ) { }
+  ) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
@@ -41,19 +41,19 @@ export class SkillsController {
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
-    return this.skillsService.findOne(id);
+    return this.skillsService.findOne(+id);
   }
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
-    return this.skillsService.update(id, updateSkillDto);
+    return this.skillsService.update(+id, updateSkillDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string) {
-    return this.skillsService.remove(id);
+    return this.skillsService.remove(+id);
   }
 
   ///////////  subSkill /////////////
@@ -64,7 +64,7 @@ export class SkillsController {
     @Param('id') id: string,
     @Body() createSkillDtos: CreateSkillDto,
   ) {
-    return this.skillsService.selectSubSkills(id, createSkillDtos);
+    return this.skillsService.selectSubSkills(+id, createSkillDtos);
   }
 
   @Post(':id/createSubSkills') // select or create subskills use this.
@@ -73,7 +73,7 @@ export class SkillsController {
     @Param('id') id: string,
     @Body() createSkillDtos: CreateSkillDto,
   ) {
-    return this.skillsService.createSubSkills(id, createSkillDtos);
+    return this.skillsService.createSubSkills(+id, createSkillDtos);
   }
 
   @Patch(':id/removeSubSkill/:subSkillId')
@@ -82,7 +82,7 @@ export class SkillsController {
     @Param('id') id: string,
     @Param('subSkillId') subSkillId: string,
   ) {
-    return this.skillsService.removeSubSkillId(id, subSkillId);
+    return this.skillsService.removeSubSkillId(+id, +subSkillId);
   }
 
   ///////// techSkill /////////////
@@ -95,11 +95,11 @@ export class SkillsController {
   ) {
     const techSkills = await Promise.all(
       createTechSkillDtos.map(async (dto) => {
-        const techSkill = await this.techSkillsService.findOne(dto.id);
+        const techSkill = await this.techSkillsService.findOne(dto.slug);
         return techSkill || this.techSkillsService.create(dto);
       }),
     );
-    return this.skillsService.createTechSkills(id, techSkills);
+    return this.skillsService.createTechSkills(+id, techSkills);
   }
 
   // @Patch(':id/selectTechSkills')
@@ -110,7 +110,7 @@ export class SkillsController {
 
   @Patch(':id/removeTechSkill/:techId')
   @HttpCode(HttpStatus.OK)
-  removeTechSkills(@Param('id') id: string, @Param('techId') TechId: string) {
-    return this.skillsService.removeTechSkill(id, TechId);
+  removeTechSkills(@Param('id') id: string, @Param('techId') techId: string) {
+    return this.skillsService.removeTechSkill(+id, +techId);
   }
 }

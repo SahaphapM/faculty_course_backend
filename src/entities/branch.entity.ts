@@ -11,7 +11,7 @@ import { Curriculum } from './curriculum.entity';
 @Entity()
 export class Branch {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column()
   name: string;
@@ -25,7 +25,10 @@ export class Branch {
   @Column({ nullable: true, length: 10 })
   abbrev: string; //CS, AI, SE etc.
 
-  @ManyToOne(() => Faculty, (faculty) => faculty.branches, { onDelete: 'SET NULL', nullable: true })
+  @ManyToOne(() => Faculty, (faculty) => faculty.branches, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
   @JoinColumn({ name: 'facultyId' })
   faculty: Faculty;
 

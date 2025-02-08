@@ -13,9 +13,9 @@ export class TechSkillsService {
   ) {}
 
   async create(dto: CreateTechSkillDto) {
-    const existId = await this.repo.findOneBy({ id: dto.id });
-    if (existId) {
-      throw new BadRequestException('this id already exist!');
+    const exist = await this.repo.findOneBy({ slug: dto.slug });
+    if (exist) {
+      throw new BadRequestException('this tech skill already exist!');
     }
     return this.repo.save(dto);
   }
@@ -24,21 +24,21 @@ export class TechSkillsService {
     return await this.repo.find();
   }
 
-  async findOne(id: string) {
-    return await this.repo.findOneBy({ id });
+  async findOne(slug: string) {
+    return await this.repo.findOneBy({ slug });
   }
 
-  async update(id: string, dto: UpdateTechSkillDto) {
-    const existId = this.repo.findOneBy({ id: dto.id });
-    if (!existId) {
+  async update(slug: string, dto: UpdateTechSkillDto) {
+    const exist = this.repo.findOneBy({ slug: dto.slug });
+    if (!exist) {
       return new BadRequestException('not found the tech skill!');
     }
-    await this.repo.update({ id }, dto);
-    return `This action updates a #${id} techSkill`;
+    await this.repo.update({ slug }, dto);
+    return `This action updates a #${slug} tech skill`;
   }
 
-  async remove(id: string) {
-    await this.repo.delete({ id });
-    return `This action removes a #${id} techSkill`;
+  async remove(slug: string) {
+    await this.repo.delete({ slug });
+    return `This action removes a #${slug} tech skill`;
   }
 }

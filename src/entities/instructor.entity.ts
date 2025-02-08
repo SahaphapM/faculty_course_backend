@@ -14,7 +14,10 @@ import { Course } from './course.entity';
 @Entity()
 export class Instructor {
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
+  // define id by user
+  @Column({ unique: true })
+  code: string;
 
   @Column({ nullable: true })
   name: string;

@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateStudentDto } from '../../dto/student/create-student.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Student } from '../../entities/student.entity';
@@ -11,7 +15,7 @@ export class StudentsService {
   constructor(
     @InjectRepository(Student)
     private readonly stuRepo: Repository<Student>,
-  ) { }
+  ) {}
 
   // Create a new student
   async create(studentDto: CreateStudentDto): Promise<Student> {
@@ -122,9 +126,7 @@ export class StudentsService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [
-            { id: Like(`%${search}%`) }
-          ];
+          options.where = [{ code: Like(`%${search}%`) }];
         }
         return await this.stuRepo.findAndCount(options);
       } else {
@@ -144,7 +146,7 @@ export class StudentsService {
   }
 
   // Get a student by ID
-  async findOne(id: string): Promise<Student> {
+  async findOne(id: number): Promise<Student> {
     const student = await this.stuRepo.findOne({
       where: { id },
       relations: {
@@ -166,19 +168,19 @@ export class StudentsService {
   }
 
   // Update a student by ID
-  async update(id: string, studentDto: CreateStudentDto): Promise<Student> {
+  async update(id: number, studentDto: CreateStudentDto): Promise<Student> {
     const student = await this.findOne(id);
     Object.assign(student, studentDto);
     return await this.stuRepo.save(student);
   }
 
   // Delete a student by ID
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const student = await this.findOne(id);
     await this.stuRepo.remove(student);
   }
 
-  async buildSkillCollectionTree(id: string): Promise<SkillCollectionTree[]> {
+  async buildSkillCollectionTree(id: number): Promise<SkillCollectionTree[]> {
     const student = await this.stuRepo.findOne({
       where: { id },
       relations: {

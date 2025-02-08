@@ -6,7 +6,7 @@ import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
 export class Clo {
   // CLO Class Learning Outcome
   @PrimaryGeneratedColumn()
-  id: string;
+  id: number;
 
   @Column({ nullable: true })
   name: string;

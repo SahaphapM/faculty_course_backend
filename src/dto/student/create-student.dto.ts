@@ -5,7 +5,7 @@ import { CourseEnrollment } from 'src/entities/course-enrollment';
 export class CreateStudentDto {
   @IsString()
   @IsNotEmpty()
-  id: string;
+  code: string; //6551212
 
   @IsString()
   @IsNotEmpty()

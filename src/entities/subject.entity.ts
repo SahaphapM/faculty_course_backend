@@ -2,13 +2,22 @@ import { Clo } from 'src/entities/clo.entity';
 import { Course } from 'src/entities/course.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
 import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
-import { Column, Entity, ManyToMany, OneToMany, PrimaryColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToMany,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { SubjectType } from 'src/enums/subject-types.enum';
 
 @Entity()
 export class Subject {
-  @PrimaryColumn()
-  id: string;
+  @PrimaryGeneratedColumn()
+  id: number;
+  // define id by user
+  @Column({ unique: true })
+  code: string;
 
   @Column({ nullable: true })
   name: string;

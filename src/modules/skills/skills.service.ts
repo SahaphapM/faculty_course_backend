@@ -17,7 +17,7 @@ export class SkillsService {
   constructor(
     @InjectRepository(Skill)
     private skRepo: TreeRepository<Skill>,
-  ) { }
+  ) {}
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
     console.log(createSkillDto);
@@ -123,9 +123,7 @@ export class SkillsService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [
-            { name: Like(`%${search}%`) }
-          ];
+          options.where = [{ name: Like(`%${search}%`) }];
         }
         return await this.skRepo.findAndCount(options);
       } else {
@@ -138,7 +136,7 @@ export class SkillsService {
     }
   }
 
-  async findOne(id: string): Promise<Skill> {
+  async findOne(id: number): Promise<Skill> {
     const skill = await this.skRepo.findOne({
       where: { id: Number(id) },
       relations: {
@@ -153,7 +151,7 @@ export class SkillsService {
     return skill;
   }
 
-  async update(id: string, updateSkillDto: UpdateSkillDto): Promise<Skill> {
+  async update(id: number, updateSkillDto: UpdateSkillDto): Promise<Skill> {
     await this.findOne(id); // Ensure the skill exists
     const skill = await this.skRepo.preload({
       id: Number(id),
@@ -171,7 +169,7 @@ export class SkillsService {
     }
   }
 
-  async remove(id: string): Promise<void> {
+  async remove(id: number): Promise<void> {
     const skill = await this.findOne(id); // Ensure the skill exists
     console.log(skill);
     try {
@@ -182,7 +180,7 @@ export class SkillsService {
   }
 
   async selectSubSkills(
-    id: string,
+    id: number,
     createSkillDto: CreateSkillDto,
   ): Promise<Skill> {
     console.log(createSkillDto);
@@ -191,7 +189,7 @@ export class SkillsService {
     parentSkill.children = parentSkill.children || []; // initialize children
 
     // find child skill in database
-    const subSkill = await this.findOne(createSkillDto.id.toString());
+    const subSkill = await this.findOne(createSkillDto.id);
 
     // Check if subSkill already related to parentSkill
     const isAlreadyRelated = parentSkill.children.some(
@@ -210,7 +208,7 @@ export class SkillsService {
   }
 
   async createSubSkills(
-    id: string,
+    id: number,
     createSkillDto: CreateSkillDto,
   ): Promise<Skill> {
     const parentSkill = await this.findOne(id);
@@ -228,11 +226,11 @@ export class SkillsService {
     }
   }
 
-  async removeSubSkillId(id: string, subSkillId: string): Promise<Skill> {
+  async removeSubSkillId(id: number, subSkillId: number): Promise<Skill> {
     const parentSkill = await this.findOne(id); // Ensure the skill exists
     const childSkill = await this.findOne(subSkillId);
     parentSkill.children = parentSkill.children.filter(
-      (children) => children.id.toString() !== subSkillId, //Remove child of parent//+
+      (children) => children.id !== subSkillId, //Remove child of parent//+
     );
     childSkill.parent = null; // Parent of child = null
     try {
@@ -243,7 +241,7 @@ export class SkillsService {
     }
   }
 
-  async createTechSkills(id: string, techSkills: TechSkill[]): Promise<Skill> {
+  async createTechSkills(id: number, techSkills: TechSkill[]): Promise<Skill> {
     const skill = await this.findOne(id);
     for (const techSkill of techSkills) {
       // Check if the techSkill already exists in the skill's techSkills
@@ -264,7 +262,7 @@ export class SkillsService {
     }
   }
 
-  async removeTechSkill(id: string, techId: string): Promise<Skill> {
+  async removeTechSkill(id: number, techId: number): Promise<Skill> {
     const skill = await this.findOne(id); // Ensure the skill exists
     skill.techSkills = skill.techSkills.filter(
       (techSkill) => techSkill.id !== techId,
