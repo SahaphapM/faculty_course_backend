@@ -156,17 +156,22 @@ export class CurriculumsService {
 
     // ✅ Handle Skills
     if (dto.skills) {
-      curriculum.skills = dto.skills.map((skillDto) => {
-        const skill = this.skillRepo.create(skillDto);
-        skill.curriculum = curriculum; // Ensure relationship is set
+      curriculum.skills = await Promise.all(
+        dto.skills.map(async (skillDto) => {
+          const skill = await this.skillRepo.save({
+            ...skillDto,
+            curriculum,
+          });
 
-        // ✅ Set Parent Relationship
-        if (skillDto.parent) {
-          skill.parent = this.skillRepo.create(skillDto.parent);
-        }
+          if (skillDto.parent) {
+            skill.parent = await this.skillRepo.findOne({
+              where: { id: skillDto.parent.id },
+            });
+          }
 
-        return skill;
-      });
+          return skill;
+        }),
+      );
     }
 
     // ✅ Save Curriculum & Skills
