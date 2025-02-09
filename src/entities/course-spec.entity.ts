@@ -6,8 +6,10 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Subject } from './subject.entity';
+import { Clo } from './clo.entity';
 
 @Entity()
 export class CourseSpec {
@@ -42,6 +44,10 @@ export class CourseSpec {
   @ManyToOne(() => Subject, (subject) => subject.courseSpecs)
   @JoinColumn({ name: 'subjectCode', referencedColumnName: 'code' }) // ระบุคอลัมน์ที่เชื่อมโยง
   subject: Subject;
+
+  // ความสัมพันธ์กับ Clo
+  @OneToMany(() => Clo, (clo) => clo.courseSpec, { nullable: true })
+  clos: Clo[];
 
   @ManyToOne(() => Curriculum, (curriculum) => curriculum.courseSpecs)
   @JoinColumn({ name: 'curriculumId' })

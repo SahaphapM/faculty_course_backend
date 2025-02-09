@@ -1,12 +1,15 @@
-import { IsNotEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateCloDto {
   @IsString()
   description: string;
 
   @IsNotEmpty()
-  subjectId: string;
+  courseSpecId: number;
 
-  @IsNotEmpty()
-  ploId: string;
+  @IsOptional()
+  ploId: number;
+
+  @IsOptional()
+  skillId: number;
 }

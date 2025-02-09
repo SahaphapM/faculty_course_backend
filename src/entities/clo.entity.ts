@@ -1,6 +1,14 @@
 import { Plo } from 'src/entities/plo.entity';
-import { Subject } from 'src/entities/subject.entity';
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  ManyToOne,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { CourseSpec } from './course-spec.entity';
+import { Skill } from './skill.entity';
+import { Subject } from './subject.entity';
 
 @Entity()
 export class Clo {
@@ -14,11 +22,18 @@ export class Clo {
   @Column()
   description: string;
 
-  @ManyToOne(() => Subject, (subject) => subject.clos, {
-    onDelete: 'CASCADE', // When delete from root of relation that relate row will be deleted
-  })
-  subject: Subject;
+  // courseSpec
+  @ManyToOne(() => CourseSpec, (courseSpec) => courseSpec.clos)
+  courseSpec: CourseSpec;
 
-  @ManyToOne(() => Plo, (plo) => plo.clos)
-  plo: Plo | null;
+  // set relation with skill
+  @OneToOne(() => Skill, (skill) => skill.clo)
+  skill: Skill;
+
+  @ManyToOne(() => Plo, (plo) => plo.clos, { nullable: true })
+  plo: Plo;
+
+  ///////////// wait for delete becuase subject no longer use with clo //////////////
+  @ManyToOne(() => Subject, (subject) => subject.clos, { nullable: true })
+  subject: Subject;
 }
