@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -132,51 +133,50 @@ export class CurriculumsService {
   }
 
   async update(id: number, dto: UpdateCurriculumDto) {
-    let curriculum = await this.findOne(id);
+    const curriculum = await this.findOne(id);
 
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
 
-    // Merge existing entity with new data
-    curriculum = this.currRepo.merge(curriculum, dto);
-
-    // Check if another curriculum already uses the same code
-    if (dto.code) {
+    // ✅ Prevent Duplicate Code
+    if (dto.code && dto.code !== curriculum.code) {
       const existing = await this.currRepo.findOne({
         where: { code: dto.code },
       });
-
-      if (existing && existing.id !== id) {
+      if (existing) {
         throw new ConflictException(
           `A curriculum with Code ${dto.code} already exists.`,
         );
       }
     }
 
-    // Handle Skills (Tree Structure)
+    // ✅ Merge Only Primitive Properties
+    this.currRepo.merge(curriculum, dto);
+
+    // ✅ Handle Skills (Avoid Overwriting)
     if (dto.skills) {
-      curriculum.skills = await Promise.all(
+      const existingSkills = await this.skillRepo.find({
+        where: { curriculum: { id: curriculum.id } },
+      });
+
+      const updatedSkills = await Promise.all(
         dto.skills.map(async (skillDto) => {
-          let skill = await this.skillRepo.findOne({
-            where: { id: skillDto.id },
-            relations: ['parent', 'children'],
-          });
+          let skill = existingSkills.find((s) => s.id === skillDto.id);
 
           if (!skill) {
             skill = this.skillRepo.create(skillDto);
           } else {
-            skill = this.skillRepo.merge(skill, skillDto);
+            this.skillRepo.merge(skill, skillDto);
           }
 
           skill.curriculum = curriculum;
 
-          // If skillDto has a parent, set it
+          // Handle Parent-Child Relations
           if (skillDto.parentId) {
             const parentSkill = await this.skillRepo.findOne({
               where: { id: skillDto.parentId },
             });
-
             if (!parentSkill) {
               throw new NotFoundException(
                 `Parent skill with ID ${skillDto.parentId} not found`,
@@ -188,10 +188,19 @@ export class CurriculumsService {
           return skill;
         }),
       );
+
+      curriculum.skills = updatedSkills;
     }
 
-    return await this.currRepo.save(curriculum);
+    // ✅ Save Curriculum & Skills
+    await this.currRepo.save(curriculum);
+
+    return {
+      statusCode: HttpStatus.OK,
+      message: 'Curriculum updated successfully',
+    };
   }
+
   async remove(id: number): Promise<void> {
     const curriculum = await this.findOne(id);
     try {
