@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsNotEmpty,
@@ -52,22 +52,26 @@ export class CreateCurriculumDto {
   // @IsArray()
   // subjectListId: string[];
 
-  @ApiProperty({ type: [Instructor] })
+  // @ApiProperty({ type: [Instructor] })
+  @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
   coordinators: Instructor[];
 
-  @ApiProperty({ type: [Plo] })
+  // @ApiProperty({ type: [Plo] })
+  @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
   plos: Plo[];
 
-  @ApiProperty({ type: [Subject] })
+  // @ApiProperty({ type: [Subject] })
+  @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
   subjects: Subject[];
 
-  @ApiProperty({ type: [CreateSkillDto] })
+  // @ApiProperty({ type: [CreateSkillDto] })
+  @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
   skills: CreateSkillDto[];
