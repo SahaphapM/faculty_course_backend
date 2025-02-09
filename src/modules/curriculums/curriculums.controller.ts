@@ -34,14 +34,17 @@ export class CurriculumsController {
     return this.curriculumsService.findOneByCode(code);
   }
 
-  @Patch(':code')
-  update(@Body() updateCurriculumDto: UpdateCurriculumDto) {
-    return this.curriculumsService.update(updateCurriculumDto);
+  @Patch(':id')
+  update(
+    @Param('id') id: string,
+    @Body() updateCurriculumDto: UpdateCurriculumDto,
+  ) {
+    return this.curriculumsService.update(+id, updateCurriculumDto);
   }
 
-  @Delete(':code')
-  remove(@Param('code') code: string) {
-    return this.curriculumsService.remove(code);
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.curriculumsService.remove(+id);
   }
 
   @Get('filters/:branchId')

@@ -17,6 +17,7 @@ import { SkillExpectedLevel } from './skill-exp-lvl';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 import { Curriculum } from './curriculum.entity';
 import { Clo } from './clo.entity';
+import { Exclude } from 'class-transformer';
 
 @Entity()
 @Tree('closure-table')
@@ -54,6 +55,7 @@ export class Skill {
     cascade: false,
   })
   @JoinColumn()
+  @Exclude()
   curriculum: Curriculum;
 
   @OneToMany(
