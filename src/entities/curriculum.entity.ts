@@ -60,10 +60,9 @@ export class Curriculum {
   @JoinTable()
   coordinators: Coordinator[];
 
-  @ManyToMany(() => Subject, (sub) => sub.curriculums, {
+  @OneToMany(() => Subject, (sub) => sub.curriculum, {
     cascade: ['insert', 'update'],
   })
-  @JoinTable()
   subjects: Subject[];
 
   @OneToMany(() => Skill, (sk) => sk.curriculum, {

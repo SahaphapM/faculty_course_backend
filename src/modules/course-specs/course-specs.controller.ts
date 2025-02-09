@@ -15,6 +15,17 @@ import { UpdateCourseSpecDto } from 'src/dto/course-specs/update-course-spec.dto
 export class CourseSpecsController {
   constructor(private readonly courseSpecsService: CourseSpecsService) {}
 
+  @Post(':curriculumId')
+  createCourseSpec(
+    @Param('curriculumId') curriculumId: number,
+    @Body() createCourseSpecDto: CreateCourseSpecDto,
+  ) {
+    return this.courseSpecsService.createCourseSpec(
+      curriculumId,
+      createCourseSpecDto,
+    );
+  }
+
   @Post()
   create(@Body() createCourseSpecDto: CreateCourseSpecDto) {
     return this.courseSpecsService.create(createCourseSpecDto);
