@@ -8,7 +8,6 @@ import {
 } from 'typeorm';
 import { CourseSpec } from './course-spec.entity';
 import { Skill } from './skill.entity';
-import { Subject } from './subject.entity';
 
 @Entity()
 export class Clo {
@@ -35,8 +34,4 @@ export class Clo {
 
   @ManyToOne(() => Plo, (plo) => plo.clos, { nullable: true })
   plo: Plo;
-
-  ///////////// wait for delete becuase subject no longer use with clo //////////////
-  @ManyToOne(() => Subject, (subject) => subject.clos, { nullable: true })
-  subject: Subject;
 }

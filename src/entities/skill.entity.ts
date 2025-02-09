@@ -1,10 +1,7 @@
-import { TechSkill } from 'src/entities/tech-skill.entity';
 import {
   Column,
   Entity,
   JoinColumn,
-  JoinTable,
-  ManyToMany,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -53,12 +50,6 @@ export class Skill {
 
   @TreeParent()
   parent: Skill;
-
-  @ManyToMany(() => TechSkill, (techSkill) => techSkill.skill, {
-    cascade: false,
-  })
-  @JoinTable()
-  techSkills: TechSkill[] | null;
 
   @ManyToOne(() => Curriculum, (cr) => cr.skills, {
     cascade: false,

@@ -11,7 +11,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
-import { TechSkillsService } from 'src/modules/tech-skills/tech-skills.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSkillDto } from 'src/dto/skill/create-skill.dto';
 import { UpdateSkillDto } from 'src/dto/skill/update-skill.dto';
@@ -20,21 +19,18 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 @ApiBearerAuth()
 @Controller('skills')
 export class SkillsController {
-  constructor(
-    private readonly skillsService: SkillsService,
-    private readonly techSkillsService: TechSkillsService,
-  ) {}
-
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  async create(@Body() createSkillDto: CreateSkillDto) {
-    return this.skillsService.create(createSkillDto);
-  }
+  constructor(private readonly skillsService: SkillsService) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: PaginationDto) {
     return this.skillsService.findAll(pag);
+  }
+
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  findOne(@Param('id') id: string) {
+    return this.skillsService.findOne(+id);
   }
 
   @Get('/curriculumId/:curriculumId')
@@ -43,10 +39,10 @@ export class SkillsController {
     return this.skillsService.findAllByCurriculum(curriculumId);
   }
 
-  @Get(':id')
-  @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string) {
-    return this.skillsService.findOne(+id);
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  async create(@Body() createSkillDto: CreateSkillDto) {
+    return this.skillsService.create(createSkillDto);
   }
 
   @Patch(':id')
@@ -89,33 +85,4 @@ export class SkillsController {
   ) {
     return this.skillsService.removeSubSkillId(+id, +subSkillId);
   }
-
-  ///////// techSkill /////////////
-
-  // @Post(':id/createTechSkills') // select or create subskills use this.
-  // @HttpCode(HttpStatus.CREATED)
-  // async createTechSkill(
-  //   @Param('id') id: string,
-  //   @Body() createTechSkillDtos: CreateTechSkillDto[],
-  // ) {
-  //   const techSkills = await Promise.all(
-  //     createTechSkillDtos.map(async (dto) => {
-  //       const techSkill = await this.techSkillsService.findOne(dto.slug);
-  //       return techSkill || this.techSkillsService.create(dto);
-  //     }),
-  //   );
-  //   return this.skillsService.createTechSkills(+id, techSkills);
-  // }
-
-  // @Patch(':id/selectTechSkills')
-  // @HttpCode(HttpStatus.OK)
-  // updateTechSkills(@Param('id') id: string, @Body() techSkillIds: string[]) {
-  //   return this.skillsService.updateTechSkills(id, techSkillIds);
-  // }
-
-  // @Patch(':id/removeTechSkill/:techId')
-  // @HttpCode(HttpStatus.OK)
-  // removeTechSkills(@Param('id') id: string, @Param('techId') techId: string) {
-  //   return this.skillsService.removeTechSkill(+id, +techId);
-  // }
 }

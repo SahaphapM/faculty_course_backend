@@ -7,7 +7,6 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindManyOptions, In, Like, Repository } from 'typeorm';
 import { Subject } from '../../entities/subject.entity';
-import { Clo } from '../../entities/clo.entity';
 import { Curriculum } from '../../entities/curriculum.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
@@ -187,26 +186,6 @@ export class SubjectsService {
       await this.subRepo.save(subject);
     } catch (error) {
       throw new BadRequestException('Failed to update subject');
-    }
-  }
-
-  async addCLO(code: string, clo: Clo): Promise<Subject> {
-    const subject = await this.subRepo.findOne({ where: { code } });
-    if (!subject) {
-      throw new NotFoundException(`Subject with ID ${code} not found`);
-    }
-    if (!subject.clos) {
-      subject.clos = [];
-    }
-    subject.clos.push(clo);
-    try {
-      await this.subRepo.save(subject);
-      return this.subRepo.findOne({
-        where: { code },
-        relations: { clos: true },
-      });
-    } catch (error) {
-      throw new BadRequestException('Failed to update Subject', error.message);
     }
   }
 

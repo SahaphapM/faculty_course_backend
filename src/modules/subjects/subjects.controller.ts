@@ -9,7 +9,6 @@ import {
   Query,
 } from '@nestjs/common';
 import { SubjectsService } from './subjects.service';
-import { CreateCloDto } from 'src/dto/clo/create-clo.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
 import { UpdateSubjectDto } from 'src/dto/subject/update-subject.dto';
@@ -24,12 +23,7 @@ export class SubjectsController {
   constructor(
     private readonly subjectsService: SubjectsService,
     private readonly closService: ClosService,
-  ) { }
-
-  @Post()
-  create(@Body() createSubjectDto: CreateSubjectDto) {
-    return this.subjectsService.create(createSubjectDto);
-  }
+  ) {}
 
   @Get()
   findAll(@Query() pag?: PaginationDto) {
@@ -39,6 +33,11 @@ export class SubjectsController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.subjectsService.findOne(id);
+  }
+
+  @Post()
+  create(@Body() createSubjectDto: CreateSubjectDto) {
+    return this.subjectsService.create(createSubjectDto);
   }
 
   @Patch(':id')
@@ -78,13 +77,6 @@ export class SubjectsController {
       subjectId,
       skillExpectedLevelId,
     );
-  }
-
-  // add new clos in subject // composition relation
-  @Post(':id/clo')
-  async addPLO(@Param('id') id: string, @Body() createCloDto: CreateCloDto) {
-    const plo = await this.closService.create(createCloDto); // create clo to database
-    return this.subjectsService.addCLO(id, plo); // add clo to curriculum
   }
 
   @Post('skill-mappings')

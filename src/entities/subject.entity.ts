@@ -1,4 +1,3 @@
-import { Clo } from 'src/entities/clo.entity';
 import { Course } from 'src/entities/course.entity';
 import { Curriculum } from 'src/entities/curriculum.entity';
 import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
@@ -58,9 +57,6 @@ export class Subject {
     },
   )
   skillExpectedLevels: SkillExpectedLevel[];
-
-  @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
-  clos: Clo[];
 
   @OneToMany(() => Course, (course) => course.subject)
   courses: Course[];

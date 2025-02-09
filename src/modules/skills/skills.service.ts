@@ -7,7 +7,6 @@ import {
 import { Skill } from '../../entities/skill.entity';
 import { FindManyOptions, Like, Repository, TreeRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TechSkill } from 'src/entities/tech-skill.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSkillDto } from 'src/dto/skill/create-skill.dto';
 import { UpdateSkillDto } from 'src/dto/skill/update-skill.dto';
@@ -291,39 +290,6 @@ export class SkillsService {
     try {
       this.skRepo.save(childSkill);
       return await this.skRepo.save(parentSkill);
-    } catch (error) {
-      throw new BadRequestException('Failed to remove subSkill');
-    }
-  }
-
-  async createTechSkills(id: number, techSkills: TechSkill[]): Promise<Skill> {
-    const skill = await this.findOne(id);
-    for (const techSkill of techSkills) {
-      // Check if the techSkill already exists in the skill's techSkills
-      const existingTechSkill = skill.techSkills.find(
-        (existing) => existing.id === techSkill.id,
-      );
-
-      // Only add the techSkill if it doesn't already exist
-      if (!existingTechSkill) {
-        skill.techSkills.push(techSkill);
-      }
-    }
-
-    try {
-      return await this.skRepo.save(skill);
-    } catch (error) {
-      throw new BadRequestException('Failed to create and select techSkills');
-    }
-  }
-
-  async removeTechSkill(id: number, techId: number): Promise<Skill> {
-    const skill = await this.findOne(id); // Ensure the skill exists
-    skill.techSkills = skill.techSkills.filter(
-      (techSkill) => techSkill.id !== techId,
-    );
-    try {
-      return await this.skRepo.save(skill);
     } catch (error) {
       throw new BadRequestException('Failed to remove subSkill');
     }
