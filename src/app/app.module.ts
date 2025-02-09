@@ -11,7 +11,6 @@ import { AuthModule } from '../auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
-import { TechSkillsModule } from '../modules/tech-skills/tech-skills.module';
 import { StudentsModule } from '../modules/students/students.module';
 import { CurriculumsModule } from 'src/modules/curriculums/curriculums.module';
 import { BranchesModule } from 'src/modules/branches/branches.module';
@@ -32,7 +31,6 @@ import { CourseSpecsModule } from 'src/modules/course-specs/course-specs.module'
     // TypeOrmModule.forRoot({
     //   type: 'sqlite',
     //   database: 'mybuu.sqlite',
-    //   logging: true,
     //   autoLoadEntities: true,
     //   synchronize: true,
     // }),
@@ -59,8 +57,7 @@ import { CourseSpecsModule } from 'src/modules/course-specs/course-specs.module'
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    AuthModule,
-    TechSkillsModule,
+    // AuthModule,
     StudentsModule,
     CoursesModule,
     CourseSpecsModule,
