@@ -1,5 +1,4 @@
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class CreatePloDto {
   @IsString()
@@ -12,8 +11,8 @@ export class CreatePloDto {
   @IsString()
   type: string;
 
-  @IsNumber()
-  curriculumId: number;
+  @IsString()
+  curriculumCode: string;
 
   // @ApiProperty({ type: [String] })
   // @ApiHideProperty()
