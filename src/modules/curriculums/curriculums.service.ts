@@ -156,40 +156,50 @@ export class CurriculumsService {
 
     // ✅ Handle Skills (Avoid Overwriting)
     if (dto.skills) {
-      const existingSkills = await this.skillRepo.find({
-        where: { curriculum: { id: curriculum.id } },
-      });
-
-      const updatedSkills = await Promise.all(
+      curriculum.skills = await Promise.all(
         dto.skills.map(async (skillDto) => {
-          let skill = existingSkills.find((s) => s.id === skillDto.id);
+          let skill: Skill;
 
-          if (!skill) {
-            skill = this.skillRepo.create(skillDto);
+          if (skillDto.id) {
+            // 🔹 Find existing skill
+            skill = await this.skillRepo.findOne({
+              where: { id: skillDto?.id },
+              relations: ['parent', 'children'],
+            });
+
+            if (skill) {
+              this.skillRepo.merge(skill, skillDto);
+            } else {
+              skill = this.skillRepo.create(skillDto);
+            }
           } else {
-            this.skillRepo.merge(skill, skillDto);
+            // 🔹 Create a new skill if ID is missing
+            skill = this.skillRepo.create(skillDto);
           }
 
           skill.curriculum = curriculum;
 
-          // Handle Parent-Child Relations
-          if (skillDto.parent.id) {
-            const parentSkill = await this.skillRepo.findOne({
-              where: { id: skillDto.parent.id },
+          // ✅ Handle Parent-Child Relationship
+          if (skillDto.parent) {
+            let parentSkill = await this.skillRepo.findOne({
+              where: { id: skillDto?.parent?.id },
+              relations: ['children'],
             });
+
             if (!parentSkill) {
-              throw new NotFoundException(
-                `Parent skill with ID ${skillDto.parent.id} not found`,
-              );
+              // 🔹 If parent skill is also new (no ID), create and save it first
+              parentSkill = this.skillRepo.create(skillDto.parent);
+              parentSkill = await this.skillRepo.save(parentSkill);
             }
+
             skill.parent = parentSkill;
+            parentSkill.children = [...(parentSkill.children || []), skill];
+            await this.skillRepo.save(parentSkill);
           }
 
-          return skill;
+          return this.skillRepo.save(skill);
         }),
       );
-
-      curriculum.skills = updatedSkills;
     }
 
     // ✅ Save Curriculum & Skills
