@@ -4,18 +4,35 @@ import { Repository } from 'typeorm';
 import { Plo } from 'src/entities/plo.entity';
 import { CreatePloDto } from '../../dto/plo/create-plo.dto';
 import { UpdatePloDto } from '../../dto/plo/update-plo.dto';
+import { CurriculumsService } from '../curriculums/curriculums.service';
 
 @Injectable()
 export class PlosService {
   constructor(
     @InjectRepository(Plo)
     private readonly ploRepository: Repository<Plo>,
+
+    private readonly curriculumService: CurriculumsService,
   ) {}
 
   async create(createPloDto: CreatePloDto): Promise<Plo> {
+    const curriculum = await this.curriculumService.findOne(
+      createPloDto.curriculumId,
+    );
+    if (!curriculum) {
+      throw new NotFoundException(
+        `Curriculum with ID ${createPloDto.curriculumId} not found`,
+      );
+    }
+
     try {
-      const plo = this.ploRepository.create(createPloDto);
-      return this.ploRepository.save(plo);
+      const plo = this.ploRepository.create({
+        curriculum: curriculum,
+        ...createPloDto,
+      });
+      const savedPlo = await this.ploRepository.save(plo);
+      console.log(savedPlo);
+      return savedPlo;
     } catch (error) {
       throw new Error(`Failed to create branch ${error.message}`);
     }

@@ -1,20 +1,22 @@
-import { ApiProperty } from '@nestjs/swagger';
-import { IsString } from 'class-validator';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreatePloDto {
   @IsString()
-  num_plo: string;
+  thaiDescription: string;
 
   @IsString()
-  description: string;
+  @IsOptional()
+  engDescription: string;
 
   @IsString()
-  resultTypes: string;
+  type: string;
 
-  @IsString()
-  curriculumId: string;
+  @IsNumber()
+  curriculumId: number;
 
-  @ApiProperty({ type: [String] })
-  @IsString()
-  cloListId: string[];
+  // @ApiProperty({ type: [String] })
+  // @ApiHideProperty()
+  // @IsString()
+  // cloListId: string[];
 }
