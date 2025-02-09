@@ -27,6 +27,11 @@ export class PlosController {
     return this.plosService.findAll();
   }
 
+  @Get('/curriculumId/:curriculumId')
+  findAllByCurriculum(@Param('curriculumId') curriculumId: number) {
+    return this.plosService.findAllByCurriculum(curriculumId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.plosService.findOne(+id);

@@ -42,10 +42,17 @@ export class PlosService {
     return this.ploRepository.find({ relations: ['curriculum', 'clos'] });
   }
 
+  async findAllByCurriculum(curriculumId: number): Promise<Plo[]> {
+    return this.ploRepository.find({
+      where: { curriculum: { id: curriculumId } },
+      relations: { clos: true },
+    });
+  }
+
   async findOne(id: number): Promise<Plo> {
     const plo = await this.ploRepository.findOne({
       where: { id },
-      relations: ['curriculum', 'clos'],
+      relations: { clos: true },
     });
     if (!plo) {
       throw new NotFoundException(`PLO with ID ${id} not found`);
