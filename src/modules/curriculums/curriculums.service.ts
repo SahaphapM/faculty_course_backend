@@ -154,52 +154,19 @@ export class CurriculumsService {
     // ✅ Merge Only Primitive Properties
     this.currRepo.merge(curriculum, dto);
 
-    // ✅ Handle Skills (Avoid Overwriting)
+    // ✅ Handle Skills
     if (dto.skills) {
-      curriculum.skills = await Promise.all(
-        dto.skills.map(async (skillDto) => {
-          let skill: Skill;
+      curriculum.skills = dto.skills.map((skillDto) => {
+        const skill = this.skillRepo.create(skillDto);
+        skill.curriculum = curriculum; // Ensure relationship is set
 
-          if (skillDto.id) {
-            // 🔹 Find existing skill
-            skill = await this.skillRepo.findOne({
-              where: { id: skillDto?.id },
-              relations: ['parent', 'children'],
-            });
+        // ✅ Set Parent Relationship
+        if (skillDto.parent) {
+          skill.parent = this.skillRepo.create(skillDto.parent);
+        }
 
-            if (skill) {
-              this.skillRepo.merge(skill, skillDto);
-            } else {
-              skill = this.skillRepo.create(skillDto);
-            }
-          } else {
-            // 🔹 Create a new skill if ID is missing
-            skill = this.skillRepo.create(skillDto);
-          }
-
-          skill.curriculum = curriculum;
-
-          // ✅ Handle Parent-Child Relationship
-          if (skillDto.parent) {
-            let parentSkill = await this.skillRepo.findOne({
-              where: { id: skillDto?.parent?.id },
-              relations: ['children'],
-            });
-
-            if (!parentSkill) {
-              // 🔹 If parent skill is also new (no ID), create and save it first
-              parentSkill = this.skillRepo.create(skillDto.parent);
-              parentSkill = await this.skillRepo.save(parentSkill);
-            }
-
-            skill.parent = parentSkill;
-            parentSkill.children = [...(parentSkill.children || []), skill];
-            await this.skillRepo.save(parentSkill);
-          }
-
-          return this.skillRepo.save(skill);
-        }),
-      );
+        return skill;
+      });
     }
 
     // ✅ Save Curriculum & Skills

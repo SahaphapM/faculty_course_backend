@@ -66,7 +66,7 @@ export class Curriculum {
   subjects: Subject[];
 
   @OneToMany(() => Skill, (sk) => sk.curriculum, {
-    cascade: ['insert', 'update'],
+    cascade: true,
   })
   skills: Skill[];
 
