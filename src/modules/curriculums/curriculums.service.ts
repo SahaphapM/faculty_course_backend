@@ -123,16 +123,16 @@ export class CurriculumsService {
   }
 
   async update(dto: UpdateCurriculumDto) {
-    const curriculum = await this.findOneByCode(dto.code);
+    let curriculum = await this.findOneByCode(dto.code);
 
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with Code ${dto.code} not found`);
     }
 
     // Merge existing entity with new data
-    this.currRepo.merge(curriculum, dto);
+    curriculum = this.currRepo.merge(curriculum, dto);
 
-    // ✅ Handle Skills (Tree Structure)
+    // Handle Skills (Tree Structure)
     if (dto.skills) {
       curriculum.skills = await Promise.all(
         dto.skills.map(async (skillDto) => {
@@ -144,7 +144,7 @@ export class CurriculumsService {
           if (!skill) {
             skill = this.skillRepo.create(skillDto);
           } else {
-            this.skillRepo.merge(skill, skillDto);
+            skill = this.skillRepo.merge(skill, skillDto);
           }
 
           skill.curriculum = curriculum;
@@ -168,22 +168,7 @@ export class CurriculumsService {
       );
     }
 
-    if (dto.branchId) {
-      const branch = await this.braRepo.findOneBy({ id: dto.branchId });
-      if (!branch) {
-        throw new NotFoundException(`Branch with ID ${dto.branchId} not found`);
-      }
-      curriculum.branch = branch;
-    }
-
-    try {
-      await this.currRepo.save(curriculum); // ✅ Save the updated entity
-    } catch (error) {
-      throw new BadRequestException(
-        'Failed to update Curriculum',
-        error.message,
-      );
-    }
+    return await this.currRepo.save(curriculum);
   }
 
   async remove(code: string): Promise<void> {
@@ -191,7 +176,7 @@ export class CurriculumsService {
     try {
       await this.currRepo.remove(curriculum);
     } catch (error) {
-      throw new BadRequestException('Failed to remove user');
+      throw new BadRequestException(`Failed to remove curriculum ${code}`);
     }
   }
 
