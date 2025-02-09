@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -103,6 +104,14 @@ export class CurriculumsService {
     }
   }
 
+  async findOne(id: number) {
+    const curriculum = await this.currRepo.findOneBy({ id });
+    if (!curriculum) {
+      throw new NotFoundException(`Curriculum with code '${id}' not found`);
+    }
+    return curriculum;
+  }
+
   async findOneByCode(code: string) {
     const curriculum = await this.currRepo.findOne({
       where: { code },
@@ -122,15 +131,28 @@ export class CurriculumsService {
     return curriculum;
   }
 
-  async update(dto: UpdateCurriculumDto) {
-    let curriculum = await this.findOneByCode(dto.code);
+  async update(id: number, dto: UpdateCurriculumDto) {
+    let curriculum = await this.findOne(id);
 
     if (!curriculum) {
-      throw new NotFoundException(`Curriculum with Code ${dto.code} not found`);
+      throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
 
     // Merge existing entity with new data
     curriculum = this.currRepo.merge(curriculum, dto);
+
+    // Check if another curriculum already uses the same code
+    if (dto.code) {
+      const existing = await this.currRepo.findOne({
+        where: { code: dto.code },
+      });
+
+      if (existing && existing.id !== id) {
+        throw new ConflictException(
+          `A curriculum with Code ${dto.code} already exists.`,
+        );
+      }
+    }
 
     // Handle Skills (Tree Structure)
     if (dto.skills) {
@@ -170,13 +192,12 @@ export class CurriculumsService {
 
     return await this.currRepo.save(curriculum);
   }
-
-  async remove(code: string): Promise<void> {
-    const curriculum = await this.findOneByCode(code);
+  async remove(id: number): Promise<void> {
+    const curriculum = await this.findOne(id);
     try {
       await this.currRepo.remove(curriculum);
     } catch (error) {
-      throw new BadRequestException(`Failed to remove curriculum ${code}`);
+      throw new BadRequestException(`Failed to remove curriculum ID ${id}`);
     }
   }
 
