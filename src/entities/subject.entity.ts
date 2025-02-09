@@ -10,6 +10,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { SubjectType } from 'src/enums/subject-types.enum';
+import { CourseSpec } from './course-spec.entity';
 
 @Entity()
 export class Subject {
@@ -37,6 +38,16 @@ export class Subject {
   })
   type: SubjectType;
 
+  @OneToMany(() => CourseSpec, (courseSpec) => courseSpec.subject, {
+    cascade: ['insert', 'update'],
+  })
+  courseSpecs: CourseSpec[];
+
+  @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
+  curriculums: Curriculum[];
+
+  //////////////// อาจจะไม่ได้ใช้แล้ว เพราะต้องโยกไปที่ CourseSpec แทน //////////////
+
   @OneToMany(
     () => SkillExpectedLevel,
     (skillExpectedLevel) => skillExpectedLevel.subject,
@@ -45,9 +56,6 @@ export class Subject {
     },
   )
   skillExpectedLevels: SkillExpectedLevel[];
-
-  @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
-  curriculums: Curriculum[];
 
   @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
   clos: Clo[];

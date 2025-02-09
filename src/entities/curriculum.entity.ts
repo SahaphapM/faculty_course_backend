@@ -14,6 +14,7 @@ import { Branch } from './branch.entity';
 import { Plo } from './plo.entity';
 import { Skill } from './skill.entity';
 import { Coordinator } from './coordinator.entity';
+import { CourseSpec } from './course-spec.entity';
 
 @Entity()
 export class Curriculum {
@@ -69,4 +70,9 @@ export class Curriculum {
     cascade: ['insert', 'update'],
   })
   skills: Skill[];
+
+  @OneToMany(() => CourseSpec, (cs) => cs.curriculum, {
+    cascade: ['insert', 'update'],
+  })
+  courseSpecs: CourseSpec[];
 }
