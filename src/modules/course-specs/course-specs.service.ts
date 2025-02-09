@@ -64,6 +64,7 @@ export class CourseSpecsService {
   findAllByCurriculum(curriculumId: number) {
     return this.courseSpecRepo.find({
       where: { curriculum: { id: curriculumId } },
+      relations: { subject: true, clos: true },
     });
   }
 

@@ -84,6 +84,12 @@ export class ClosService {
     });
   }
 
+  async findAllByCoursSpec(coursSpecId: number): Promise<Clo[]> {
+    return await this.closRepository.find({
+      where: { courseSpec: { id: coursSpecId } },
+    });
+  }
+
   async findOne(id: number): Promise<Clo> {
     const clo = await this.closRepository.findOne({
       where: { id },
