@@ -1,11 +1,13 @@
 import { SubjectType } from 'src/enums/subject-types.enum';
 
 export class CreateCourseSpecDto {
-  name: string;
+  thaiName: string;
 
   engName: string;
 
-  description: string;
+  engDescription: string;
+
+  thaiDescription: string;
 
   credit: string;
 

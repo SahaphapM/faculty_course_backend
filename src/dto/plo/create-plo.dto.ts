@@ -2,6 +2,10 @@ import { IsOptional, IsString } from 'class-validator';
 
 export class CreatePloDto {
   @IsString()
+  name: string;
+
+  @IsString()
+  @IsOptional()
   thaiDescription: string;
 
   @IsString()
@@ -12,7 +16,7 @@ export class CreatePloDto {
   type: string;
 
   @IsString()
-  curriculumCode: string;
+  curriculumId: number;
 
   // @ApiProperty({ type: [String] })
   // @ApiHideProperty()

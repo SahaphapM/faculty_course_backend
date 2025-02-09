@@ -25,11 +25,20 @@ export class Skill {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column()
+  @Column({ nullable: true })
   name: string;
 
-  @Column()
-  description: string;
+  @Column({ nullable: true })
+  thaiName: string;
+
+  @Column({ nullable: true })
+  engName: string;
+
+  @Column({ nullable: true })
+  thaiDescription: string;
+
+  @Column({ nullable: true })
+  engDescription: string;
 
   @Column({
     // enum: LearningDomain, //mysql/mariaDB not support

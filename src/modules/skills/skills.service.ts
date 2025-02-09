@@ -123,11 +123,12 @@ export class SkillsService {
       relations: { children: true },
       select: {
         id: true,
-        name: true,
-        description: true,
+        thaiName: true,
+        engName: true,
+        thaiDescription: true,
+        engDescription: true,
         domain: true,
-        parent: { id: true, name: true },
-        children: true,
+        parent: { id: true, thaiName: true, engName: true },
         curriculum: { id: true, name: true },
       },
     };
@@ -140,7 +141,12 @@ export class SkillsService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [{ name: Like(`%${search}%`) }];
+          options.where = [
+            { thaiName: Like(`%${search}%`) },
+            { engName: Like(`%${search}%`) },
+            { thaiDescription: Like(`%${search}%`) },
+            { engDescription: Like(`%${search}%`) },
+          ];
         }
         return await this.skRepo.findAndCount(options);
       } else {
