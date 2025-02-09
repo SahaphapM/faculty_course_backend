@@ -173,13 +173,13 @@ export class CurriculumsService {
           skill.curriculum = curriculum;
 
           // Handle Parent-Child Relations
-          if (skillDto.parentId) {
+          if (skillDto.parent.id) {
             const parentSkill = await this.skillRepo.findOne({
-              where: { id: skillDto.parentId },
+              where: { id: skillDto.parent.id },
             });
             if (!parentSkill) {
               throw new NotFoundException(
-                `Parent skill with ID ${skillDto.parentId} not found`,
+                `Parent skill with ID ${skillDto.parent.id} not found`,
               );
             }
             skill.parent = parentSkill;

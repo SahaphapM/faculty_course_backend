@@ -1,4 +1,4 @@
-import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty } from '@nestjs/swagger';
 import {
   IsArray,
   IsNotEmpty,
@@ -9,7 +9,7 @@ import {
 import { Instructor } from 'src/entities/instructor.entity';
 import { Plo } from 'src/entities/plo.entity';
 import { Subject } from 'src/entities/subject.entity';
-import { CreateSkillDto } from '../skill/create-skill.dto';
+import { Skill } from 'src/entities/skill.entity';
 
 export class CreateCurriculumDto {
   @IsString()
@@ -74,5 +74,5 @@ export class CreateCurriculumDto {
   @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
-  skills: CreateSkillDto[];
+  skills: Skill[];
 }
