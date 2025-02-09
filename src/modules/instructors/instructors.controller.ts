@@ -90,6 +90,12 @@ export class InstructorsController {
     return this.insService.findAll(pag);
   }
 
+  @Get('curriculum/:curriculumId')
+  @HttpCode(HttpStatus.OK)
+  findAllByCurriculum(@Param('curriculumId') curriculumId: string) {
+    return this.insService.findAllByCurriculum(+curriculumId);
+  }
+
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {

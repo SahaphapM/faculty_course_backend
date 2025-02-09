@@ -173,6 +173,12 @@ export class InstructorsService {
     }
   }
 
+  async findAllByCurriculum(curriculumId: number) {
+    return await this.insRepo.find({
+      where: { curriculums: { id: curriculumId } },
+    });
+  }
+
   async findOne(id: number): Promise<Instructor> {
     const teacher = await this.insRepo.findOne({
       where: { id },
