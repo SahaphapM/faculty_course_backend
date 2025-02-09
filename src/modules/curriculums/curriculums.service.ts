@@ -9,8 +9,8 @@ import {
 import { CreateCurriculumDto } from '../../dto/curriculum/create-curriculum.dto';
 import { UpdateCurriculumDto } from '../../dto/curriculum/update-curriculum.dto';
 import { Curriculum } from '../../entities/curriculum.entity';
-import { FindManyOptions, Like, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { DataSource, FindManyOptions, Like, Repository } from 'typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { Skill } from 'src/entities/skill.entity';
 import { Branch } from 'src/entities/branch.entity';
@@ -18,6 +18,8 @@ import { Branch } from 'src/entities/branch.entity';
 @Injectable()
 export class CurriculumsService {
   constructor(
+    @InjectDataSource()
+    private dataSource: DataSource,
     @InjectRepository(Curriculum)
     private currRepo: Repository<Curriculum>,
     @InjectRepository(Skill)
@@ -154,24 +156,45 @@ export class CurriculumsService {
     // ✅ Merge Only Primitive Properties
     this.currRepo.merge(curriculum, dto);
 
-    // ✅ Handle Skills
+    // Create a TreeRepository for Skill entity
+    const skillTreeRepository = this.dataSource.getTreeRepository(Skill);
+
+    // Handle skills update
     if (dto.skills) {
-      curriculum.skills = await Promise.all(
-        dto.skills.map(async (skillDto) => {
-          const skill = await this.skillRepo.save({
-            ...skillDto,
-            curriculum,
-          });
+      curriculum.skills = [];
 
-          if (skillDto.parent) {
-            skill.parent = await this.skillRepo.findOne({
-              where: { id: skillDto.parent.id },
-            });
+      // Helper function to recursively create skills and their children
+      const createSkillWithChildren = async (
+        skillData: any,
+        parentSkill?: Skill,
+      ) => {
+        // Create the skill
+        const skill = this.skillRepo.create({
+          name: skillData.name,
+          domain: skillData.domain,
+          thaiDescription: skillData.description,
+          curriculum: curriculum,
+          parent: parentSkill || null,
+        });
+
+        // Save the current skill
+        const savedSkill = await skillTreeRepository.save(skill);
+
+        // Recursively handle children if they exist
+        if (skillData.children && Array.isArray(skillData.children)) {
+          for (const childData of skillData.children) {
+            await createSkillWithChildren(childData, savedSkill);
           }
+        }
 
-          return skill;
-        }),
-      );
+        return savedSkill;
+      };
+
+      // Process each top-level skill
+      for (const skillDto of dto.skills) {
+        const savedSkill = await createSkillWithChildren(skillDto);
+        curriculum.skills.push(savedSkill);
+      }
     }
 
     // ✅ Save Curriculum & Skills
