@@ -46,8 +46,6 @@ export class CourseSpecsService {
     const courseSpec = this.courseSpecRepo.create({
       ...createCourseSpecDto,
     });
-    console.log('CourseSpec', courseSpec);
-
     return this.courseSpecRepo.save(courseSpec);
   }
 
@@ -60,6 +58,12 @@ export class CourseSpecsService {
   findAll() {
     return this.courseSpecRepo.find({
       relations: { curriculum: true, subject: true },
+    });
+  }
+
+  findAllByCurriculum(curriculumId: number) {
+    return this.courseSpecRepo.find({
+      where: { curriculum: { id: curriculumId } },
     });
   }
 

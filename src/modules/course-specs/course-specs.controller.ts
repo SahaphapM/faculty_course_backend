@@ -30,6 +30,11 @@ export class CourseSpecsController {
     return this.courseSpecsService.findAll();
   }
 
+  @Get('curriculumId/:curriculumId')
+  findAllByCurriculum(@Param('curriculumId') curriculumId: number) {
+    return this.courseSpecsService.findAllByCurriculum(curriculumId);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.courseSpecsService.findOne(+id);
