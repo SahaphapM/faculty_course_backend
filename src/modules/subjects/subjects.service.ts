@@ -114,9 +114,10 @@ export class SubjectsService {
           expectedLevel: true,
           skill: {
             id: true,
-            name: true,
-            parent: { id: true, name: true },
-            children: { id: true, name: true },
+            thaiName: true,
+            engName: true,
+            parent: { id: true, thaiName: true, engName: true },
+            children: { id: true, thaiName: true, engName: true },
           },
         },
       },

@@ -123,10 +123,7 @@ export class CourseSpecsService {
 
     // สร้าง Subject และเชื่อมโยงกับ Curriculum
     const newSubject = this.subRepo.create({
-      code: createCourseSpecDto.subjectCode,
-      name: createCourseSpecDto.name,
-      engName: createCourseSpecDto.engName,
-      description: createCourseSpecDto.description,
+      ...createCourseSpecDto,
       curriculum: curriculum, // กำหนด curriculum ทั้งตัว (ไม่ใช่แค่ id)
     });
 

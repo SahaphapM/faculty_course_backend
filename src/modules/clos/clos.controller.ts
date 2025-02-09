@@ -36,6 +36,11 @@ export class ClosController {
     return this.closService.findAll();
   }
 
+  @Get('coursSpecId/:coursSpecId')
+  findAllByCoursSpec(@Param('coursSpecId') id: string) {
+    return this.closService.findAllByCoursSpec(+id);
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.closService.findOne(+id);

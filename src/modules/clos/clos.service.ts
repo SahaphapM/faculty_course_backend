@@ -64,7 +64,8 @@ export class ClosService {
     if (search) {
       options.where = [
         { name: Like(`%${search}%`) },
-        { description: Like(`%${search}%`) },
+        { thaiDescription: Like(`%${search}%`) },
+        { engDescription: Like(`%${search}%`) },
       ];
     }
 

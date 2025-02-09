@@ -16,12 +16,12 @@ export class PlosService {
   ) {}
 
   async create(createPloDto: CreatePloDto): Promise<Plo> {
-    const curriculum = await this.curriculumService.findOneByCode(
-      createPloDto.curriculumCode,
+    const curriculum = await this.curriculumService.findOne(
+      createPloDto.curriculumId,
     );
     if (!curriculum) {
       throw new NotFoundException(
-        `Curriculum with ID ${createPloDto.curriculumCode} not found`,
+        `Curriculum with ID ${createPloDto.curriculumId} not found`,
       );
     }
 

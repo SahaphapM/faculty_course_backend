@@ -2,7 +2,13 @@ import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateCloDto {
   @IsString()
-  description: string;
+  name: string;
+
+  @IsString()
+  engDescription: string;
+
+  @IsString()
+  thaiDescription: string;
 
   @IsNotEmpty()
   courseSpecId: number;

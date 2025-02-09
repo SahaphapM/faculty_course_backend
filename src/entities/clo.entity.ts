@@ -19,8 +19,11 @@ export class Clo {
   @Column({ nullable: true })
   name: string;
 
-  @Column()
-  description: string;
+  @Column({ nullable: true })
+  thaiDescription: string;
+
+  @Column({ nullable: true })
+  engDescription: string;
 
   // courseSpec
   @ManyToOne(() => CourseSpec, (courseSpec) => courseSpec.clos)

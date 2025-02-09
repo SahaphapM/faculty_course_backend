@@ -16,6 +16,9 @@ export class Plo {
   id: number;
 
   @Column({ nullable: true })
+  name: string;
+
+  @Column({ nullable: true })
   thaiDescription: string;
 
   @Column({ nullable: true })
