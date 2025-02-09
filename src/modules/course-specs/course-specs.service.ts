@@ -20,15 +20,14 @@ export class CourseSpecsService {
     private curRepo: Repository<Curriculum>,
   ) {}
 
-  async createCourseSpec(
-    curriculumId: number,
-    createCourseSpecDto: CreateCourseSpecDto,
-  ) {
-    console.log('curriculumId', curriculumId);
-    const curriculum = await this.curRepo.findOneBy({ id: curriculumId });
+  async createCourseSpec(createCourseSpecDto: CreateCourseSpecDto) {
+    console.log('curriculumId', createCourseSpecDto.curriculumId);
+    const curriculum = await this.curRepo.findOneBy({
+      id: createCourseSpecDto.curriculumId,
+    });
     if (!curriculum) {
       throw new NotFoundException(
-        `Curriculum with ID ${curriculumId} not found`,
+        `Curriculum with ID ${createCourseSpecDto.curriculumId} not found`,
       );
     }
 
@@ -38,12 +37,13 @@ export class CourseSpecsService {
 
     if (!subject) {
       // if not found then create new subject set data from courseSpecDto
-      subject = await this.createSubject(curriculumId, createCourseSpecDto);
+      subject = await this.createSubject(
+        createCourseSpecDto.curriculumId,
+        createCourseSpecDto,
+      );
     }
 
     const courseSpec = this.courseSpecRepo.create({
-      curriculumId: curriculumId,
-
       ...createCourseSpecDto,
     });
     console.log('CourseSpec', courseSpec);

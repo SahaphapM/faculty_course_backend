@@ -102,11 +102,13 @@ export class SubjectsService {
       relations: { skillExpectedLevels: { skill: true } },
       select: {
         id: true,
+        code: true,
         name: true,
         engName: true,
         description: true,
         type: true,
         credit: true,
+
         skillExpectedLevels: {
           id: true,
           expectedLevel: true,
