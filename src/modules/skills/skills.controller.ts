@@ -11,7 +11,6 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
-import { CreateTechSkillDto } from 'src/modules/tech-skills/dto/create-tech-skill.dto';
 import { TechSkillsService } from 'src/modules/tech-skills/tech-skills.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSkillDto } from 'src/dto/skill/create-skill.dto';
@@ -36,6 +35,12 @@ export class SkillsController {
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: PaginationDto) {
     return this.skillsService.findAll(pag);
+  }
+
+  @Get('/curriculumId/:curriculumId')
+  @HttpCode(HttpStatus.OK)
+  findAllByCurriculum(@Param('curriculumId') curriculumId: number) {
+    return this.skillsService.findAllByCurriculum(curriculumId);
   }
 
   @Get(':id')
@@ -87,20 +92,20 @@ export class SkillsController {
 
   ///////// techSkill /////////////
 
-  @Post(':id/createTechSkills') // select or create subskills use this.
-  @HttpCode(HttpStatus.CREATED)
-  async createTechSkill(
-    @Param('id') id: string,
-    @Body() createTechSkillDtos: CreateTechSkillDto[],
-  ) {
-    const techSkills = await Promise.all(
-      createTechSkillDtos.map(async (dto) => {
-        const techSkill = await this.techSkillsService.findOne(dto.slug);
-        return techSkill || this.techSkillsService.create(dto);
-      }),
-    );
-    return this.skillsService.createTechSkills(+id, techSkills);
-  }
+  // @Post(':id/createTechSkills') // select or create subskills use this.
+  // @HttpCode(HttpStatus.CREATED)
+  // async createTechSkill(
+  //   @Param('id') id: string,
+  //   @Body() createTechSkillDtos: CreateTechSkillDto[],
+  // ) {
+  //   const techSkills = await Promise.all(
+  //     createTechSkillDtos.map(async (dto) => {
+  //       const techSkill = await this.techSkillsService.findOne(dto.slug);
+  //       return techSkill || this.techSkillsService.create(dto);
+  //     }),
+  //   );
+  //   return this.skillsService.createTechSkills(+id, techSkills);
+  // }
 
   // @Patch(':id/selectTechSkills')
   // @HttpCode(HttpStatus.OK)
@@ -108,9 +113,9 @@ export class SkillsController {
   //   return this.skillsService.updateTechSkills(id, techSkillIds);
   // }
 
-  @Patch(':id/removeTechSkill/:techId')
-  @HttpCode(HttpStatus.OK)
-  removeTechSkills(@Param('id') id: string, @Param('techId') techId: string) {
-    return this.skillsService.removeTechSkill(+id, +techId);
-  }
+  // @Patch(':id/removeTechSkill/:techId')
+  // @HttpCode(HttpStatus.OK)
+  // removeTechSkills(@Param('id') id: string, @Param('techId') techId: string) {
+  //   return this.skillsService.removeTechSkill(+id, +techId);
+  // }
 }

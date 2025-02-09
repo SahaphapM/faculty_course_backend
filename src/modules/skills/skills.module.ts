@@ -5,9 +5,10 @@ import { Skill } from '../../entities/skill.entity';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TechSkill } from 'src/entities/tech-skill.entity';
 import { TechSkillsService } from 'src/modules/tech-skills/tech-skills.service';
+import { Curriculum } from 'src/entities/curriculum.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Skill, TechSkill])],
+  imports: [TypeOrmModule.forFeature([Skill, TechSkill, Curriculum])],
   controllers: [SkillsController],
   providers: [SkillsService, TechSkillsService],
   exports: [SkillsService],
