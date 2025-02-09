@@ -102,11 +102,13 @@ export class SubjectsService {
       relations: { skillExpectedLevels: { skill: true } },
       select: {
         id: true,
+        code: true,
         name: true,
         engName: true,
         description: true,
         type: true,
         credit: true,
+
         skillExpectedLevels: {
           id: true,
           expectedLevel: true,
@@ -144,7 +146,6 @@ export class SubjectsService {
   async findOne(code: string): Promise<Subject> {
     const subject = await this.subRepo.findOne({
       where: { code },
-      relations: { skillExpectedLevels: { skill: true } },
     });
     if (!subject) {
       throw new NotFoundException(`Subject with id ${code} not found`);

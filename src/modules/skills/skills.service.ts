@@ -5,22 +5,38 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Skill } from '../../entities/skill.entity';
-import { FindManyOptions, Like, TreeRepository } from 'typeorm';
+import { FindManyOptions, Like, Repository, TreeRepository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TechSkill } from 'src/entities/tech-skill.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSkillDto } from 'src/dto/skill/create-skill.dto';
 import { UpdateSkillDto } from 'src/dto/skill/update-skill.dto';
+import { Curriculum } from 'src/entities/curriculum.entity';
 
 @Injectable()
 export class SkillsService {
   constructor(
     @InjectRepository(Skill)
     private skRepo: TreeRepository<Skill>,
+
+    @InjectRepository(Curriculum)
+    private curriculumRepo: Repository<Curriculum>,
   ) {}
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
     console.log(createSkillDto);
+
+    const curriculum = await this.curriculumRepo.findOne({
+      where: { id: createSkillDto.curriculum.id },
+    });
+
+    if (!curriculum) {
+      throw new NotFoundException(
+        `Curriculum with ID ${createSkillDto.curriculum.id} not found`,
+      );
+    }
+
+    createSkillDto.curriculum = curriculum;
 
     try {
       return await this.skRepo.save(createSkillDto);
@@ -112,6 +128,7 @@ export class SkillsService {
         domain: true,
         parent: { id: true, name: true },
         children: true,
+        curriculum: { id: true, name: true },
       },
     };
     try {
@@ -136,13 +153,32 @@ export class SkillsService {
     }
   }
 
+  async findAllByCurriculum(curriculumId: number) {
+    const curriculum = await this.curriculumRepo.findOne({
+      where: { id: curriculumId },
+    });
+
+    if (!curriculum) {
+      throw new NotFoundException(
+        `Curriculum with ID ${curriculumId} not found`,
+      );
+    }
+
+    const skills = await this.skRepo.find({
+      where: { curriculum: { id: curriculumId } },
+      relations: { children: { children: true } },
+    });
+
+    return skills;
+  }
+
   async findOne(id: number): Promise<Skill> {
     const skill = await this.skRepo.findOne({
       where: { id: Number(id) },
       relations: {
         children: { children: { children: { children: { children: true } } } },
         parent: true,
-        techSkills: true,
+        curriculum: true,
       },
     });
     if (!skill) {
@@ -213,9 +249,22 @@ export class SkillsService {
   ): Promise<Skill> {
     const parentSkill = await this.findOne(id);
 
+    const curriculum = await this.curriculumRepo.findOne({
+      where: { id: createSkillDto.curriculum.id || parentSkill.curriculum.id },
+    });
+
+    if (!curriculum) {
+      throw new NotFoundException(
+        `Curriculum with ID ${createSkillDto.curriculum.id} not found`,
+      );
+    }
+
     parentSkill.children = parentSkill.children || []; // initialize children
 
-    const subSkill = await this.skRepo.save(createSkillDto);
+    const subSkill = await this.skRepo.save({
+      ...createSkillDto,
+      curriculum,
+    });
 
     parentSkill.children.push(subSkill);
 

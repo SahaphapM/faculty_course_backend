@@ -14,6 +14,7 @@ import { Branch } from './branch.entity';
 import { Plo } from './plo.entity';
 import { Skill } from './skill.entity';
 import { Coordinator } from './coordinator.entity';
+import { CourseSpec } from './course-spec.entity';
 
 @Entity()
 export class Curriculum {
@@ -59,14 +60,18 @@ export class Curriculum {
   @JoinTable()
   coordinators: Coordinator[];
 
-  @ManyToMany(() => Subject, (sub) => sub.curriculums, {
+  @OneToMany(() => Subject, (sub) => sub.curriculum, {
     cascade: ['insert', 'update'],
   })
-  @JoinTable()
   subjects: Subject[];
 
   @OneToMany(() => Skill, (sk) => sk.curriculum, {
     cascade: ['insert', 'update'],
   })
   skills: Skill[];
+
+  @OneToMany(() => CourseSpec, (cs) => cs.curriculum, {
+    cascade: ['insert', 'update'],
+  })
+  courseSpecs: CourseSpec[];
 }

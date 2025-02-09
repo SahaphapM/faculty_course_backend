@@ -16,18 +16,18 @@ export class Plo {
   id: number;
 
   @Column({ nullable: true })
-  num_plo: string;
+  thaiDescription: string;
+
+  @Column({ nullable: true })
+  engDescription: string;
 
   @Column()
-  description: string;
-
-  @Column()
-  resultTypes: string;
+  type: string;
 
   @ManyToOne(() => Curriculum, (curriculum) => curriculum)
   @JoinColumn({ name: 'curriculumId' })
   curriculum: Curriculum;
 
-  @OneToMany(() => Clo, (clo) => clo.plo, { cascade: true })
+  @OneToMany(() => Clo, (clo) => clo.plo)
   clos: Clo[];
 }

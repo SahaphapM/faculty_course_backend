@@ -103,25 +103,6 @@ export class CurriculumsService {
     }
   }
 
-  async findOne(id: number): Promise<Curriculum> {
-    const curriculum = await this.currRepo.findOne({
-      where: { id },
-      relations: {
-        plos: true,
-        subjects: true,
-        branch: true,
-        coordinators: true,
-        skills: {
-          children: true,
-        },
-      },
-    });
-    if (!curriculum) {
-      throw new NotFoundException(`Curriculum with ID '${id}' not found`);
-    }
-    return curriculum;
-  }
-
   async findOneByCode(code: string) {
     const curriculum = await this.currRepo.findOne({
       where: { code },
@@ -141,11 +122,11 @@ export class CurriculumsService {
     return curriculum;
   }
 
-  async update(id: number, dto: UpdateCurriculumDto) {
-    const curriculum = await this.findOne(id);
+  async update(dto: UpdateCurriculumDto) {
+    const curriculum = await this.findOneByCode(dto.code);
 
     if (!curriculum) {
-      throw new NotFoundException(`Curriculum with ID ${id} not found`);
+      throw new NotFoundException(`Curriculum with Code ${dto.code} not found`);
     }
 
     // Merge existing entity with new data
@@ -205,103 +186,8 @@ export class CurriculumsService {
     }
   }
 
-  // async addSubject(id: number, subjects: Subject[]): Promise<Curriculum> {
-  //   const curriculum = await this.findOne(id);
-  //   if (!curriculum) {
-  //     throw new NotFoundException(`Curriculum with ID ${id} not found`);
-  //   }
-
-  //   // Assign subjects directly to the curriculum
-  //   curriculum.subjects = subjects;
-
-  //   try {
-  //     await this.currRepo.save(curriculum);
-  //     return this.currRepo.findOne({
-  //       where: { id },
-  //       relations: { subjects: true },
-  //     });
-  //   } catch (error) {
-  //     throw new BadRequestException(
-  //       'Failed to update Curriculum',
-  //       error.message,
-  //     );
-  //   }
-  // }
-
-  // async selectSubject(id: number, subjects: Subject[]): Promise<Curriculum> {
-  //   const curriculum = await this.findOne(id);
-  //   if (!curriculum) {
-  //     throw new NotFoundException(`Curriculum with ID ${id} not found`);
-  //   }
-  //   curriculum.subjects = subjects;
-  //   try {
-  //     await this.currRepo.save(curriculum);
-  //     return this.currRepo.findOne({
-  //       where: { id },
-  //       relations: { subjects: true },
-  //     });
-  //   } catch (error) {
-  //     throw new BadRequestException(
-  //       'Failed to update Curriculum',
-  //       error.message,
-  //     );
-  //   }
-  // }
-
-  // async addCoordinator(
-  //   id: string,
-  //   teacherListId: number[],
-  // ): Promise<Curriculum> {
-  //   console.log('addCoordinator', teacherListId);
-  //   const curriculum = await this.findOne(id);
-  //   if (!curriculum) {
-  //     throw new NotFoundException(`Curriculum with ID ${id} not found`);
-  //   }
-  //   curriculum.coordinators = [];
-  //   if (teacherListId) {
-  //     for (let index = 0; index < teacherListId.length; index++) {
-  //       const teacher = await this.insService.findOne(teacherListId[index]);
-  //       curriculum.coordinators.push(teacher);
-  //     }
-  //   }
-  //   try {
-  //     await this.currRepo.save(curriculum);
-  //     return this.currRepo.findOne({
-  //       where: { id },
-  //     });
-  //   } catch (error) {
-  //     throw new BadRequestException(
-  //       'Failed to update Curriculum',
-  //       error.message,
-  //     );
-  //   }
-  // }
-
-  // async addPLO(id: string, plo: Plo): Promise<Curriculum> {
-  //   const curriculum = await this.findOne(id);
-  //   if (!curriculum) {
-  //     throw new NotFoundException(`Curriculum with ID ${id} not found`);
-  //   }
-  //   if (!curriculum.plos) {
-  //     curriculum.plos = [];
-  //   }
-  //   curriculum.plos.push(plo);
-  //   try {
-  //     await this.currRepo.save(curriculum);
-  //     return this.currRepo.findOne({
-  //       where: { id },
-  //       relations: { plos: true },
-  //     });
-  //   } catch (error) {
-  //     throw new BadRequestException(
-  //       'Failed to update Curriculum',
-  //       error.message,
-  //     );
-  //   }
-  // }
-
-  async remove(id: number): Promise<void> {
-    const curriculum = await this.findOne(id);
+  async remove(code: string): Promise<void> {
+    const curriculum = await this.findOneByCode(code);
     try {
       await this.currRepo.remove(curriculum);
     } catch (error) {

@@ -5,11 +5,12 @@ import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 import {
   Column,
   Entity,
-  ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { SubjectType } from 'src/enums/subject-types.enum';
+import { CourseSpec } from './course-spec.entity';
 
 @Entity()
 export class Subject {
@@ -25,29 +26,38 @@ export class Subject {
   @Column({ nullable: true })
   engName: string;
 
-  @Column()
+  @Column({ nullable: true })
   description: string;
 
-  @Column()
+  @Column({ nullable: true })
   credit: string; //3 (2-2-5)
 
   @Column({
     // enum: SubjectType, // DB not support
     default: SubjectType.Compulsory,
+    nullable: true,
   })
   type: SubjectType;
+
+  @OneToMany(() => CourseSpec, (courseSpec) => courseSpec.subject, {
+    cascade: ['insert', 'update'],
+  })
+  courseSpecs: CourseSpec[];
+
+  @ManyToOne(() => Curriculum, (curriculum) => curriculum.subjects)
+  curriculum: Curriculum;
+
+  //////////////// อาจจะไม่ได้ใช้แล้ว เพราะต้องโยกไปที่ CourseSpec แทน //////////////
 
   @OneToMany(
     () => SkillExpectedLevel,
     (skillExpectedLevel) => skillExpectedLevel.subject,
     {
       cascade: true,
+      nullable: true,
     },
   )
   skillExpectedLevels: SkillExpectedLevel[];
-
-  @ManyToMany(() => Curriculum, (curriculum) => curriculum.subjects)
-  curriculums: Curriculum[];
 
   @OneToMany(() => Clo, (clo) => clo.subject, { cascade: true })
   clos: Clo[];
