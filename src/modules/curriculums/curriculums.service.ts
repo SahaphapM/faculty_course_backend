@@ -1,6 +1,5 @@
 import {
   BadRequestException,
-  ConflictException,
   HttpStatus,
   Injectable,
   InternalServerErrorException,
@@ -136,39 +135,19 @@ export class CurriculumsService {
 
   async update(id: number, dto: UpdateCurriculumDto) {
     const curriculum = await this.findOne(id);
-
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
 
-    // ✅ Prevent Duplicate Code
-    if (dto.code && dto.code !== curriculum.code) {
-      const existing = await this.currRepo.findOne({
-        where: { code: dto.code },
-      });
-      if (existing) {
-        throw new ConflictException(
-          `A curriculum with Code ${dto.code} already exists.`,
-        );
-      }
-    }
+    this.dataSource.getTreeRepository(Skill);
 
-    // ✅ Merge Only Primitive Properties
-    this.currRepo.merge(curriculum, dto);
-
-    // Create a TreeRepository for Skill entity
-    const skillTreeRepository = this.dataSource.getTreeRepository(Skill);
-
-    // Handle skills update
     if (dto.skills) {
       curriculum.skills = [];
 
-      // Helper function to recursively create skills and their children
       const createSkillWithChildren = async (
         skillData: any,
         parentSkill?: Skill,
       ) => {
-        // Create the skill
         const skill = this.skillRepo.create({
           name: skillData.name,
           domain: skillData.domain,
@@ -177,28 +156,28 @@ export class CurriculumsService {
           parent: parentSkill || null,
         });
 
-        // Save the current skill
-        const savedSkill = await skillTreeRepository.save(skill);
-
-        // Recursively handle children if they exist
         if (skillData.children && Array.isArray(skillData.children)) {
           for (const childData of skillData.children) {
-            await createSkillWithChildren(childData, savedSkill);
+            const childSkill = await createSkillWithChildren(childData, skill);
+            if (!skill.children) skill.children = [];
+            skill.children.push(childSkill);
           }
         }
 
-        return savedSkill;
+        return skill;
       };
 
-      // Process each top-level skill
+      // Create skill tree structure but don't save yet
       for (const skillDto of dto.skills) {
-        const savedSkill = await createSkillWithChildren(skillDto);
-        curriculum.skills.push(savedSkill);
+        const skill = await createSkillWithChildren(skillDto);
+        curriculum.skills.push(skill);
       }
     }
 
-    // ✅ Save Curriculum & Skills
-    await this.currRepo.save(curriculum);
+    // Save everything in one transaction
+    await this.dataSource.transaction(async (manager) => {
+      return await manager.save(curriculum);
+    });
 
     return {
       statusCode: HttpStatus.OK,
