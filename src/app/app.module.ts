@@ -17,6 +17,7 @@ import { CurriculumsModule } from 'src/modules/curriculums/curriculums.module';
 import { BranchesModule } from 'src/modules/branches/branches.module';
 import { ClosModule } from 'src/modules/clos/clos.module';
 import { CoursesModule } from 'src/modules/courses/courses.module';
+import { CourseSpecsModule } from 'src/modules/course-specs/course-specs.module';
 
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { CoursesModule } from 'src/modules/courses/courses.module';
     TechSkillsModule,
     StudentsModule,
     CoursesModule,
+    CourseSpecsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
