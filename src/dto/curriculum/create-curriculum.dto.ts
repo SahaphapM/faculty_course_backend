@@ -7,9 +7,9 @@ import {
   IsString,
 } from 'class-validator';
 import { Instructor } from 'src/entities/instructor.entity';
-import { Plo } from 'src/entities/plo.entity';
-import { Subject } from 'src/entities/subject.entity';
-import { Skill } from 'src/entities/skill.entity';
+import { UpdateCourseSpecDto } from '../course-specs/update-course-spec.dto';
+import { UpdatePloDto } from '../plo/update-plo.dto';
+import { UpdateSkillDto } from '../skill/update-skill.dto';
 
 export class CreateCurriculumDto {
   @IsString()
@@ -62,17 +62,23 @@ export class CreateCurriculumDto {
   @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
-  plos: Plo[];
+  plos: UpdatePloDto[];
 
   // @ApiProperty({ type: [Subject] })
+  // @ApiHideProperty() // Hide this Property
+  // @IsArray()
+  // @IsOptional()
+  // subjects: Subject[];
+
+  // send course spec instead
   @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
-  subjects: Subject[];
+  courseSpecs: UpdateCourseSpecDto[];
 
   // @ApiProperty({ type: [CreateSkillDto] })
   @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
-  skills: Skill[];
+  skills: UpdateSkillDto[];
 }

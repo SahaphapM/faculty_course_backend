@@ -8,17 +8,18 @@ import {
 import { CreateCurriculumDto } from '../../dto/curriculum/create-curriculum.dto';
 import { UpdateCurriculumDto } from '../../dto/curriculum/update-curriculum.dto';
 import { Curriculum } from '../../entities/curriculum.entity';
-import { DataSource, FindManyOptions, Like, Repository } from 'typeorm';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { FindManyOptions, Like, Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { Skill } from 'src/entities/skill.entity';
 import { Branch } from 'src/entities/branch.entity';
+import { Subject } from 'src/entities/subject.entity';
 
 @Injectable()
 export class CurriculumsService {
   constructor(
-    @InjectDataSource()
-    private dataSource: DataSource,
+    @InjectRepository(Subject)
+    private subRepo: Repository<Subject>,
     @InjectRepository(Curriculum)
     private currRepo: Repository<Curriculum>,
     @InjectRepository(Skill)
@@ -138,9 +139,20 @@ export class CurriculumsService {
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
+    // Course Spec Handle + create subjects
+    if (dto.courseSpecs.length) {
+      curriculum.subjects = [];
 
-    this.dataSource.getTreeRepository(Skill);
+      for (const courseSpec of dto.courseSpecs) {
+        curriculum.courseSpecs.map((cs) => {
+          cs.curriculum = curriculum;
+        });
+        const subject = this.subRepo.create({ ...courseSpec.subject });
+        curriculum.subjects.push(subject);
+      }
+    }
 
+    // Skill handle things
     if (dto.skills) {
       curriculum.skills = [];
 
@@ -175,9 +187,7 @@ export class CurriculumsService {
     }
 
     // Save everything in one transaction
-    await this.dataSource.transaction(async (manager) => {
-      return await manager.save(curriculum);
-    });
+    this.currRepo.save(curriculum);
 
     return {
       statusCode: HttpStatus.OK,

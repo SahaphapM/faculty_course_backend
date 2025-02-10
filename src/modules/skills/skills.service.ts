@@ -23,22 +23,20 @@ export class SkillsService {
   ) {}
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
-    console.log(createSkillDto);
-
     const curriculum = await this.curriculumRepo.findOne({
-      where: { id: createSkillDto.curriculum.id },
+      where: { id: createSkillDto.curriculumId },
     });
 
     if (!curriculum) {
       throw new NotFoundException(
-        `Curriculum with ID ${createSkillDto.curriculum.id} not found`,
+        `Curriculum with ID ${createSkillDto.curriculumId} not found`,
       );
     }
-
-    createSkillDto.curriculum = curriculum;
+    const skill = this.skRepo.create(createSkillDto);
+    skill.curriculum = curriculum;
 
     try {
-      return await this.skRepo.save(createSkillDto);
+      return await this.skRepo.save(skill);
     } catch (error) {
       throw new BadRequestException(
         'Failed to create skill',
@@ -255,12 +253,12 @@ export class SkillsService {
     const parentSkill = await this.findOne(id);
 
     const curriculum = await this.curriculumRepo.findOne({
-      where: { id: createSkillDto.curriculum.id || parentSkill.curriculum.id },
+      where: { id: createSkillDto.curriculumId || parentSkill.curriculum.id },
     });
 
     if (!curriculum) {
       throw new NotFoundException(
-        `Curriculum with ID ${createSkillDto.curriculum.id} not found`,
+        `Curriculum with ID ${createSkillDto.curriculumId} not found`,
       );
     }
 

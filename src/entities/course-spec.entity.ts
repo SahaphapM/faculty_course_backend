@@ -37,11 +37,12 @@ export class CourseSpec {
   })
   type: SubjectType;
 
-  @Column()
-  subjectCode: string; // คอลัมน์ที่ใช้เชื่อมโยงกับ Subject.code
+  // Duplicate with below
+  // @Column()
+  // subjectCode: string; // คอลัมน์ที่ใช้เชื่อมโยงกับ Subject.code
 
-  @Column()
-  curriculumId: number;
+  // @Column()
+  // curriculumId: number;
 
   // ความสัมพันธ์กับ Subject
   @ManyToOne(() => Subject, (subject) => subject.courseSpecs)

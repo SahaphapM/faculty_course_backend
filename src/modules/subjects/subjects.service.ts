@@ -105,9 +105,9 @@ export class SubjectsService {
       select: {
         id: true,
         code: true,
-        name: true,
+        thaiName: true,
         engName: true,
-        description: true,
+        thaiDescription: true,
         type: true,
         credit: true,
         // skillExpectedLevels: {
@@ -135,7 +135,7 @@ export class SubjectsService {
           options.where = [
             {
               code: Like(`%${search}%`),
-              name: Like(`%${search}%`),
+              thaiName: Like(`%${search}%`),
               engName: Like(`%${search}%`),
             },
           ];

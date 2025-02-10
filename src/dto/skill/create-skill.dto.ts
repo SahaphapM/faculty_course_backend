@@ -1,6 +1,5 @@
 import { ApiHideProperty } from '@nestjs/swagger';
 import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Curriculum } from 'src/entities/curriculum.entity';
 import { Skill } from 'src/entities/skill.entity';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 
@@ -27,6 +26,6 @@ export class CreateSkillDto {
   @IsNumber()
   parentId: number | null;
 
-  curriculum: Partial<Curriculum>;
-  // techSkills: TechSkill[] | null;
+  @IsNumber()
+  curriculumId: number;
 }

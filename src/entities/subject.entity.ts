@@ -20,13 +20,16 @@ export class Subject {
   code: string;
 
   @Column({ nullable: true })
-  name: string;
+  thaiName: string;
 
   @Column({ nullable: true })
   engName: string;
 
   @Column({ nullable: true })
-  description: string;
+  thaiDescription: string;
+
+  @Column({ nullable: true })
+  engDescription: string;
 
   @Column({ nullable: true })
   credit: string; //3 (2-2-5)

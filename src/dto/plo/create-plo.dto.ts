@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class CreatePloDto {
   @IsString()
@@ -15,7 +15,7 @@ export class CreatePloDto {
   @IsString()
   type: string;
 
-  @IsString()
+  @IsNumber()
   curriculumId: number;
 
   // @ApiProperty({ type: [String] })

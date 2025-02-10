@@ -32,7 +32,7 @@ export class CourseSpecsService {
     }
 
     let subject = await this.subRepo.findOneBy({
-      code: createCourseSpecDto.subjectCode,
+      code: createCourseSpecDto.subject.code,
     });
 
     if (!subject) {
@@ -82,11 +82,11 @@ export class CourseSpecsService {
       throw new NotFoundException(`CourseSpec with id ${id} not found`);
     }
 
-    let subject;
+    let subject: Subject;
 
-    if (courseSpec.subjectCode !== updateCourseSpecDto.subjectCode) {
+    if (courseSpec.subject.code !== updateCourseSpecDto.subject.code) {
       subject = await this.subRepo.findOneBy({
-        code: updateCourseSpecDto.subjectCode,
+        code: updateCourseSpecDto.subject.code,
       });
 
       if (!subject) {

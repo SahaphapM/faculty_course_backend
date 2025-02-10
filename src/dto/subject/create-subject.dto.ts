@@ -7,13 +7,16 @@ export class CreateSubjectDto {
   code: string;
 
   @IsString()
-  name: string;
+  thaiName: string;
 
   @IsString()
   engName: string;
 
   @IsString()
-  description: string;
+  thaiDescription: string;
+
+  @IsString()
+  engDescription: string;
 
   @IsString()
   credit: string;
