@@ -20,8 +20,11 @@ export class Course {
   @Column()
   name: string;
 
-  @Column()
-  description: string;
+  @Column({ nullable: true, type: 'text' })
+  thaiDescription: string;
+
+  @Column({ nullable: true, type: 'text' })
+  engDescription: string;
 
   @Column({ default: true, nullable: true })
   active: boolean;
