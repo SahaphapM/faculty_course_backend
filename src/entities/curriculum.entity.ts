@@ -24,16 +24,16 @@ export class Curriculum {
   @Column({ unique: true })
   code: string;
 
-  @Column()
+  @Column({ nullable: true })
   thaiName: string;
 
-  @Column()
+  @Column({ nullable: true })
   engName: string;
 
-  @Column()
+  @Column({ nullable: true })
   thaiDegree: string;
 
-  @Column()
+  @Column({ nullable: true })
   engDegree: string;
 
   @ManyToOne(() => Branch, (branch) => branch.curriculums, {
@@ -42,7 +42,7 @@ export class Curriculum {
   @JoinColumn({ name: 'branchId' })
   branch: Branch;
 
-  @Column()
+  @Column({ nullable: true })
   thaiDescription: string;
 
   @Column()
