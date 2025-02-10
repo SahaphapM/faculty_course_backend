@@ -145,7 +145,7 @@ export class InstructorsService {
       select: {
         id: true,
         email: true,
-        name: true,
+        thaiName: true,
         engName: true,
         tel: true,
         position: true,
@@ -160,7 +160,7 @@ export class InstructorsService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [{ name: Like(`%${search}%`) }];
+          options.where = [{ thaiName: Like(`%${search}%`) }];
         }
         return await this.insRepo.findAndCount(options);
       } else {

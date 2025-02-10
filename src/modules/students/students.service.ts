@@ -112,7 +112,7 @@ export class StudentsService {
       relations: { skillCollection: true, branch: { faculty: true } },
       select: {
         id: true,
-        name: true,
+        thaiName: true,
         engName: true,
         branch: { id: true, name: true, faculty: { id: true, name: true } },
       },

@@ -20,7 +20,7 @@ export class Instructor {
   code: string;
 
   @Column({ nullable: true })
-  name: string;
+  thaiName: string;
 
   @Column({ nullable: true })
   engName: string;

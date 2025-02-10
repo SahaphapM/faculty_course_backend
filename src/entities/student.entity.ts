@@ -23,7 +23,7 @@ export class Student {
   code: string;
 
   @Column()
-  name: string;
+  thaiName: string;
 
   @Column({ nullable: true })
   engName: string;
