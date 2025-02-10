@@ -36,8 +36,10 @@ export class CourseSpec {
   // type: SubjectType;
 
   // ความสัมพันธ์กับ Subject
-  @ManyToOne(() => Subject, (subject) => subject.courseSpecs)
-  @JoinColumn({ name: 'subjectCode', referencedColumnName: 'code' }) // ระบุคอลัมน์ที่เชื่อมโยง
+  @ManyToOne(() => Subject, (subject) => subject.courseSpecs, {
+    cascade: ['insert', 'update'],
+  })
+  @JoinColumn({ name: 'subjectId' }) //use subjectId PK
   subject: Subject;
 
   // ความสัมพันธ์กับ Clo
