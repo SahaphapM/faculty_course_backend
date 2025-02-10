@@ -65,26 +65,29 @@ export class SubjectsService {
   async create(dto: CreateSubjectDto): Promise<Subject> {
     // if (!dto.skillExpectedLevels.length) return ===> Set to can create subject without skill
 
-    const skillExpectedLevels = await Promise.all(
-      dto.skillExpectedLevels.map((s) => {
-        if (!s.subject && !s.subject.id) {
-          throw new BadRequestException(
-            'Subject ID in SkillExpectedLevel is required',
-          );
-        }
-        const existSkill = this.skillRepo.findOneBy({ id: s.skill.id });
-        if (!existSkill) {
-          throw new BadRequestException(
-            `Skill with ID ${s.skill.id} not found`,
-          );
-        }
-        return this.SkillExpectedLevelsRepository.create(s);
-      }),
-    );
-    if (!skillExpectedLevels) {
-      throw new NotFoundException('Skills not found');
-    }
-    const subject = this.subRepo.create({ ...dto, skillExpectedLevels });
+    // const skillExpectedLevels = await Promise.all(
+    //   dto.skillExpectedLevels.map((s) => {
+    //     if (!s.subject && !s.subject.id) {
+    //       throw new BadRequestException(
+    //         'Subject ID in SkillExpectedLevel is required',
+    //       );
+    //     }
+    //     const existSkill = this.skillRepo.findOneBy({ id: s.skill.id });
+    //     if (!existSkill) {
+    //       throw new BadRequestException(
+    //         `Skill with ID ${s.skill.id} not found`,
+    //       );
+    //     }
+    //     return this.SkillExpectedLevelsRepository.create(s);
+    //   }),
+    // );
+    // if (!skillExpectedLevels) {
+    //   throw new NotFoundException('Skills not found');
+    // }
+    const subject = this.subRepo.create({
+      ...dto,
+      // skillExpectedLevels
+    });
     try {
       return await this.subRepo.save(subject);
     } catch (error) {
@@ -107,18 +110,17 @@ export class SubjectsService {
         description: true,
         type: true,
         credit: true,
-
-        skillExpectedLevels: {
-          id: true,
-          expectedLevel: true,
-          skill: {
-            id: true,
-            thaiName: true,
-            engName: true,
-            parent: { id: true, thaiName: true, engName: true },
-            children: { id: true, thaiName: true, engName: true },
-          },
-        },
+        // skillExpectedLevels: {
+        //   id: true,
+        //   expectedLevel: true,
+        //   skill: {
+        //     id: true,
+        //     thaiName: true,
+        //     engName: true,
+        //     parent: { id: true, thaiName: true, engName: true },
+        //     children: { id: true, thaiName: true, engName: true },
+        //   },
+        // },
       },
     };
     try {
@@ -130,7 +132,13 @@ export class SubjectsService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [{ name: Like(`%${search}%`) }];
+          options.where = [
+            {
+              code: Like(`%${search}%`),
+              name: Like(`%${search}%`),
+              engName: Like(`%${search}%`),
+            },
+          ];
         }
         return await this.subRepo.findAndCount(options);
       } else {
@@ -154,144 +162,149 @@ export class SubjectsService {
   }
 
   async update(code: string, dto: UpdateSubjectDto) {
-    // const subject = await this.subRepo.preload({
-    //   id,
-    //   ...dto,
-    // });
     const subject = await this.subRepo.findOne({ where: { code } });
     if (!subject) {
       throw new NotFoundException(`Subject with id ${code} not found`);
     }
-    if (dto.skillExpectedLevels.length > 0) {
-      const skillExpectedLevels = await Promise.all(
-        dto.skillExpectedLevels.map((s) => {
-          const existSkill = this.skillRepo.findOneBy({ id: s.skill.id });
-          if (!existSkill) {
-            throw new BadRequestException(
-              `Skill with ID ${s.skill.id} not found`,
-            );
-          }
-          return this.SkillExpectedLevelsRepository.create({
-            ...s,
-            subject: { id: subject.id },
-          });
-        }),
-      );
-      if (!skillExpectedLevels) {
-        throw new NotFoundException('Skills not found');
-      }
-      subject.skillExpectedLevels = skillExpectedLevels;
-    }
+
+    // if (dto.skillExpectedLevels.length > 0) {
+    //   const skillExpectedLevels = await Promise.all(
+    //     dto.skillExpectedLevels.map((s) => {
+    //       const existSkill = this.skillRepo.findOneBy({ id: s.skill.id });
+    //       if (!existSkill) {
+    //         throw new BadRequestException(
+    //           `Skill with ID ${s.skill.id} not found`,
+    //         );
+    //       }
+    //       return this.SkillExpectedLevelsRepository.create({
+    //         ...s,
+    //         subject: { id: subject.id },
+    //       });
+    //     }),
+    //   );
+    //   if (!skillExpectedLevels) {
+    //     throw new NotFoundException('Skills not found');
+    //   }
+    //   subject.skillExpectedLevels = skillExpectedLevels;
+    // }
+    // try {
+    //   await this.subRepo.save(subject);
+
+    // update subject with dto
+
     try {
-      await this.subRepo.save(subject);
+      await this.subRepo.save({
+        ...subject,
+        ...dto,
+      });
     } catch (error) {
       throw new BadRequestException('Failed to update subject');
     }
   }
 
-  async selectSkills(
-    id: string,
-    skillExpectedLevels: SkillExpectedLevel[],
-  ): Promise<Subject> {
-    const subject = await this.findOne(id);
-    if (!subject) {
-      throw new NotFoundException(`Subject with ID ${id} not found`);
-    }
+  // async selectSkills(
+  //   id: string,
+  //   skillExpectedLevels: SkillExpectedLevel[],
+  // ): Promise<Subject> {
+  //   const subject = await this.findOne(id);
+  //   if (!subject) {
+  //     throw new NotFoundException(`Subject with ID ${id} not found`);
+  //   }
 
-    // Ensure skillExpectedLevels is initialized
-    subject.skillExpectedLevels = subject.skillExpectedLevels || [];
+  //   // Ensure skillExpectedLevels is initialized
+  //   subject.skillExpectedLevels = subject.skillExpectedLevels || [];
 
-    const notSameSkillExpectedLevels = skillExpectedLevels.filter(
-      (newSkillExpectedLevel) =>
-        !subject.skillExpectedLevels.some(
-          (subjectSkillExpectedLevel) =>
-            subjectSkillExpectedLevel.skill.id ===
-            newSkillExpectedLevel.skill.id,
-        ),
-    );
+  //   const notSameSkillExpectedLevels = skillExpectedLevels.filter(
+  //     (newSkillExpectedLevel) =>
+  //       !subject.skillExpectedLevels.some(
+  //         (subjectSkillExpectedLevel) =>
+  //           subjectSkillExpectedLevel.skill.id ===
+  //           newSkillExpectedLevel.skill.id,
+  //       ),
+  //   );
 
-    for (let index = 0; index < notSameSkillExpectedLevels.length; index++) {
-      let skillExpectedLevel = this.SkillExpectedLevelsRepository.create(
-        notSameSkillExpectedLevels[index],
-      );
-      skillExpectedLevel =
-        await this.SkillExpectedLevelsRepository.save(skillExpectedLevel);
+  //   for (let index = 0; index < notSameSkillExpectedLevels.length; index++) {
+  //     let skillExpectedLevel = this.SkillExpectedLevelsRepository.create(
+  //       notSameSkillExpectedLevels[index],
+  //     );
+  //     skillExpectedLevel =
+  //       await this.SkillExpectedLevelsRepository.save(skillExpectedLevel);
 
-      subject.skillExpectedLevels.push(skillExpectedLevel);
-    }
+  //     subject.skillExpectedLevels.push(skillExpectedLevel);
+  //   }
 
-    try {
-      return await this.subRepo.save(subject);
-    } catch (error) {
-      throw new BadRequestException(
-        'Failed to update SkillExpectedLevel in Subject',
-        error.message,
-      );
-    }
-  }
+  //   try {
+  //     return await this.subRepo.save(subject);
+  //   } catch (error) {
+  //     throw new BadRequestException(
+  //       'Failed to update SkillExpectedLevel in Subject',
+  //       error.message,
+  //     );
+  //   }
+  // }
 
-  async updateSkillExpectedLevel(
-    skillExpectedLevel: SkillExpectedLevel,
-  ): Promise<SkillExpectedLevel> {
-    try {
-      return await this.SkillExpectedLevelsRepository.save(skillExpectedLevel);
-    } catch (error) {
-      throw new BadRequestException(
-        `Failed to update SkillExpectedLevel ID : ${skillExpectedLevel.id}`,
-        error.message,
-      );
-    }
-  }
+  // async updateSkillExpectedLevel(
+  //   skillExpectedLevel: SkillExpectedLevel,
+  // ): Promise<SkillExpectedLevel> {
+  //   try {
+  //     return await this.SkillExpectedLevelsRepository.save(skillExpectedLevel);
+  //   } catch (error) {
+  //     throw new BadRequestException(
+  //       `Failed to update SkillExpectedLevel ID : ${skillExpectedLevel.id}`,
+  //       error.message,
+  //     );
+  //   }
+  // }
 
-  async removeSkill(
-    code: string,
-    skillExpectedLevelId: number,
-  ): Promise<Subject> {
-    // Fetch the subject with the associated skillExpectedLevels
-    const subject = await this.subRepo.findOne({
-      where: { code },
-      relations: { skillExpectedLevels: true },
-    });
+  // async removeSkill(
+  //   code: string,
+  //   skillExpectedLevelId: number,
+  // ): Promise<Subject> {
+  //   // Fetch the subject with the associated skillExpectedLevels
+  //   const subject = await this.subRepo.findOne({
+  //     where: { code },
+  //     relations: { skillExpectedLevels: true },
+  //   });
 
-    if (!subject) {
-      throw new NotFoundException(`Subject with ID ${code} not found`);
-    }
+  //   if (!subject) {
+  //     throw new NotFoundException(`Subject with ID ${code} not found`);
+  //   }
 
-    // Find the skillExpectedLevel to remove
-    const skillExpectedLevelToRemove = subject.skillExpectedLevels.find(
-      (skillExpectedLevel) => skillExpectedLevel.id === skillExpectedLevelId,
-    );
+  //   // Find the skillExpectedLevel to remove
+  //   const skillExpectedLevelToRemove = subject.skillExpectedLevels.find(
+  //     (skillExpectedLevel) => skillExpectedLevel.id === skillExpectedLevelId,
+  //   );
 
-    if (!skillExpectedLevelToRemove) {
-      throw new NotFoundException(
-        `SkillExpectedLevel with ID ${skillExpectedLevelId} not found`,
-      );
-    }
+  //   if (!skillExpectedLevelToRemove) {
+  //     throw new NotFoundException(
+  //       `SkillExpectedLevel with ID ${skillExpectedLevelId} not found`,
+  //     );
+  //   }
 
-    // Filter out the skillExpectedLevel from the subject
-    subject.skillExpectedLevels = subject.skillExpectedLevels.filter(
-      (skillExpectedLevel) => skillExpectedLevel.id !== skillExpectedLevelId,
-    );
+  //   // Filter out the skillExpectedLevel from the subject
+  //   subject.skillExpectedLevels = subject.skillExpectedLevels.filter(
+  //     (skillExpectedLevel) => skillExpectedLevel.id !== skillExpectedLevelId,
+  //   );
 
-    try {
-      // Delete the skillExpectedLevel from the database
-      await this.SkillExpectedLevelsRepository.delete(skillExpectedLevelId);
+  //   try {
+  //     // Delete the skillExpectedLevel from the database
+  //     await this.SkillExpectedLevelsRepository.delete(skillExpectedLevelId);
 
-      // Save the updated subject
-      await this.subRepo.save(subject);
+  //     // Save the updated subject
+  //     await this.subRepo.save(subject);
 
-      // Return the updated subject with the remaining skillExpectedLevels
-      return await this.subRepo.findOne({
-        where: { code },
-        relations: { skillExpectedLevels: true },
-      });
-    } catch (error) {
-      throw new BadRequestException(
-        'Failed to remove Skill from Subject',
-        error.message,
-      );
-    }
-  }
+  //     // Return the updated subject with the remaining skillExpectedLevels
+  //     return await this.subRepo.findOne({
+  //       where: { code },
+  //       relations: { skillExpectedLevels: true },
+  //     });
+  //   } catch (error) {
+  //     throw new BadRequestException(
+  //       'Failed to remove Skill from Subject',
+  //       error.message,
+  //     );
+  //   }
+  // }
 
   async remove(code: string): Promise<void> {
     const subject = await this.findOne(code);

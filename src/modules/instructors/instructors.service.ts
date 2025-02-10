@@ -196,6 +196,21 @@ export class InstructorsService {
     return teacher;
   }
 
+  async selectInstructorToCurriculum(teacherId: number, curriculumId: number) {
+    const teacher = await this.insRepo.findOneBy({ id: teacherId });
+    const curriculum = await this.curRepo.findOneBy({ id: curriculumId });
+    if (!teacher) {
+      throw new NotFoundException(`Teacher with ID ${teacherId} not found`);
+    }
+    if (!curriculum) {
+      throw new NotFoundException(
+        `Curriculum with ID ${curriculumId} not found`,
+      );
+    }
+    teacher.curriculums.push(curriculum);
+    return await this.insRepo.save(teacher);
+  }
+
   async update(
     id: number,
     updateTeacherDto: UpdateInstructorDto,

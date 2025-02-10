@@ -14,8 +14,8 @@ import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
 import { UpdateSubjectDto } from 'src/dto/subject/update-subject.dto';
 import { ClosService } from '../clos/clos.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { CreateSkillCollection } from 'src/dto/skill/skill-collection.dto';
-import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
+// import { CreateSkillCollection } from 'src/dto/skill/skill-collection.dto';
+// import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 
 @ApiBearerAuth()
 @Controller('subjects')
@@ -50,39 +50,39 @@ export class SubjectsController {
     return this.subjectsService.remove(id);
   }
 
-  // Select SkillExpectedLevels in subject // aggration relation
-  @Post('skillExpectedLevels/:subjectId')
-  async selectSkills(
-    @Param('subjectId') id: string,
-    @Body() skillExpectedLevels: SkillExpectedLevel[],
-  ) {
-    return this.subjectsService.selectSkills(id, skillExpectedLevels); // select skill to curriculum
-  }
+  // // Select SkillExpectedLevels in subject // aggration relation
+  // @Post('skillExpectedLevels/:subjectId')
+  // async selectSkills(
+  //   @Param('subjectId') id: string,
+  //   @Body() skillExpectedLevels: SkillExpectedLevel[],
+  // ) {
+  //   return this.subjectsService.selectSkills(id, skillExpectedLevels); // select skill to curriculum
+  // }
 
-  // Update SkillExpectedLevel
-  @Patch('skillExpectedLevels')
-  async updateSkillExpectedLevel(
-    @Body() skillExpectedLevels: SkillExpectedLevel,
-  ) {
-    return this.subjectsService.updateSkillExpectedLevel(skillExpectedLevels); // select skill to curriculum
-  }
+  // // Update SkillExpectedLevel
+  // @Patch('skillExpectedLevels')
+  // async updateSkillExpectedLevel(
+  //   @Body() skillExpectedLevels: SkillExpectedLevel,
+  // ) {
+  //   return this.subjectsService.updateSkillExpectedLevel(skillExpectedLevels); // select skill to curriculum
+  // }
 
-  // remove SkillExpectedLevel from subject
-  @Delete('skillExpectedLevels/:subjectId/:skillExpectedLevelId')
-  async removeSkillExpectedLevel(
-    @Param('subjectId') subjectId: string,
-    @Param('skillExpectedLevelId') skillExpectedLevelId: number,
-  ) {
-    return await this.subjectsService.removeSkill(
-      subjectId,
-      skillExpectedLevelId,
-    );
-  }
+  // // remove SkillExpectedLevel from subject
+  // @Delete('skillExpectedLevels/:subjectId/:skillExpectedLevelId')
+  // async removeSkillExpectedLevel(
+  //   @Param('subjectId') subjectId: string,
+  //   @Param('skillExpectedLevelId') skillExpectedLevelId: number,
+  // ) {
+  //   return await this.subjectsService.removeSkill(
+  //     subjectId,
+  //     skillExpectedLevelId,
+  //   );
+  // }
 
-  @Post('skill-mappings')
-  async skillMappings(@Body() skill: CreateSkillCollection[]) {
-    return this.subjectsService.skillMappings(skill); // mapping skill with skill detail
-  }
+  // @Post('skill-mappings')
+  // async skillMappings(@Body() skill: CreateSkillCollection[]) {
+  //   return this.subjectsService.skillMappings(skill); // mapping skill with skill detail
+  // }
 
   @Get('filters/:curriculumId')
   async filters(@Param('curriculumId') curriculumId: string) {

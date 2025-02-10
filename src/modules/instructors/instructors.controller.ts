@@ -38,6 +38,18 @@ export class InstructorsController {
     return this.insService.create(createTeacherDto);
   }
 
+  @Get(':curriculumId/:instructorId')
+  @HttpCode(HttpStatus.OK)
+  selectInstructorToCurriculum(
+    @Param('curriculumId') curriculumId: string,
+    @Param('instructorId') instructorId: string,
+  ) {
+    return this.insService.selectInstructorToCurriculum(
+      +instructorId,
+      +curriculumId,
+    );
+  }
+
   @Post(':id/image/upload')
   @UseInterceptors(FileInterceptor('image'))
   public async uploadFile(
