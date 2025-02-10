@@ -1,7 +1,7 @@
 module.exports = {
   apps: [
     {
-      name: 'BUU API', // Give your application a descriptive name
+      name: 'BUU-API', // Give your application a descriptive name
       script: './dist/main.js', // Path to your built application's entry point
       cwd: './', // Current working directory (usually the project root)
       instances: 1, // Number of instances to run (for load balancing, usually equals to number of cores)
