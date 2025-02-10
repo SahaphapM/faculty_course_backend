@@ -36,7 +36,10 @@ export class CreateCurriculumDto {
   branch: Branch;
 
   @IsString()
-  description: string;
+  thaiDescription: string;
+
+  @IsString()
+  engDescription: string;
 
   @IsNumber()
   period: number | 3;
