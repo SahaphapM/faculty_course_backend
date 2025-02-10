@@ -1,0 +1,5 @@
+untrack app.module.ts
+git update-index --assume-unchanged src/app/app.module.ts
+
+track app.module.ts
+git update-index --no-assume-unchanged src/app/app.module.ts
