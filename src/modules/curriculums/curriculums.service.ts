@@ -55,31 +55,83 @@ export class CurriculumsService {
     }
   }
 
+  // async findAll(pag?: PaginationDto) {
+  //   const defaultLimit = 10;
+  //   const defaultPage = 1;
+
+  //   const options: FindManyOptions<Curriculum> = {
+  //     relationLoadStrategy: 'query',
+  //     relations: {
+  //       plos: true,
+  //       branch: true,
+  //       coordinators: true,
+  //     },
+  //     select: {
+  //       id: true,
+  //       code: true,
+  //       thaiName: true,
+  //       thaiDescription: true,
+  //       minimumGrade: true,
+  //       thaiDegree: true,
+  //       engDegree: true,
+  //       engName: true,
+  //       period: true,
+  //       branch: { id: true, name: true },
+  //       coordinators: { id: true, thaiName: true },
+  //     },
+  //   };
+
+  //   try {
+  //     if (pag) {
+  //       const { search, limit, page, order, facultyName, branchName } = pag;
+
+  //       options.take = limit || defaultLimit;
+  //       options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
+  //       options.order = { id: order || 'ASC' };
+  //       options.where = {};
+
+  //       if (search) {
+  //         options.where.thaiName = Like(`%${search}%`);
+  //       }
+  //       if (facultyName) {
+  //         options.where.branch = {
+  //           faculty: { name: Like(`%${facultyName}%`) },
+  //         };
+  //       }
+  //       if (branchName) {
+  //         options.where.branch = { name: Like(`%${branchName}%`) };
+  //       }
+
+  //       return await this.currRepo.findAndCount(options);
+  //     } else {
+  //       return await this.currRepo.find(options);
+  //     }
+  //   } catch (error) {
+  //     console.error('Error fetching curriculums:', error);
+  //     throw new InternalServerErrorException('Failed to fetch curriculums');
+  //   }
+  // }
+
   async findAll(pag?: PaginationDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 
     const options: FindManyOptions<Curriculum> = {
       relationLoadStrategy: 'query',
-      relations: {
-        plos: true,
-        branch: true,
-        coordinators: true,
-      },
-      select: {
-        id: true,
-        code: true,
-        thaiName: true,
-        thaiDescription: true,
-        minimumGrade: true,
-        thaiDegree: true,
-        engDegree: true,
-        engName: true,
-        period: true,
-        branch: { id: true, name: true },
-        coordinators: { id: true, thaiName: true },
-      },
+      relations: ['plos', 'branch', 'coordinators'],
+      select: [
+        'id',
+        'code',
+        'thaiName',
+        'thaiDescription',
+        'minimumGrade',
+        'thaiDegree',
+        'engDegree',
+        'engName',
+        'period',
+      ],
     };
+
     try {
       if (pag) {
         const { search, limit, page, order, facultyName, branchName } = pag;
@@ -87,26 +139,20 @@ export class CurriculumsService {
         options.take = limit || defaultLimit;
         options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
         options.order = { id: order || 'ASC' };
-        options.where = [];
 
-        if (search) {
-          options.where.push({ thaiName: Like(`%${search}%`) });
-        }
-        if (facultyName) {
-          options.where.push({
+        options.where = {
+          ...(search && { thaiName: Like(`%${search}%`) }),
+          ...(facultyName && {
             branch: { faculty: { name: Like(`%${facultyName}%`) } },
-          });
-        }
-        if (branchName) {
-          options.where.push({ branch: { name: Like(`%${branchName}%`) } });
-        }
+          }),
+          ...(branchName && { branch: { name: Like(`%${branchName}%`) } }),
+        };
 
         return await this.currRepo.findAndCount(options);
       } else {
         return await this.currRepo.find(options);
       }
     } catch (error) {
-      // Log the error for debugging
       console.error('Error fetching curriculums:', error);
       throw new InternalServerErrorException('Failed to fetch curriculums');
     }
