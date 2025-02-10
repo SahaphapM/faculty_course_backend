@@ -3,13 +3,15 @@ import {
   IsArray,
   IsNotEmpty,
   IsNumber,
+  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
 import { Instructor } from 'src/entities/instructor.entity';
-import { UpdateCourseSpecDto } from '../course-specs/update-course-spec.dto';
-import { UpdatePloDto } from '../plo/update-plo.dto';
-import { UpdateSkillDto } from '../skill/update-skill.dto';
+import { Branch } from 'src/entities/branch.entity';
+import { Plo } from 'src/entities/plo.entity';
+import { CourseSpec } from 'src/entities/course-spec.entity';
+import { Skill } from 'src/entities/skill.entity';
 
 export class CreateCurriculumDto {
   @IsString()
@@ -17,20 +19,21 @@ export class CreateCurriculumDto {
   code: string;
 
   @IsString()
-  name: string;
+  thaiName: string;
 
   @IsString()
   engName: string;
 
   @IsString()
-  degree: string;
+  thaiDegree: string;
 
   @IsString()
   engDegree: string;
 
-  @IsNumber()
+  @ApiHideProperty()
+  @IsObject()
   @IsOptional()
-  branchId: number;
+  branch: Branch;
 
   @IsString()
   description: string;
@@ -62,7 +65,7 @@ export class CreateCurriculumDto {
   @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
-  plos: UpdatePloDto[];
+  plos: Plo[];
 
   // @ApiProperty({ type: [Subject] })
   // @ApiHideProperty() // Hide this Property
@@ -74,11 +77,11 @@ export class CreateCurriculumDto {
   @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
-  courseSpecs: UpdateCourseSpecDto[];
+  courseSpecs: CourseSpec[];
 
   // @ApiProperty({ type: [CreateSkillDto] })
   @ApiHideProperty() // Hide this Property
   @IsArray()
   @IsOptional()
-  skills: UpdateSkillDto[];
+  skills: Skill[];
 }

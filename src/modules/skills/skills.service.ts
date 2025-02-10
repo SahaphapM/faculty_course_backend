@@ -24,15 +24,15 @@ export class SkillsService {
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
     const curriculum = await this.curriculumRepo.findOne({
-      where: { id: createSkillDto.curriculumId },
+      where: { id: createSkillDto.curriculum },
     });
 
     if (!curriculum) {
       throw new NotFoundException(
-        `Curriculum with ID ${createSkillDto.curriculumId} not found`,
+        `Curriculum with ID ${createSkillDto.curriculum} not found`,
       );
     }
-    const skill = this.skRepo.create(createSkillDto);
+    const skill = this.skRepo.create(curriculum);
     skill.curriculum = curriculum;
 
     try {
@@ -40,76 +40,10 @@ export class SkillsService {
     } catch (error) {
       throw new BadRequestException(
         'Failed to create skill',
-        createSkillDto.name,
+        createSkillDto.thaiName,
       );
     }
   }
-
-  // async findAllByPage(
-  //   paginationDto: PaginationDto,
-  // ): Promise<{ data: Skill[]; total: number }> {
-  //   const { page, limit, sort, order, search, bySubject } = paginationDto;
-
-  //   const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
-
-  //   // Join relations to include them in the result
-  //   queryBuilder
-  //     .where('skill.parentId IS NULL') // Correctly check for NULL
-  //     .leftJoinAndSelect('skill.skillExpectedLevels', 'skillExpectedLevels')
-  //     .leftJoinAndSelect('skillExpectedLevels.subject', 'subject')
-  //     .leftJoinAndSelect('skill.children', 'children') // For direct children
-  //     .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
-  //     .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
-  //     .leftJoinAndSelect('skill.techSkills', 'techSkills');
-
-  //   // Conditionally add joins based on bySubject
-  //   if (bySubject) {
-  //     queryBuilder.andWhere('subject.id = :subjectId', {
-  //       subjectId: bySubject,
-  //     });
-  //   }
-  //   // Add search condition if provided
-
-  //   if (search) {
-  //     queryBuilder.andWhere(
-  //       new Brackets((qb) => {
-  //         qb.where('skill.name LIKE :search', {
-  //           search: `%${search}%`,
-  //         }).orWhere('skill.description LIKE :search', {
-  //           search: `%${search}%`,
-  //         });
-  //       }),
-  //     );
-  //   }
-
-  //   // Pagination
-  //   const [data, total] = await queryBuilder
-  //     .skip((page - 1) * limit)
-  //     .take(limit)
-  //     .orderBy(`skill.${sort || 'id'}`, order || 'ASC')
-  //     .getManyAndCount();
-
-  //   return { data, total };
-  // }
-
-  // async findAll(): Promise<Skill[]> {
-  //   const queryBuilder = this.skillsRepository.createQueryBuilder('skill');
-
-  //   queryBuilder
-  //     .where('skill.parentId IS NULL') // Correctly check for NULL
-  //     .leftJoinAndSelect('skill.skillExpectedLevels', 'skillExpectedLevels')
-  //     .leftJoinAndSelect('skillExpectedLevels.subjects', 'subject')
-  //     .leftJoinAndSelect('skill.children', 'children') // For direct children
-  //     .leftJoinAndSelect('children.children', 'grandchildren') // For children of children
-  //     .leftJoinAndSelect('grandchildren.children', 'greatGrandchildren') // Children of grandchildren
-  //     .leftJoinAndSelect('skill.techSkills', 'techSkills');
-
-  //   // .where('skill.parentId IS NULL') // Check where parentId is null
-  //   // .leftJoinAndSelect['skill.skillExpectedLevels', 'skillExpectedLevels']
-  //   const skills = await queryBuilder.getMany();
-
-  //   return skills;
-  // }
 
   async findAll(pag?: PaginationDto) {
     const defaultLimit = 10;
@@ -126,7 +60,7 @@ export class SkillsService {
         engDescription: true,
         domain: true,
         parent: { id: true, thaiName: true, engName: true },
-        curriculum: { id: true, name: true },
+        curriculum: { id: true, thaiName: true },
       },
     };
     try {
@@ -190,11 +124,11 @@ export class SkillsService {
     return skill;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async update(id: number, updateSkillDto: UpdateSkillDto): Promise<Skill> {
     await this.findOne(id); // Ensure the skill exists
     const skill = await this.skRepo.preload({
       id: Number(id),
-      ...updateSkillDto,
     });
 
     if (!skill) {
@@ -218,32 +152,29 @@ export class SkillsService {
     }
   }
 
-  async selectSubSkills(
-    id: number,
-    createSkillDto: CreateSkillDto,
-  ): Promise<Skill> {
+  async selectSubSkills(id: number, createSkillDto: CreateSkillDto) {
     console.log(createSkillDto);
     const parentSkill = await this.findOne(id);
 
     parentSkill.children = parentSkill.children || []; // initialize children
 
     // find child skill in database
-    const subSkill = await this.findOne(createSkillDto.id);
+    // const subSkill = await this.findOne(createSkillDto.id);
 
     // Check if subSkill already related to parentSkill
-    const isAlreadyRelated = parentSkill.children.some(
-      (child) => child.id.toString() === subSkill.id.toString(),
-    );
+    // const isAlreadyRelated = parentSkill.children.some(
+    //   (child) => child.id.toString() === subSkill.id.toString(),
+    // );
 
     // If not already related, add the subSkill to subSkills
-    if (!isAlreadyRelated) {
-      parentSkill.children.push(subSkill);
-      try {
-        return await this.skRepo.save(parentSkill);
-      } catch (error) {
-        throw new BadRequestException('Failed to select childSkill');
-      }
-    }
+    // if (!isAlreadyRelated) {
+    //   parentSkill.children.push(subSkill);
+    //   try {
+    //     return await this.skRepo.save(parentSkill);
+    //   } catch (error) {
+    //     throw new BadRequestException('Failed to select childSkill');
+    //   }
+    // }
   }
 
   async createSubSkills(
@@ -253,23 +184,23 @@ export class SkillsService {
     const parentSkill = await this.findOne(id);
 
     const curriculum = await this.curriculumRepo.findOne({
-      where: { id: createSkillDto.curriculumId || parentSkill.curriculum.id },
+      where: { id: createSkillDto.curriculum || parentSkill.curriculum.id },
     });
 
     if (!curriculum) {
       throw new NotFoundException(
-        `Curriculum with ID ${createSkillDto.curriculumId} not found`,
+        `Curriculum with ID ${createSkillDto.curriculum} not found`,
       );
     }
 
     parentSkill.children = parentSkill.children || []; // initialize children
 
-    const subSkill = await this.skRepo.save({
-      ...createSkillDto,
-      curriculum,
-    });
+    // const subSkill = await this.skRepo.save({
+    //   ...createSkillDto,
+    //   curriculum,
+    // });
 
-    parentSkill.children.push(subSkill);
+    // parentSkill.children.push(subSkill);
 
     try {
       return await this.skRepo.save(parentSkill);

@@ -210,7 +210,7 @@ export class StudentsService {
       // Initialize SkillCollectionTree nodes and populate the skillMap
       skillCollections.forEach((skillCollection) => {
         const { gainedLevel, passed, skillExpectedLevels } = skillCollection;
-        const { id: skillId, name } = skillExpectedLevels.skill;
+        const { id: skillId, thaiName: name } = skillExpectedLevels.skill;
 
         skillMap[skillId] = {
           id: idCounter++, // Assign and increment the auto-increment ID
@@ -237,7 +237,7 @@ export class StudentsService {
             skillMap[parentId] = {
               id: idCounter++, // Assign and increment the auto-increment ID
               skillId: parentId,
-              name: parent.name,
+              name: parent.thaiName,
               gainedLevel: null,
               expectedLevel: null,
               passed: null,

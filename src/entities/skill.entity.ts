@@ -23,9 +23,6 @@ export class Skill {
   id: number;
 
   @Column({ nullable: true })
-  name: string;
-
-  @Column({ nullable: true })
   thaiName: string;
 
   @Column({ nullable: true })
@@ -38,14 +35,13 @@ export class Skill {
   engDescription: string;
 
   @Column({
-    // enum: LearningDomain, //mysql/mariaDB not support
     default: LearningDomain.Psychomotor,
     nullable: true,
   })
   domain: LearningDomain;
 
   // Tree relation
-  @TreeChildren({ cascade: false }) // delete parent not effect childs
+  @TreeChildren({ cascade: ['insert', 'update'] }) // delete parent not effect childs
   children: Skill[];
 
   @TreeParent()

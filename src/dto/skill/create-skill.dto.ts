@@ -1,31 +1,42 @@
-import { ApiHideProperty } from '@nestjs/swagger';
-import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
-import { Skill } from 'src/entities/skill.entity';
+import { Type } from 'class-transformer';
+import {
+  IsOptional,
+  IsString,
+  IsEnum,
+  ValidateNested,
+  IsNumber,
+} from 'class-validator';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 
 export class CreateSkillDto {
   @IsOptional()
-  @IsNumber()
-  id: number;
-
   @IsString()
-  name: string;
+  thaiName?: string;
 
+  @IsOptional()
   @IsString()
-  description: string;
+  engName?: string;
 
+  @IsOptional()
+  @IsString()
+  thaiDescription?: string;
+
+  @IsOptional()
+  @IsString()
+  engDescription?: string;
+
+  @IsOptional()
   @IsEnum(LearningDomain)
-  domain: LearningDomain;
-
-  // subjects: Subject[] | null;
-  @ApiHideProperty()
-  @IsOptional()
-  children: Skill[] | null;
+  domain?: LearningDomain;
 
   @IsOptional()
-  @IsNumber()
-  parentId: number | null;
+  @ValidateNested({ each: true })
+  @Type(() => CreateSkillDto) // Recursive type for nested skills
+  children?: CreateSkillDto[];
+
+  @IsOptional()
+  parent?: number; // Reference to parent skill ID
 
   @IsNumber()
-  curriculumId: number;
+  curriculum: number; //Ref to curriculum ID
 }

@@ -28,19 +28,25 @@ export class CurriculumsService {
     private braRepo: Repository<Branch>,
   ) {}
 
-  async create(dto: CreateCurriculumDto): Promise<Curriculum> {
-    const curriculum = this.currRepo.create(dto);
+  async create(dto: CreateCurriculumDto) {
+    // pause for now
+    const curriculum = this.currRepo.create({});
     try {
-      if (dto.branchId) {
-        const branch = await this.braRepo.findOneBy({ id: dto.branchId });
+      if (dto.branch) {
+        const branch = await this.braRepo.findOneBy({ id: dto.branch.id });
         if (!branch) {
           throw new NotFoundException(
-            `Branch with IDs ${dto.branchId} not found`,
+            `Branch with IDs ${dto.branch} not found`,
           );
         }
         curriculum.branch = branch;
       }
-      return await this.currRepo.save(curriculum);
+      await this.currRepo.save(curriculum);
+      return {
+        statusCode: HttpStatus.CREATED,
+        message: 'Curriculum created successfully',
+        data: curriculum,
+      };
     } catch (error) {
       throw new BadRequestException(
         'Failed to create Curriculum ',
@@ -64,10 +70,10 @@ export class CurriculumsService {
       select: {
         id: true,
         code: true,
-        name: true,
-        description: true,
+        thaiName: true,
+        thaiDescription: true,
         minimumGrade: true,
-        degree: true,
+        thaiDegree: true,
         engDegree: true,
         engName: true,
         period: true,
@@ -85,7 +91,7 @@ export class CurriculumsService {
         options.where = [];
 
         if (search) {
-          options.where.push({ name: Like(`%${search}%`) });
+          options.where.push({ thaiName: Like(`%${search}%`) });
         }
         if (facultyName) {
           options.where.push({
@@ -139,52 +145,20 @@ export class CurriculumsService {
     if (!curriculum) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
-    // Course Spec Handle + create subjects
-    if (dto.courseSpecs.length) {
-      curriculum.subjects = [];
 
-      for (const courseSpec of dto.courseSpecs) {
-        curriculum.courseSpecs.map((cs) => {
-          cs.curriculum = curriculum;
-        });
-        const subject = this.subRepo.create({ ...courseSpec.subject });
-        curriculum.subjects.push(subject);
-      }
-    }
+    this.currRepo.merge(curriculum, dto);
+    // // Course Spec Handle + create subjects
+    // if (dto.courseSpecs.length) {
+    //   curriculum.subjects = [];
 
-    // Skill handle things
-    if (dto.skills) {
-      curriculum.skills = [];
-
-      const createSkillWithChildren = async (
-        skillData: any,
-        parentSkill?: Skill,
-      ) => {
-        const skill = this.skillRepo.create({
-          name: skillData.name,
-          domain: skillData.domain,
-          thaiDescription: skillData.description,
-          curriculum: curriculum,
-          parent: parentSkill || null,
-        });
-
-        if (skillData.children && Array.isArray(skillData.children)) {
-          for (const childData of skillData.children) {
-            const childSkill = await createSkillWithChildren(childData, skill);
-            if (!skill.children) skill.children = [];
-            skill.children.push(childSkill);
-          }
-        }
-
-        return skill;
-      };
-
-      // Create skill tree structure but don't save yet
-      for (const skillDto of dto.skills) {
-        const skill = await createSkillWithChildren(skillDto);
-        curriculum.skills.push(skill);
-      }
-    }
+    //   for (const courseSpec of dto.courseSpecs) {
+    //     curriculum.courseSpecs.map((cs) => {
+    //       cs.curriculum = curriculum;
+    //     });
+    //     const subject = this.subRepo.create({ ...courseSpec.subject });
+    //     curriculum.subjects.push(subject);
+    //   }
+    // }
 
     // Save everything in one transaction
     this.currRepo.save(curriculum);

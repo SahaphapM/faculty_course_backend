@@ -25,13 +25,13 @@ export class Curriculum {
   code: string;
 
   @Column()
-  name: string;
+  thaiName: string;
 
   @Column()
   engName: string;
 
   @Column()
-  degree: string;
+  thaiDegree: string;
 
   @Column()
   engDegree: string;
@@ -43,7 +43,7 @@ export class Curriculum {
   branch: Branch;
 
   @Column()
-  description: string;
+  thaiDescription: string;
 
   @Column()
   period: number;
@@ -66,7 +66,7 @@ export class Curriculum {
   subjects: Subject[];
 
   @OneToMany(() => Skill, (sk) => sk.curriculum, {
-    cascade: true,
+    cascade: ['insert', 'update'],
   })
   skills: Skill[];
 
