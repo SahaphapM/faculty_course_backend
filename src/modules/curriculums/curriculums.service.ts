@@ -63,7 +63,6 @@ export class CurriculumsService {
       relationLoadStrategy: 'query',
       relations: {
         plos: true,
-        subjects: true,
         branch: true,
         coordinators: true,
       },
