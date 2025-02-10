@@ -126,7 +126,10 @@ export class CurriculumsService {
       where: { code },
       relations: {
         plos: true,
-        subjects: true,
+        // subjects: true,
+        courseSpecs: {
+          subject: true,
+        },
         branch: true,
         coordinators: true,
         skills: {
