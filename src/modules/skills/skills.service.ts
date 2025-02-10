@@ -11,6 +11,7 @@ import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSkillDto } from 'src/dto/skill/create-skill.dto';
 import { UpdateSkillDto } from 'src/dto/skill/update-skill.dto';
 import { Curriculum } from 'src/entities/curriculum.entity';
+import { LearningDomain } from 'src/enums/learning-domain.enum';
 
 @Injectable()
 export class SkillsService {
@@ -181,8 +182,10 @@ export class SkillsService {
     id: number,
     createSkillDto: CreateSkillDto,
   ): Promise<Skill> {
+    // หา parentSkill จาก id
     const parentSkill = await this.findOne(id);
 
+    // หา curriculum จาก createSkillDto หรือ parentSkill
     const curriculum = await this.curriculumRepo.findOne({
       where: { id: createSkillDto.curriculum || parentSkill.curriculum.id },
     });
@@ -193,20 +196,22 @@ export class SkillsService {
       );
     }
 
-    parentSkill.children = parentSkill.children || []; // initialize children
+    // สร้าง subSkill จาก createSkillDto
+    const subSkill = new Skill();
+    subSkill.thaiName = createSkillDto.thaiName;
+    subSkill.engName = createSkillDto.engName;
+    subSkill.thaiDescription = createSkillDto.thaiDescription;
+    subSkill.engDescription = createSkillDto.engDescription;
+    subSkill.domain = createSkillDto.domain || LearningDomain.Psychomotor;
+    subSkill.curriculum = curriculum;
 
-    // const subSkill = await this.skRepo.save({
-    //   ...createSkillDto,
-    //   curriculum,
-    // });
+    // กำหนด parent ให้กับ subSkill
+    subSkill.parent = parentSkill;
 
-    // parentSkill.children.push(subSkill);
+    // บันทึก subSkill ลงในฐานข้อมูล
+    const savedSubSkill = await this.skRepo.save(subSkill);
 
-    try {
-      return await this.skRepo.save(parentSkill);
-    } catch (error) {
-      throw new BadRequestException('Failed to create childSkill');
-    }
+    return savedSubSkill;
   }
 
   async removeSubSkillId(id: number, subSkillId: number): Promise<Skill> {
