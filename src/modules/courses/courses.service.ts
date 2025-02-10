@@ -127,7 +127,7 @@ export class CoursesService {
       select: {
         id: true,
         name: true,
-        description: true,
+        thaiDescription: true,
         active: true,
       },
     };

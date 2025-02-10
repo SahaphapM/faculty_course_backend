@@ -28,7 +28,7 @@ export class Instructor {
   @Column({ nullable: true })
   tel: string;
 
-  @Column({ default: 'unknown.jpg' })
+  @Column({ nullable: true })
   picture: string;
 
   @Column({ nullable: true })
@@ -49,7 +49,7 @@ export class Instructor {
   @Column({ nullable: true })
   socials: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   bio: string;
 
   @OneToOne(() => Branch)

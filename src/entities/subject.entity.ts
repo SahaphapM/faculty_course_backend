@@ -25,10 +25,10 @@ export class Subject {
   @Column({ nullable: true })
   engName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   thaiDescription: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   engDescription: string;
 
   @Column({ nullable: true })

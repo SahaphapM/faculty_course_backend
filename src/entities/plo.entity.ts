@@ -18,10 +18,10 @@ export class Plo {
   @Column({ nullable: true })
   name: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   thaiDescription: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'text' })
   engDescription: string;
 
   @Column()
