@@ -45,6 +45,7 @@ export class CourseSpecsService {
 
     const courseSpec = this.courseSpecRepo.create({
       ...createCourseSpecDto,
+      subject,
     });
     return this.courseSpecRepo.save(courseSpec);
   }
@@ -124,6 +125,7 @@ export class CourseSpecsService {
     // สร้าง Subject และเชื่อมโยงกับ Curriculum
     const newSubject = this.subRepo.create({
       ...createCourseSpecDto,
+      code: createCourseSpecDto.subject.code,
       curriculum: curriculum, // กำหนด curriculum ทั้งตัว (ไม่ใช่แค่ id)
     });
 
