@@ -4,6 +4,7 @@ import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToMany,
   PrimaryGeneratedColumn,
@@ -47,6 +48,7 @@ export class Subject {
   courseSpecs: CourseSpec[];
 
   @ManyToOne(() => Curriculum, (curriculum) => curriculum.subjects)
+  @JoinColumn({ name: 'curriculumId' })
   curriculum: Curriculum;
 
   //////////////// อาจจะไม่ได้ใช้แล้ว เพราะต้องโยกไปที่ CourseSpec แทน //////////////
