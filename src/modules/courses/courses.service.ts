@@ -200,7 +200,7 @@ export class CoursesService {
       },
       select: {
         id: true,
-        student: { id: true, name: true },
+        student: { id: true, thaiName: true },
         skillCollections: {
           id: true,
           gainedLevel: true,

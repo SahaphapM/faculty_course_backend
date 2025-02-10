@@ -49,8 +49,8 @@ export class UsersService {
         id: true,
         email: true,
         role: true,
-        student: { id: true, name: true },
-        teacher: { id: true, name: true },
+        student: { id: true, thaiName: true },
+        teacher: { id: true, thaiName: true },
       },
     };
     try {

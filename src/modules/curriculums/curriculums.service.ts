@@ -78,7 +78,7 @@ export class CurriculumsService {
         engName: true,
         period: true,
         branch: { id: true, name: true },
-        coordinators: { id: true, name: true },
+        coordinators: { id: true, thaiName: true },
       },
     };
     try {
