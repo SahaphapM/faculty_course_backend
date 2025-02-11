@@ -101,26 +101,11 @@ export class SubjectsService {
 
     const options: FindManyOptions<Subject> = {
       relationLoadStrategy: 'query',
-      relations: { skillExpectedLevels: { skill: true } },
       select: {
         id: true,
         code: true,
-        // thaiName: true,
-        // engName: true,
-        // thaiDescription: true,
-        // type: true,
-        // credit: true,
-        // skillExpectedLevels: {
-        //   id: true,
-        //   expectedLevel: true,
-        //   skill: {
-        //     id: true,
-        //     thaiName: true,
-        //     engName: true,
-        //     parent: { id: true, thaiName: true, engName: true },
-        //     children: { id: true, thaiName: true, engName: true },
-        //   },
-        // },
+        thaiName: true,
+        engName: true,
       },
     };
     try {
@@ -133,11 +118,9 @@ export class SubjectsService {
 
         if (search) {
           options.where = [
-            {
-              code: Like(`%${search}%`),
-              thaiName: Like(`%${search}%`),
-              engName: Like(`%${search}%`),
-            },
+            { code: Like(`%${search}%`) }, // ค้นหาโดย code
+            { thaiName: Like(`%${search}%`) }, // ค้นหาโดย thaiName
+            { engName: Like(`%${search}%`) }, // ค้นหาโดย engName
           ];
         }
         return await this.subRepo.findAndCount(options);

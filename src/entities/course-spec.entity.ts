@@ -28,7 +28,7 @@ export class CourseSpec {
   @Column({ nullable: true })
   engDescription: string;
 
-  @Column()
+  @Column({ nullable: true })
   credit: string; //3 (2-2-5)
 
   @Column({
