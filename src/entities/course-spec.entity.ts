@@ -5,35 +5,37 @@ import {
   ManyToOne,
   JoinColumn,
   OneToMany,
+  Column,
 } from 'typeorm';
 import { Subject } from './subject.entity';
 import { Clo } from './clo.entity';
+import { SubjectType } from 'src/enums/subject-types.enum';
 
 @Entity()
 export class CourseSpec {
   @PrimaryGeneratedColumn()
   id: number;
 
-  // @Column({ nullable: true })
-  // thaiName: string;
+  @Column({ nullable: true })
+  thaiName: string;
 
-  // @Column({ nullable: true })
-  // engName: string;
+  @Column({ nullable: true })
+  engName: string;
 
-  // @Column({ nullable: true })
-  // thaiDescription: string;
+  @Column({ nullable: true })
+  thaiDescription: string;
 
-  // @Column({ nullable: true })
-  // engDescription: string;
+  @Column({ nullable: true })
+  engDescription: string;
 
-  // @Column()
-  // credit: string; //3 (2-2-5)
+  @Column()
+  credit: string; //3 (2-2-5)
 
-  // @Column({
-  //   // enum: SubjectType, // DB not support
-  //   default: SubjectType.Compulsory,
-  // })
-  // type: SubjectType;
+  @Column({
+    // enum: SubjectType, // DB not support
+    default: SubjectType.Compulsory,
+  })
+  type: SubjectType;
 
   // ความสัมพันธ์กับ Subject
   @ManyToOne(() => Subject, (subject) => subject.courseSpecs, {

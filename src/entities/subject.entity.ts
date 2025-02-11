@@ -26,21 +26,21 @@ export class Subject {
   @Column({ nullable: true })
   engName: string;
 
-  @Column({ nullable: true, type: 'text' })
-  thaiDescription: string;
+  // @Column({ nullable: true, type: 'text' })
+  // thaiDescription: string;
 
-  @Column({ nullable: true, type: 'text' })
-  engDescription: string;
+  // @Column({ nullable: true, type: 'text' })
+  // engDescription: string;
 
-  @Column({ nullable: true })
-  credit: string; //3 (2-2-5)
+  // @Column({ nullable: true })
+  // credit: string; //3 (2-2-5)
 
-  @Column({
-    // enum: SubjectType, // DB not support
-    default: SubjectType.Compulsory,
-    nullable: true,
-  })
-  type: SubjectType;
+  // @Column({
+  //   // enum: SubjectType, // DB not support
+  //   default: SubjectType.Compulsory,
+  //   nullable: true,
+  // })
+  // type: SubjectType;
 
   @OneToMany(() => CourseSpec, (courseSpec) => courseSpec.subject, {
     cascade: ['insert', 'update'],

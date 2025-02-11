@@ -105,11 +105,11 @@ export class SubjectsService {
       select: {
         id: true,
         code: true,
-        thaiName: true,
-        engName: true,
-        thaiDescription: true,
-        type: true,
-        credit: true,
+        // thaiName: true,
+        // engName: true,
+        // thaiDescription: true,
+        // type: true,
+        // credit: true,
         // skillExpectedLevels: {
         //   id: true,
         //   expectedLevel: true,
