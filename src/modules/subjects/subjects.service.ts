@@ -106,6 +106,7 @@ export class SubjectsService {
         code: true,
         thaiName: true,
         engName: true,
+        curriculum: { id: true, thaiName: true },
       },
     };
     try {
