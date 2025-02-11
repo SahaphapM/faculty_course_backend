@@ -113,12 +113,11 @@ export class CurriculumsService {
   // }
 
   async findAll(pag?: PaginationDto) {
-    const defaultLimit = 10;
+    const defaultLimit = 15;
     const defaultPage = 1;
 
     const options: FindManyOptions<Curriculum> = {
-      relationLoadStrategy: 'query',
-      relations: ['plos', 'branch', 'coordinators'],
+      relations: ['branch'],
       select: [
         'id',
         'code',
@@ -173,6 +172,7 @@ export class CurriculumsService {
         plos: true,
         // subjects: true,
         courseSpecs: {
+          clos: true,
           subject: true,
         },
         branch: true,
