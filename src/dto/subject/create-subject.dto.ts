@@ -12,17 +12,17 @@ export class CreateSubjectDto {
   @IsString()
   engName: string;
 
-  @IsString()
-  thaiDescription: string;
+  // @IsString()
+  // thaiDescription: string;
 
-  @IsString()
-  engDescription: string;
+  // @IsString()
+  // engDescription: string;
 
-  @IsString()
-  credit: string;
+  // @IsString()
+  // credit: string;
 
-  @IsEnum(SubjectType)
-  type: SubjectType;
+  // @IsEnum(SubjectType)
+  // type: SubjectType;
 
   @IsOptional()
   @IsArray()
