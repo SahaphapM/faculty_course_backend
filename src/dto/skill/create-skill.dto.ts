@@ -6,6 +6,7 @@ import {
   ValidateNested,
   IsNumber,
 } from 'class-validator';
+import { Curriculum } from 'src/entities/curriculum.entity';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 
 export class CreateSkillDto {
@@ -38,5 +39,5 @@ export class CreateSkillDto {
   parent?: number; // Reference to parent skill ID
 
   @IsNumber()
-  curriculum: number; //Ref to curriculum ID
+  curriculum: Partial<Curriculum>; //Ref to curriculum ID
 }
