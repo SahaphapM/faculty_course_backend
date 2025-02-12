@@ -185,7 +185,10 @@ export class SkillsService {
     createSkillDto: CreateSkillDto,
   ): Promise<Skill> {
     // หา parentSkill จาก id
+    console.log('parentId', parentId);
     const parentSkill = await this.findOne(parentId);
+
+    console.log(createSkillDto);
 
     // หา curriculum จาก createSkillDto หรือ parentSkill
     const curriculum = await this.curriculumRepo.findOne({
