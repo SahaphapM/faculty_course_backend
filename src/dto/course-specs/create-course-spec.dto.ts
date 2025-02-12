@@ -1,6 +1,7 @@
-import { IsNumber, IsObject, IsString } from 'class-validator';
-import { Subject } from 'src/entities/subject.entity';
+import { IsEnum, IsNumber, IsString } from 'class-validator';
 import { SubjectType } from 'src/enums/subject-types.enum';
+import { CreateSubjectDto } from '../subject/create-subject.dto';
+import { Type } from 'class-transformer';
 
 export class CreateCourseSpecDto {
   @IsString()
@@ -18,13 +19,13 @@ export class CreateCourseSpecDto {
   @IsString()
   credit: string;
 
-  @IsString()
+  @IsEnum(SubjectType)
   type: SubjectType;
 
   // get code subject from here
-  @IsObject()
-  subject: Partial<Subject>;
+  @Type(() => CreateSubjectDto)
+  subject: CreateSubjectDto;
 
-  @IsNumber()
+  @IsNumber({ allowNaN: false, allowInfinity: false })
   curriculumId: number;
 }
