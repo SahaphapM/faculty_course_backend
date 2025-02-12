@@ -33,8 +33,7 @@ export class SkillsService {
         `Curriculum with ID ${createSkillDto.curriculum} not found`,
       );
     }
-    const skill = this.skRepo.create(curriculum);
-    skill.curriculum = curriculum;
+    const skill = this.skRepo.create({ ...curriculum, curriculum: curriculum });
 
     try {
       return await this.skRepo.save(skill);
