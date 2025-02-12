@@ -29,8 +29,7 @@ export class CurriculumsService {
   ) {}
 
   async create(dto: CreateCurriculumDto) {
-    // pause for now
-    const curriculum = this.currRepo.create({});
+    const curriculum = this.currRepo.create(dto);
     try {
       if (dto.branch) {
         const branch = await this.braRepo.findOneBy({ id: dto.branch.id });
