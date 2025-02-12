@@ -76,6 +76,14 @@ export class CourseSpecsService {
     return courseSpec;
   }
 
+  async findExistSubject(code: string) {
+    const existSubject = await this.subRepo.findOne({ where: { code } });
+    if (!existSubject) {
+      return;
+    }
+    return existSubject;
+  }
+
   async saveByCurrId(id: number, updateCourseSpecDto: UpdateCourseSpecDto) {
     const curr = await this.curRepo.findOneBy({ id });
     if (!curr) {
