@@ -29,6 +29,10 @@ export class CurriculumsController {
     return this.curriculumsService.findAll(pag);
   }
 
+  @Get('findExistCode/:code')
+  findExistCode(@Param('code') code: string) {
+    return this.curriculumsService.findExistCode(code);
+  }
   @Get(':code')
   findOneByCode(@Param('code') code: string) {
     return this.curriculumsService.findOneByCode(code);
