@@ -164,6 +164,11 @@ export class CurriculumsService {
     return curriculum;
   }
 
+  async findExistCode(code: string) {
+    const curriculum = await this.currRepo.findOneBy({ code });
+    return curriculum;
+  }
+
   async findOneByCode(code: string) {
     const curriculum = await this.currRepo.findOne({
       where: { code },
