@@ -3,7 +3,6 @@ import {
   IsArray,
   IsNotEmpty,
   IsNumber,
-  IsObject,
   IsOptional,
   IsString,
 } from 'class-validator';
@@ -12,6 +11,8 @@ import { Branch } from 'src/entities/branch.entity';
 import { Plo } from 'src/entities/plo.entity';
 import { CourseSpec } from 'src/entities/course-spec.entity';
 import { Skill } from 'src/entities/skill.entity';
+import { Type } from 'class-transformer';
+import { CreateBranchDto } from '../branch/create-branch.dto';
 
 export class CreateCurriculumDto {
   @IsString()
@@ -31,8 +32,8 @@ export class CreateCurriculumDto {
   engDegree: string;
 
   @ApiHideProperty()
-  @IsObject()
   @IsOptional()
+  @Type(() => CreateBranchDto)
   branch: Branch;
 
   @IsString()
