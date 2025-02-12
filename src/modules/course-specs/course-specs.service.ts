@@ -84,13 +84,27 @@ export class CourseSpecsService {
     return existSubject;
   }
 
-  async saveByCurrId(id: number, updateCourseSpecDto: UpdateCourseSpecDto) {
+  async createByCurrId(id: number, dto: CreateCourseSpecDto) {
     const curr = await this.curRepo.findOneBy({ id });
     if (!curr) {
       throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
     const courseSpec = this.courseSpecRepo.create({
-      ...updateCourseSpecDto,
+      ...dto,
+      curriculum: curr,
+    });
+    return this.courseSpecRepo.save(courseSpec);
+  }
+  async updateByCurrId(id: number, dto: UpdateCourseSpecDto) {
+    const curr = await this.curRepo.findOneBy({ id });
+    if (!curr) {
+      throw new NotFoundException(`Curriculum with ID ${id} not found`);
+    }
+    if (!dto.id) {
+      throw new NotFoundException(`Course-spec with ID ${id} not found`);
+    }
+    const courseSpec = this.courseSpecRepo.create({
+      ...dto,
       curriculum: curr,
     });
     return this.courseSpecRepo.save(courseSpec);
