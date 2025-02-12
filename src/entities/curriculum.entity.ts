@@ -42,10 +42,10 @@ export class Curriculum {
   @JoinColumn({ name: 'branchId' })
   branch: Branch;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'longtext' })
   thaiDescription: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'longtext' })
   engDescription: string;
 
   @Column()

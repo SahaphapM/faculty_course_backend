@@ -22,10 +22,10 @@ export class CourseSpec {
   @Column({ nullable: true })
   engName: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'longtext' })
   thaiDescription: string;
 
-  @Column({ nullable: true })
+  @Column({ nullable: true, type: 'longtext' })
   engDescription: string;
 
   @Column({ nullable: true })

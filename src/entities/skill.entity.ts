@@ -28,10 +28,10 @@ export class Skill {
   @Column({ nullable: true })
   engName: string;
 
-  @Column({ nullable: true, type: 'text' })
+  @Column({ nullable: true, type: 'longtext' })
   thaiDescription: string;
 
-  @Column({ nullable: true, type: 'text' })
+  @Column({ nullable: true, type: 'longtext' })
   engDescription: string;
 
   @Column({
