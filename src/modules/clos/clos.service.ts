@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -39,11 +40,9 @@ export class ClosService {
       skill,
     });
     try {
-      const savedClo = await this.closRepository.save(clo);
-      console.log(savedClo);
-      return savedClo;
+      return await this.closRepository.save(clo);
     } catch (error) {
-      throw new BadRequestException('Failed to create CLO');
+      throw new BadRequestException('Failed to create CLO' + error.message);
     }
   }
 
@@ -80,15 +79,25 @@ export class ClosService {
   }
 
   async findAll(): Promise<Clo[]> {
-    return await this.closRepository.find({
-      relations: { skill: true, plo: true },
-    });
+    try {
+      return await this.closRepository.find({
+        relations: { skill: true, plo: true },
+      });
+    } catch (error) {
+      throw new NotFoundException('Failed to fetch CLOs' + error.message);
+    }
   }
 
   async findAllByCoursSpec(coursSpecId: number): Promise<Clo[]> {
-    return await this.closRepository.find({
-      where: { courseSpec: { id: coursSpecId } },
-    });
+    try {
+      return await this.closRepository.find({
+        where: { courseSpec: { id: coursSpecId } },
+      });
+    } catch (error) {
+      throw new NotFoundException(
+        `CourseSpec with id ${coursSpecId} not found ` + error.message,
+      );
+    }
   }
 
   async findOne(id: number): Promise<Clo> {
@@ -118,16 +127,22 @@ export class ClosService {
     try {
       return await this.closRepository.save(clo);
     } catch (error) {
-      throw new BadRequestException('Failed to update CLO');
+      throw new BadRequestException('Failed to update CLO' + error.message);
     }
   }
 
   async remove(id: number): Promise<void> {
-    const clo = await this.findOne(id); // Ensure the CLO exists
+    const clo = await this.findOne(id);
+    if (!clo) {
+      throw new NotFoundException(`CLO with ID ${id} not found`);
+    }
+
     try {
-      await this.closRepository.remove(clo);
+      await this.closRepository.delete(id);
     } catch (error) {
-      throw new BadRequestException('Failed to remove CLO');
+      throw new InternalServerErrorException(
+        `Failed to delete CLO: ${error.message}`,
+      );
     }
   }
 

@@ -2,6 +2,7 @@ import { Plo } from 'src/entities/plo.entity';
 import {
   Column,
   Entity,
+  JoinColumn,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -32,6 +33,7 @@ export class Clo {
   @OneToOne(() => Skill, (skill) => skill.clo, {
     cascade: false,
   })
+  @JoinColumn({ name: 'skillId' })
   skill: Skill;
 
   @ManyToOne(() => Plo, (plo) => plo.clos, { nullable: true, cascade: false })
