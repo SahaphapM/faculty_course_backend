@@ -37,6 +37,11 @@ export class CourseSpecsController {
     return this.courseSpecsService.findAllByCurriculum(id);
   }
 
+  @Get(`findExistSubject/:code`)
+  findExistSubject(@Param('code') code: string) {
+    return this.courseSpecsService.findExistSubject(code);
+  }
+
   @Patch(`${pathCurr}/:id`)
   updateByCurriculum(
     @Param('curriculumId') id: number,

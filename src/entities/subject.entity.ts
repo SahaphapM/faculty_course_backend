@@ -9,7 +9,6 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { SubjectType } from 'src/enums/subject-types.enum';
 import { CourseSpec } from './course-spec.entity';
 
 @Entity()
