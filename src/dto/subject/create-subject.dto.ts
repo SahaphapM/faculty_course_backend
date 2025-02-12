@@ -1,6 +1,5 @@
-import { IsString, IsArray, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsArray, IsOptional } from 'class-validator';
 import { Curriculum } from 'src/entities/curriculum.entity';
-import { SubjectType } from 'src/enums/subject-types.enum';
 
 export class CreateSubjectDto {
   @IsString()
