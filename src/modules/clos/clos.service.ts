@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -39,24 +38,31 @@ export class ClosService {
       plo,
       skill,
     });
+
     try {
       return await this.closRepository.save(clo);
     } catch (error) {
-      throw new BadRequestException('Failed to create CLO' + error.message);
+      throw new InternalServerErrorException(
+        `Failed to create CLO: ${error.message}`,
+      );
     }
   }
 
   async findAllByPage(
     paginationDto: PaginationDto,
   ): Promise<{ data: Clo[]; total: number }> {
-    // console.log(paginationDto);
-    const { page, limit, sort, order, search } = paginationDto;
-    // console.log(search);
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'id',
+      order = 'ASC',
+      search,
+    } = paginationDto;
 
     const options: FindManyOptions<Clo> = {
       take: limit,
       skip: (page - 1) * limit,
-      order: sort ? { [sort]: order } : {},
+      order: { [sort]: order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC' },
       relations: { skill: true, plo: true },
     };
 
@@ -68,14 +74,14 @@ export class ClosService {
       ];
     }
 
-    // console.log('Query options:', options); // Debugging line
-
-    const [result, total] = await this.closRepository.findAndCount(options);
-
-    // console.log('Result:', result); // Debugging line
-    // console.log('Total:', total); // Debugging line
-
-    return { data: result, total };
+    try {
+      const [result, total] = await this.closRepository.findAndCount(options);
+      return { data: result, total };
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed to retrieve data: ${error.message}`,
+      );
+    }
   }
 
   async findAll(): Promise<Clo[]> {
@@ -101,19 +107,26 @@ export class ClosService {
   }
 
   async findOne(id: number): Promise<Clo> {
-    const clo = await this.closRepository.findOne({
-      where: { id },
-      relations: { skill: true, plo: true },
-    });
-    if (!clo) {
-      throw new NotFoundException(`CLO with id ${id} not found`);
+    try {
+      const clo = await this.closRepository.findOne({
+        where: { id },
+        relations: { skill: true, plo: true },
+      });
+
+      if (!clo) {
+        throw new NotFoundException(`CLO with ID ${id} not found`);
+      }
+
+      return clo;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        `Failed to retrieve CLO: ${error.message}`,
+      );
     }
-    return clo;
   }
 
   async update(id: number, updateCloDto: UpdateCloDto): Promise<Clo> {
     await this.findOne(id); // Ensure the CLO exists
-    console.log(updateCloDto);
 
     const clo = await this.closRepository.preload({
       id,
@@ -121,13 +134,15 @@ export class ClosService {
     });
 
     if (!clo) {
-      throw new NotFoundException(`CLO with id ${id} not found`);
+      throw new NotFoundException(`CLO with ID ${id} not found`);
     }
 
     try {
       return await this.closRepository.save(clo);
     } catch (error) {
-      throw new BadRequestException('Failed to update CLO' + error.message);
+      throw new InternalServerErrorException(
+        `Failed to update CLO: ${error.message}`,
+      );
     }
   }
 
