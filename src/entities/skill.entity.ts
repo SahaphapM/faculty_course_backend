@@ -28,10 +28,10 @@ export class Skill {
   @Column({ nullable: true })
   engName: string;
 
-  @Column({ nullable: true, type: 'longtext' })
+  @Column({ nullable: true, type: 'text' })
   thaiDescription: string;
 
-  @Column({ nullable: true, type: 'longtext' })
+  @Column({ nullable: true, type: 'text' })
   engDescription: string;
 
   @Column({
@@ -63,7 +63,9 @@ export class Skill {
   )
   skillExpectedLevels: SkillExpectedLevel[];
 
-  @OneToOne(() => Clo)
+  @OneToOne(() => Clo, {
+    cascade: false,
+  })
   @JoinColumn()
   clo: Clo;
 

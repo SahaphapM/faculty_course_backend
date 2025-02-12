@@ -18,10 +18,11 @@ export class Plo {
   @Column({ nullable: true })
   name: string;
 
-  @Column({ nullable: true, type: 'longtext' })
+  @Column({ nullable: true, type: 'text' })
   thaiDescription: string;
 
-  @Column({ nullable: true, type: 'longtext' })
+  // text log
+  @Column({ nullable: true, type: 'text' })
   engDescription: string;
 
   @Column()
@@ -31,6 +32,8 @@ export class Plo {
   @JoinColumn({ name: 'curriculumId' })
   curriculum: Curriculum;
 
-  @OneToMany(() => Clo, (clo) => clo.plo)
+  @OneToMany(() => Clo, (clo) => clo.plo, {
+    cascade: false,
+  })
   clos: Clo[];
 }
