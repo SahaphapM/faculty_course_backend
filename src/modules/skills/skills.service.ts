@@ -129,17 +129,17 @@ export class SkillsService {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async update(id: number, updateSkillDto: UpdateSkillDto): Promise<Skill> {
-    await this.findOne(id); // Ensure the skill exists
-    const skill = await this.skRepo.preload({
-      id: Number(id),
-    });
+    const skill = await this.findOne(id); // Ensure the skill exists
 
     if (!skill) {
       throw new NotFoundException(`Skill with id ${id} not found`);
     }
 
     try {
-      return await this.skRepo.save(skill);
+      return await this.skRepo.save({
+        ...skill,
+        ...updateSkillDto,
+      });
     } catch (error) {
       throw new BadRequestException('Failed to update skill');
     }
