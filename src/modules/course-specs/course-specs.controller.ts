@@ -42,12 +42,20 @@ export class CourseSpecsController {
     return this.courseSpecsService.findExistSubject(code);
   }
 
+  @Post(`${pathCurr}/:id`)
+  createByCurriculum(
+    @Param('curriculumId') id: string,
+    @Body() dto: CreateCourseSpecDto,
+  ) {
+    return this.courseSpecsService.createByCurrId(+id, dto);
+  }
+
   @Patch(`${pathCurr}/:id`)
   updateByCurriculum(
     @Param('curriculumId') id: string,
-    @Body() updateCourseSpecDto: UpdateCourseSpecDto,
+    @Body() dto: UpdateCourseSpecDto,
   ) {
-    return this.courseSpecsService.saveByCurrId(+id, updateCourseSpecDto);
+    return this.courseSpecsService.updateByCurrId(+id, dto);
   }
 
   @Get(':id')
