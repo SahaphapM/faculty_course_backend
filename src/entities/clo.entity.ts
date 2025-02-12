@@ -18,10 +18,10 @@ export class Clo {
   @Column({ nullable: true })
   name: string;
 
-  @Column({ nullable: true, type: 'longtext' })
+  @Column({ nullable: true, type: 'text' })
   thaiDescription: string;
 
-  @Column({ nullable: true, type: 'longtext' })
+  @Column({ nullable: true, type: 'text' })
   engDescription: string;
 
   // courseSpec
@@ -29,9 +29,11 @@ export class Clo {
   courseSpec: CourseSpec;
 
   // set relation with skill
-  @OneToOne(() => Skill, (skill) => skill.clo)
+  @OneToOne(() => Skill, (skill) => skill.clo, {
+    cascade: false,
+  })
   skill: Skill;
 
-  @ManyToOne(() => Plo, (plo) => plo.clos, { nullable: true })
+  @ManyToOne(() => Plo, (plo) => plo.clos, { nullable: true, cascade: false })
   plo: Plo;
 }
