@@ -25,7 +25,7 @@ export class SkillsService {
 
   async create(createSkillDto: CreateSkillDto): Promise<Skill> {
     const curriculum = await this.curriculumRepo.findOne({
-      where: { id: createSkillDto.curriculum },
+      where: { id: createSkillDto.curriculum.id },
     });
 
     if (!curriculum) {
@@ -187,7 +187,7 @@ export class SkillsService {
 
     // หา curriculum จาก createSkillDto หรือ parentSkill
     const curriculum = await this.curriculumRepo.findOne({
-      where: { id: createSkillDto.curriculum || parentSkill.curriculum.id },
+      where: { id: createSkillDto.curriculum.id || parentSkill.curriculum.id },
     });
 
     if (!curriculum) {
