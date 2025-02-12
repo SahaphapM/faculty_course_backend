@@ -44,7 +44,7 @@ export class CourseSpecsController {
 
   @Post(`${pathCurr}/:id`)
   createByCurriculum(
-    @Param('curriculumId') id: string,
+    @Param('id') id: string,
     @Body() dto: CreateCourseSpecDto,
   ) {
     return this.courseSpecsService.createByCurrId(+id, dto);
@@ -52,7 +52,7 @@ export class CourseSpecsController {
 
   @Patch(`${pathCurr}/:id`)
   updateByCurriculum(
-    @Param('curriculumId') id: string,
+    @Param('id') id: string,
     @Body() dto: UpdateCourseSpecDto,
   ) {
     return this.courseSpecsService.updateByCurrId(+id, dto);
