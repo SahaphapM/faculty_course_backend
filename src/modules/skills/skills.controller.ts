@@ -29,8 +29,8 @@ export class SkillsController {
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string) {
-    return this.skillsService.findOne(+id);
+  findOne(@Param('id') id: number) {
+    return this.skillsService.findOne(id);
   }
 
   @Get('/curriculumId/:curriculumId')
@@ -47,14 +47,14 @@ export class SkillsController {
 
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
-  update(@Param('id') id: string, @Body() updateSkillDto: UpdateSkillDto) {
-    return this.skillsService.update(+id, updateSkillDto);
+  update(@Param('id') id: number, @Body() updateSkillDto: UpdateSkillDto) {
+    return this.skillsService.update(id, updateSkillDto);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string) {
-    return this.skillsService.remove(+id);
+  remove(@Param('id') id: number) {
+    return this.skillsService.remove(id);
   }
 
   ///////////  subSkill /////////////
@@ -71,18 +71,18 @@ export class SkillsController {
   @Post(':parentId/createSubSkills') // select or create subskills use this.
   @HttpCode(HttpStatus.CREATED)
   async createSubSkill(
-    @Param('id') id: string,
+    @Param('parentId') id: number,
     @Body() createSkillDtos: CreateSkillDto,
   ) {
-    return this.skillsService.createSubSkills(+id, createSkillDtos);
+    return this.skillsService.createSubSkills(id, createSkillDtos);
   }
 
   @Patch(':id/removeSubSkill/:subSkillId')
   @HttpCode(HttpStatus.OK)
   removeSubSkillId(
-    @Param('id') id: string,
-    @Param('subSkillId') subSkillId: string,
+    @Param('id') id: number,
+    @Param('subSkillId') subSkillId: number,
   ) {
-    return this.skillsService.removeSubSkillId(+id, +subSkillId);
+    return this.skillsService.removeSubSkillId(id, subSkillId);
   }
 }
