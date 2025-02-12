@@ -11,6 +11,8 @@ import { CourseSpecsService } from './course-specs.service';
 import { CreateCourseSpecDto } from 'src/dto/course-specs/create-course-spec.dto';
 import { UpdateCourseSpecDto } from 'src/dto/course-specs/update-course-spec.dto';
 
+const pathCurr = 'curriculumId';
+
 @Controller('course-specs')
 export class CourseSpecsController {
   constructor(private readonly courseSpecsService: CourseSpecsService) {}
@@ -30,9 +32,17 @@ export class CourseSpecsController {
     return this.courseSpecsService.findAll();
   }
 
-  @Get('curriculumId/:curriculumId')
-  findAllByCurriculum(@Param('curriculumId') curriculumId: number) {
-    return this.courseSpecsService.findAllByCurriculum(curriculumId);
+  @Get(`${pathCurr}/:id`)
+  findAllByCurriculum(@Param('curriculumId') id: number) {
+    return this.courseSpecsService.findAllByCurriculum(id);
+  }
+
+  @Patch(`${pathCurr}/:id`)
+  updateByCurriculum(
+    @Param('curriculumId') id: number,
+    @Body() updateCourseSpecDto: UpdateCourseSpecDto,
+  ) {
+    return this.courseSpecsService.saveByCurrId(id, updateCourseSpecDto);
   }
 
   @Get(':id')

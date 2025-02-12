@@ -76,6 +76,18 @@ export class CourseSpecsService {
     return courseSpec;
   }
 
+  async saveByCurrId(id: number, updateCourseSpecDto: UpdateCourseSpecDto) {
+    const curr = await this.curRepo.findOneBy({ id });
+    if (!curr) {
+      throw new NotFoundException(`Curriculum with ID ${id} not found`);
+    }
+    const courseSpec = this.courseSpecRepo.create({
+      ...updateCourseSpecDto,
+      curriculum: curr,
+    });
+    return this.courseSpecRepo.save(courseSpec);
+  }
+
   async update(id: number, updateCourseSpecDto: UpdateCourseSpecDto) {
     const courseSpec = await this.findOne(id);
 

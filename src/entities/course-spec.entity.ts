@@ -39,7 +39,7 @@ export class CourseSpec {
 
   // ความสัมพันธ์กับ Subject
   @ManyToOne(() => Subject, (subject) => subject.courseSpecs, {
-    cascade: ['insert', 'update'],
+    cascade: ['insert'],
   })
   @JoinColumn({ name: 'subjectId' }) //use subjectId PK
   subject: Subject;
