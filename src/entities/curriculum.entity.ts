@@ -45,6 +45,9 @@ export class Curriculum {
   @Column({ nullable: true })
   thaiDescription: string;
 
+  @Column({ nullable: true })
+  engDescription: string;
+
   @Column()
   period: number;
 
