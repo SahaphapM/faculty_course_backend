@@ -33,7 +33,10 @@ export class SkillsService {
         `Curriculum with ID ${createSkillDto.curriculum} not found`,
       );
     }
-    const skill = this.skRepo.create({ ...curriculum, curriculum: curriculum });
+    const skill = this.skRepo.create({
+      ...createSkillDto,
+      curriculum: curriculum,
+    });
 
     try {
       return await this.skRepo.save(skill);
@@ -152,37 +155,37 @@ export class SkillsService {
     }
   }
 
-  async selectSubSkills(id: number, createSkillDto: CreateSkillDto) {
-    console.log(createSkillDto);
-    const parentSkill = await this.findOne(id);
+  // async selectSubSkills(id: number, createSkillDto: CreateSkillDto) {
+  //   console.log(createSkillDto);
+  //   const parentSkill = await this.findOne(id);
 
-    parentSkill.children = parentSkill.children || []; // initialize children
+  //   parentSkill.children = parentSkill.children || []; // initialize children
 
-    // find child skill in database
-    // const subSkill = await this.findOne(createSkillDto.id);
+  // find child skill in database
+  // const subSkill = await this.findOne(createSkillDto.id);
 
-    // Check if subSkill already related to parentSkill
-    // const isAlreadyRelated = parentSkill.children.some(
-    //   (child) => child.id.toString() === subSkill.id.toString(),
-    // );
+  // Check if subSkill already related to parentSkill
+  // const isAlreadyRelated = parentSkill.children.some(
+  //   (child) => child.id.toString() === subSkill.id.toString(),
+  // );
 
-    // If not already related, add the subSkill to subSkills
-    // if (!isAlreadyRelated) {
-    //   parentSkill.children.push(subSkill);
-    //   try {
-    //     return await this.skRepo.save(parentSkill);
-    //   } catch (error) {
-    //     throw new BadRequestException('Failed to select childSkill');
-    //   }
-    // }
-  }
+  // If not already related, add the subSkill to subSkills
+  // if (!isAlreadyRelated) {
+  //   parentSkill.children.push(subSkill);
+  //   try {
+  //     return await this.skRepo.save(parentSkill);
+  //   } catch (error) {
+  //     throw new BadRequestException('Failed to select childSkill');
+  //   }
+  // }
+  // }
 
   async createSubSkills(
-    id: number,
+    parentId: number,
     createSkillDto: CreateSkillDto,
   ): Promise<Skill> {
     // หา parentSkill จาก id
-    const parentSkill = await this.findOne(id);
+    const parentSkill = await this.findOne(parentId);
 
     // หา curriculum จาก createSkillDto หรือ parentSkill
     const curriculum = await this.curriculumRepo.findOne({
