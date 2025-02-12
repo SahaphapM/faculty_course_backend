@@ -38,6 +38,5 @@ export class CreateSkillDto {
   @IsOptional()
   parent?: number; // Reference to parent skill ID
 
-  @IsNumber()
   curriculum: Partial<Curriculum>; //Ref to curriculum ID
 }
