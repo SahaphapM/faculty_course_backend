@@ -33,8 +33,8 @@ export class CourseSpecsController {
   }
 
   @Get(`${pathCurr}/:id`)
-  findAllByCurriculum(@Param('curriculumId') id: number) {
-    return this.courseSpecsService.findAllByCurriculum(id);
+  findAllByCurriculum(@Param('curriculumId') id: string) {
+    return this.courseSpecsService.findAllByCurriculum(+id);
   }
 
   @Get(`findExistSubject/:code`)
@@ -44,10 +44,10 @@ export class CourseSpecsController {
 
   @Patch(`${pathCurr}/:id`)
   updateByCurriculum(
-    @Param('curriculumId') id: number,
+    @Param('curriculumId') id: string,
     @Body() updateCourseSpecDto: UpdateCourseSpecDto,
   ) {
-    return this.courseSpecsService.saveByCurrId(id, updateCourseSpecDto);
+    return this.courseSpecsService.saveByCurrId(+id, updateCourseSpecDto);
   }
 
   @Get(':id')
