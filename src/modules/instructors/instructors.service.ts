@@ -195,14 +195,20 @@ export class InstructorsService {
     if (!code) {
       throw new BadRequestException('Code must be provided');
     }
-    const teacher = await this.insRepo.findOneBy({ code });
+
     console.log('Searching for code:', code);
+
+    const teacher = await this.insRepo
+      .createQueryBuilder('instructor')
+      .where('instructor.code = :code', { code })
+      .getOne();
 
     if (!teacher) {
       throw new NotFoundException(
         `Instructor/Coordinator with Code ${code} not found`,
       );
     }
+
     return teacher;
   }
 
