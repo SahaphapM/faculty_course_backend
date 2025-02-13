@@ -116,7 +116,7 @@ export class InstructorsController {
   @Get('findExistCode/:code')
   findExistCode(@Param('code') code: string) {
     console.log('call controller code', code);
-    return this.insService.findExistCode(code);
+    // return this.insService.findExistCode(code);
   }
 
   @Patch(':id')
