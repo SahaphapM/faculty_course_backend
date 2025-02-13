@@ -130,11 +130,17 @@ export class InstructorsService {
       relationLoadStrategy: 'query',
       select: {
         id: true,
+        code: true,
         email: true,
         thaiName: true,
         engName: true,
         tel: true,
         position: true,
+        branch: {
+          id: true,
+          thaiName: true,
+          engName: true,
+        },
       },
     };
     try {

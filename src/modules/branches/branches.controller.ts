@@ -29,6 +29,11 @@ export class BranchesController {
     return this.branchService.findAll(pag);
   }
 
+  @Get('options')
+  findAllOptions() {
+    return this.branchService.findAllOptions();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.branchService.findOne(+id);

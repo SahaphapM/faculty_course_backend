@@ -24,7 +24,7 @@ export class BranchesService {
     try {
       const { facultyId, ...rest } = createBranchDto;
       const existBranch = await this.braRepo.findOne({
-        where: { name: createBranchDto.name },
+        where: { thaiName: createBranchDto.name },
       });
       if (existBranch) {
         throw new Error(
@@ -56,7 +56,7 @@ export class BranchesService {
       relationLoadStrategy: 'query',
       select: {
         id: true,
-        name: true,
+        thaiName: true,
         engName: true,
         abbrev: true,
       },
@@ -70,7 +70,7 @@ export class BranchesService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [{ name: Like(`%${search}%`) }];
+          options.where = [{ thaiName: Like(`%${search}%`) }];
         }
         return await this.braRepo.findAndCount(options);
       } else {
@@ -81,6 +81,19 @@ export class BranchesService {
       console.error('Error fetching branches:', error);
       throw new InternalServerErrorException('Failed to fetch branches');
     }
+  }
+
+  async findAllOptions() {
+    const options: FindManyOptions<Branch> = {
+      relationLoadStrategy: 'query',
+      select: {
+        id: true,
+        thaiName: true,
+        engName: true,
+        abbrev: true,
+      },
+    };
+    return await this.braRepo.find(options);
   }
 
   async findOne(id: number): Promise<Branch> {

@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateFacultyDto } from '../../dto/faculty/create-faculty.dto';
 import { UpdateFacultyDto } from '../../dto/faculty/update-faculty.dto';
 import { Faculty } from '../../entities/faculty.entity';
@@ -11,7 +15,7 @@ export class FacultiesService {
   constructor(
     @InjectRepository(Faculty)
     private facRepo: Repository<Faculty>,
-  ) { }
+  ) {}
   async create(createFacultyDto: CreateFacultyDto): Promise<Faculty> {
     try {
       const faculty = this.facRepo.create(createFacultyDto);
@@ -30,8 +34,8 @@ export class FacultiesService {
           id: true,
           name: true,
           engName: true,
-          branches: { id: true, name: true, engName: true },
-        }
+          branches: { id: true, thaiName: true, engName: true },
+        },
       });
     } catch (error) {
       // Handle specific error types here
@@ -64,9 +68,7 @@ export class FacultiesService {
         options.order = { id: order || 'ASC' };
 
         if (search) {
-          options.where = [
-            { name: Like(`%${search}%`) }
-          ];
+          options.where = [{ name: Like(`%${search}%`) }];
         }
         return await this.facRepo.findAndCount(options);
       } else {
