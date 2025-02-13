@@ -195,9 +195,7 @@ export class InstructorsService {
     if (!code) {
       throw new BadRequestException('Code must be provided');
     }
-    const teacher = await this.insRepo.findOne({
-      where: { code },
-    });
+    const teacher = await this.insRepo.findOneBy({ code });
     console.log('Searching for code:', code);
 
     if (!teacher) {
