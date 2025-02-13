@@ -43,6 +43,7 @@ export class CreateInstructorDto {
   @IsOptional()
   socials: Partial<SocialForm>;
 
+  @IsNumber()
   @IsOptional()
   branchId: number;
 
@@ -63,7 +64,7 @@ interface SocialForm {
   github: string;
   gitlab: string;
   website: string;
-  twitter: string;
+  x: string;
   instagram: string;
   youtube: string;
   tiktok: string;

@@ -184,7 +184,21 @@ export class InstructorsService {
       where: { id },
     });
     if (!teacher) {
-      throw new NotFoundException(`Teacher with ID ${id} not found`);
+      throw new NotFoundException(
+        `Instructor/Coordinator with ID ${id} not found`,
+      );
+    }
+    return teacher;
+  }
+
+  async findExistCode(code: string): Promise<Instructor> {
+    const teacher = await this.insRepo.findOne({
+      where: { code },
+    });
+    if (!teacher) {
+      throw new NotFoundException(
+        `Instructor/Coordinator with Code ${code} not found`,
+      );
     }
     return teacher;
   }
@@ -196,11 +210,13 @@ export class InstructorsService {
     return teacher;
   }
 
-  async selectInstructorToCurriculum(teacherId: number, curriculumId: number) {
+  async selectCoordinatorToCurriculum(teacherId: number, curriculumId: number) {
     const teacher = await this.insRepo.findOneBy({ id: teacherId });
     const curriculum = await this.curRepo.findOneBy({ id: curriculumId });
     if (!teacher) {
-      throw new NotFoundException(`Teacher with ID ${teacherId} not found`);
+      throw new NotFoundException(
+        `Instructor/Coordinator with ID ${teacherId} not found`,
+      );
     }
     if (!curriculum) {
       throw new NotFoundException(
@@ -218,7 +234,9 @@ export class InstructorsService {
     const teacher = await this.findOne(id);
 
     if (!teacher) {
-      throw new NotFoundException(`Teacher with ID ${id} not found`);
+      throw new NotFoundException(
+        `Instructor/Coordinator with ID ${id} not found`,
+      );
     }
     // Update teacher properties
     Object.assign(teacher, updateTeacherDto);
@@ -229,7 +247,7 @@ export class InstructorsService {
       const teacherUpdated = await this.findOne(id);
       return teacherUpdated;
     } catch (error) {
-      throw new BadRequestException('Failed to update teacher');
+      throw new BadRequestException('Failed to update Instructor/Coordinator');
     }
   }
 
@@ -239,7 +257,7 @@ export class InstructorsService {
       await this.insRepo.remove(teacher);
       return `Success Delete ID ${id}`;
     } catch (error) {
-      throw new BadRequestException('Failed to remove teacher');
+      throw new BadRequestException('Failed to remove Instructor/Coordinator');
     }
   }
 }
