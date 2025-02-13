@@ -85,7 +85,7 @@ export class InstructorsService {
   }
 
   async create(dto: CreateInstructorDto) {
-    const { branchId, curriculumsId, ...rest } = dto;
+    const { branchId, ...rest } = dto;
 
     // Check if the teacher with this email already exists
     const existingTeacher = await this.insRepo.findOne({
@@ -98,7 +98,6 @@ export class InstructorsService {
     }
 
     let existBranch = null;
-    let existCurriculums = [];
 
     // Check for branch if branchId is provided
     if (branchId) {
@@ -110,18 +109,6 @@ export class InstructorsService {
       }
     }
 
-    // Check for curriculums if curriculumsId is provided
-    if (curriculumsId && curriculumsId.length > 0) {
-      existCurriculums = await this.curRepo.findBy({ id: In(curriculumsId) });
-      if (existCurriculums.length !== curriculumsId.length) {
-        throw new BadRequestException(
-          `Curriculum with ID ${curriculumsId
-            .filter((id) => !existCurriculums.find((c) => c.id === id))
-            .join(', ')} does not exist`,
-        );
-      }
-    }
-
     // Create teacher instance, conditionally adding optional fields
     const teacher = this.insRepo.create({
       ...rest,
@@ -129,8 +116,7 @@ export class InstructorsService {
         ? dto.specialists.map((s) => s).join(', ')
         : '-',
       socials: dto.socials ? JSON.stringify(dto.socials) : '-',
-      curriculums: existCurriculums.length > 0 ? existCurriculums : undefined,
-      branch: existBranch ?? undefined,
+      branch: existBranch,
     });
 
     return await this.insRepo.save(teacher);

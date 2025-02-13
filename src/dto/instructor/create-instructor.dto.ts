@@ -11,7 +11,7 @@ export class CreateInstructorDto {
   email: string;
 
   @IsString()
-  name: string;
+  thaiName: string;
 
   @IsString()
   engName: string;
