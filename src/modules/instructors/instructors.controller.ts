@@ -87,12 +87,11 @@ export class InstructorsController {
     fs.writeFileSync(uploadPath, file.buffer);
 
     // set image name of teacher
-    const teacher = await this.insService.findOne(+id);
-    teacher.picture = randomFileName;
-    await this.insService.update(
+    const teacher = (await this.insService.findOne(
       +id,
-      teacher as unknown as Partial<UpdateInstructorDto>,
-    );
+    )) as unknown as UpdateInstructorDto;
+    teacher.picture = randomFileName;
+    await this.insService.update(+id, teacher);
     return { message: 'File upload successful', filename: randomFileName };
   }
 
@@ -114,7 +113,7 @@ export class InstructorsController {
     return this.insService.findOne(+id);
   }
 
-  @Get(':code')
+  @Get('findExistCode/:code')
   @HttpCode(HttpStatus.OK)
   findExistCode(@Param('code') id: string) {
     return this.insService.findExistCode(id);
