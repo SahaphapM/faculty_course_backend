@@ -44,7 +44,7 @@ export class InstructorsController {
     @Param('curriculumId') curriculumId: string,
     @Param('instructorId') instructorId: string,
   ) {
-    return this.insService.selectInstructorToCurriculum(
+    return this.insService.selectCoordinatorToCurriculum(
       +instructorId,
       +curriculumId,
     );
@@ -112,6 +112,12 @@ export class InstructorsController {
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
     return this.insService.findOne(+id);
+  }
+
+  @Get(':code')
+  @HttpCode(HttpStatus.OK)
+  findExistCode(@Param('code') id: string) {
+    return this.insService.findExistCode(id);
   }
 
   @Patch(':id')
