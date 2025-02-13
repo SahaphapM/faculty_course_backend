@@ -143,7 +143,7 @@ export class CurriculumsService {
           ...(facultyName && {
             branch: { faculty: { name: Like(`%${facultyName}%`) } },
           }),
-          ...(branchName && { branch: { name: Like(`%${branchName}%`) } }),
+          ...(branchName && { branch: { thaiName: Like(`%${branchName}%`) } }),
         };
 
         return await this.currRepo.findAndCount(options);

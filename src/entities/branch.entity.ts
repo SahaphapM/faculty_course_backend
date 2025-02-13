@@ -14,7 +14,7 @@ export class Branch {
   id: number;
 
   @Column()
-  name: string;
+  thaiName: string;
 
   @Column({ nullable: true })
   engName: string;
@@ -22,7 +22,7 @@ export class Branch {
   @Column({ nullable: true })
   description: string;
 
-  @Column({ nullable: true, length: 10 })
+  @Column({ nullable: true, length: 5 })
   abbrev: string; //CS, AI, SE etc.
 
   @ManyToOne(() => Faculty, (faculty) => faculty.branches, {

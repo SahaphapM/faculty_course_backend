@@ -114,7 +114,7 @@ export class StudentsService {
         id: true,
         thaiName: true,
         engName: true,
-        branch: { id: true, name: true, faculty: { id: true, name: true } },
+        branch: { id: true, thaiName: true, faculty: { id: true, name: true } },
       },
     };
     try {
