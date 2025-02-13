@@ -178,22 +178,10 @@ export class InstructorsService {
   }
 
   async findExistCode(code: string): Promise<Instructor> {
-    if (!code) {
-      throw new BadRequestException('Code must be provided');
-    }
-
-    console.log('Searching for code:', code);
-
     const teacher = await this.insRepo
       .createQueryBuilder('instructor')
       .where('instructor.code = :code', { code })
       .getOne();
-
-    if (!teacher) {
-      throw new NotFoundException(
-        `Instructor/Coordinator with Code ${code} not found`,
-      );
-    }
 
     return teacher;
   }
