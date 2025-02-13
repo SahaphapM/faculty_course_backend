@@ -115,8 +115,8 @@ export class InstructorsController {
 
   @Get('findExistCode/:code')
   @HttpCode(HttpStatus.OK)
-  findExistCode(@Param('code') id: string) {
-    return this.insService.findExistCode(id);
+  findExistCode(@Param('code') code: string) {
+    return this.insService.findExistCode(code);
   }
 
   @Patch(':id')
