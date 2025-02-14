@@ -106,7 +106,7 @@ export class SkillsService {
 
     const skills = await this.skRepo.find({
       where: { curriculum: { id: curriculumId } },
-      relations: { children: { children: true } },
+      relations: { children: { children: true }, parent: true },
     });
 
     return skills;
