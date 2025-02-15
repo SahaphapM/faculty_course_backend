@@ -31,11 +31,12 @@ export class Clo {
 
   // set relation with skill
   @OneToOne(() => Skill, (skill) => skill.clo, {
-    cascade: false,
+    nullable: true,
+    cascade: null,
   })
   @JoinColumn({ name: 'skillId' })
   skill: Skill;
 
-  @ManyToOne(() => Plo, (plo) => plo.clos, { nullable: true, cascade: false })
+  @ManyToOne(() => Plo, (plo) => plo.clos, { nullable: true, cascade: null })
   plo: Plo;
 }

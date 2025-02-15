@@ -28,12 +28,16 @@ export class Plo {
   @Column()
   type: string;
 
-  @ManyToOne(() => Curriculum, (curriculum) => curriculum)
+  @ManyToOne(() => Curriculum, (curriculum) => curriculum, {
+    nullable: true,
+    cascade: null,
+  })
   @JoinColumn({ name: 'curriculumId' })
   curriculum: Curriculum;
 
   @OneToMany(() => Clo, (clo) => clo.plo, {
-    cascade: false,
+    nullable: true,
+    cascade: null,
   })
   clos: Clo[];
 }

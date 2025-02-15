@@ -11,6 +11,7 @@ import { PlosService } from './plos.service';
 import { CreatePloDto } from '../../dto/plo/create-plo.dto';
 import { UpdatePloDto } from '../../dto/plo/update-plo.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @ApiBearerAuth()
 @Controller('plos')
@@ -43,7 +44,11 @@ export class PlosController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.plosService.remove(+id);
+  remove(@Param('id') id: number) {
+    try {
+      return this.plosService.remove(id);
+    } catch (error) {
+      throw new ExceptionsHandler(error);
+    }
   }
 }
