@@ -8,12 +8,10 @@ import {IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
 export class CreateInstructorDto {
   @ApiProperty({
   type: 'string',
-  required: false,
-  nullable: true,
 })
-@IsOptional()
+@IsNotEmpty()
 @IsString()
-engName?: string  | null;
+engName: string ;
 @ApiProperty({
   type: 'string',
   required: false,
@@ -79,18 +77,18 @@ socials?: string  | null;
 branchId?: number  | null;
 @ApiProperty({
   type: 'string',
-})
-@IsNotEmpty()
-@IsString()
-code: string ;
-@ApiProperty({
-  type: 'string',
   required: false,
   nullable: true,
 })
 @IsOptional()
 @IsString()
-thaiName?: string  | null;
+code?: string  | null;
+@ApiProperty({
+  type: 'string',
+})
+@IsNotEmpty()
+@IsString()
+thaiName: string ;
 @ApiProperty({
   type: 'string',
   required: false,

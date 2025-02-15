@@ -7,6 +7,12 @@ import {IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
 
 export class CreateSubjectDto {
   @ApiProperty({
+  type: 'string',
+})
+@IsNotEmpty()
+@IsString()
+code: string ;
+@ApiProperty({
   type: 'integer',
   format: 'int32',
 })

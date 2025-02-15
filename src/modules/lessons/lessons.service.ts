@@ -7,18 +7,18 @@ import {
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
-import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
+import { CreateLessonDto } from 'src/generated/nestjs-dto/create-lesson.dto';
+import { UpdateLessonDto } from 'src/generated/nestjs-dto/update-lesson.dto';
 
 @Injectable()
 export class LessonsService {
   constructor(private prisma: PrismaService) {}
 
-  // Find subjects by a list of IDs
-  async findByList(subjectListId: number[]) {
-    return this.prisma.subject.findMany({
+  // Find lessons by a list of IDs
+  async findByList(lessonListId: number[]) {
+    return this.prisma.lesson.findMany({
       where: {
-        id: { in: subjectListId },
+        id: { in: lessonListId },
       },
     });
   }
@@ -27,21 +27,21 @@ export class LessonsService {
     return this.prisma.lesson.findUnique({ where: { id } });
   }
 
-  // Create a new subject
-  async create(dto: CreateSubjectDto) {
+  // Create a new lesson
+  async create(dto: CreateLessonDto) {
     try {
-      const subject = await this.prisma.subject.create({
+      const lesson = await this.prisma.lesson.create({
         data: {
           ...dto,
         },
       });
-      return subject;
+      return lesson;
     } catch (error) {
-      throw new BadRequestException('Failed to create subject', error.message);
+      throw new BadRequestException('Failed to create lesson', error.message);
     }
   }
 
-  // Find all subjects with pagination and search
+  // Find all lessons with pagination and search
   async findAll(pag?: PaginationDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
@@ -65,73 +65,73 @@ export class LessonsService {
 
     try {
       if (pag) {
-        const [subjects, total] = await Promise.all([
+        const [lessons, total] = await Promise.all([
           this.prisma.lesson.findMany(options),
           this.prisma.lesson.count({ where: options.where }),
         ]);
-        return { data: subjects, total };
+        return { data: lessons, total };
       } else {
         return await this.prisma.lesson.findMany(options);
       }
     } catch (error) {
-      console.error('Error fetching subjects:', error);
-      throw new InternalServerErrorException('Failed to fetch subjects');
+      console.error('Error fetching lessons:', error);
+      throw new InternalServerErrorException('Failed to fetch lessons');
     }
   }
 
-  async update(id: number, dto: UpdateSubjectDto) {
+  async update(id: number, dto: UpdateLessonDto) {
     try {
-      const subject = await this.prisma.subject.update({
+      const lesson = await this.prisma.lesson.update({
         where: { id },
         data: {
           ...dto,
         },
       });
-      return subject;
+      return lesson;
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new NotFoundException(`Subject with code ${id} not found`);
+        throw new NotFoundException(`lesson with code ${id} not found`);
       }
-      throw new BadRequestException('Failed to update subject');
+      throw new BadRequestException('Failed to update lesson');
     }
   }
 
   async remove(id: number): Promise<void> {
     try {
-      // Delete the subject
-      await this.prisma.subject.delete({
+
+      await this.prisma.lesson.delete({
         where: { id },
       });
     } catch (error) {
       if (error.code === 'P2025') {
-        throw new NotFoundException(`Subject with code ${id} not found`);
+        throw new NotFoundException(`lesson with code ${id} not found`);
       }
       throw new BadRequestException(
-        `Failed to remove subject: ${error.message}`,
+        `Failed to remove lesson: ${error.message}`,
       );
     }
   }
 
-  // Filter subjects by curriculum ID
-  async filters(curriculumId: number) {
-    try {
-      const subjects = await this.prisma.subject.findMany({
-        where: {
-          curriculum: {
-            id: { equals: curriculumId },
-          },
-        },
-        select: {
-          id: true,
-          thaiName: true,
-          engName: true,
-        },
-      });
-      return subjects;
-    } catch (error) {
-      throw new BadRequestException(
-        `Failed to filter subjects: ${error.message}`,
-      );
-    }
-  }
+
+  // async filters(curriculumId: number) {
+  //   try {
+  //     const lessons = await this.prisma.lesson.findMany({
+  //       where: {
+  //         curriculum: {
+  //           id: { equals: curriculumId },
+  //         },
+  //       },
+  //       select: {
+  //         id: true,
+  //         thaiName: true,
+  //         engName: true,
+  //       },
+  //     });
+  //     return lessons;
+  //   } catch (error) {
+  //     throw new BadRequestException(
+  //       `Failed to filter lessons: ${error.message}`,
+  //     );
+  //   }
+  // }
 }

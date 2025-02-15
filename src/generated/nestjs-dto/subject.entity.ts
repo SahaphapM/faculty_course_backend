@@ -14,6 +14,10 @@ export class Subject {
 })
 id: number ;
 @ApiProperty({
+  type: 'string',
+})
+code: string ;
+@ApiProperty({
   type: 'integer',
   format: 'int32',
   nullable: true,

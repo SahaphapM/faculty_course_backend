@@ -9,11 +9,10 @@ export class UpdateInstructorDto {
   @ApiProperty({
   type: 'string',
   required: false,
-  nullable: true,
 })
 @IsOptional()
 @IsString()
-engName?: string  | null;
+engName?: string ;
 @ApiProperty({
   type: 'string',
   required: false,
@@ -81,18 +80,18 @@ branchId?: number  | null;
 @ApiProperty({
   type: 'string',
   required: false,
-})
-@IsOptional()
-@IsString()
-code?: string ;
-@ApiProperty({
-  type: 'string',
-  required: false,
   nullable: true,
 })
 @IsOptional()
 @IsString()
-thaiName?: string  | null;
+code?: string  | null;
+@ApiProperty({
+  type: 'string',
+  required: false,
+})
+@IsOptional()
+@IsString()
+thaiName?: string ;
 @ApiProperty({
   type: 'string',
   required: false,

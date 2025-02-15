@@ -9,6 +9,10 @@ export class SubjectDto {
 })
 id: number ;
 @ApiProperty({
+  type: 'string',
+})
+code: string ;
+@ApiProperty({
   type: 'integer',
   format: 'int32',
 })

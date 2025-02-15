@@ -66,7 +66,7 @@ export class CourseService {
         course_instructors: true,
       },
       where: {
-        ...(code && { subject: { code: { contains: code }} }),
+        ...(code && { subject: { code: { contains: code } } }),
       },
     };
 

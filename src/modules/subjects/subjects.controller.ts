@@ -9,8 +9,8 @@ import {
   Query,
 } from '@nestjs/common';
 import { SubjectService } from './subjects.service';
-import { CreateCourseSpecDto } from 'src/generated/nestjs-dto/create-courseSpec.dto';
-import { UpdateCourseSpecDto } from 'src/generated/nestjs-dto/update-courseSpec.dto';
+import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
+import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
 
 @Controller('subjects')
 export class SubjectController {
@@ -27,7 +27,7 @@ export class SubjectController {
   }
 
   @Post()
-  createByCurriculum(@Body() dto: CreateCourseSpecDto) {
+  createByCurriculum(@Body() dto: CreateSubjectDto) {
     return this.courseSpecsService.create(dto);
   }
 
@@ -39,7 +39,7 @@ export class SubjectController {
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateCourseSpecDto: UpdateCourseSpecDto,
+    @Body() updateCourseSpecDto: UpdateSubjectDto,
   ) {
     return this.courseSpecsService.update(+id, updateCourseSpecDto);
   }

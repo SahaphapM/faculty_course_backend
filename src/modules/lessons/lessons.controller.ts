@@ -11,10 +11,8 @@ import {
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { LessonsService } from './lessons.service';
-import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
-import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
-// import { CreateSkillCollection } from 'src/dto/skill/skill-collection.dto';
-// import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
+import { CreateLessonDto } from 'src/generated/nestjs-dto/create-lesson.dto';
+import { UpdateLessonDto } from 'src/generated/nestjs-dto/update-lesson.dto';
 
 @ApiBearerAuth()
 @Controller('lessons')
@@ -32,13 +30,13 @@ export class LessonsController {
   }
 
   @Post()
-  create(@Body() createSubjectDto: CreateSubjectDto) {
-    return this.subjectsService.create(createSubjectDto);
+  create(@Body() dto: CreateLessonDto) {
+    return this.subjectsService.create(dto);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSubjectDto: UpdateSubjectDto) {
-    return this.subjectsService.update(+id, updateSubjectDto);
+  update(@Param('id') id: string, @Body() dto: UpdateLessonDto) {
+    return this.subjectsService.update(+id, dto);
   }
 
   @Delete(':id')

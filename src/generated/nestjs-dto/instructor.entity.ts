@@ -14,9 +14,8 @@ export class Instructor {
 id: number ;
 @ApiProperty({
   type: 'string',
-  nullable: true,
 })
-engName: string  | null;
+engName: string ;
 @ApiProperty({
   type: 'string',
   nullable: true,
@@ -59,13 +58,13 @@ socials: string  | null;
 branchId: number  | null;
 @ApiProperty({
   type: 'string',
-})
-code: string ;
-@ApiProperty({
-  type: 'string',
   nullable: true,
 })
-thaiName: string  | null;
+code: string  | null;
+@ApiProperty({
+  type: 'string',
+})
+thaiName: string ;
 @ApiProperty({
   type: 'string',
   nullable: true,

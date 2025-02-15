@@ -56,17 +56,15 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 #Database file
-mybuu.sqlite
+*.sqlite
 
 #db docker
 db
 
 docker-compose.yml
-docker-compose.yml
-
-# Ignoring for Testing with sqlite and local testing 
-src/app/app.module.ts
-src/auth/auth.controller.ts
-src/auth/auth.module.ts
 
 .vscode
+prisma/ERD.svg
+src/generated/*
+
+

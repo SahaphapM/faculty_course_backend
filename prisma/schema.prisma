@@ -92,6 +92,7 @@ model course_instructor {
 
 model subject {
   id              Int     @id @default(autoincrement())
+  code            String
   /// @DtoRelationIncludeId
   curriculumId    Int
   thaiName        String? @db.VarChar(255)
@@ -171,7 +172,7 @@ model faculty {
 
 model instructor {
   id                 Int                       @id @default(autoincrement())
-  engName            String?                   @unique() @db.VarChar(255)
+  engName            String                    @unique() @db.VarChar(255)
   tel                String?                   @db.VarChar(255)
   picture            String?                   @db.VarChar(255)
   position           String?                   @db.VarChar(255)
@@ -181,8 +182,8 @@ model instructor {
   socials            String?                   @db.VarChar(255)
   /// @DtoRelationIncludeId
   branchId           Int?                      @unique()
-  code               String                    @unique() @db.VarChar(255)
-  thaiName           String?                   @unique() @db.VarChar(255)
+  code               String?                   @unique() @db.VarChar(255)
+  thaiName           String                    @unique() @db.VarChar(255)
   bio                String?                   @db.Text
   course_instructors course_instructor[]
   curriculums        curriculum_coordinators[]

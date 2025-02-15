@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
+import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
-import { UpdateCourseSpecDto } from 'src/generated/nestjs-dto/update-courseSpec.dto';
-import { CreateCourseSpecDto } from 'src/generated/nestjs-dto/create-courseSpec.dto';
 
 @Injectable()
 export class SubjectService {
@@ -42,7 +42,7 @@ export class SubjectService {
     return courseSpec;
   }
 
-  async create(dto: CreateCourseSpecDto) {
+  async create(dto: CreateSubjectDto) {
     return await this.prisma.subject.create({
       data: {
         ...dto,
@@ -51,7 +51,7 @@ export class SubjectService {
     });
   }
 
-  async update(id: number, dto: UpdateCourseSpecDto ) {
+  async update(id: number, dto: UpdateSubjectDto ) {
     return await this.prisma.subject.update({
       where: { id: id },
       data: {
