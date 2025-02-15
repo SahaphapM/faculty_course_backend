@@ -10,7 +10,7 @@ import { ProfilePayload } from './types/current-user';
 import { AuthJwtPayload } from './types/auth-jwtPayload';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
-import { CreateUserDto } from 'src/dto/user/create-user.dto';
+import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 
 @Injectable()
 export class AuthService {

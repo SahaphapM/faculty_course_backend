@@ -3,7 +3,6 @@ import {ApiProperty} from '@nestjs/swagger'
 import {Subject} from './subject.entity'
 import {Branch} from './branch.entity'
 import {CurriculumCoordinators} from './curriculumCoordinators.entity'
-import {CurriculumSubjects} from './curriculumSubjects.entity'
 import {Plo} from './plo.entity'
 import {Skill} from './skill.entity'
 
@@ -69,7 +68,7 @@ engDescription: string  | null;
   isArray: true,
   required: false,
 })
-subject?: Subject[] ;
+subjects?: Subject[] ;
 @ApiProperty({
   type: () => Branch,
   required: false,
@@ -81,23 +80,17 @@ branch?: Branch  | null;
   isArray: true,
   required: false,
 })
-curriculum_coordinators?: CurriculumCoordinators[] ;
-@ApiProperty({
-  type: () => CurriculumSubjects,
-  isArray: true,
-  required: false,
-})
-curriculum_subjects?: CurriculumSubjects[] ;
+coordinators?: CurriculumCoordinators[] ;
 @ApiProperty({
   type: () => Plo,
   isArray: true,
   required: false,
 })
-plo?: Plo[] ;
+plos?: Plo[] ;
 @ApiProperty({
   type: () => Skill,
   isArray: true,
   required: false,
 })
-skill?: Skill[] ;
+skills?: Skill[] ;
 }

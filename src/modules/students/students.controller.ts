@@ -9,9 +9,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
-import { CreateStudentDto } from '../../dto/student/create-student.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
+import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 
 @ApiBearerAuth()
 @Controller('students')
@@ -38,13 +39,13 @@ export class StudentsController {
     return this.studentsService.findOne(+id);
   }
 
-  @Get('skill-tree/:id')
-  findProfile(@Param('id') id: string) {
-    return this.studentsService.buildSkillCollectionTree(+id);
-  }
+  // @Get('skill-tree/:id')
+  // findProfile(@Param('id') id: string) {
+  //   return this.studentsService.buildSkillCollectionTree(+id);
+  // }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateStudentDto: CreateStudentDto) {
+  update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
     return this.studentsService.update(+id, updateStudentDto);
   }
 

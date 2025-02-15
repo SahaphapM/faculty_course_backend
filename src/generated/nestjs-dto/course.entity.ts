@@ -1,7 +1,8 @@
 
 import {ApiProperty} from '@nestjs/swagger'
+import {Subject} from './subject.entity'
 import {CourseEnrollment} from './courseEnrollment.entity'
-import {CourseInstructors} from './courseInstructors.entity'
+import {CourseInstructor} from './courseInstructor.entity'
 
 
 export class Course {
@@ -23,29 +24,23 @@ id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-subjectId: number  | null;
+subjectId: number ;
 @ApiProperty({
-  type: 'string',
-  nullable: true,
+  type: () => Subject,
+  required: false,
 })
-thaiDescription: string  | null;
-@ApiProperty({
-  type: 'string',
-  nullable: true,
-})
-engDescription: string  | null;
+subject?: Subject ;
 @ApiProperty({
   type: () => CourseEnrollment,
   isArray: true,
   required: false,
 })
-course_enrollment?: CourseEnrollment[] ;
+course_enrollments?: CourseEnrollment[] ;
 @ApiProperty({
-  type: () => CourseInstructors,
+  type: () => CourseInstructor,
   isArray: true,
   required: false,
 })
-course_instructors?: CourseInstructors[] ;
+course_instructors?: CourseInstructor[] ;
 }

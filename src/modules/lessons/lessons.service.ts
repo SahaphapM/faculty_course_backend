@@ -5,7 +5,7 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
 import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';

@@ -4,386 +4,252 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Course } from 'src/entities/course.entity';
-import { CourseEnrollment } from 'src/entities/course-enrollment';
-import { SkillCollection } from 'src/entities/skill-collection.entity';
-import { Repository } from 'typeorm';
-import { FindManyOptions } from 'typeorm';
-import { Like } from 'typeorm';
-import { LessonsService } from '../lessons/lessons.service';
-import { StudentsService } from '../students/students.service';
-import { CreateCourseDto } from 'src/dto/course/create-course.dto';
-import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
-import { InstructorsService } from '../instructors/instructors.service';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
+import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
+import { Prisma } from '@prisma/client';
+import { StudentsService } from '../students/students.service';
 
 @Injectable()
-export class CoursesService {
+export class CourseService {
   constructor(
-    @InjectRepository(Course)
-    private readonly courseRepo: Repository<Course>,
-
-    @InjectRepository(CourseEnrollment)
-    private readonly courseEnrollRepo: Repository<CourseEnrollment>,
-
-    @InjectRepository(SkillCollection)
-    private readonly skillCollRepo: Repository<SkillCollection>,
-
-    private readonly subjectsService: LessonsService,
-
-    private readonly instructorsService: InstructorsService,
-
-    private readonly studentsService: StudentsService, // Inject StudentsService
+    private prisma: PrismaService,
+    private studentService: StudentsService,
   ) {}
 
   // Create a new course
-  async create(dto: CreateCourseDto): Promise<Course> {
-    const { subjectId, instructorListId: teacherListId, ...rest } = dto;
+  async create(createCourseDto: CreateCourseDto) {
+    const { subjectId, ...rest } = createCourseDto;
+
     try {
-      const subject = await this.subjectsService.findOneCode(subjectId);
+      // Find the subject
+      const subject = await this.prisma.subject.findUnique({
+        where: { id: subjectId },
+      });
       if (!subject) {
         throw new NotFoundException('Subject not found');
       }
-      // const curriculum = await this.currRepo.findOneBy({ id: curriculumId });
-      // if (!curriculum) {
-      //   throw new NotFoundException('Curriculum not found');
-      // }
 
-      const instructors =
-        await this.instructorsService.findByList(teacherListId);
-
-      const newCourse = this.courseRepo.create({
-        ...rest,
-        subject,
-        instructors: instructors,
+      // Create the course
+      const newCourse = await this.prisma.course.create({
+        data: {
+          ...rest,
+          subject: { connect: { id: subjectId } },
+        },
+        include: {
+          subject: true,
+        },
       });
-      return await this.courseRepo.save(newCourse);
+
+      return newCourse;
     } catch (error) {
-      throw new BadRequestException(`Failed to create course ${error}`);
+      throw new BadRequestException(
+        `Failed to create course: ${error.message}`,
+      );
     }
   }
 
-  // async findAllByPage(
-  //   paginationDto: PaginationDto,
-  // ): Promise<{ data: Course[]; total: number }> {
-  //   const { page, limit, sort, order, search } = paginationDto;
-
-  // const queryBuilder = this.courseRepository.createQueryBuilder('course');
-
-  // Include roles in the query
-  // queryBuilder.leftJoinAndSelect('course.roles', 'roles');
-  // .leftJoinAndSelect('course.courseStudentDetails', 'courseStudentDetails')
-  // .leftJoinAndSelect('courseStudentDetails.student', 'student')
-
-  // // Conditionally add joins if columnId and columnName are provided
-  // if (columnId && columnName === 'branch') {
-  //   // Join user with curriculum
-  //   queryBuilder.innerJoin('user.curriculums', 'curriculum');
-  //   // Join curriculum with branch
-  //   queryBuilder.innerJoin('curriculum.branch', 'branch');
-  //   // Filter by branchId
-  //   queryBuilder.andWhere('branch.id = :branchId', { branchId: columnId });
-  // } else if (columnId && columnName === 'curriculum') {
-  //   queryBuilder.innerJoinAndSelect(`user.${columnName}s`, `${columnName}`);
-  //   queryBuilder.andWhere(`${columnName}.id = :columnId`, {
-  //     columnId,
-  //   });
-  // }
-
-  //   const options: FindManyOptions<Course> = {
-  //     take: limit,
-  //     skip: (page - 1) * limit,
-  //     order: sort ? { [sort]: order } : {},
-  //   };
-
-  //   if (search) {
-  //     options.where = [
-  //       { id: Like(`%${search}%`) },
-  //       { name: Like(`%${search}%`) },
-
-  //       // { branch: { name: Like(`%${search}%`) } }, // Corrected for nested relation
-  //       // { branch: { faculty: { name: Like(`%${search}%`) } } },
-  //     ];
-  //   }
-
-  //   const [result, total] = await this.courseRepo.findAndCount(options);
-
-  //   return { data: result, total };
-  // }
-
+  // Find all courses with pagination and search
   async findAll(pag?: PaginationDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const options: FindManyOptions<Course> = {
-      relationLoadStrategy: 'query',
-      relations: {
-        subject: true,
-        courseEnrollment: { student: true },
-        instructors: true,
-      },
-      select: {
-        id: true,
-        name: true,
-        thaiDescription: true,
-        active: true,
+    const { search, limit, page, order } = pag || {};
+
+    const options: Prisma.courseFindManyArgs = {
+      take: limit || defaultLimit,
+      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
+      orderBy: { id: order || 'asc' },
+      include: {
+        course_enrollments: { include: { student: true } },
+        course_instructors: true,
       },
     };
+
+    if (search) {
+      options.where = {
+        name: { contains: search },
+      };
+    }
+
     try {
       if (pag) {
-        const { search, limit, page, order } = pag;
-
-        options.take = limit || defaultLimit;
-        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-        options.order = { id: order || 'ASC' };
-
-        if (search) {
-          options.where = [{ name: Like(`%${search}%`) }];
-        }
-        return await this.courseRepo.findAndCount(options);
+        const [courses, total] = await Promise.all([
+          this.prisma.course.findMany(options),
+          this.prisma.course.count({ where: options.where }),
+        ]);
+        return { data: courses, total };
       } else {
-        return await this.courseRepo.find(options);
+        return await this.prisma.course.findMany(options);
       }
     } catch (error) {
-      // Log the error for debugging
       console.error('Error fetching courses:', error);
       throw new InternalServerErrorException('Failed to fetch courses');
     }
   }
 
   // Find a single course by ID
-  async findOne(id: string): Promise<Course> {
-    const course = await this.courseRepo
-      .createQueryBuilder('course')
-      .leftJoinAndSelect('course.subject', 'subject')
-      .leftJoinAndSelect('subject.skillExpectedLevels', 'skillExpectedLevels')
-      .leftJoinAndSelect('skillExpectedLevels.skill', 'skill')
-      .leftJoinAndSelect('skill.parent', 'parentSkill')
-      .leftJoinAndSelect('skill.children', 'childSkills')
-      .leftJoinAndSelect('course.instructors', 'instructors')
-      .select([
-        'course.id',
-        'course.name',
-        'course.description',
-        'subject.id',
-        'subject.name',
-        'subject.description',
-        'skillExpectedLevels.id',
-        'skillExpectedLevels.expectedLevel',
-        'skill.id',
-        'skill.name',
-        'parentSkill.id',
-        'parentSkill.name',
-        'childSkills.id',
-        'childSkills.name',
-        'instructors.id',
-        'instructors.name',
-      ])
-      .where('course.id = :id', { id })
-      .getOne();
+  async findOne(id: number) {
+    try {
+      const course = await this.prisma.course.findUnique({
+        where: { id },
+        include: {
+          subject: {
+            include: {
+              skill_expected_level: {
+                include: {
+                  skill: {
+                    include: {
+                      parent: true,
+                      subs: true,
+                    },
+                  },
+                },
+              },
+            },
+          },
+          course_instructors: true,
+        },
+      });
 
-    if (!course) {
-      throw new NotFoundException(`Course with ID ${id} not found`);
+      if (!course) {
+        throw new NotFoundException(`Course with ID ${id} not found`);
+      }
+
+      return course;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch course');
     }
-
-    return course;
   }
 
-  async findCourseEnrolmentByCourseId(id: number): Promise<CourseEnrollment[]> {
-    const courseEnrollment = await this.courseEnrollRepo.find({
-      where: { course: { id } },
-      relations: {
-        student: true,
-        skillCollections: { skillExpectedLevels: { skill: true } },
-      },
-      select: {
-        id: true,
-        student: { id: true, thaiName: true },
-        skillCollections: {
-          id: true,
-          gainedLevel: true,
-          skillExpectedLevels: {
-            id: true,
-            expectedLevel: true,
-            skill: {
-              id: true,
-              thaiName: true,
-              engName: true,
-              parent: { id: true, thaiName: true, engName: true },
-              children: { id: true, thaiName: true, engName: true },
+  // Find course enrollments by course ID
+  async findCourseEnrollmentByCourseId(id: number) {
+    try {
+      const courseEnrollments = await this.prisma.course_enrollment.findMany({
+        where: { courseId: id },
+        include: {
+          student: true,
+          skill_collections: {
+            include: {
+              skill_expected_level: {
+                include: {
+                  skill: {
+                    include: {
+                      parent: true,
+                      subs: true,
+                    },
+                  },
+                },
+              },
             },
           },
         },
-      },
-      relationLoadStrategy: 'query',
-    });
+      });
 
-    if (!courseEnrollment) {
-      throw new NotFoundException(
-        `Course Enrollment with Course ID ${id} not found`,
+      if (!courseEnrollments) {
+        throw new NotFoundException(
+          `Course enrollments for course ID ${id} not found`,
+        );
+      }
+
+      return courseEnrollments;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch course enrollments',
       );
     }
-
-    return courseEnrollment;
   }
 
   // Update an existing course
-  async update(id: number, updateCourseDto: UpdateCourseDto): Promise<Course> {
-    const course = await this.courseRepo.findOne({ where: { id } }); // Ensure the course exists
-    if (!course) {
-      throw new NotFoundException(`Course with ID ${id} not found`);
-    }
-
-    const updatedCourse = this.courseRepo.merge(course, updateCourseDto);
+  async update(id: number, updateCourseDto: UpdateCourseDto) {
     try {
-      return await this.courseRepo.save(updatedCourse);
+      const course = await this.prisma.course.update({
+        where: { id },
+        data: updateCourseDto,
+        include: {
+          subject: true,
+          course_instructors: true,
+        },
+      });
+      return course;
     } catch (error) {
-      throw new BadRequestException('Failed to Update course');
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Course with ID ${id} not found`);
+      }
+      throw new BadRequestException('Failed to update course');
     }
   }
 
   // Delete a course by ID
   async remove(id: number): Promise<void> {
-    const result = await this.courseRepo.delete(id);
-
-    if (result.affected === 0) {
-      throw new NotFoundException(`Course with ID ${id} not found`);
+    try {
+      await this.prisma.course.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Course with ID ${id} not found`);
+      }
+      throw new BadRequestException('Failed to delete course');
     }
   }
 
-  async importStudents(id: string, studentListCode: string[]) {
-    const course = await this.findOne(id);
+  // Import students into a course
+  async importStudents(id: number, studentListCode: string[]) {
+    const course = await this.findOne(+id);
 
-    if (!course.subject) {
+    if (!course.subjectId) {
       throw new BadRequestException(
-        'Course must have a subject before import students',
+        'Course must have a subject before importing students',
       );
     }
 
-    course.courseEnrollment = course.courseEnrollment || [];
-
-    const students = await this.studentsService.findManyByIds(studentListCode);
+    const students = await this.studentService.findManyByCode(studentListCode);
     const missingStudents = studentListCode.filter(
       (code) => !students.some((student) => student.code === code),
     );
+
     if (missingStudents.length > 0) {
       throw new NotFoundException(
         `Students with IDs ${missingStudents.join(', ')} not found`,
       );
     }
 
-    const newEnrollments = students.map((student) => {
-      const courseEnrollment = this.courseEnrollRepo.create({
-        student,
-        course,
-        skillCollections: course.subject.skillExpectedLevels.map((skill) =>
-          this.skillCollRepo.create({
-            student: student,
-            skillExpectedLevels: skill,
-          }),
-        ),
-      });
-      return courseEnrollment;
+    // Bulk insert course enrollments
+    await this.prisma.course_enrollment.createMany({
+      data: students.map((student) => ({
+        studentId: student.id,
+        courseId: course.id,
+      })),
+      skipDuplicates: true, // Avoid duplicate enrollments
     });
 
-    course.courseEnrollment.push(...newEnrollments);
+    await this.prisma.skill_collection.createMany({
+      data: students.map((student) => ({
+        studentId: student.id,
+        courseId: course.id,
+      } as Prisma.skill_collectionCreateManyInput)),
+      skipDuplicates: true, // Avoid duplicate skill records
+    });
 
-    return await this.courseRepo.save(course);
+    return await this.findOne(id);
   }
-  async removeEnrollment(
-    courseId: string,
-    courseStudentDetailId: number,
-  ): Promise<Course> {
-    const course = await this.findOne(courseId);
 
-    // Find the CourseStudentDetail that matches the studentId to be removed
-    const courseStudentDetailToRemove = course.courseEnrollment.find(
-      (courseStudentDetail) => courseStudentDetail.id === courseStudentDetailId,
-    );
-
-    if (courseStudentDetailToRemove) {
-      // Remove the course detail from the courseStudentDetails array
-      course.courseEnrollment = course.courseEnrollment.filter(
-        (courseStudentDetail) =>
-          courseStudentDetail !== courseStudentDetailToRemove,
-      );
-      if (courseStudentDetailToRemove.skillCollections) {
-        // Remove SkillCollection records from the database
-        await this.skillCollRepo.remove(
-          courseStudentDetailToRemove.skillCollections,
+  // Remove a student enrollment from a course
+  async removeEnrollment(courseId: number, courseStudentDetailId: number) {
+    try {
+      await this.prisma.course_enrollment.delete({
+        where: { id: courseStudentDetailId },
+      });
+      return await this.findOne(courseId);
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(
+          `Enrollment with ID ${courseStudentDetailId} not found`,
         );
       }
-
-      // Save the updated course
-      await this.courseRepo.save(course);
-
-      // Delete the corresponding CourseStudentDetail record from the database
-      await this.courseEnrollRepo.delete(courseStudentDetailToRemove.id);
+      throw new BadRequestException('Failed to remove enrollment');
     }
-
-    return course;
-  }
-
-  async selectSubject(id: string, subjectId: string): Promise<Course> {
-    const course = await this.findOne(id);
-    const subject = await this.subjectsService.findOneCode(subjectId);
-    if (course.subject && course.courseEnrollment) {
-      await this.createSkillCollection(
-        subject.skillExpectedLevels,
-        course.courseEnrollment,
-      );
-    }
-    delete course.courseEnrollment;
-    course.subject = subject;
-
-    // Save the updated course
-    return await this.courseRepo.save(course);
-  }
-  async createSkillCollection(
-    skillExpectedLevels: SkillExpectedLevel[],
-    courseEnr: CourseEnrollment[],
-  ) {
-    // Create array of skill collections to be saved
-    const skillCollectionsToSave: SkillCollection[] = [];
-
-    // Iterate through each course enrollment
-    for (let i = 0; i < courseEnr.length; i++) {
-      // Remove existing skill collections
-      if (courseEnr[i].skillCollections) {
-        await this.skillCollRepo.remove(courseEnr[i].skillCollections);
-      } else {
-        courseEnr[i].skillCollections = [];
-      }
-
-      // Iterate through each skill
-      for (let index = 0; index < skillExpectedLevels.length; index++) {
-        const skillCollection = this.skillCollRepo.create({
-          courseEnrollment: courseEnr[i],
-          skillExpectedLevels: skillExpectedLevels[index],
-          passed: false,
-          student: courseEnr[i].student,
-        });
-        // Exclude the courseStudentDetail property to avoid circular reference
-        delete skillCollection.courseEnrollment;
-
-        // Add to array of skill collections to be saved
-        skillCollectionsToSave.push(skillCollection);
-      }
-    }
-
-    // Save all skill collections in one go
-    await this.skillCollRepo.save(skillCollectionsToSave);
-
-    // Add saved skill collections to course enrollments
-    for (let i = 0; i < courseEnr.length; i++) {
-      courseEnr[i].skillCollections = skillCollectionsToSave.filter(
-        (skillCollection) =>
-          skillCollection.courseEnrollment.id === courseEnr[i].id,
-      );
-      await this.courseEnrollRepo.save(courseEnr[i]);
-    }
-    return courseEnr;
   }
 }

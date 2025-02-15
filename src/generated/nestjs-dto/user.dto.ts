@@ -18,8 +18,9 @@ email: string ;
 password: string ;
 @ApiProperty({
   type: 'string',
+  nullable: true,
 })
-avatarUrl: string ;
+avatarUrl: string  | null;
 @ApiProperty({
   type: 'string',
   nullable: true,
@@ -35,7 +36,7 @@ hashedRefreshToken: string  | null;
   format: 'int32',
   nullable: true,
 })
-teacherId: number  | null;
+instructorId: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

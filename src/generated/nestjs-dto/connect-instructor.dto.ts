@@ -16,6 +16,22 @@ export class ConnectInstructorDto {
 @IsInt()
 id?: number ;
 @ApiProperty({
+  type: 'string',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsString()
+engName?: string ;
+@ApiProperty({
+  type: 'string',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsString()
+email?: string ;
+@ApiProperty({
   type: 'integer',
   format: 'int32',
   required: false,
@@ -32,4 +48,12 @@ branchId?: number ;
 @IsOptional()
 @IsString()
 code?: string ;
+@ApiProperty({
+  type: 'string',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsString()
+thaiName?: string ;
 }

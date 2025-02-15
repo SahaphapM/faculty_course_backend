@@ -4,130 +4,45 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { Instructor } from '../../entities/instructor.entity';
-import { FindManyOptions, In, Like, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from '../../dto/pagination.dto';
-import { CreateInstructorDto } from '../../dto/instructor/create-instructor.dto';
-import { UpdateInstructorDto } from '../../dto/instructor/update-instructor.dto';
-import { Curriculum } from 'src/entities/curriculum.entity';
-import { Branch } from 'src/entities/branch.entity';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.dto';
+import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class InstructorsService {
-  constructor(
-    @InjectRepository(Branch)
-    private braRepo: Repository<Branch>,
-    @InjectRepository(Curriculum)
-    private curRepo: Repository<Curriculum>,
-    @InjectRepository(Instructor)
-    private insRepo: Repository<Instructor>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  // async findAllByPage(
-  //   paginationDto: PaginationDto,
-  // ): Promise<{ data: Instructor[]; total: number }> {
-  //   const { page, limit, sort, order, search, columnId, columnName } =
-  //     paginationDto;
-
-  //   const queryBuilder = this.insRepo.createQueryBuilder('teacher');
-
-  //   // Conditionally add joins if columnId and columnName are provided
-  //   if (columnId && columnName === 'branch') {
-  //     // Join teacher with curriculum
-  //     queryBuilder.innerJoin('teacher.curriculums', 'curriculum');
-  //     // Join curriculum with branch
-  //     queryBuilder.innerJoin('curriculum.branch', 'branch');
-  //     // Filter by branchId with explicit table alias
-  //     queryBuilder.andWhere('branch.id = :branchId', { branchId: columnId });
-  //   } else if (columnId && columnName === 'curriculum') {
-  //     queryBuilder.innerJoinAndSelect(
-  //       `teacher.${columnName}s`,
-  //       `${columnName}`,
-  //     );
-  //     queryBuilder.andWhere(`${columnName}.id = :columnId`, {
-  //       columnId,
-  //     });
-  //   }
-
-  //   if (search) {
-  //     queryBuilder.andWhere(
-  //       new Brackets((qb) => {
-  //         qb.where('teacher.name LIKE :search', { search: `%${search}%` })
-  //           .orWhere('teacher.engName LIKE :search', { search: `%${search}%` })
-  //           .orWhere('teacher.email LIKE :search', { search: `%${search}%` });
-  //       }),
-  //     );
-  //   }
-
-  //   if (sort && order) {
-  //     queryBuilder.orderBy(`teacher.${sort}`, order);
-  //   }
-
-  //   // Log the generated SQL query and its parameters
-  //   // console.log('Generated SQL:', queryBuilder.getSql());
-  //   // console.log('Query Parameters:', queryBuilder.getParameters());
-
-  //   const [data, total] = await queryBuilder
-  //     .take(limit)
-  //     .skip((page - 1) * limit)
-  //     .getManyAndCount();
-
-  //   // console.log('PaginationDto:', paginationDto);
-  //   // console.log('Data:', data);
-  //   // console.log('Total:', total);
-
-  //   return { data, total };
-  // }
-
-  findByList(c: string[]) {
-    return this.insRepo.findBy({ id: In(c) });
+  findByListCode(c: string[]) {
+    return this.prisma.instructor.findMany({ where: { code: { in: c } } });
   }
 
   async create(dto: CreateInstructorDto) {
-    const { branchId, ...rest } = dto;
-
     // Check if the teacher with this email already exists
-    const existingTeacher = await this.insRepo.findOne({
-      where: { email: rest.email },
+    const existingTeacher = await this.prisma.instructor.findUnique({
+      where: { code: dto.email },
     });
+
     if (existingTeacher) {
       throw new BadRequestException(
-        `Teacher with Email ${rest.email} already exists`,
+        `Instructor with code ${dto.email} already exists`,
       );
     }
 
-    let existBranch = null;
-
-    // Check for branch if branchId is provided
-    if (branchId) {
-      existBranch = await this.braRepo.findOne({ where: { id: branchId } });
-      if (!existBranch) {
-        throw new BadRequestException(
-          `Branch with ID ${branchId} does not exist`,
-        );
-      }
-    }
-
     // Create teacher instance, conditionally adding optional fields
-    const teacher = this.insRepo.create({
-      ...rest,
-      specialists: dto.specialists
-        ? dto.specialists.map((s) => s).join(', ')
-        : '-',
-      socials: dto.socials ? JSON.stringify(dto.socials) : '-',
-      branch: existBranch,
+    const teacher = await this.prisma.instructor.create({
+      data: dto,
     });
 
-    return await this.insRepo.save(teacher);
+    return teacher;
   }
 
   async findAll(pag?: PaginationDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const options: FindManyOptions<Instructor> = {
-      relationLoadStrategy: 'query',
+    const options: Prisma.instructorFindManyArgs = {
       select: {
         id: true,
         code: true,
@@ -137,9 +52,11 @@ export class InstructorsService {
         tel: true,
         position: true,
         branch: {
-          id: true,
-          thaiName: true,
-          engName: true,
+          select: {
+            id: true,
+            thaiName: true,
+            engName: true,
+          },
         },
       },
     };
@@ -149,14 +66,19 @@ export class InstructorsService {
 
         options.take = limit || defaultLimit;
         options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-        options.order = { id: order || 'ASC' };
+        options.orderBy = { id: order || 'asc' };
 
         if (search) {
-          options.where = [{ thaiName: Like(`%${search}%`) }];
+          options.where = {
+            OR: [
+              { thaiName: { contains: search } },
+              { engName: { contains: search } },
+            ],
+          };
         }
-        return await this.insRepo.findAndCount(options);
+        return await this.prisma.instructor.findMany(options);
       } else {
-        return await this.insRepo.find(options);
+        return await this.prisma.instructor.findMany(options);
       }
     } catch (error) {
       // Log the error for debugging
@@ -165,14 +87,8 @@ export class InstructorsService {
     }
   }
 
-  async findAllByCurriculum(curriculumId: number) {
-    return await this.insRepo.find({
-      where: { curriculums: { id: curriculumId } },
-    });
-  }
-
-  async findOne(id: number): Promise<Instructor> {
-    const teacher = await this.insRepo.findOne({
+  async findOne(id: number) {
+    const teacher = await this.prisma.instructor.findUnique({
       where: { id },
     });
     if (!teacher) {
@@ -183,67 +99,72 @@ export class InstructorsService {
     return teacher;
   }
 
-  async findExistCode(code: string): Promise<Instructor> {
-    const teacher = await this.insRepo
-      .createQueryBuilder('instructor')
-      .where('instructor.code = :code', { code })
-      .getOne();
-
-    return teacher;
-  }
-
-  async findByEmail(email: string): Promise<Instructor> {
-    const teacher = await this.insRepo.findOne({
-      where: { email },
+  async findExistCode(code: string) {
+    const teacher = await this.prisma.instructor.findUnique({
+      where: { code },
     });
     return teacher;
   }
 
-  async selectCoordinatorToCurriculum(teacherId: number, curriculumId: number) {
-    const teacher = await this.insRepo.findOneBy({ id: teacherId });
-    const curriculum = await this.curRepo.findOneBy({ id: curriculumId });
+  async updateCoordinatorToCurriculum(teacherId: number, curriculumId: number) {
+    // Find the instructor
+    const teacher = await this.prisma.instructor.findUnique({
+      where: { id: teacherId },
+    });
+
+    // Find the curriculum
+    const curriculum = await this.prisma.curriculum.findUnique({
+      where: { id: curriculumId },
+    });
+
+    // Validate instructor exists
     if (!teacher) {
-      throw new NotFoundException(
-        `Instructor/Coordinator with ID ${teacherId} not found`,
-      );
+      throw new NotFoundException(`Instructor with ID ${teacherId} not found`);
     }
+
+    // Validate curriculum exists
     if (!curriculum) {
       throw new NotFoundException(
         `Curriculum with ID ${curriculumId} not found`,
       );
     }
-    teacher.curriculums.push(curriculum);
-    return await this.insRepo.save(teacher);
+
+    // Update curriculum with coordinator
+    await this.prisma.curriculum.update({
+      where: { id: curriculumId },
+      data: {
+        coordinators: {
+          // Many to many
+          connect: {
+            instructorId_curriculumId: {
+              instructorId: teacherId,
+              curriculumId,
+            },
+          },
+        },
+      },
+    });
+
+    return `Success: Assigned Instructor ID ${teacherId} to Curriculum ID ${curriculumId}`;
   }
 
-  async update(
-    id: number,
-    updateTeacherDto: UpdateInstructorDto,
-  ): Promise<Instructor> {
-    const teacher = await this.findOne(id);
-
-    if (!teacher) {
-      throw new NotFoundException(
-        `Instructor/Coordinator with ID ${id} not found`,
-      );
-    }
-    // Update teacher properties
-    Object.assign(teacher, updateTeacherDto);
-    // teacher.roles = updateTeacherDto.roles;
-
+  async update(id: number, updateTeacherDto: UpdateInstructorDto) {
     try {
-      await this.insRepo.save(teacher);
-      const teacherUpdated = await this.findOne(id);
-      return teacherUpdated;
+      await this.prisma.instructor.update({
+        where: { id },
+        data: updateTeacherDto,
+      });
+      return `Success Update ID ${id}`;
     } catch (error) {
       throw new BadRequestException('Failed to update Instructor/Coordinator');
     }
   }
 
   async remove(id: number) {
-    const teacher = await this.findOne(id);
     try {
-      await this.insRepo.remove(teacher);
+      await this.prisma.instructor.delete({
+        where: { id },
+      });
       return `Success Delete ID ${id}`;
     } catch (error) {
       throw new BadRequestException('Failed to remove Instructor/Coordinator');

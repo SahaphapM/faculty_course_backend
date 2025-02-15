@@ -38,13 +38,13 @@ curriculumId: number  | null;
   required: false,
   nullable: true,
 })
-parentSkill?: Skill  | null;
+parent?: Skill  | null;
 @ApiProperty({
   type: () => Skill,
   isArray: true,
   required: false,
 })
-subSkills?: Skill[] ;
+subs?: Skill[] ;
 @ApiProperty({
   type: () => Clo,
   required: false,

@@ -31,7 +31,7 @@ email?: string ;
 })
 @IsOptional()
 @IsInt()
-teacherId?: number ;
+instructorId?: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

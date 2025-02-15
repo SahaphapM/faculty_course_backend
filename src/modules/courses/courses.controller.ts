@@ -7,17 +7,17 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { CoursesService } from './courses.service';
+import { CourseService } from './courses.service';
 import { Query } from '@nestjs/common';
-import { CreateCourseDto } from 'src/dto/course/create-course.dto';
-import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
+import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 
 @ApiBearerAuth()
 @Controller('courses')
 export class CoursesController {
-  constructor(private readonly coursesService: CoursesService) {}
+  constructor(private readonly coursesService: CourseService) {}
 
   @Post()
   create(@Body() createCourseDto: CreateCourseDto) {
@@ -31,12 +31,12 @@ export class CoursesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.coursesService.findOne(id);
+    return this.coursesService.findOne(+id);
   }
 
   @Get(':id/enrollments')
   findCourseEnrollment(@Param('id') id: string) {
-    return this.coursesService.findCourseEnrolmentByCourseId(+id);
+    return this.coursesService.findCourseEnrollmentByCourseId(+id);
   }
 
   @Patch(':id')
@@ -49,20 +49,12 @@ export class CoursesController {
     return this.coursesService.remove(+id);
   }
 
-  @Patch('selectSubject/:id/:subjectId')
-  selectSubject(
-    @Param('id') id: string,
-    @Param('subjectId') subjectId: string,
-  ) {
-    return this.coursesService.selectSubject(id, subjectId);
-  }
-
   @Patch(':id/import-students')
   importStudents(
     @Param('id') courseId: string,
     @Body() studentListId: string[],
   ) {
-    return this.coursesService.importStudents(courseId, studentListId);
+    return this.coursesService.importStudents(+courseId, studentListId);
   }
 
   @Delete(':id/remove-enrollment/:enId')
@@ -70,6 +62,6 @@ export class CoursesController {
     @Param('id') courseId: string,
     @Param('enId') enrollId: number,
   ) {
-    return this.coursesService.removeEnrollment(courseId, enrollId);
+    return this.coursesService.removeEnrollment(+courseId, enrollId);
   }
 }

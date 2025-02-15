@@ -1,46 +1,32 @@
 import {
+  Injectable,
+  NotFoundException,
+  InternalServerErrorException,
   BadRequestException,
   HttpStatus,
-  Injectable,
-  InternalServerErrorException,
-  NotFoundException,
 } from '@nestjs/common';
-import { CreateCurriculumDto } from '../../dto/curriculum/create-curriculum.dto';
-import { UpdateCurriculumDto } from '../../dto/curriculum/update-curriculum.dto';
-import { Curriculum } from '../../entities/curriculum.entity';
-import { FindManyOptions, Like, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
+import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
+import { Prisma } from '@prisma/client'; // Import Prisma types
+import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { Skill } from 'src/entities/skill.entity';
-import { Branch } from 'src/entities/branch.entity';
-import { Subject } from 'src/entities/subject.entity';
+import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 
 @Injectable()
 export class CurriculumsService {
-  constructor(
-    @InjectRepository(Subject)
-    private subRepo: Repository<Subject>,
-    @InjectRepository(Curriculum)
-    private currRepo: Repository<Curriculum>,
-    @InjectRepository(Skill)
-    private skillRepo: Repository<Skill>,
-    @InjectRepository(Branch)
-    private braRepo: Repository<Branch>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
+  // Create a new curriculum
   async create(dto: CreateCurriculumDto) {
-    const curriculum = this.currRepo.create(dto);
     try {
-      if (dto.branch) {
-        const branch = await this.braRepo.findOneBy({ id: dto.branch.id });
-        if (!branch) {
-          throw new NotFoundException(
-            `Branch with IDs ${dto.branch} not found`,
-          );
-        }
-        curriculum.branch = branch;
-      }
-      await this.currRepo.save(curriculum);
+      const { branchId, ...rest } = dto;
+
+      const curriculum = await this.prisma.curriculum.create({
+        data: {
+          ...rest,
+          branch: branchId ? { connect: { id: branchId } } : undefined,
+        },
+      });
+
       return {
         statusCode: HttpStatus.CREATED,
         message: 'Curriculum created successfully',
@@ -48,107 +34,47 @@ export class CurriculumsService {
       };
     } catch (error) {
       throw new BadRequestException(
-        'Failed to create Curriculum ',
+        'Failed to create curriculum',
         error.message,
       );
     }
   }
 
-  // async findAll(pag?: PaginationDto) {
-  //   const defaultLimit = 10;
-  //   const defaultPage = 1;
-
-  //   const options: FindManyOptions<Curriculum> = {
-  //     relationLoadStrategy: 'query',
-  //     relations: {
-  //       plos: true,
-  //       branch: true,
-  //       coordinators: true,
-  //     },
-  //     select: {
-  //       id: true,
-  //       code: true,
-  //       thaiName: true,
-  //       thaiDescription: true,
-  //       minimumGrade: true,
-  //       thaiDegree: true,
-  //       engDegree: true,
-  //       engName: true,
-  //       period: true,
-  //       branch: { id: true, name: true },
-  //       coordinators: { id: true, thaiName: true },
-  //     },
-  //   };
-
-  //   try {
-  //     if (pag) {
-  //       const { search, limit, page, order, facultyName, branchName } = pag;
-
-  //       options.take = limit || defaultLimit;
-  //       options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-  //       options.order = { id: order || 'ASC' };
-  //       options.where = {};
-
-  //       if (search) {
-  //         options.where.thaiName = Like(`%${search}%`);
-  //       }
-  //       if (facultyName) {
-  //         options.where.branch = {
-  //           faculty: { name: Like(`%${facultyName}%`) },
-  //         };
-  //       }
-  //       if (branchName) {
-  //         options.where.branch = { name: Like(`%${branchName}%`) };
-  //       }
-
-  //       return await this.currRepo.findAndCount(options);
-  //     } else {
-  //       return await this.currRepo.find(options);
-  //     }
-  //   } catch (error) {
-  //     console.error('Error fetching curriculums:', error);
-  //     throw new InternalServerErrorException('Failed to fetch curriculums');
-  //   }
-  // }
-
+  // Find all curriculums with pagination and search
   async findAll(pag?: PaginationDto) {
     const defaultLimit = 15;
     const defaultPage = 1;
 
-    const options: FindManyOptions<Curriculum> = {
-      relations: ['branch'],
-      select: [
-        'id',
-        'code',
-        'thaiName',
-        'thaiDescription',
-        'minimumGrade',
-        'thaiDegree',
-        'engDegree',
-        'engName',
-        'period',
-      ],
+    const { search, limit, page, order, facultyName } = pag || {};
+
+    const options: Prisma.curriculumFindManyArgs = {
+      take: limit || defaultLimit,
+      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
+      orderBy: { id: order || 'asc' },
+      include: {
+        branch: {
+          include: {
+            faculty: true,
+          },
+        },
+      },
+      where: {
+        ...(search && { thaiName: { contains: search } }),
+        ...(facultyName && {
+          branch: { faculty: { name: { contains: facultyName } } },
+        }),
+      },
     };
 
     try {
       if (pag) {
-        const { search, limit, page, order, facultyName, branchName } = pag;
-
-        options.take = limit || defaultLimit;
-        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-        options.order = { id: order || 'ASC' };
-
-        options.where = {
-          ...(search && { thaiName: Like(`%${search}%`) }),
-          ...(facultyName && {
-            branch: { faculty: { name: Like(`%${facultyName}%`) } },
-          }),
-          ...(branchName && { branch: { thaiName: Like(`%${branchName}%`) } }),
-        };
-
-        return await this.currRepo.findAndCount(options);
+        const [curriculums, total] = await Promise.all([
+          this.prisma.curriculum.findMany(options),
+          this.prisma.curriculum.count({ where: options.where }),
+        ]);
+        return { data: curriculums, total };
       } else {
-        return await this.currRepo.find(options);
+        return await this.prisma.curriculum.findMany(options);
       }
     } catch (error) {
       console.error('Error fetching curriculums:', error);
@@ -156,90 +82,119 @@ export class CurriculumsService {
     }
   }
 
+  // Find a curriculum by ID
   async findOne(id: number) {
-    const curriculum = await this.currRepo.findOneBy({ id });
-    if (!curriculum) {
-      throw new NotFoundException(`Curriculum with code '${id}' not found`);
-    }
-    return curriculum;
-  }
-
-  async findExistCode(code: string) {
-    const curriculum = await this.currRepo.findOneBy({ code });
-    return curriculum;
-  }
-
-  async findOneByCode(code: string) {
-    const curriculum = await this.currRepo.findOne({
-      where: { code },
-      relations: {
-        plos: true,
-        // subjects: true,
-        courseSpecs: {
-          clos: true,
-          subject: true,
-        },
-        branch: true,
-        coordinators: true,
-        skills: {
-          children: true,
-        },
-      },
-    });
-    if (!curriculum) {
-      throw new NotFoundException(`Curriculum with code '${code}' not found`);
-    }
-    return curriculum;
-  }
-
-  async update(id: number, dto: UpdateCurriculumDto) {
-    const curriculum = await this.findOne(id);
-    if (!curriculum) {
-      throw new NotFoundException(`Curriculum with ID ${id} not found`);
-    }
-
-    this.currRepo.merge(curriculum, dto);
-    // // Course Spec Handle + create subjects
-    // if (dto.courseSpecs.length) {
-    //   curriculum.subjects = [];
-
-    //   for (const courseSpec of dto.courseSpecs) {
-    //     curriculum.courseSpecs.map((cs) => {
-    //       cs.curriculum = curriculum;
-    //     });
-    //     const subject = this.subRepo.create({ ...courseSpec.subject });
-    //     curriculum.subjects.push(subject);
-    //   }
-    // }
-
-    // Save everything in one transaction
-    this.currRepo.save(curriculum);
-
-    return {
-      statusCode: HttpStatus.OK,
-      message: 'Curriculum updated successfully',
-    };
-  }
-
-  async remove(id: number): Promise<void> {
-    const curriculum = await this.findOne(id);
     try {
-      await this.currRepo.remove(curriculum);
+      const curriculum = await this.prisma.curriculum.findUnique({
+        where: { id },
+      });
+
+      if (!curriculum) {
+        throw new NotFoundException(`Curriculum with ID ${id} not found`);
+      }
+
+      return curriculum;
     } catch (error) {
-      throw new BadRequestException(`Failed to remove curriculum ID ${id}`);
+      throw new InternalServerErrorException('Failed to fetch curriculum');
     }
   }
 
-  async filters(branchId: string): Promise<Curriculum[]> {
+  // Find a curriculum by code
+  async findExistCode(code: string) {
     try {
-      const curriculums = await this.currRepo
-        .createQueryBuilder('curriculum')
-        .select(['curriculum.id', 'curriculum.thaiName', 'curriculum.engName'])
-        .where('curriculum.branchId = :branchId', { branchId })
-        .getMany();
+      return await this.prisma.curriculum.findUnique({
+        where: { code },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch curriculum by code',
+      );
+    }
+  }
+
+  // Find a curriculum by code with relations
+  async findOneByCode(code: string) {
+    try {
+      const curriculum = await this.prisma.curriculum.findUnique({
+        where: { code },
+        include: {
+          plos: true,
+          subjects: {
+            include: {
+              clos: true,
+            },
+          },
+          branch: true,
+          coordinators: true,
+          skills: {
+            include: {
+              subs: true,
+            },
+          },
+        },
+      });
+
+      if (!curriculum) {
+        throw new NotFoundException(`Curriculum with code ${code} not found`);
+      }
+
+      return curriculum;
+    } catch (error) {
+      throw new InternalServerErrorException(
+        'Failed to fetch curriculum by code',
+      );
+    }
+  }
+
+  // Update a curriculum by ID
+  async update(id: number, dto: UpdateCurriculumDto) {
+    try {
+      const curriculum = await this.prisma.curriculum.update({
+        where: { id },
+        data: dto,
+      });
+
+      return {
+        statusCode: HttpStatus.OK,
+        message: 'Curriculum updated successfully',
+        data: curriculum,
+      };
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Curriculum with ID ${id} not found`);
+      }
+      throw new BadRequestException('Failed to update curriculum');
+    }
+  }
+
+  // Remove a curriculum by ID
+  async remove(id: number): Promise<void> {
+    try {
+      await this.prisma.curriculum.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Curriculum with ID ${id} not found`);
+      }
+      throw new BadRequestException('Failed to remove curriculum');
+    }
+  }
+
+  // Filter curriculums by branch ID
+  async filters(branchId: string) {
+    try {
+      const curriculums = await this.prisma.curriculum.findMany({
+        where: { branchId: parseInt(branchId) },
+        select: {
+          id: true,
+          thaiName: true,
+          engName: true,
+        },
+      });
       return curriculums;
     } catch (error) {
-      throw new Error(`Failed to fetch details: ${error.message}`);
+      throw new InternalServerErrorException('Failed to filter curriculums');
     }
   }
 }

@@ -12,9 +12,9 @@ import {
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { CreateSkillDto } from 'src/dto/skill/create-skill.dto';
-import { UpdateSkillDto } from 'src/dto/skill/update-skill.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
+import { UpdateSkillDto } from 'src/generated/nestjs-dto/update-skill.dto';
 
 @ApiBearerAuth()
 @Controller('skills')
@@ -56,17 +56,6 @@ export class SkillsController {
   remove(@Param('id') id: number) {
     return this.skillsService.remove(id);
   }
-
-  ///////////  subSkill /////////////
-
-  // @Patch(':id/selectSubSkills') // select or create subskills use this.
-  // @HttpCode(HttpStatus.CREATED)
-  // async selectSubSkills(
-  //   @Param('id') id: string,
-  //   @Body() createSkillDtos: CreateSkillDto,
-  // ) {
-  //   return this.skillsService.selectSubSkills(+id, createSkillDtos);
-  // }
 
   @Post(':parentId/createSubSkills') // select or create subskills use this.
   @HttpCode(HttpStatus.CREATED)

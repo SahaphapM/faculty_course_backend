@@ -1,12 +1,10 @@
 import { Module } from '@nestjs/common';
 import { SkillsService } from './skills.service';
 import { SkillsController } from './skills.controller';
-import { Skill } from '../../entities/skill.entity';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Curriculum } from 'src/entities/curriculum.entity';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Skill, Curriculum])],
+  imports: [PrismaModule],
   controllers: [SkillsController],
   providers: [SkillsService],
   exports: [SkillsService],

@@ -4,24 +4,23 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { clo } from 'prisma/prisma-client';
-import { CloDto } from 'src/generated/nestjs-dto/clo.dto';
 import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
+import { CreateCloDto } from 'src/generated/nestjs-dto/create-clo.dto';
 @Injectable()
 export class ClosService {
   constructor(private prisma: PrismaService) {}
 
-  async create(createCloDto: CloDto): Promise<clo> {
-    const { courseSpec, plo, skill } = await this.findDependency(createCloDto);
+  async create(dto: CreateCloDto) {
+    // const { courseSpec, plo, skill } = await this.findDependency(createCloDto);
 
     try {
       return await this.prisma.clo.create({
         data: {
-          ...createCloDto,
-          courseSpecId: courseSpec.id,
-          ploId: plo.id,
-          skills: { connect: { id: skill.id } },
+          ...dto,
+          subjectId: dto.subjectId,
+          ploId: dto.ploId,
         },
       });
     } catch (error) {
@@ -82,17 +81,17 @@ export class ClosService {
     }
   }
 
-  async findAllByCourseSpec(courseSpecId: number): Promise<clo[]> {
-    try {
-      return await this.prisma.clo.findMany({
-        where: { courseSpecId },
-      });
-    } catch (error) {
-      throw new NotFoundException(
-        `CourseSpec with id ${courseSpecId} not found: ${error.message}`,
-      );
-    }
-  }
+  // async findAllByCourseSpec(courseSpecId: number): Promise<clo[]> {
+  //   try {
+  //     return await this.prisma.clo.findMany({
+  //       where: { id: courseSpecId },
+  //     });
+  //   } catch (error) {
+  //     throw new NotFoundException(
+  //       `CourseSpec with id ${courseSpecId} not found: ${error.message}`,
+  //     );
+  //   }
+  // }
 
   async findOne(id: number): Promise<clo> {
     try {
@@ -144,37 +143,37 @@ export class ClosService {
   }
 
   // Helper function to find dependencies
-  async findDependency(createCloDto: CloDto) {
-    const courseSpec = await this.prisma.course_spec.findUnique({
-      where: { id: createCloDto.courseSpecId },
-    });
+  // async findDependency(createCloDto: CloDto) {
+  //   const courseSpec = await this.prisma.course_spec.findUnique({
+  //     where: { id: createCloDto.courseSpecId },
+  //   });
 
-    if (!courseSpec) {
-      throw new NotFoundException(
-        `CourseSpec with id ${createCloDto.courseSpecId} not found`,
-      );
-    }
+  //   if (!courseSpec) {
+  //     throw new NotFoundException(
+  //       `CourseSpec with id ${createCloDto.courseSpecId} not found`,
+  //     );
+  //   }
 
-    const skill = await this.prisma.skill.findUnique({
-      where: { id: createCloDto },
-    });
+  //   const skill = await this.prisma.skill.findUnique({
+  //     where: { id: createCloDto },
+  //   });
 
-    if (!skill) {
-      throw new NotFoundException(
-        `Skill with id ${createCloDto.skillId} not found`,
-      );
-    }
+  //   if (!skill) {
+  //     throw new NotFoundException(
+  //       `Skill with id ${createCloDto.skillId} not found`,
+  //     );
+  //   }
 
-    const plo = await this.prisma.plo.findUnique({
-      where: { id: createCloDto.ploId },
-    });
+  //   const plo = await this.prisma.plo.findUnique({
+  //     where: { id: createCloDto.ploId },
+  //   });
 
-    if (!plo) {
-      throw new NotFoundException(
-        `PLO with id ${createCloDto.ploId} not found`,
-      );
-    }
+  //   if (!plo) {
+  //     throw new NotFoundException(
+  //       `PLO with id ${createCloDto.ploId} not found`,
+  //     );
+  //   }
 
-    return { courseSpec, skill, plo };
-  }
+  //   return { courseSpec, skill, plo };
+  // }
 }

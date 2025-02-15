@@ -27,25 +27,8 @@ active?: number  | null;
   type: 'integer',
   format: 'int32',
   required: false,
-  nullable: true,
 })
 @IsOptional()
 @IsInt()
-subjectId?: number  | null;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-thaiDescription?: string  | null;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-engDescription?: string  | null;
+subjectId?: number ;
 }

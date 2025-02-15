@@ -11,11 +11,11 @@ import {
   Res,
 } from '@nestjs/common';
 import { ClosService } from './clos.service';
-import { CreateCloDto } from 'src/dto/clo/create-clo.dto';
-import { UpdateCloDto } from 'src/dto/clo/update-clo.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Response } from 'express';
+import { CreateCloDto } from 'src/generated/nestjs-dto/create-clo.dto';
+import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
 
 @ApiBearerAuth()
 @Controller('clos')
@@ -37,10 +37,10 @@ export class ClosController {
     return this.closService.findAll();
   }
 
-  @Get('coursSpecId/:coursSpecId')
-  findAllByCoursSpec(@Param('coursSpecId') id: number) {
-    return this.closService.findAllByCourseSpec(id);
-  }
+  // @Get('coursSpecId/:coursSpecId')
+  // findAllByCoursSpec(@Param('coursSpecId') id: number) {
+  //   return this.closService.findAllByCourseSpec(id);
+  // }
 
   @Get(':id')
   findOne(@Param('id') id: number) {

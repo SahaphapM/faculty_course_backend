@@ -1,14 +1,12 @@
 import { Module } from '@nestjs/common';
-import { PlosService } from './plos.service';
+import { PloService } from './plos.service';
 import { PlosController } from './plos.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Plo } from '../../entities/plo.entity';
-import { CurriculumsModule } from '../curriculums/curriculums.module';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Plo]), CurriculumsModule],
+  imports: [PrismaModule],
   controllers: [PlosController],
-  providers: [PlosService],
-  exports: [PlosService],
+  providers: [PloService],
+  exports: [PloService],
 })
 export class PlosModule {}

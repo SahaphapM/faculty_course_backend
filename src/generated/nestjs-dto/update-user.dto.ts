@@ -27,6 +27,14 @@ password?: string ;
 })
 @IsOptional()
 @IsString()
+avatarUrl?: string  | null;
+@ApiProperty({
+  type: 'string',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsString()
 role?: string  | null;
 @ApiProperty({
   type: 'string',
@@ -44,7 +52,7 @@ hashedRefreshToken?: string  | null;
 })
 @IsOptional()
 @IsInt()
-teacherId?: number  | null;
+instructorId?: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

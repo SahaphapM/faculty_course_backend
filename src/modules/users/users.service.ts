@@ -4,149 +4,124 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { User } from '../../entities/user.entity';
-import { FindManyOptions, Like, Repository } from 'typeorm';
-import { InjectRepository } from '@nestjs/typeorm';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { CreateUserDto } from 'src/dto/user/create-user.dto';
-import { UpdateUserDto } from 'src/dto/user/update-user.dto';
-import { Student } from 'src/entities/student.entity';
-import { Instructor } from 'src/entities/instructor.entity';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
+import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
+import { Prisma } from '@prisma/client'; 
 
 @Injectable()
 export class UsersService {
-  constructor(
-    @InjectRepository(User)
-    private userRepo: Repository<User>,
-    @InjectRepository(Student)
-    private stuRepo: Repository<Student>,
-    @InjectRepository(Instructor)
-    private teaRepo: Repository<Instructor>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const existingUser = await this.userRepo.findOne({
+  async create(createUserDto: CreateUserDto) {
+    const existingUser = await this.prisma.user.findUnique({
       where: { email: createUserDto.email },
     });
+
     if (existingUser) {
       throw new BadRequestException(
         `User with Email ${createUserDto.email} already exists`,
       );
     }
 
-    const user = this.userRepo.create(createUserDto);
-    return await this.userRepo.save(user);
+    return await this.prisma.user.create({ data: createUserDto });
   }
 
   async findAll(pag?: PaginationDto) {
     const defaultLimit = 10;
-    const defaultPage = 1;
+    // const defaultPage = 1;
 
-    const options: FindManyOptions<User> = {
-      relationLoadStrategy: 'query',
-      relations: { student: true, teacher: true },
-      select: {
-        id: true,
-        email: true,
-        role: true,
-        student: { id: true, thaiName: true },
-        teacher: { id: true, thaiName: true },
-      },
-    };
-    try {
-      if (pag) {
-        const { search, limit, page, order } = pag;
+    const take = pag?.limit || defaultLimit;
+    const skip = pag?.page ? (pag.page - 1) * take : 0;
 
-        options.take = limit || defaultLimit;
-        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-        options.order = { id: order || 'ASC' };
-
-        if (search) {
-          options.where = [
-            // { id: Like(`%${search}%`) },
-            { email: Like(`%${search}%`) },
-          ];
+    const where: Prisma.userWhereInput = pag?.search
+      ? {
+          OR: [
+            { id: { equals: parseInt(pag.search, 10) || undefined } },
+            { email: { contains: pag.search } },
+          ],
         }
-        return await this.userRepo.findAndCount(options);
-      } else {
-        return await this.userRepo.find(options);
-      }
+      : {};
+
+    try {
+      const [users, total] = await Promise.all([
+        this.prisma.user.findMany({
+          take,
+          skip,
+          where,
+          orderBy: { id: pag?.order || 'asc' },
+          include: {
+            student: { select: { id: true, thaiName: true } },
+            instructor: { select: { id: true, thaiName: true } },
+          },
+        }),
+        this.prisma.user.count({ where }),
+      ]);
+
+      return { data: users, total };
     } catch (error) {
-      // Log the error for debugging
       console.error('Error fetching users:', error);
       throw new InternalServerErrorException('Failed to fetch users');
     }
   }
 
-  async findOne(id: number): Promise<User> {
-    const user = await this.userRepo.findOne({
+  async findOne(id: number) {
+    const user = await this.prisma.user.findUnique({
       where: { id },
+      include: { student: true, instructor: true },
     });
+
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
     return user;
   }
 
-  async findByEmail(email: string): Promise<User> {
-    const user = await this.userRepo.findOne({
-      where: { email },
-    });
-    return user;
+  async findByEmail(email: string) {
+    return await this.prisma.user.findUnique({ where: { email } });
   }
 
   async update(id: number, dto: UpdateUserDto) {
     const user = await this.findOne(id);
-
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
-    // Update user properties
-    Object.assign(user, dto);
-
-    if (dto.studentCode) {
-      const ent = await this.stuRepo.findOneBy({
-        code: dto.studentCode,
-      });
-      if (!ent) {
-        throw new NotFoundException(
-          `User with ID ${dto.studentCode} not found`,
-        );
-      }
-      user.student = ent;
-    }
-
-    if (dto.instructorCode) {
-      const ent = await this.teaRepo.findOneBy({
-        code: dto.instructorCode,
-      });
-      if (!ent) {
-        throw new NotFoundException(
-          `User with Code ${dto.instructorCode} not found`,
-        );
-      }
-      user.teacher = ent;
-    }
+    const data: Prisma.userUpdateInput = {
+      ...dto,
+      student: {
+        connect: { id: dto.studentId },
+      },
+      instructor: {
+        connect: { id: dto.instructorId },
+      },
+    };
 
     try {
-      return await this.userRepo.save(user);
+      return await this.prisma.user.update({
+        where: { id },
+        data,
+      });
     } catch (error) {
       throw new BadRequestException('Failed to update user');
     }
   }
 
   async remove(id: number) {
-    const user = await this.findOne(id);
+    await this.findOne(id);
     try {
-      await this.userRepo.remove(user);
+      await this.prisma.user.delete({ where: { id } });
       return `Success Delete ID ${id}`;
     } catch (error) {
       throw new BadRequestException('Failed to remove user');
     }
   }
 
-  async updateHashedRefreshToken(userId: any, hashedRefreshToken: string) {
-    return await this.userRepo.update({ id: userId }, { hashedRefreshToken });
+  async updateHashedRefreshToken(userId: number, hashedRefreshToken: string) {
+    return await this.prisma.user.update({
+      where: { id: userId },
+      data: { hashedRefreshToken },
+    });
   }
 }

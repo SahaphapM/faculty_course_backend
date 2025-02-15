@@ -1,260 +1,180 @@
 import {
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
+  InternalServerErrorException,
+  BadRequestException,
 } from '@nestjs/common';
-import { CreateStudentDto } from '../../dto/student/create-student.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Student } from '../../entities/student.entity';
-import { FindManyOptions, In, Like, Repository } from 'typeorm';
-import { SkillCollectionTree } from '../../entities/skill-collection.entity';
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
+import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
+import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 
 @Injectable()
 export class StudentsService {
-  constructor(
-    @InjectRepository(Student)
-    private readonly stuRepo: Repository<Student>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   // Create a new student
-  async create(studentDto: CreateStudentDto): Promise<Student> {
-    const newStudent = this.stuRepo.create(studentDto);
-    return await this.stuRepo.save(newStudent);
-  }
-
-  async importStudents(students: CreateStudentDto[]) {
-    if (Array.isArray(students)) {
-      const newStudents = students.map((student) =>
-        this.stuRepo.create({
-          ...student,
-          enrollmentDate: new Date(student.enrollmentDate),
-        }),
-      );
-      await this.stuRepo.insert(newStudents);
-    } else {
-      // Handle the case where `students` is not an array
-      console.error('Expected students to be an array, but got:', students);
+  async create(studentDto: CreateStudentDto) {
+    try {
+      const newStudent = await this.prisma.student.create({
+        data: studentDto,
+      });
+      return newStudent;
+    } catch (error) {
+      throw new BadRequestException('Failed to create student', error.message);
     }
   }
 
-  // async findAllByPage(
-  //   paginationDto: PaginationDto,
-  // ): Promise<{ data: Student[]; total: number }> {
-  //   const { page, limit, sort, order, search, columnId, columnName } =
-  //     paginationDto;
+  // Import multiple students
+  async importStudents(students: CreateStudentDto[]) {
+    if (!Array.isArray(students)) {
+      throw new BadRequestException('Expected students to be an array');
+    }
 
-  //   const queryBuilder = this.studentRepository.createQueryBuilder('student');
+    try {
+      const newStudents = students.map((student) => ({
+        ...student,
+        enrollmentDate: new Date(student.enrollmentDate),
+      }));
 
-  //   // Join relations to include courseDetails, courses, and subjects
-  //   queryBuilder
-  //     .leftJoinAndSelect('student.skillCollection', 'skillCollection')
-  //     .leftJoinAndSelect(
-  //       'skillCollection.skillExpectedLevels',
-  //       'skillExpectedLevels',
-  //     )
-  //     .leftJoinAndSelect('skillExpectedLevels.skill', 'skill')
-  //     .innerJoin('student.courseDetails', 'courseDetails')
-  //     .leftJoin('courseDetails.course', 'course')
-  //     .leftJoin('course.subject', 'subject');
+      await this.prisma.student.createMany({
+        data: newStudents,
+      });
+    } catch (error) {
+      throw new BadRequestException('Failed to import students', error.message);
+    }
+  }
 
-  //   // Conditionally filter based on columnId and columnName
-  //   if (columnId) {
-  //     if (columnName === 'subject') {
-  //       // Filter students by subject id
-  //       queryBuilder.andWhere('subject.id = :subjectId', {
-  //         subjectId: columnId,
-  //       });
-  //     } else if (columnName === 'course') {
-  //       // Filter students by course id
-  //       queryBuilder.andWhere('course.id = :courseId', { courseId: columnId });
-  //     }
-  //   }
-
-  //   // Add search conditions if provided
-  //   if (search) {
-  //     queryBuilder.andWhere(
-  //       new Brackets((qb) => {
-  //         qb.where('student.name LIKE :search', { search: `%${search}%` })
-  //           .orWhere('student.nameInEnglish LIKE :search', {
-  //             search: `%${search}%`,
-  //           })
-  //           .orWhere('student.id LIKE :search', { search: `%${search}%` });
-  //       }),
-  //     );
-  //   }
-
-  //   // Add sorting if provided
-  //   if (sort && order) {
-  //     queryBuilder.orderBy(`student.${sort}`, order);
-  //   }
-
-  //   // Log the generated SQL query and its parameters
-  //   // console.log('Generated SQL:', queryBuilder.getSql());
-  //   // console.log('Query Parameters:', queryBuilder.getParameters());
-
-  //   // Execute the query with pagination
-  //   const [data, total] = await queryBuilder
-  //     .skip((page - 1) * limit)
-  //     .take(limit)
-  //     .getManyAndCount();
-
-  //   return { data, total };
-  // }
-
-  // Get all students
+  // Get all students with pagination and search
   async findAll(pag?: PaginationDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const options: FindManyOptions<Student> = {
-      relationLoadStrategy: 'query',
-      relations: { skillCollection: true, branch: { faculty: true } },
+    const { search, limit, page, order } = pag || {};
+
+    const options: Prisma.studentFindManyArgs = {
+      take: limit || defaultLimit,
+      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
+      orderBy: { id: order || 'asc' },
+      include: {
+        branch: {
+          include: {
+            faculty: true,
+          },
+        },
+        skill_collections: true,
+      },
       select: {
         id: true,
         thaiName: true,
         engName: true,
-        branch: { id: true, thaiName: true, faculty: { id: true, name: true } },
-      },
-    };
-    try {
-      if (pag) {
-        const { search, limit, page, order } = pag;
-
-        options.take = limit || defaultLimit;
-        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-        options.order = { id: order || 'ASC' };
-
-        if (search) {
-          options.where = [{ code: Like(`%${search}%`) }];
-        }
-        return await this.stuRepo.findAndCount(options);
-      } else {
-        return await this.stuRepo.find(options);
-      }
-    } catch (error) {
-      // Log the error for debugging
-      console.error('Error fetching students:', error);
-      throw new InternalServerErrorException('Failed to fetch students');
-    }
-  }
-
-  async findManyByIds(studentListId: string[]) {
-    return await this.stuRepo.find({
-      where: { id: In(studentListId) },
-    });
-  }
-
-  // Get a student by ID
-  async findOne(id: number): Promise<Student> {
-    const student = await this.stuRepo.findOne({
-      where: { id },
-      relations: {
-        courseEnrollment: { course: true },
-        skillCollection: true,
-      },
-      // relationLoadStrategy: 'query',
-    });
-    if (!student) {
-      throw new NotFoundException(`Student with ID "${id}" not found`);
-    }
-
-    // student.skillCollectionTree = this.buildSkillCollectionTree(
-    //   student.skillCollection,
-    // );
-    // delete student.skillCollection;
-
-    return student;
-  }
-
-  // Update a student by ID
-  async update(id: number, studentDto: CreateStudentDto): Promise<Student> {
-    const student = await this.findOne(id);
-    Object.assign(student, studentDto);
-    return await this.stuRepo.save(student);
-  }
-
-  // Delete a student by ID
-  async remove(id: number): Promise<void> {
-    const student = await this.findOne(id);
-    await this.stuRepo.remove(student);
-  }
-
-  async buildSkillCollectionTree(id: number): Promise<SkillCollectionTree[]> {
-    const student = await this.stuRepo.findOne({
-      where: { id },
-      relations: {
-        courseEnrollment: {
-          skillCollections: {
-            skillExpectedLevels: {
-              skill: {
-                parent: true,
+        branch: {
+          select: {
+            id: true,
+            thaiName: true,
+            faculty: {
+              select: {
+                id: true,
+                name: true,
               },
             },
           },
         },
       },
-    });
+    };
 
-    let idCounter = 1; // Initialize a counter for auto-incremented IDs
-    const result: SkillCollectionTree[] = [];
-
-    for (let i = 0; i < student.courseEnrollment.length; i++) {
-      if (!student.courseEnrollment[i].skillCollections) {
-        throw new NotFoundException(`SkillCollections" not found`);
-      }
-      const skillCollections = student.courseEnrollment[i].skillCollections;
-
-      const skillMap: { [skillId: number]: SkillCollectionTree } = {};
-
-      // Initialize SkillCollectionTree nodes and populate the skillMap
-      skillCollections.forEach((skillCollection) => {
-        const { gainedLevel, passed, skillExpectedLevels } = skillCollection;
-        const { id: skillId, thaiName: name } = skillExpectedLevels.skill;
-
-        skillMap[skillId] = {
-          id: idCounter++, // Assign and increment the auto-increment ID
-          skillId,
-          name,
-          gainedLevel,
-          expectedLevel: skillExpectedLevels.expectedLevel,
-          passed,
-          children: [],
-        };
-      });
-
-      // Build the tree structure, adding missing parents if necessary
-      skillCollections.forEach((skillCollection) => {
-        const { skillExpectedLevels } = skillCollection;
-        const { skill } = skillExpectedLevels;
-        const { id: skillId, parent } = skill;
-
-        if (parent) {
-          const parentId = parent.id;
-
-          // If the parent isn't in skillMap, add a placeholder for it
-          if (!skillMap[parentId]) {
-            skillMap[parentId] = {
-              id: idCounter++, // Assign and increment the auto-increment ID
-              skillId: parentId,
-              name: parent.thaiName,
-              gainedLevel: null,
-              expectedLevel: null,
-              passed: null,
-              children: [],
-            };
-            result.push(skillMap[parentId]);
-          }
-
-          // Add current skill as a child of its parent
-          skillMap[parentId].children.push(skillMap[skillId]);
-          console.log(skillMap);
-        } else {
-          // If no parent, it's a root skill
-          result.push(skillMap[skillId]);
-        }
-      });
+    if (search) {
+      options.where = {
+        OR: [
+          { code: { contains: search } },
+          { thaiName: { contains: search } },
+          { engName: { contains: search } },
+        ],
+      };
     }
-    return result;
+
+    try {
+      if (pag) {
+        const [students, total] = await Promise.all([
+          this.prisma.student.findMany(options),
+          this.prisma.student.count({ where: options.where }),
+        ]);
+        return { data: students, total };
+      } else {
+        return await this.prisma.student.findMany(options);
+      }
+    } catch (error) {
+      console.error('Error fetching students:', error);
+      throw new InternalServerErrorException('Failed to fetch students');
+    }
+  }
+
+  // Find students by a list of IDs
+  async findManyByCode(studentListCode: string[]) {
+    try {
+      return await this.prisma.student.findMany({
+        where: {
+          code: { in: studentListCode },
+        },
+      });
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch students by Codes');
+    }
+  }
+
+  // Get a student by ID
+  async findOne(id: number) {
+    try {
+      const student = await this.prisma.student.findUnique({
+        where: { id },
+        include: {
+          course_enrollments: {
+            include: {
+              course: true,
+            },
+          },
+          skill_collections: true,
+        },
+      });
+
+      if (!student) {
+        throw new NotFoundException(`Student with ID "${id}" not found`);
+      }
+
+      return student;
+    } catch (error) {
+      throw new InternalServerErrorException('Failed to fetch student');
+    }
+  }
+
+  // Update a student by ID
+  async update(id: number, studentDto: UpdateStudentDto) {
+    try {
+      const student = await this.prisma.student.update({
+        where: { id },
+        data: studentDto,
+      });
+      return student;
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Student with ID "${id}" not found`);
+      }
+      throw new BadRequestException('Failed to update student');
+    }
+  }
+
+  // Delete a student by ID
+  async remove(id: number): Promise<void> {
+    try {
+      await this.prisma.student.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Student with ID "${id}" not found`);
+      }
+      throw new BadRequestException('Failed to delete student');
+    }
   }
 }

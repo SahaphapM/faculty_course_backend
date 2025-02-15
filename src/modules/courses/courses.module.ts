@@ -1,31 +1,13 @@
 import { Module } from '@nestjs/common';
-import { CoursesService } from './courses.service';
+import { CourseService } from './courses.service';
 import { CoursesController } from './courses.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Course } from 'src/entities/course.entity';
-import { CourseEnrollment } from 'src/entities/course-enrollment';
-import { Student } from 'src/entities/student.entity';
-import { SkillCollection } from 'src/entities/skill-collection.entity';
+import { PrismaModule } from 'src/prisma/prisma.module';
 import { StudentsModule } from '../students/students.module';
-import { SubjectsModule } from '../lessons/lessons.module';
-import { Instructor } from 'src/entities/instructor.entity';
-import { InstructorsModule } from '../instructors/instructors.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Course,
-      CourseEnrollment,
-      Student,
-      SkillCollection,
-      Instructor,
-      // Curriculum,
-    ]),
-    StudentsModule,
-    SubjectsModule,
-    InstructorsModule
-  ],
+  imports: [PrismaModule, StudentsModule],
   controllers: [CoursesController],
-  providers: [CoursesService],
+  providers: [CourseService],
+  exports: [CourseService],
 })
-export class CoursesModule { }
+export class CoursesModule {}

@@ -7,15 +7,15 @@ import {
   Param,
   Delete,
 } from '@nestjs/common';
-import { PlosService } from './plos.service';
-import { CreatePloDto } from '../../dto/plo/create-plo.dto';
-import { UpdatePloDto } from '../../dto/plo/update-plo.dto';
+import { PloService } from './plos.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
+import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
 
 @ApiBearerAuth()
 @Controller('plos')
 export class PlosController {
-  constructor(private readonly plosService: PlosService) {}
+  constructor(private readonly plosService: PloService) {}
 
   @Post()
   create(@Body() createPloDto: CreatePloDto) {

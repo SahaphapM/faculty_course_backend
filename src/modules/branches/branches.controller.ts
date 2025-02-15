@@ -9,10 +9,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
-import { CreateBranchDto } from '../../dto/branch/create-branch.dto';
-import { UpdateBranchDto } from '../../dto/branch/update-branch.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { PaginationDto } from 'src/dto/pagination.dto';
+import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
+import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 
 @ApiBearerAuth()
 @Controller('branches')

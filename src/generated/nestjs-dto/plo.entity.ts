@@ -40,7 +40,7 @@ engDescription: string  | null;
   isArray: true,
   required: false,
 })
-clo?: Clo[] ;
+clos?: Clo[] ;
 @ApiProperty({
   type: () => Curriculum,
   required: false,

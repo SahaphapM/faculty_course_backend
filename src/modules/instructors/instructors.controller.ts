@@ -14,8 +14,6 @@ import {
   ParseFilePipeBuilder,
 } from '@nestjs/common';
 import { InstructorsService } from './instructors.service';
-import { CreateInstructorDto } from '../../dto/instructor/create-instructor.dto';
-import { UpdateInstructorDto } from '../../dto/instructor/update-instructor.dto';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomUploadFileTypeValidator } from './instructors.file.validators';
@@ -23,6 +21,8 @@ import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.dto';
+import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.dto';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 2 * 1024 * 1024; // 2 mb
 const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
@@ -44,7 +44,7 @@ export class InstructorsController {
     @Param('curriculumId') curriculumId: string,
     @Param('instructorId') instructorId: string,
   ) {
-    return this.insService.selectCoordinatorToCurriculum(
+    return this.insService.updateCoordinatorToCurriculum(
       +instructorId,
       +curriculumId,
     );
@@ -101,11 +101,11 @@ export class InstructorsController {
     return this.insService.findAll(pag);
   }
 
-  @Get('curriculum/:curriculumId')
-  @HttpCode(HttpStatus.OK)
-  findAllByCurriculum(@Param('curriculumId') curriculumId: string) {
-    return this.insService.findAllByCurriculum(+curriculumId);
-  }
+  // @Get('curriculum/:curriculumId')
+  // @HttpCode(HttpStatus.OK)
+  // findAllByCurriculum(@Param('curriculumId') curriculumId: string) {
+  //   return this.insService.findAllByCurriculum(+curriculumId);
+  // }
 
   @Get(':id')
   @HttpCode(HttpStatus.OK)

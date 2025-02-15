@@ -21,17 +21,6 @@ id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-subjectId: number  | null;
-@ApiProperty({
-  type: 'string',
-  nullable: true,
-})
-thaiDescription: string  | null;
-@ApiProperty({
-  type: 'string',
-  nullable: true,
-})
-engDescription: string  | null;
+subjectId: number ;
 }

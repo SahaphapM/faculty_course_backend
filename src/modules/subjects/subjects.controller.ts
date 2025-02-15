@@ -8,13 +8,13 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { CourseSpecsService } from './subjects.service';
+import { SubjectService } from './subjects.service';
 import { CreateCourseSpecDto } from 'src/generated/nestjs-dto/create-courseSpec.dto';
 import { UpdateCourseSpecDto } from 'src/generated/nestjs-dto/update-courseSpec.dto';
 
 @Controller('subjects')
-export class CourseSpecsController {
-  constructor(private readonly courseSpecsService: CourseSpecsService) {}
+export class SubjectController {
+  constructor(private readonly courseSpecsService: SubjectService) {}
 
   @Get()
   findAll() {

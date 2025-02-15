@@ -9,15 +9,15 @@ import {
   Query,
 } from '@nestjs/common';
 import { FacultiesService } from './faculties.service';
-import { CreateFacultyDto } from '../../dto/faculty/create-faculty.dto';
-import { UpdateFacultyDto } from '../../dto/faculty/update-faculty.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { PaginationDto } from 'src/dto/pagination.dto';
+import { CreateFacultyDto } from 'src/generated/nestjs-dto/create-faculty.dto';
+import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
 
 @ApiBearerAuth()
 @Controller('faculties')
 export class FacultiesController {
-  constructor(private readonly facultiesService: FacultiesService) { }
+  constructor(private readonly facultiesService: FacultiesService) {}
 
   @Post()
   create(@Body() createFacultyDto: CreateFacultyDto) {
@@ -28,11 +28,6 @@ export class FacultiesController {
   findAll(@Query() pag?: PaginationDto) {
     return this.facultiesService.findAll(pag);
   }
-
-  // @Get('getAllDetails')
-  // findAllDetails() {
-  //   return this.facultiesService.findAllDetails();
-  // }
 
   @Get('filters')
   findFilters() {

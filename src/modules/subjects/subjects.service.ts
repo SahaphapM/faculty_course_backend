@@ -1,10 +1,10 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from 'prisma/prisma.service'; // Adjust the import path as needed
+import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 import { UpdateCourseSpecDto } from 'src/generated/nestjs-dto/update-courseSpec.dto';
 import { CreateCourseSpecDto } from 'src/generated/nestjs-dto/create-courseSpec.dto';
 
 @Injectable()
-export class CourseSpecsService {
+export class SubjectService {
   constructor(
     private prisma: PrismaService,
   ) {}
@@ -27,7 +27,7 @@ export class CourseSpecsService {
   async findAllByCurriculumId(curriculumId: number) {
     return await this.prisma.subject.findMany({
       where: { curriculumId },
-      include: { clo: true },
+      include: { clos: true },
     });
   }
   async findOne(id: number) {

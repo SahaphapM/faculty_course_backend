@@ -47,13 +47,13 @@ thaiName: string ;
   isArray: true,
   required: false,
 })
-course_enrollment?: CourseEnrollment[] ;
+course_enrollments?: CourseEnrollment[] ;
 @ApiProperty({
   type: () => SkillCollection,
   isArray: true,
   required: false,
 })
-skill_collection?: SkillCollection[] ;
+skill_collections?: SkillCollection[] ;
 @ApiProperty({
   type: () => Branch,
   required: false,

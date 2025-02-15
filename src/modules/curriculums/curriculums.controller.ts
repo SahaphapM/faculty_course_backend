@@ -9,10 +9,10 @@ import {
   Query,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
-import { CreateCurriculumDto } from '../../dto/curriculum/create-curriculum.dto';
-import { UpdateCurriculumDto } from '../../dto/curriculum/update-curriculum.dto';
 import { PaginationDto } from '../../dto/pagination.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
+import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 
 @ApiBearerAuth()
 @Controller('curriculums')

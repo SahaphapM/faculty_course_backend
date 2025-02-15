@@ -4,16 +4,16 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { PrismaService } from 'prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { branch } from '@prisma/client'; // Import the Prisma-generated Branch type
-import { BranchDto } from 'src/generated/nestjs-dto/branch.dto';
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
+import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 
 @Injectable()
 export class BranchesService {
   constructor(private prisma: PrismaService) {}
 
-  async create(dto: BranchDto) {
+  async create(dto: CreateBranchDto) {
     try {
       const { facultyId, ...rest } = dto;
 

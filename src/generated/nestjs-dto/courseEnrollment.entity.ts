@@ -40,5 +40,5 @@ student?: Student  | null;
   isArray: true,
   required: false,
 })
-skill_collection?: SkillCollection[] ;
+skill_collections?: SkillCollection[] ;
 }

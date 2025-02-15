@@ -1,73 +1,118 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Plo } from 'src/entities/plo.entity';
-import { CreatePloDto } from '../../dto/plo/create-plo.dto';
-import { UpdatePloDto } from '../../dto/plo/update-plo.dto';
-import { CurriculumsService } from '../curriculums/curriculums.service';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+} from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
+import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
+import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
 
 @Injectable()
-export class PlosService {
-  constructor(
-    @InjectRepository(Plo)
-    private readonly ploRepository: Repository<Plo>,
+export class PloService {
+  constructor(private prisma: PrismaService) {}
 
-    private readonly curriculumService: CurriculumsService,
-  ) {}
+  // Create a new PLO
+  async create(createPloDto: CreatePloDto) {
+    const { curriculumId, ...rest } = createPloDto;
 
-  async create(createPloDto: CreatePloDto): Promise<Plo> {
-    const curriculum = await this.curriculumService.findOne(
-      createPloDto.curriculumId,
-    );
+    // Check if the curriculum exists
+    const curriculum = await this.prisma.curriculum.findUnique({
+      where: { id: curriculumId },
+    });
+
     if (!curriculum) {
       throw new NotFoundException(
-        `Curriculum with ID ${createPloDto.curriculumId} not found`,
+        `Curriculum with ID ${curriculumId} not found`,
       );
     }
 
     try {
-      const plo = this.ploRepository.create({
-        curriculum: curriculum,
-        ...createPloDto,
+      const plo = await this.prisma.plo.create({
+        data: {
+          ...rest,
+          curriculum: { connect: { id: curriculumId } },
+        },
       });
-      const savedPlo = await this.ploRepository.save(plo);
-      console.log(savedPlo);
-      return savedPlo;
+      return plo;
     } catch (error) {
-      throw new Error(`Failed to create branch ${error.message}`);
+      throw new BadRequestException(`Failed to create PLO: ${error.message}`);
     }
   }
 
-  async findAll(): Promise<Plo[]> {
-    return this.ploRepository.find({ relations: ['curriculum', 'clos'] });
-  }
-
-  async findAllByCurriculum(curriculumId: number): Promise<Plo[]> {
-    return this.ploRepository.find({
-      where: { curriculum: { id: curriculumId } },
-      relations: { clos: true },
-    });
-  }
-
-  async findOne(id: number): Promise<Plo> {
-    const plo = await this.ploRepository.findOne({
-      where: { id },
-      relations: { clos: true },
-    });
-    if (!plo) {
-      throw new NotFoundException(`PLO with ID ${id} not found`);
+  // Find all PLOs
+  async findAll() {
+    try {
+      return await this.prisma.plo.findMany({
+        include: {
+          curriculum: true,
+          clos: true,
+        },
+      });
+    } catch (error) {
+      throw new BadRequestException('Failed to fetch PLOs');
     }
-    return plo;
   }
 
-  async update(id: number, updatePloDto: UpdatePloDto): Promise<Plo> {
-    const plo = await this.findOne(id);
-    Object.assign(plo, updatePloDto);
-    return this.ploRepository.save(plo);
+  // Find all PLOs by curriculum ID
+  async findAllByCurriculum(curriculumId: number) {
+    try {
+      return await this.prisma.plo.findMany({
+        where: { curriculumId },
+        include: { clos: true },
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        `Failed to fetch PLOs for curriculum ID ${curriculumId}`,
+      );
+    }
   }
 
+  // Find a PLO by ID
+  async findOne(id: number) {
+    try {
+      const plo = await this.prisma.plo.findUnique({
+        where: { id },
+        include: { clos: true },
+      });
+
+      if (!plo) {
+        throw new NotFoundException(`PLO with ID ${id} not found`);
+      }
+
+      return plo;
+    } catch (error) {
+      throw new BadRequestException(`Failed to fetch PLO with ID ${id}`);
+    }
+  }
+
+  // Update a PLO by ID
+  async update(id: number, updatePloDto: UpdatePloDto) {
+    try {
+      const plo = await this.prisma.plo.update({
+        where: { id },
+        data: updatePloDto,
+        include: { clos: true },
+      });
+      return plo;
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`PLO with ID ${id} not found`);
+      }
+      throw new BadRequestException(`Failed to update PLO: ${error.message}`);
+    }
+  }
+
+  // Remove a PLO by ID
   async remove(id: number): Promise<void> {
-    const plo = await this.findOne(id);
-    await this.ploRepository.remove(plo);
+    try {
+      await this.prisma.plo.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`PLO with ID ${id} not found`);
+      }
+      throw new BadRequestException(`Failed to remove PLO: ${error.message}`);
+    }
   }
 }
