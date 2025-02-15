@@ -27,7 +27,7 @@ export class SubjectController {
   }
 
   @Post()
-  createByCurriculum(@Body() dto: CreateSubjectDto) {
+  create(@Body() dto: CreateSubjectDto) {
     return this.courseSpecsService.create(dto);
   }
 

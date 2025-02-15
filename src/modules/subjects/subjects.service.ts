@@ -5,9 +5,7 @@ import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import 
 
 @Injectable()
 export class SubjectService {
-  constructor(
-    private prisma: PrismaService,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async findAll() {
     return await this.prisma.subject.findMany({
@@ -43,15 +41,24 @@ export class SubjectService {
   }
 
   async create(dto: CreateSubjectDto) {
-    return await this.prisma.subject.create({
+    const subject = await this.prisma.subject.create({
       data: {
         ...dto,
         curriculumId: dto.curriculumId,
       },
     });
+    await this.prisma.lesson.create({
+      data: {
+        thaiName: dto.thaiName,
+        engName: dto.engName,
+        subjectId: subject.id,
+      },
+    });
+
+    return subject;
   }
 
-  async update(id: number, dto: UpdateSubjectDto ) {
+  async update(id: number, dto: UpdateSubjectDto) {
     return await this.prisma.subject.update({
       where: { id: id },
       data: {
