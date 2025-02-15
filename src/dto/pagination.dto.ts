@@ -2,6 +2,7 @@ import { Type } from 'class-transformer';
 import { IsOptional, IsPositive, IsInt, IsString } from 'class-validator';
 
 export class PaginationDto {
+  // base
   @IsOptional()
   @IsInt()
   @IsPositive()
@@ -20,33 +21,61 @@ export class PaginationDto {
 
   @IsOptional()
   @IsString()
-  order?: 'asc' | 'desc' = 'asc';
+  orderBy?: 'asc' | 'desc' = 'asc';
+
+  // most common
+  @IsOptional()
+  @IsString()
+  thaiName?: string;
 
   @IsOptional()
   @IsString()
-  search?: string;
+  engName?: string;
 
   @IsOptional()
   @IsString()
-  columnId?: string;
+  code?: string;
+
+  // for skill
+  @IsOptional()
+  @IsString()
+  name?: string;
+
+  // @IsOptional()
+  // @IsString()
+  // search?: string;
+
+  // @IsOptional()
+  // @IsString()
+  // columnId?: string;
+
+  // @IsOptional()
+  // @IsString()
+  // columnName?: string;
+
+  // @IsOptional()
+  // @IsString()
+  // bySubject?: string;
+
+  // for curriculum
+  @IsOptional()
+  @IsString()
+  facultyThaiName?: string;
 
   @IsOptional()
   @IsString()
-  columnName?: string;
+  facultyEngName?: string;
 
   @IsOptional()
   @IsString()
-  bySubject?: string;
+  branchThaiName?: string;
 
   @IsOptional()
   @IsString()
-  facultyName?: string;
+  branchEngName?: string;
 
+  // user
   @IsOptional()
   @IsString()
-  branchName?: string;
-
-  @IsOptional()
-  @IsString()
-  curriculumName?: string;
+  email?: string;
 }

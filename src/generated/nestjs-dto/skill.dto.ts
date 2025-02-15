@@ -27,7 +27,6 @@ cloId: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-curriculumId: number  | null;
+curriculumId: number ;
 }

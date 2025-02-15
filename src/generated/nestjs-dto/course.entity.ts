@@ -7,10 +7,6 @@ import {CourseInstructor} from './courseInstructor.entity'
 
 export class Course {
   @ApiProperty({
-  type: 'string',
-})
-name: string ;
-@ApiProperty({
   type: 'integer',
   format: 'int32',
   nullable: true,

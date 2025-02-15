@@ -46,7 +46,7 @@ export class LessonsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { search, limit, page, order } = pag || {};
+    const { thaiName, engName, limit, page, orderBy: order } = pag || {};
 
     const options: Prisma.lessonFindManyArgs = {
       take: limit || defaultLimit,
@@ -57,16 +57,11 @@ export class LessonsService {
         thaiName: true,
         engName: true,
       },
+      where: {
+        ...(thaiName && { thaiName: { contains: thaiName } }),
+        ...(engName && { engName: { contains: engName } }),
+      },
     };
-
-    if (search) {
-      options.where = {
-        OR: [
-          { thaiName: { contains: search } },
-          { engName: { contains: search } },
-        ],
-      };
-    }
 
     try {
       if (pag) {

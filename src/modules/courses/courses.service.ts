@@ -55,7 +55,7 @@ export class CourseService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { search, limit, page, order } = pag || {};
+    const { code, limit, page, orderBy: order } = pag || {};
 
     const options: Prisma.courseFindManyArgs = {
       take: limit || defaultLimit,
@@ -65,13 +65,10 @@ export class CourseService {
         course_enrollments: { include: { student: true } },
         course_instructors: true,
       },
+      where: {
+        ...(code && { subject: { code: { contains: code }} }),
+      },
     };
-
-    if (search) {
-      options.where = {
-        name: { contains: search },
-      };
-    }
 
     try {
       if (pag) {
@@ -226,10 +223,13 @@ export class CourseService {
     });
 
     await this.prisma.skill_collection.createMany({
-      data: students.map((student) => ({
-        studentId: student.id,
-        courseId: course.id,
-      } as Prisma.skill_collectionCreateManyInput)),
+      data: students.map(
+        (student) =>
+          ({
+            studentId: student.id,
+            courseId: course.id,
+          }) as Prisma.skill_collectionCreateManyInput,
+      ),
       skipDuplicates: true, // Avoid duplicate skill records
     });
 

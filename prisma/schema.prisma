@@ -54,7 +54,6 @@ model branch {
 }
 
 model course {
-  name               String              @db.VarChar(255)
   active             Int?                @default(1) @db.TinyInt
   id                 Int                 @id @default(autoincrement())
   /// @DtoRelationIncludeId
@@ -233,14 +232,14 @@ model skill {
   /// @DtoRelationIncludeId
   cloId        Int?
   /// @DtoRelationIncludeId
-  curriculumId Int?
+  curriculumId Int
 
   // Self-referencing relation for parent-child skills
   parent               skill?                 @relation("SkillHierarchy", fields: [parentId], references: [id], onDelete: NoAction)
-  subs                  skill[]                @relation("SkillHierarchy")
+  subs                 skill[]                @relation("SkillHierarchy")
   // Many-to-One relation: A skill belongs to one CLO
   clo                  clo?                   @relation("CLOToSkills", fields: [cloId], references: [id], onDelete: NoAction)
-  curriculum           curriculum?            @relation(fields: [curriculumId], references: [id])
+  curriculum           curriculum             @relation(fields: [curriculumId], references: [id])
   skill_expected_level skill_expected_level[]
 }
 
@@ -320,7 +319,7 @@ model user {
   id                 Int         @id @default(autoincrement())
   email              String      @unique() @db.VarChar(255)
   password           String      @db.VarChar(255)
-  avatarUrl          String?      @db.VarChar(255)
+  avatarUrl          String?     @db.VarChar(255)
   role               String?     @db.VarChar(255)
   hashedRefreshToken String?     @db.VarChar(255)
   /// @DtoRelationIncludeId

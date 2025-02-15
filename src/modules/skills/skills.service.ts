@@ -47,12 +47,12 @@ export class SkillsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { search, limit, page, order } = pag || {};
+    const { name, limit, page, orderBy } = pag || {};
 
     const options: Prisma.skillFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { id: order || 'asc' },
+      orderBy: { id: orderBy || 'asc' },
       include: {
         parent: {
           select: {
@@ -70,9 +70,9 @@ export class SkillsService {
       },
     };
 
-    if (search) {
+    if (name) {
       options.where = {
-        OR: [{ name: { contains: search } }],
+        OR: [{ name: { contains: name } }],
       };
     }
 

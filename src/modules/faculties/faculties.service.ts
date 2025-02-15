@@ -54,7 +54,7 @@ export class FacultiesService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { search, limit, page, order } = pag || {};
+    const { thaiName, engName, limit, page, orderBy: order } = pag || {};
 
     const options: Prisma.facultyFindManyArgs = {
       take: limit || defaultLimit,
@@ -63,13 +63,11 @@ export class FacultiesService {
       include: {
         branch: true,
       },
+      where: {
+        ...(thaiName && { thaiName: { contains: thaiName } }),
+        ...(engName && { engName: { contains: engName } }),
+      },
     };
-
-    if (search) {
-      options.where = {
-        name: { contains: search },
-      };
-    }
 
     try {
       if (pag) {

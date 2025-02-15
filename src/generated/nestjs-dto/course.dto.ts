@@ -4,10 +4,6 @@ import {ApiProperty} from '@nestjs/swagger'
 
 export class CourseDto {
   @ApiProperty({
-  type: 'string',
-})
-name: string ;
-@ApiProperty({
   type: 'integer',
   format: 'int32',
   nullable: true,

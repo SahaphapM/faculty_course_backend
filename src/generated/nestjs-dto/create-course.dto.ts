@@ -1,18 +1,12 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
+import {IsInt,IsNotEmpty,IsOptional} from 'class-validator'
 
 
 
 
 export class CreateCourseDto {
   @ApiProperty({
-  type: 'string',
-})
-@IsNotEmpty()
-@IsString()
-name: string ;
-@ApiProperty({
   type: 'integer',
   format: 'int32',
   default: 1,

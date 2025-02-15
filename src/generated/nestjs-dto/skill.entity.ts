@@ -30,9 +30,8 @@ cloId: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-curriculumId: number  | null;
+curriculumId: number ;
 @ApiProperty({
   type: () => Skill,
   required: false,
@@ -54,9 +53,8 @@ clo?: Clo  | null;
 @ApiProperty({
   type: () => Curriculum,
   required: false,
-  nullable: true,
 })
-curriculum?: Curriculum  | null;
+curriculum?: Curriculum ;
 @ApiProperty({
   type: () => SkillExpectedLevel,
   isArray: true,

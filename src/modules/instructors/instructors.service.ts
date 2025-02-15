@@ -42,7 +42,12 @@ export class InstructorsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
+    const { thaiName, engName, code, limit, page, orderBy } = pag;
+
     const options: Prisma.instructorFindManyArgs = {
+      take: limit || defaultLimit,
+      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
+      orderBy: { id: orderBy || 'asc' },
       select: {
         id: true,
         code: true,
@@ -59,23 +64,14 @@ export class InstructorsService {
           },
         },
       },
+      where: {
+        ...(code && { code: { contains: code } }),
+        ...(thaiName && { thaiName: { contains: thaiName } }),
+        ...(engName && { engName: { contains: engName } }),
+      },
     };
     try {
       if (pag) {
-        const { search, limit, page, order } = pag;
-
-        options.take = limit || defaultLimit;
-        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-        options.orderBy = { id: order || 'asc' };
-
-        if (search) {
-          options.where = {
-            OR: [
-              { thaiName: { contains: search } },
-              { engName: { contains: search } },
-            ],
-          };
-        }
         return await this.prisma.instructor.findMany(options);
       } else {
         return await this.prisma.instructor.findMany(options);

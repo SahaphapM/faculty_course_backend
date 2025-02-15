@@ -33,10 +33,8 @@ cloId?: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  required: false,
-  nullable: true,
 })
-@IsOptional()
+@IsNotEmpty()
 @IsInt()
-curriculumId?: number  | null;
+curriculumId: number ;
 }

@@ -45,23 +45,40 @@ export class CurriculumsService {
     const defaultLimit = 15;
     const defaultPage = 1;
 
-    const { search, limit, page, order, facultyName } = pag || {};
+    const {
+      limit,
+      page,
+      orderBy,
+      thaiName,
+      engName,
+      facultyThaiName,
+      facultyEngName,
+    } = pag || {};
 
     const options: Prisma.curriculumFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { id: order || 'asc' },
+      orderBy: { id: orderBy || 'asc' },
       include: {
         branch: {
           include: {
             faculty: true,
           },
         },
+        skills: {
+          include: {
+            subs: true,
+          },
+        },
       },
       where: {
-        ...(search && { thaiName: { contains: search } }),
-        ...(facultyName && {
-          branch: { faculty: { name: { contains: facultyName } } },
+        ...(thaiName && { thaiName: { contains: thaiName } }),
+        ...(engName && { engName: { contains: engName } }),
+        ...(facultyThaiName && {
+          branch: { faculty: { name: { contains: facultyThaiName } } },
+        }),
+        ...(facultyEngName && {
+          branch: { faculty: { name: { contains: facultyEngName } } },
         }),
       },
     };

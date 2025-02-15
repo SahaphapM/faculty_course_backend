@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { branch } from '@prisma/client'; // Import the Prisma-generated Branch type
+import { branch, Prisma } from '@prisma/client'; // Import the Prisma-generated Branch type
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 
@@ -47,33 +47,28 @@ export class BranchesService {
     }
   }
 
-  async findAll(pag?: PaginationDto) {
-    const defaultLimit = 10;
-    const defaultPage = 1;
+  async findAll(pag: PaginationDto) {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'id',
+      orderBy = 'asc',
+      thaiName,
+      engName,
+    } = pag;
 
-    const options: any = {
-      select: {
-        id: true,
-        thaiName: true,
-        engName: true,
-        abbrev: true,
+    const options: Prisma.branchFindManyArgs = {
+      take: limit,
+      skip: (page - 1) * limit,
+      orderBy: { [sort]: orderBy },
+      where: {
+        ...(thaiName && { thaiName: { contains: thaiName } }),
+        ...(engName && { engName: { contains: engName } }),
       },
     };
 
     try {
       if (pag) {
-        const { search, limit, page, order } = pag;
-
-        options.take = limit || defaultLimit;
-        options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-        options.orderBy = { id: order || 'asc' };
-
-        if (search) {
-          options.where = {
-            thaiName: { contains: search, mode: 'insensitive' },
-          };
-        }
-
         const [branches, total] = await Promise.all([
           this.prisma.branch.findMany(options),
           this.prisma.branch.count({ where: options.where }),

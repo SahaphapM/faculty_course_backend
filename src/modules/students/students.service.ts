@@ -51,12 +51,12 @@ export class StudentsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { search, limit, page, order } = pag || {};
+    const { thaiName, engName, code, limit, page, orderBy } = pag || {};
 
     const options: Prisma.studentFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { id: order || 'asc' },
+      orderBy: { id: orderBy || 'asc' },
       include: {
         branch: {
           include: {
@@ -64,6 +64,11 @@ export class StudentsService {
           },
         },
         skill_collections: true,
+      },
+      where: {
+        ...{ code: { contains: code } },
+        ...{ thaiName: { contains: thaiName } },
+        ...{ engName: { contains: engName } },
       },
       select: {
         id: true,
@@ -73,26 +78,11 @@ export class StudentsService {
           select: {
             id: true,
             thaiName: true,
-            faculty: {
-              select: {
-                id: true,
-                name: true,
-              },
-            },
+            engName: true,
           },
         },
       },
     };
-
-    if (search) {
-      options.where = {
-        OR: [
-          { code: { contains: search } },
-          { thaiName: { contains: search } },
-          { engName: { contains: search } },
-        ],
-      };
-    }
 
     try {
       if (pag) {
@@ -119,7 +109,9 @@ export class StudentsService {
         },
       });
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch students by Codes');
+      throw new InternalServerErrorException(
+        'Failed to fetch students by Codes',
+      );
     }
   }
 

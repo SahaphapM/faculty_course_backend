@@ -5,7 +5,7 @@ import {
 } from '@nestjs/common';
 import { PaginationDto } from 'src/dto/pagination.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { clo } from 'prisma/prisma-client';
+import { clo, Prisma } from 'prisma/prisma-client';
 import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
 import { CreateCloDto } from 'src/generated/nestjs-dto/create-clo.dto';
 @Injectable()
@@ -31,32 +31,25 @@ export class ClosService {
   }
 
   async findAllByPage(
-    paginationDto: PaginationDto,
+    pag: PaginationDto,
   ): Promise<{ data: clo[]; total: number }> {
     const {
       page = 1,
       limit = 10,
       sort = 'id',
-      order = 'asc',
-      search,
-    } = paginationDto;
+      orderBy = 'asc',
+      name,
+    } = pag;
 
-    const options: any = {
+    const options: Prisma.cloFindManyArgs = {
       take: limit,
       skip: (page - 1) * limit,
-      orderBy: { [sort]: order },
-      include: { skill: true, plo: true },
+      orderBy: { [sort]: orderBy },
+      include: { skills: true, plo: true },
+      where: {
+        ...(name && { name: { contains: name } }),
+      },
     };
-
-    if (search) {
-      options.where = {
-        OR: [
-          { name: { contains: search, mode: 'insensitive' } },
-          { thaiDescription: { contains: search, mode: 'insensitive' } },
-          { engDescription: { contains: search, mode: 'insensitive' } },
-        ],
-      };
-    }
 
     try {
       const [data, total] = await Promise.all([

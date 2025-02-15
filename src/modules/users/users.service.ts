@@ -8,7 +8,7 @@ import { PaginationDto } from 'src/dto/pagination.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
-import { Prisma } from '@prisma/client'; 
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class UsersService {
@@ -29,34 +29,31 @@ export class UsersService {
   }
 
   async findAll(pag?: PaginationDto) {
-    const defaultLimit = 10;
-    // const defaultPage = 1;
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'id',
+      orderBy = 'asc',
+      email
+    } = pag;
 
-    const take = pag?.limit || defaultLimit;
-    const skip = pag?.page ? (pag.page - 1) * take : 0;
-
-    const where: Prisma.userWhereInput = pag?.search
-      ? {
-          OR: [
-            { id: { equals: parseInt(pag.search, 10) || undefined } },
-            { email: { contains: pag.search } },
-          ],
-        }
-      : {};
+    const options: Prisma.userFindManyArgs = {
+      take: limit,
+      skip: (page - 1) * limit,
+      orderBy: { [sort]: orderBy },
+      where: {
+        ...(email && { email: { contains: email } }),
+      },
+      include: {
+        student: { select: { id: true, thaiName: true } },
+        instructor: { select: { id: true, thaiName: true } },
+      },
+    };
 
     try {
       const [users, total] = await Promise.all([
-        this.prisma.user.findMany({
-          take,
-          skip,
-          where,
-          orderBy: { id: pag?.order || 'asc' },
-          include: {
-            student: { select: { id: true, thaiName: true } },
-            instructor: { select: { id: true, thaiName: true } },
-          },
-        }),
-        this.prisma.user.count({ where }),
+        this.prisma.user.findMany(options),
+        this.prisma.user.count({ where: options.where }),
       ]);
 
       return { data: users, total };
