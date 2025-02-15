@@ -5,6 +5,7 @@ import { Plo } from 'src/entities/plo.entity';
 import { CreatePloDto } from '../../dto/plo/create-plo.dto';
 import { UpdatePloDto } from '../../dto/plo/update-plo.dto';
 import { CurriculumsService } from '../curriculums/curriculums.service';
+import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @Injectable()
 export class PlosService {
@@ -67,7 +68,21 @@ export class PlosService {
   }
 
   async remove(id: number): Promise<void> {
-    const plo = await this.findOne(id);
+    const plo = await this.ploRepository.findOne({
+      where: { id },
+      relations: ['clos'], // โหลดข้อมูล Clos ที่เกี่ยวข้อง
+    });
+
+    if (!plo) {
+      throw new NotFoundException(`Plo with ID ${id} not found`);
+    }
+
+    // อัปเดต Clos ที่เกี่ยวข้องให้ไม่เชื่อมโยงกับ Plo
+    for (const clo of plo.clos) {
+      clo.plo = null; // <-- ตั้งค่า plo เป็น null
+      await this.ploRepository.manager.save(clo); // <-- บันทึกการเปลี่ยนแปลง
+    }
+    // ลบ Plo
     await this.ploRepository.remove(plo);
   }
 }
