@@ -2,22 +2,53 @@ generator client {
   provider = "prisma-client-js"
 }
 
+generator nestjsDto {
+  provider                        = "prisma-generator-nestjs-dto"
+  output                          = "../src/generated/nestjs-dto"
+  outputToNestJsResourceStructure = "false"
+  flatResourceStructure           = "false"
+  exportRelationModifierClasses   = "true"
+  reExport                        = "false"
+  generateFileTypes               = "all"
+  createDtoPrefix                 = "Create"
+  updateDtoPrefix                 = "Update"
+  dtoSuffix                       = "Dto"
+  entityPrefix                    = ""
+  entitySuffix                    = ""
+  classValidation                 = "true"
+  fileNamingStyle                 = "camel"
+  noDependencies                  = "false"
+  outputType                      = "class"
+  definiteAssignmentAssertion     = "false"
+  requiredResponseApiProperty     = "true"
+  prettier                        = "false"
+  wrapRelationsAsType             = "false"
+  showDefaultValues               = "false"
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
 datasource db {
   provider = "mysql"
   url      = env("DATABASE_URL")
 }
 
 model branch {
-  id          Int          @id @default(autoincrement())
-  engName     String?      @db.VarChar(255)
-  facultyId   Int?
-  description String?      @db.VarChar(255)
-  thaiName    String       @db.VarChar(255)
-  abbrev      String?      @db.VarChar(5)
-  faculty     faculty?     @relation(fields: [facultyId], references: [id], onUpdate: NoAction)
-  curriculum  curriculum[]
-  instructor  instructor?
-  student     student?
+  id              Int          @id @default(autoincrement())
+  /// @DtoRelationIncludeId
+  facultyId       Int?
+  thaiDescription String       @db.VarChar(255)
+  engDescription  String?      @db.VarChar(255)
+  thaiName        String       @db.VarChar(255)
+  engName         String?      @db.VarChar(255)
+  abbrev          String?      @db.VarChar(5)
+  // Relations
+  faculty         faculty?     @relation(fields: [facultyId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  curriculum      curriculum[]
+  instructor      instructor?
+  student         student?
 
   @@index([facultyId])
 }
@@ -26,6 +57,7 @@ model course {
   name                          String                          @db.VarChar(255)
   active                        Int?                            @default(1) @db.TinyInt
   id                            Int                             @id @default(autoincrement())
+  /// @DtoRelationIncludeId
   subjectId                     Int?
   thaiDescription               String?                         @db.Text
   engDescription                String?                         @db.Text
@@ -38,7 +70,9 @@ model course {
 
 model course_enrollment {
   id               Int                @id @default(autoincrement())
+  /// @DtoRelationIncludeId
   courseId         Int?
+  /// @DtoRelationIncludeId
   studentId        Int?
   course           course?            @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   student          student?           @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -78,44 +112,50 @@ model course_spec {
 }
 
 model curriculum {
-  engName                            String?                              @db.VarChar(255)
-  engDegree                          String?                              @db.VarChar(255)
-  period                             Int
-  minimumGrade                       Int
-  branchId                           Int?
-  code                               String                               @unique() @db.VarChar(255)
-  id                                 Int                                  @id @default(autoincrement())
-  thaiName                           String?                              @db.VarChar(255)
-  thaiDegree                         String?                              @db.VarChar(255)
-  thaiDescription                    String?                              @db.Text
-  engDescription                     String?                              @db.Text
-  course_spec                        course_spec[]
-  branch                             branch?                              @relation(fields: [branchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  curriculum_coordinators_instructor curriculum_coordinators_instructor[]
-  curriculum_subjects_subject        curriculum_subjects_subject[]
-  plo                                plo[]
-  skill                              skill[]
-  subject                            subject[]
+  engName                 String?                   @db.VarChar(255)
+  engDegree               String?                   @db.VarChar(255)
+  period                  Int
+  minimumGrade            Int
+  /// @DtoRelationIncludeId
+  branchId                Int?
+  code                    String                    @unique() @db.VarChar(255)
+  id                      Int                       @id @default(autoincrement())
+  thaiName                String?                   @db.VarChar(255)
+  thaiDegree              String?                   @db.VarChar(255)
+  thaiDescription         String?                   @db.Text
+  engDescription          String?                   @db.Text
+  course_spec             course_spec[]
+  branch                  branch?                   @relation(fields: [branchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  curriculum_coordinators curriculum_coordinators[]
+  curriculum_subjects     curriculum_subjects[]
+  plo                     plo[]
+  skill                   skill[]
+  subject                 subject[]
 
   @@index([branchId])
 }
 
-model curriculum_coordinators_instructor {
+model curriculum_coordinators {
+  /// @DtoRelationIncludeId
   instructorId Int
+  /// @DtoRelationIncludeId
   curriculumId Int
   instructor   instructor @relation(fields: [instructorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   curriculum   curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  // @@map("curriculum_coordinators_instructor")
 
   @@id([instructorId, curriculumId])
   @@index([instructorId])
   @@index([curriculumId])
 }
 
-model curriculum_subjects_subject {
+model curriculum_subjects {
   curriculumId Int
+  /// @DtoRelationIncludeId
   subjectId    Int
   subject      subject    @relation(fields: [subjectId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   curriculum   curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  // @@map("curriculum_subjects_subject")
 
   @@id([curriculumId, subjectId])
   @@index([subjectId])
@@ -132,26 +172,28 @@ model faculty {
 }
 
 model instructor {
-  id                                 Int                                  @id @default(autoincrement())
-  engName                            String?                              @db.VarChar(255)
-  tel                                String?                              @db.VarChar(255)
-  picture                            String?                              @db.VarChar(255)
-  position                           String?                              @db.VarChar(255)
-  email                              String                               @db.VarChar(255)
-  officeRoom                         String?                              @db.VarChar(255)
-  specialists                        String?                              @db.VarChar(255)
-  socials                            String?                              @db.VarChar(255)
-  branchId                           Int?                                 @unique()
-  code                               String                               @unique() @db.VarChar(255)
-  thaiName                           String?                              @db.VarChar(255)
-  bio                                String?                              @db.Text
+  id                                 Int                             @id @default(autoincrement())
+  engName                            String?                         @db.VarChar(255)
+  tel                                String?                         @db.VarChar(255)
+  picture                            String?                         @db.VarChar(255)
+  position                           String?                         @db.VarChar(255)
+  email                              String                          @db.VarChar(255)
+  officeRoom                         String?                         @db.VarChar(255)
+  specialists                        String?                         @db.VarChar(255)
+  socials                            String?                         @db.VarChar(255)
+  /// @DtoRelationIncludeId
+  branchId                           Int?                            @unique()
+  code                               String                          @unique() @db.VarChar(255)
+  thaiName                           String?                         @db.VarChar(255)
+  bio                                String?                         @db.Text
   course_instructors_instructor      course_instructors_instructor[]
-  curriculum_coordinators_instructor curriculum_coordinators_instructor[]
-  branch                             branch?                              @relation(fields: [branchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  curriculum_coordinators_instructor curriculum_coordinators[]
+  branch                             branch?                         @relation(fields: [branchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user                               user?
 }
 
 model plo {
+  /// @DtoRelationIncludeId
   curriculumId    Int?
   id              Int         @id @default(autoincrement())
   type            String      @db.VarChar(255)
@@ -167,7 +209,9 @@ model plo {
 model clo {
   id              Int     @id @default(autoincrement())
   name            String? @db.VarChar(255)
+  /// @DtoRelationIncludeId
   ploId           Int?
+  /// @DtoRelationIncludeId
   courseSpecId    Int?
   thaiDescription String? @db.Text
   engDescription  String? @db.Text
@@ -185,8 +229,11 @@ model clo {
 model skill {
   id           Int    @id @default(autoincrement())
   name         String
+  /// @DtoRelationIncludeId
   parentId     Int?
+  /// @DtoRelationIncludeId
   cloId        Int?
+  /// @DtoRelationIncludeId
   curriculumId Int?
 
   // Self-referencing relation for parent-child skills
@@ -219,6 +266,7 @@ model skill_collection {
   passed               Int                   @default(0) @db.TinyInt
   ExpectedLevelId      Int?
   courseEnrollmentId   Int?
+  /// @DtoRelationIncludeId
   studentId            Int?
   course_enrollment    course_enrollment?    @relation(fields: [courseEnrollmentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
   skill_expected_level skill_expected_level? @relation(fields: [ExpectedLevelId], references: [id], onDelete: Cascade)
@@ -232,7 +280,9 @@ model skill_collection {
 model skill_expected_level {
   id               Int                @id @default(autoincrement())
   expectedLevel    Int?
+  /// @DtoRelationIncludeId
   skillId          Int?
+  /// @DtoRelationIncludeId
   subjectId        Int?
   skill_collection skill_collection[]
   skill            skill?             @relation(fields: [skillId], references: [id], onDelete: NoAction, onUpdate: NoAction)
@@ -257,16 +307,17 @@ model student {
 }
 
 model subject {
-  engName                     String?                       @db.VarChar(255)
-  code                        String                        @unique() @db.VarChar(255)
-  id                          Int                           @id @default(autoincrement())
+  engName                     String?                @db.VarChar(255)
+  code                        String                 @unique() @db.VarChar(255)
+  id                          Int                    @id @default(autoincrement())
+  /// @DtoRelationIncludeId
   curriculumId                Int?
-  thaiName                    String?                       @db.VarChar(255)
+  thaiName                    String?                @db.VarChar(255)
   course                      course[]
   course_spec                 course_spec[]
-  curriculum_subjects_subject curriculum_subjects_subject[]
+  curriculum_subjects_subject curriculum_subjects[]
   skill_expected_level        skill_expected_level[]
-  curriculum                  curriculum?                   @relation(fields: [curriculumId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  curriculum                  curriculum?            @relation(fields: [curriculumId], references: [id], onDelete: NoAction, onUpdate: NoAction)
 
   @@index([curriculumId])
 }
@@ -278,7 +329,9 @@ model user {
   avatarUrl          String      @default("unknown.jpg") @db.VarChar(255)
   role               String?     @db.VarChar(255)
   hashedRefreshToken String?     @db.VarChar(255)
+  /// @DtoRelationIncludeId
   teacherId          Int?        @unique()
+  /// @DtoRelationIncludeId
   studentId          Int?        @unique()
   student            student?    @relation(fields: [studentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   instructor         instructor? @relation(fields: [teacherId], references: [id], onDelete: NoAction, onUpdate: NoAction)

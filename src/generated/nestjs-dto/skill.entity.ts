@@ -1,0 +1,66 @@
+
+import {ApiProperty} from '@nestjs/swagger'
+import {Clo} from './clo.entity'
+import {Curriculum} from './curriculum.entity'
+import {SkillExpectedLevel} from './skillExpectedLevel.entity'
+
+
+export class Skill {
+  @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+id: number ;
+@ApiProperty({
+  type: 'string',
+})
+name: string ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+parentId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+cloId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+curriculumId: number  | null;
+@ApiProperty({
+  type: () => Skill,
+  required: false,
+  nullable: true,
+})
+parentSkill?: Skill  | null;
+@ApiProperty({
+  type: () => Skill,
+  isArray: true,
+  required: false,
+})
+subSkills?: Skill[] ;
+@ApiProperty({
+  type: () => Clo,
+  required: false,
+  nullable: true,
+})
+clo?: Clo  | null;
+@ApiProperty({
+  type: () => Curriculum,
+  required: false,
+  nullable: true,
+})
+curriculum?: Curriculum  | null;
+@ApiProperty({
+  type: () => SkillExpectedLevel,
+  isArray: true,
+  required: false,
+})
+skill_expected_level?: SkillExpectedLevel[] ;
+}

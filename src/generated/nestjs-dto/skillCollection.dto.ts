@@ -1,0 +1,27 @@
+
+import {ApiProperty} from '@nestjs/swagger'
+
+
+export class SkillCollectionDto {
+  @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+id: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+gainedLevel: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+passed: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+studentId: number  | null;
+}

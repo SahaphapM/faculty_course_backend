@@ -3,48 +3,47 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateBranchDto } from '../../dto/branch/create-branch.dto';
-import { UpdateBranchDto } from '../../dto/branch/update-branch.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { FindManyOptions, Like, Repository } from 'typeorm';
-import { Branch } from '../../entities/branch.entity';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { Faculty } from 'src/entities/faculty.entity';
+import { PrismaService } from 'prisma/prisma.service';
+import { branch } from '@prisma/client'; // Import the Prisma-generated Branch type
+import { BranchDto } from 'src/generated/nestjs-dto/branch.dto';
+import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 
 @Injectable()
 export class BranchesService {
-  constructor(
-    @InjectRepository(Branch)
-    private braRepo: Repository<Branch>,
-    @InjectRepository(Faculty)
-    private facRepo: Repository<Faculty>,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
-  async create(createBranchDto: CreateBranchDto): Promise<Branch> {
+  async create(dto: BranchDto) {
     try {
-      const { facultyId, ...rest } = createBranchDto;
-      const existBranch = await this.braRepo.findOne({
-        where: { thaiName: createBranchDto.name },
+      const { facultyId, ...rest } = dto;
+
+      // Check if a branch with the same name already exists
+      const existBranch = await this.prisma.branch.findFirst({
+        where: { thaiName: dto.thaiName },
       });
       if (existBranch) {
-        throw new Error(
-          `Branch with name ${createBranchDto.name} already exists`,
-        );
+        throw new Error(`Branch with name ${dto.thaiName} already exists`);
       }
-      const existFaculty = await this.facRepo.findOne({
+
+      // Check if the faculty exists
+      const existFaculty = await this.prisma.faculty.findUnique({
         where: { id: facultyId },
       });
-      if (existFaculty) {
-        const branch = this.braRepo.create({
-          ...rest,
-          faculty: existFaculty,
-        });
-        return await this.braRepo.save(branch);
-      } else {
+      if (!existFaculty) {
         throw new Error(`Faculty with ID ${facultyId} does not exist`);
       }
+
+      // Create the branch
+      const branch = await this.prisma.branch.create({
+        data: {
+          ...rest,
+          facultyId,
+        },
+      });
+
+      return branch;
     } catch (error) {
-      throw new Error(`Failed to create branch ${error.message}`);
+      throw new Error(`Failed to create branch: ${error.message}`);
     }
   }
 
@@ -52,8 +51,7 @@ export class BranchesService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const options: FindManyOptions<Branch> = {
-      relationLoadStrategy: 'query',
+    const options: any = {
       select: {
         id: true,
         thaiName: true,
@@ -61,31 +59,38 @@ export class BranchesService {
         abbrev: true,
       },
     };
+
     try {
       if (pag) {
         const { search, limit, page, order } = pag;
 
         options.take = limit || defaultLimit;
         options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-        options.order = { id: order || 'ASC' };
+        options.orderBy = { id: order || 'asc' };
 
         if (search) {
-          options.where = [{ thaiName: Like(`%${search}%`) }];
+          options.where = {
+            thaiName: { contains: search, mode: 'insensitive' },
+          };
         }
-        return await this.braRepo.findAndCount(options);
+
+        const [branches, total] = await Promise.all([
+          this.prisma.branch.findMany(options),
+          this.prisma.branch.count({ where: options.where }),
+        ]);
+
+        return { data: branches, total };
       } else {
-        return await this.braRepo.find(options);
+        return await this.prisma.branch.findMany(options);
       }
     } catch (error) {
-      // Log the error for debugging
       console.error('Error fetching branches:', error);
       throw new InternalServerErrorException('Failed to fetch branches');
     }
   }
 
   async findAllOptions() {
-    const options: FindManyOptions<Branch> = {
-      relationLoadStrategy: 'query',
+    const options = {
       select: {
         id: true,
         thaiName: true,
@@ -93,33 +98,35 @@ export class BranchesService {
         abbrev: true,
       },
     };
-    return await this.braRepo.find(options);
+    return await this.prisma.branch.findMany(options);
   }
 
-  async findOne(id: number): Promise<Branch> {
+  async findOne(id: number): Promise<branch> {
     try {
-      const branch = await this.braRepo.findOne({
+      const branch = await this.prisma.branch.findUnique({
         where: { id },
-        relations: { curriculums: true, faculty: true },
+        include: { curriculum: true, faculty: true },
       });
+
       if (!branch) {
         throw new NotFoundException(`Branch with ID ${id} not found`);
       }
+
       return branch;
     } catch (error) {
       throw new Error('Failed to fetch branch');
     }
   }
 
-  async update(id: number, updateBranchDto: UpdateBranchDto): Promise<Branch> {
+  async update(id: number, updateBranchDto: UpdateBranchDto): Promise<branch> {
     try {
-      const branch = await this.findOne(id);
-      Object.assign(branch, updateBranchDto);
-      await this.braRepo.save(branch);
-      return this.braRepo.findOne({
+      const branch = await this.prisma.branch.update({
         where: { id },
-        relations: { faculty: true, curriculums: true },
+        data: updateBranchDto,
+        include: { faculty: true, curriculum: true },
       });
+
+      return branch;
     } catch (error) {
       throw new Error('Failed to update branch');
     }
@@ -127,20 +134,25 @@ export class BranchesService {
 
   async remove(id: number): Promise<void> {
     try {
-      const branch = await this.findOne(id);
-      await this.braRepo.remove(branch);
+      await this.prisma.branch.delete({
+        where: { id },
+      });
     } catch (error) {
       throw new Error('Failed to remove branch');
     }
   }
 
-  async filters(facultyId: string): Promise<Branch[]> {
+  async filters(facultyId: string) {
     try {
-      const branches = await this.braRepo
-        .createQueryBuilder('branch')
-        .select(['branch.id', 'branch.name', 'branch.engName'])
-        .where('branch.facultyId = :facultyId', { facultyId })
-        .getMany();
+      const branches = await this.prisma.branch.findMany({
+        where: { facultyId: parseInt(facultyId) },
+        select: {
+          id: true,
+          thaiName: true,
+          engName: true,
+        },
+      });
+
       return branches;
     } catch (error) {
       throw new Error('Failed to fetch branches');

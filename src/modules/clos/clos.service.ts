@@ -3,44 +3,27 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Clo } from '../../entities/clo.entity';
-import { FindManyOptions, Like, Repository } from 'typeorm';
-import { CreateCloDto } from 'src/dto/clo/create-clo.dto';
-import { UpdateCloDto } from 'src/dto/clo/update-clo.dto';
 import { PaginationDto } from 'src/dto/pagination.dto';
-import { Plo } from 'src/entities/plo.entity';
-import { CourseSpec } from 'src/entities/course-spec.entity';
-import { Skill } from 'src/entities/skill.entity';
-
+import { PrismaService } from 'prisma/prisma.service';
+import { clo } from 'prisma/prisma-client';
+import { CloDto } from 'src/generated/nestjs-dto/clo.dto';
+import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
 @Injectable()
 export class ClosService {
-  constructor(
-    @InjectRepository(Clo)
-    private closRepository: Repository<Clo>,
+  constructor(private prisma: PrismaService) {}
 
-    @InjectRepository(CourseSpec)
-    private courseSpecsRepository: Repository<CourseSpec>,
-
-    @InjectRepository(Plo)
-    private plosRepository: Repository<Plo>,
-
-    @InjectRepository(Skill)
-    private skillsRepository: Repository<Skill>,
-  ) {}
-
-  async create(createCloDto: CreateCloDto): Promise<Clo> {
-    const { courseSpec, plo, skill } = await this.findDependencys(createCloDto);
-
-    const clo = this.closRepository.create({
-      ...createCloDto,
-      courseSpec,
-      plo,
-      skill,
-    });
+  async create(createCloDto: CloDto): Promise<clo> {
+    const { courseSpec, plo, skill } = await this.findDependency(createCloDto);
 
     try {
-      return await this.closRepository.save(clo);
+      return await this.prisma.clo.create({
+        data: {
+          ...createCloDto,
+          courseSpecId: courseSpec.id,
+          ploId: plo.id,
+          skills: { connect: { id: skill.id } },
+        },
+      });
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to create CLO: ${error.message}`,
@@ -50,33 +33,38 @@ export class ClosService {
 
   async findAllByPage(
     paginationDto: PaginationDto,
-  ): Promise<{ data: Clo[]; total: number }> {
+  ): Promise<{ data: clo[]; total: number }> {
     const {
       page = 1,
       limit = 10,
       sort = 'id',
-      order = 'ASC',
+      order = 'asc',
       search,
     } = paginationDto;
 
-    const options: FindManyOptions<Clo> = {
+    const options: any = {
       take: limit,
       skip: (page - 1) * limit,
-      order: { [sort]: order.toUpperCase() === 'DESC' ? 'DESC' : 'ASC' },
-      relations: { skill: true, plo: true },
+      orderBy: { [sort]: order },
+      include: { skill: true, plo: true },
     };
 
     if (search) {
-      options.where = [
-        { name: Like(`%${search}%`) },
-        { thaiDescription: Like(`%${search}%`) },
-        { engDescription: Like(`%${search}%`) },
-      ];
+      options.where = {
+        OR: [
+          { name: { contains: search, mode: 'insensitive' } },
+          { thaiDescription: { contains: search, mode: 'insensitive' } },
+          { engDescription: { contains: search, mode: 'insensitive' } },
+        ],
+      };
     }
 
     try {
-      const [result, total] = await this.closRepository.findAndCount(options);
-      return { data: result, total };
+      const [data, total] = await Promise.all([
+        this.prisma.clo.findMany(options),
+        this.prisma.clo.count({ where: options.where }),
+      ]);
+      return { data, total };
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to retrieve data: ${error.message}`,
@@ -84,33 +72,33 @@ export class ClosService {
     }
   }
 
-  async findAll(): Promise<Clo[]> {
+  async findAll(): Promise<clo[]> {
     try {
-      return await this.closRepository.find({
-        relations: { skill: true, plo: true },
+      return await this.prisma.clo.findMany({
+        include: { skills: true, plo: true },
       });
     } catch (error) {
-      throw new NotFoundException('Failed to fetch CLOs' + error.message);
+      throw new NotFoundException('Failed to fetch CLOs: ' + error.message);
     }
   }
 
-  async findAllByCoursSpec(coursSpecId: number): Promise<Clo[]> {
+  async findAllByCourseSpec(courseSpecId: number): Promise<clo[]> {
     try {
-      return await this.closRepository.find({
-        where: { courseSpec: { id: coursSpecId } },
+      return await this.prisma.clo.findMany({
+        where: { courseSpecId },
       });
     } catch (error) {
       throw new NotFoundException(
-        `CourseSpec with id ${coursSpecId} not found ` + error.message,
+        `CourseSpec with id ${courseSpecId} not found: ${error.message}`,
       );
     }
   }
 
-  async findOne(id: number): Promise<Clo> {
+  async findOne(id: number): Promise<clo> {
     try {
-      const clo = await this.closRepository.findOne({
+      const clo = await this.prisma.clo.findUnique({
         where: { id },
-        relations: { skill: true, plo: true },
+        include: { skills: true, plo: true },
       });
 
       if (!clo) {
@@ -125,20 +113,14 @@ export class ClosService {
     }
   }
 
-  async update(id: number, updateCloDto: UpdateCloDto): Promise<Clo> {
+  async update(id: number, updateCloDto: UpdateCloDto): Promise<clo> {
     await this.findOne(id); // Ensure the CLO exists
 
-    const clo = await this.closRepository.preload({
-      id,
-      ...updateCloDto,
-    });
-
-    if (!clo) {
-      throw new NotFoundException(`CLO with ID ${id} not found`);
-    }
-
     try {
-      return await this.closRepository.save(clo);
+      return await this.prisma.clo.update({
+        where: { id },
+        data: updateCloDto,
+      });
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to update CLO: ${error.message}`,
@@ -153,7 +135,7 @@ export class ClosService {
     }
 
     try {
-      await this.closRepository.delete(id);
+      await this.prisma.clo.delete({ where: { id } });
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to delete CLO: ${error.message}`,
@@ -161,9 +143,9 @@ export class ClosService {
     }
   }
 
-  //////////////////////////////////// function /////////////////////////////////////
-  async findDependencys(createCloDto: CreateCloDto) {
-    const courseSpec = await this.courseSpecsRepository.findOne({
+  // Helper function to find dependencies
+  async findDependency(createCloDto: CloDto) {
+    const courseSpec = await this.prisma.course_spec.findUnique({
       where: { id: createCloDto.courseSpecId },
     });
 
@@ -173,8 +155,8 @@ export class ClosService {
       );
     }
 
-    const skill = await this.skillsRepository.findOne({
-      where: { id: createCloDto.skillId },
+    const skill = await this.prisma.skill.findUnique({
+      where: { id: createCloDto },
     });
 
     if (!skill) {
@@ -183,7 +165,7 @@ export class ClosService {
       );
     }
 
-    const plo = await this.plosRepository.findOne({
+    const plo = await this.prisma.plo.findUnique({
       where: { id: createCloDto.ploId },
     });
 
