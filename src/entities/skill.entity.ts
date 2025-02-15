@@ -63,15 +63,9 @@ export class Skill {
   )
   skillExpectedLevels: SkillExpectedLevel[];
 
-  @OneToOne(() => Clo, (clo) => clo.skill, {
+  @OneToMany(() => Clo, (clo) => clo.skill, {
     cascade: false,
+    nullable: true,
   })
-  @JoinColumn({ name: 'cloId' })
-  clo: Clo;
-
-  // I think it is not needed. We have skillExpectedLevels to relate to skill already.
-  // @OneToMany(() => SkillCollection, (s) => s.courseEnrollment, {
-  //   cascade: false,
-  // })
-  // skillCollections: SkillCollection[];
+  clo: Clo[];
 }

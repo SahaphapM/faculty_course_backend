@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateCourseSpecDto } from 'src/dto/course-specs/create-course-spec.dto';
 import { UpdateCourseSpecDto } from 'src/dto/course-specs/update-course-spec.dto';
@@ -141,8 +145,30 @@ export class CourseSpecsService {
     return savedCourseSpec;
   }
 
-  remove(id: number) {
-    return this.courseSpecRepo.delete(id);
+  async remove(id: number): Promise<void> {
+    try {
+      const result = await this.courseSpecRepo.delete(id);
+
+      // ตรวจสอบว่ามีการลบข้อมูลหรือไม่
+      if (result.affected === 0) {
+        throw new NotFoundException(`CourseSpec with ID ${id} not found`);
+      }
+    } catch (error) {
+      // ตรวจสอบประเภทข้อผิดพลาด
+      if (error instanceof NotFoundException) {
+        throw error; // ส่งกลับ NotFoundException ตามเดิม
+      } else if (error.code === 'ER_ROW_IS_REFERENCED_2') {
+        // Foreign Key Constraint Error
+        throw new InternalServerErrorException(
+          'Cannot delete CourseSpec because it is referenced by other entities',
+        );
+      } else {
+        // ข้อผิดพลาดอื่น ๆ
+        throw new InternalServerErrorException(
+          'An error occurred while deleting the CourseSpec',
+        );
+      }
+    }
   }
 
   async createSubject(
