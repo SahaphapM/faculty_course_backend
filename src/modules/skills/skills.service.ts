@@ -185,56 +185,56 @@ export class SkillsService {
   }
 
   // Create a sub-skill under a parent skill
-  async createSubSkills(parentId: number, createSkillDto: CreateSkillDto) {
-    const parentSkill = await this.findOne(parentId);
+  // async createSubSkills(parentId: number, createSkillDto: CreateSkillDto) {
+  //   const parentSkill = await this.findOne(parentId);
 
-    const curriculum = await this.prisma.curriculum.findUnique({
-      where: { id: createSkillDto.curriculumId || parentSkill.curriculumId },
-    });
+  //   const curriculum = await this.prisma.curriculum.findUnique({
+  //     where: { id: createSkillDto.curriculumId || parentSkill.curriculumId },
+  //   });
 
-    if (!curriculum) {
-      throw new NotFoundException(
-        `Curriculum with ID ${createSkillDto.curriculumId} not found`,
-      );
-    }
+  //   if (!curriculum) {
+  //     throw new NotFoundException(
+  //       `Curriculum with ID ${createSkillDto.curriculumId} not found`,
+  //     );
+  //   }
 
-    try {
-      const subSkill = await this.prisma.skill.create({
-        data: {
-          ...createSkillDto,
-          curriculumId: curriculum.id,
-          parentId: parentId,
-        },
-      });
-      return subSkill;
-    } catch (error) {
-      throw new BadRequestException(
-        `Failed to create sub-skill: ${error.message}`,
-      );
-    }
-  }
+  //   try {
+  //     const subSkill = await this.prisma.skill.create({
+  //       data: {
+  //         ...createSkillDto,
+  //         curriculumId: curriculum.id,
+  //         parentId: parentId,
+  //       },
+  //     });
+  //     return subSkill;
+  //   } catch (error) {
+  //     throw new BadRequestException(
+  //       `Failed to create sub-skill: ${error.message}`,
+  //     );
+  //   }
+  // }
 
-  // Remove a sub-skill from a parent skill
-  async removeSubSkillId(parentId: number, subSkillId: number) {
-    const parentSkill = await this.findOne(parentId);
-    const childSkill = await this.findOne(subSkillId);
+  // // Remove a sub-skill from a parent skill
+  // async removeSubSkillId(parentId: number, subSkillId: number) {
+  //   const parentSkill = await this.findOne(parentId);
+  //   const childSkill = await this.findOne(subSkillId);
 
-    if (!parentSkill || !childSkill) {
-      throw new NotFoundException('Parent or child skill not found');
-    }
+  //   if (!parentSkill || !childSkill) {
+  //     throw new NotFoundException('Parent or child skill not found');
+  //   }
 
-    try {
-      await this.prisma.skill.update({
-        where: { id: subSkillId },
-        data: {
-          parent: { disconnect: true },
-        },
-      });
-      return parentSkill;
-    } catch (error) {
-      throw new BadRequestException(
-        `Failed to remove sub-skill: ${error.message}`,
-      );
-    }
-  }
+  //   try {
+  //     await this.prisma.skill.update({
+  //       where: { id: subSkillId },
+  //       data: {
+  //         parent: { disconnect: true },
+  //       },
+  //     });
+  //     return parentSkill;
+  //   } catch (error) {
+  //     throw new BadRequestException(
+  //       `Failed to remove sub-skill: ${error.message}`,
+  //     );
+  //   }
+  // }
 }

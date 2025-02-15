@@ -57,21 +57,21 @@ export class SkillsController {
     return this.skillsService.remove(id);
   }
 
-  @Post(':parentId/createSubSkills') // select or create subskills use this.
-  @HttpCode(HttpStatus.CREATED)
-  async createSubSkill(
-    @Param('parentId') id: number,
-    @Body() createSkillDtos: CreateSkillDto,
-  ) {
-    return this.skillsService.createSubSkills(id, createSkillDtos);
-  }
+  // @Post(':parentId/createSubSkills') // select or create subskills use this.
+  // @HttpCode(HttpStatus.CREATED)
+  // async createSubSkill(
+  //   @Param('parentId') id: number,
+  //   @Body() createSkillDtos: CreateSkillDto,
+  // ) {
+  //   return this.skillsService.createSubSkills(id, createSkillDtos);
+  // }
 
-  @Patch(':id/removeSubSkill/:subSkillId')
-  @HttpCode(HttpStatus.OK)
-  removeSubSkillId(
-    @Param('id') id: number,
-    @Param('subSkillId') subSkillId: number,
-  ) {
-    return this.skillsService.removeSubSkillId(id, subSkillId);
-  }
+  // @Patch(':id/removeSubSkill/:subSkillId')
+  // @HttpCode(HttpStatus.OK)
+  // removeSubSkillId(
+  //   @Param('id') id: number,
+  //   @Param('subSkillId') subSkillId: number,
+  // ) {
+  //   return this.skillsService.removeSubSkillId(id, subSkillId);
+  // }
 }
