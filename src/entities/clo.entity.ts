@@ -4,7 +4,6 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { CourseSpec } from './course-spec.entity';
@@ -30,7 +29,7 @@ export class Clo {
   courseSpec: CourseSpec;
 
   // set relation with skill
-  @OneToOne(() => Skill, (skill) => skill.clo, {
+  @ManyToOne(() => Skill, (skill) => skill.clo, {
     nullable: true,
     cascade: null,
   })

@@ -12,6 +12,7 @@ import { CreateSkillDto } from 'src/dto/skill/create-skill.dto';
 import { UpdateSkillDto } from 'src/dto/skill/update-skill.dto';
 import { Curriculum } from 'src/entities/curriculum.entity';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
+import { ExceptionsHandler } from '@nestjs/core/exceptions/exceptions-handler';
 
 @Injectable()
 export class SkillsService {
@@ -146,39 +147,42 @@ export class SkillsService {
   }
 
   async remove(id: number): Promise<void> {
-    const skill = await this.findOne(id); // Ensure the skill exists
-    console.log(skill);
-    try {
-      await this.skRepo.remove(skill);
-    } catch (error) {
-      throw new BadRequestException('Failed to remove skill');
+    const skill = await this.skRepo.findOne({
+      where: { id },
+      relations: { children: true, parent: { children: true }, clo: true },
+    });
+
+    if (!skill) {
+      throw new NotFoundException(`Skill with ID ${id} not found`);
     }
+
+    // จัดการ Clo
+    if (skill.clo) {
+      for (const clo of skill.clo) {
+        clo.skill = null; // ตั้งค่า skill เป็น null
+        await this.skRepo.manager.save(skill.clo); // บันทึกการเปลี่ยนแปลง
+      }
+    }
+
+    // จัดการ children
+    if (skill.children && skill.children.length > 0) {
+      for (const child of skill.children) {
+        child.parent = null; // ตั้งค่า parent เป็น null
+        await this.skRepo.save(child); // บันทึกการเปลี่ยนแปลง
+      }
+    }
+
+    // จัดการ parent
+    if (skill.parent) {
+      skill.parent.children = skill.parent.children.filter(
+        (child) => child.id !== skill.id,
+      ); // ลบ skill ออกจาก children ของ parent
+      await this.skRepo.save(skill.parent); // บันทึกการเปลี่ยนแปลง
+    }
+
+    // ลบ Skill
+    await this.skRepo.remove(skill);
   }
-
-  // async selectSubSkills(id: number, createSkillDto: CreateSkillDto) {
-  //   console.log(createSkillDto);
-  //   const parentSkill = await this.findOne(id);
-
-  //   parentSkill.children = parentSkill.children || []; // initialize children
-
-  // find child skill in database
-  // const subSkill = await this.findOne(createSkillDto.id);
-
-  // Check if subSkill already related to parentSkill
-  // const isAlreadyRelated = parentSkill.children.some(
-  //   (child) => child.id.toString() === subSkill.id.toString(),
-  // );
-
-  // If not already related, add the subSkill to subSkills
-  // if (!isAlreadyRelated) {
-  //   parentSkill.children.push(subSkill);
-  //   try {
-  //     return await this.skRepo.save(parentSkill);
-  //   } catch (error) {
-  //     throw new BadRequestException('Failed to select childSkill');
-  //   }
-  // }
-  // }
 
   async createSubSkills(
     parentId: number,
