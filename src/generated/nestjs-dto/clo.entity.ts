@@ -1,7 +1,7 @@
 
 import {ApiProperty} from '@nestjs/swagger'
 import {Plo} from './plo.entity'
-import {CourseSpec} from './courseSpec.entity'
+import {Subject} from './subject.entity'
 import {Skill} from './skill.entity'
 
 
@@ -27,7 +27,7 @@ ploId: number  | null;
   format: 'int32',
   nullable: true,
 })
-courseSpecId: number  | null;
+subjectId: number  | null;
 @ApiProperty({
   type: 'string',
   nullable: true,
@@ -45,11 +45,11 @@ engDescription: string  | null;
 })
 plo?: Plo  | null;
 @ApiProperty({
-  type: () => CourseSpec,
+  type: () => Subject,
   required: false,
   nullable: true,
 })
-course_spec?: CourseSpec  | null;
+subject?: Subject  | null;
 @ApiProperty({
   type: () => Skill,
   isArray: true,

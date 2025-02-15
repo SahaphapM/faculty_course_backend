@@ -1,20 +1,11 @@
 import { Module } from '@nestjs/common';
-import { SubjectsService } from './subjects.service';
-import { SubjectsController } from './subjects.controller';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { Subject } from '../../entities/subject.entity';
-import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
-import { Curriculum } from '../../entities/curriculum.entity';
-import { ClosModule } from '../clos/clos.module';
-import { Skill } from 'src/entities/skill.entity';
+import { CourseSpecsService } from './subjects.service';
+import { CourseSpecsController } from './subjects.controller';
+import { LessonsService } from '../lessons/lessons.service';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([Subject, Curriculum, SkillExpectedLevel, Skill]),
-    ClosModule,
-  ],
-  controllers: [SubjectsController],
-  providers: [SubjectsService],
-  exports: [SubjectsService],
+  imports: [LessonsService],
+  controllers: [CourseSpecsController],
+  providers: [CourseSpecsService],
 })
-export class SubjectsModule { }
+export class CourseSpecsModule {}

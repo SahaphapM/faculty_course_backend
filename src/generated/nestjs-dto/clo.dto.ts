@@ -24,7 +24,7 @@ ploId: number  | null;
   format: 'int32',
   nullable: true,
 })
-courseSpecId: number  | null;
+subjectId: number  | null;
 @ApiProperty({
   type: 'string',
   nullable: true,

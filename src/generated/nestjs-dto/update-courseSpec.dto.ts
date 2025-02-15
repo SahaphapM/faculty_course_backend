@@ -1,12 +1,29 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {IsOptional,IsString} from 'class-validator'
+import {IsInt,IsOptional,IsString} from 'class-validator'
 
 
 
 
 export class UpdateCourseSpecDto {
   @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+curriculumId?: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+})
+@IsOptional()
+@IsInt()
+subjectId?: number ;
+@ApiProperty({
   type: 'string',
   required: false,
   nullable: true,

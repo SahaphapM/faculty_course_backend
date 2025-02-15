@@ -9,6 +9,17 @@ export class CourseSpecDto {
 })
 id: number ;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+curriculumId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+subjectId: number ;
+@ApiProperty({
   type: 'string',
   nullable: true,
 })

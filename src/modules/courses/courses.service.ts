@@ -11,7 +11,7 @@ import { SkillCollection } from 'src/entities/skill-collection.entity';
 import { Repository } from 'typeorm';
 import { FindManyOptions } from 'typeorm';
 import { Like } from 'typeorm';
-import { SubjectsService } from '../subjects/subjects.service';
+import { LessonsService } from '../lessons/lessons.service';
 import { StudentsService } from '../students/students.service';
 import { CreateCourseDto } from 'src/dto/course/create-course.dto';
 import { UpdateCourseDto } from 'src/dto/course/update-course.dto';
@@ -31,7 +31,7 @@ export class CoursesService {
     @InjectRepository(SkillCollection)
     private readonly skillCollRepo: Repository<SkillCollection>,
 
-    private readonly subjectsService: SubjectsService,
+    private readonly subjectsService: LessonsService,
 
     private readonly instructorsService: InstructorsService,
 
@@ -42,7 +42,7 @@ export class CoursesService {
   async create(dto: CreateCourseDto): Promise<Course> {
     const { subjectId, instructorListId: teacherListId, ...rest } = dto;
     try {
-      const subject = await this.subjectsService.findOne(subjectId);
+      const subject = await this.subjectsService.findOneCode(subjectId);
       if (!subject) {
         throw new NotFoundException('Subject not found');
       }
@@ -328,7 +328,7 @@ export class CoursesService {
 
   async selectSubject(id: string, subjectId: string): Promise<Course> {
     const course = await this.findOne(id);
-    const subject = await this.subjectsService.findOne(subjectId);
+    const subject = await this.subjectsService.findOneCode(subjectId);
     if (course.subject && course.courseEnrollment) {
       await this.createSkillCollection(
         subject.skillExpectedLevels,

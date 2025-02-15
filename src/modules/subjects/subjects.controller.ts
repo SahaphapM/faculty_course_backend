@@ -8,84 +8,44 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { SubjectsService } from './subjects.service';
-import { PaginationDto } from 'src/dto/pagination.dto';
-import { CreateSubjectDto } from 'src/dto/subject/create-subject.dto';
-import { UpdateSubjectDto } from 'src/dto/subject/update-subject.dto';
-import { ClosService } from '../clos/clos.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
-// import { CreateSkillCollection } from 'src/dto/skill/skill-collection.dto';
-// import { SkillExpectedLevel } from 'src/entities/skill-exp-lvl';
+import { CourseSpecsService } from './subjects.service';
+import { CreateCourseSpecDto } from 'src/generated/nestjs-dto/create-courseSpec.dto';
+import { UpdateCourseSpecDto } from 'src/generated/nestjs-dto/update-courseSpec.dto';
 
-@ApiBearerAuth()
 @Controller('subjects')
-export class SubjectsController {
-  constructor(
-    private readonly subjectsService: SubjectsService,
-    private readonly closService: ClosService,
-  ) {}
+export class CourseSpecsController {
+  constructor(private readonly courseSpecsService: CourseSpecsService) {}
 
   @Get()
-  findAll(@Query() pag?: PaginationDto) {
-    return this.subjectsService.findAll(pag);
+  findAll() {
+    return this.courseSpecsService.findAll();
+  }
+
+  @Get(':curriculumId')
+  findAllByCurriculum(@Query('curriculumId') id: string) {
+    return this.courseSpecsService.findAllByCurriculumId(+id);
+  }
+
+  @Post()
+  createByCurriculum(@Body() dto: CreateCourseSpecDto) {
+    return this.courseSpecsService.create(dto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.subjectsService.findOne(id);
-  }
-
-  @Post()
-  create(@Body() createSubjectDto: CreateSubjectDto) {
-    return this.subjectsService.create(createSubjectDto);
+    return this.courseSpecsService.findOne(+id);
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateSubjectDto: UpdateSubjectDto) {
-    return this.subjectsService.update(id, updateSubjectDto);
+  update(
+    @Param('id') id: string,
+    @Body() updateCourseSpecDto: UpdateCourseSpecDto,
+  ) {
+    return this.courseSpecsService.update(+id, updateCourseSpecDto);
   }
 
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.subjectsService.remove(id);
-  }
-
-  // // Select SkillExpectedLevels in subject // aggration relation
-  // @Post('skillExpectedLevels/:subjectId')
-  // async selectSkills(
-  //   @Param('subjectId') id: string,
-  //   @Body() skillExpectedLevels: SkillExpectedLevel[],
-  // ) {
-  //   return this.subjectsService.selectSkills(id, skillExpectedLevels); // select skill to curriculum
-  // }
-
-  // // Update SkillExpectedLevel
-  // @Patch('skillExpectedLevels')
-  // async updateSkillExpectedLevel(
-  //   @Body() skillExpectedLevels: SkillExpectedLevel,
-  // ) {
-  //   return this.subjectsService.updateSkillExpectedLevel(skillExpectedLevels); // select skill to curriculum
-  // }
-
-  // // remove SkillExpectedLevel from subject
-  // @Delete('skillExpectedLevels/:subjectId/:skillExpectedLevelId')
-  // async removeSkillExpectedLevel(
-  //   @Param('subjectId') subjectId: string,
-  //   @Param('skillExpectedLevelId') skillExpectedLevelId: number,
-  // ) {
-  //   return await this.subjectsService.removeSkill(
-  //     subjectId,
-  //     skillExpectedLevelId,
-  //   );
-  // }
-
-  // @Post('skill-mappings')
-  // async skillMappings(@Body() skill: CreateSkillCollection[]) {
-  //   return this.subjectsService.skillMappings(skill); // mapping skill with skill detail
-  // }
-
-  @Get('filters/:curriculumId')
-  async filters(@Param('curriculumId') curriculumId: string) {
-    return this.subjectsService.filters(curriculumId);
+    return this.courseSpecsService.remove(+id);
   }
 }

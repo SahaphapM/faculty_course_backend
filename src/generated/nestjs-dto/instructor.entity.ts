@@ -1,6 +1,6 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {CourseInstructorsInstructor} from './courseInstructorsInstructor.entity'
+import {CourseInstructors} from './courseInstructors.entity'
 import {CurriculumCoordinators} from './curriculumCoordinators.entity'
 import {Branch} from './branch.entity'
 import {User} from './user.entity'
@@ -72,17 +72,17 @@ thaiName: string  | null;
 })
 bio: string  | null;
 @ApiProperty({
-  type: () => CourseInstructorsInstructor,
+  type: () => CourseInstructors,
   isArray: true,
   required: false,
 })
-course_instructors_instructor?: CourseInstructorsInstructor[] ;
+course_instructors?: CourseInstructors[] ;
 @ApiProperty({
   type: () => CurriculumCoordinators,
   isArray: true,
   required: false,
 })
-curriculum_coordinators_instructor?: CurriculumCoordinators[] ;
+curriculum_coordinators?: CurriculumCoordinators[] ;
 @ApiProperty({
   type: () => Branch,
   required: false,

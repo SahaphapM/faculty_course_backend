@@ -7,7 +7,7 @@ import { CourseEnrollment } from 'src/entities/course-enrollment';
 import { Student } from 'src/entities/student.entity';
 import { SkillCollection } from 'src/entities/skill-collection.entity';
 import { StudentsModule } from '../students/students.module';
-import { SubjectsModule } from '../subjects/subjects.module';
+import { SubjectsModule } from '../lessons/lessons.module';
 import { Instructor } from 'src/entities/instructor.entity';
 import { InstructorsModule } from '../instructors/instructors.module';
 

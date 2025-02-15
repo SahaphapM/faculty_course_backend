@@ -31,7 +31,7 @@ ploId?: number  | null;
 })
 @IsOptional()
 @IsInt()
-courseSpecId?: number  | null;
+subjectId?: number  | null;
 @ApiProperty({
   type: 'string',
   required: false,

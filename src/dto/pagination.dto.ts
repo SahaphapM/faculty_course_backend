@@ -20,7 +20,7 @@ export class PaginationDto {
 
   @IsOptional()
   @IsString()
-  order?: 'ASC' | 'DESC' = 'ASC';
+  order?: 'asc' | 'desc' = 'asc';
 
   @IsOptional()
   @IsString()
