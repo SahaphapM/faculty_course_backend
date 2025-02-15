@@ -95,18 +95,23 @@ export class SkillsService {
   // Find all skills by curriculum ID
   async findAllByCurriculum(curriculumId: number) {
     try {
-      const curriculum = await this.prisma.curriculum.findUnique({
-        where: { id: curriculumId },
+      // Find all child skill IDs
+      const childSkillIds = await this.prisma.skill.findMany({
+        where: {
+          curriculumId,
+          parentId: { not: null }, // Only fetch child skills
+        },
+        select: { id: true }, // Select only IDs
       });
 
-      if (!curriculum) {
-        throw new NotFoundException(
-          `Curriculum with ID ${curriculumId} not found`,
-        );
-      }
+      const childIdsSet = new Set(childSkillIds.map((skill) => skill.id));
 
+      // Fetch only root skills (excluding children)
       const skills = await this.prisma.skill.findMany({
-        where: { curriculumId },
+        where: {
+          curriculumId,
+          id: { notIn: [...childIdsSet] }, // Exclude child IDs
+        },
         include: {
           subs: {
             include: {
