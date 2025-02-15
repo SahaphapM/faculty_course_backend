@@ -1,8 +1,14 @@
-import { IsNumber, IsOptional, IsPositive, IsString, Length } from 'class-validator';
+import {
+  IsNumber,
+  IsOptional,
+  IsPositive,
+  IsString,
+  Length,
+} from 'class-validator';
 
 export class CreateBranchDto {
   @IsString()
-  name: string;
+  thaiName: string;
 
   @IsString()
   engName: string;

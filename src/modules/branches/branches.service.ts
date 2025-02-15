@@ -24,11 +24,11 @@ export class BranchesService {
     try {
       const { facultyId, ...rest } = createBranchDto;
       const existBranch = await this.braRepo.findOne({
-        where: { thaiName: createBranchDto.name },
+        where: { thaiName: createBranchDto.thaiName },
       });
       if (existBranch) {
         throw new Error(
-          `Branch with name ${createBranchDto.name} already exists`,
+          `Branch with name ${createBranchDto.thaiName} already exists`,
         );
       }
       const existFaculty = await this.facRepo.findOne({

@@ -246,7 +246,10 @@ export class InstructorsService {
       await this.insRepo.remove(teacher);
       return `Success Delete ID ${id}`;
     } catch (error) {
-      throw new BadRequestException('Failed to remove Instructor/Coordinator');
+      throw new BadRequestException(
+        'Failed to remove Instructor/Coordinator',
+        error.message,
+      );
     }
   }
 }

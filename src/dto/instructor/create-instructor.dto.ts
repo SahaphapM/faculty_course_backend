@@ -7,6 +7,9 @@ import {
 } from 'class-validator';
 
 export class CreateInstructorDto {
+  @IsString()
+  code: string;
+
   @IsEmail()
   email: string;
 
