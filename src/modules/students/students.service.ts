@@ -51,49 +51,59 @@ export class StudentsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { thaiName, engName, code, limit, page, orderBy } = pag || {};
+    const {
+      thaiName,
+      engName,
+      code,
+      limit,
+      page,
+      orderBy,
+      branchThaiName,
+      branchEngName,
+      facultyThaiName,
+      facultyEngName,
+    } = pag || {};
 
     const options: Prisma.studentFindManyArgs = {
-      take: limit || defaultLimit,
-      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { id: orderBy || 'asc' },
+      take: limit ?? defaultLimit,
+      skip: ((page ?? defaultPage) - 1) * (limit ?? defaultLimit),
+      orderBy: { id: orderBy ?? 'asc' },
       include: {
         branch: {
-          include: {
-            faculty: true,
+          select: {
+            thaiName: true,
+            engName: true,
+            faculty: { select: { thaiName: true, engName: true } },
           },
         },
         skill_collections: true,
       },
       where: {
-        ...{ code: { contains: code } },
-        ...{ thaiName: { contains: thaiName } },
-        ...{ engName: { contains: engName } },
-      },
-      select: {
-        id: true,
-        thaiName: true,
-        engName: true,
-        branch: {
-          select: {
-            id: true,
-            thaiName: true,
-            engName: true,
-          },
-        },
+        ...(code && { code: { contains: code } }),
+        ...(thaiName && { thaiName: { contains: thaiName } }),
+        ...(engName && { engName: { contains: engName } }),
+        ...(branchThaiName && {
+          branch: { thaiName: { contains: branchThaiName } },
+        }),
+        ...(branchEngName && {
+          branch: { engName: { contains: branchEngName } },
+        }),
+        ...(facultyThaiName && {
+          branch: { faculty: { thaiName: { contains: facultyThaiName } } },
+        }),
+        ...(facultyEngName && {
+          branch: { faculty: { engName: { contains: facultyEngName } } },
+        }),
       },
     };
 
     try {
-      if (pag) {
-        const [students, total] = await Promise.all([
-          this.prisma.student.findMany(options),
-          this.prisma.student.count({ where: options.where }),
-        ]);
-        return { data: students, total };
-      } else {
-        return await this.prisma.student.findMany(options);
-      }
+      const [students, total] = await Promise.all([
+        this.prisma.student.findMany(options),
+        this.prisma.student.count({ where: options.where }),
+      ]);
+
+      return { data: students, total };
     } catch (error) {
       console.error('Error fetching students:', error);
       throw new InternalServerErrorException('Failed to fetch students');
