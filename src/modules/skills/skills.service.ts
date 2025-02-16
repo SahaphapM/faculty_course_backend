@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 import { Prisma } from '@prisma/client'; // Import Prisma types
-import { PaginationDto } from 'src/dto/pagination.dto'; // Adjust the import path as needed
+import { FilterParams } from 'src/dto/filter-params.dto'; // Adjust the import path as needed
 import { UpdateSkillDto } from 'src/generated/nestjs-dto/update-skill.dto';
 import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
 
@@ -43,7 +43,7 @@ export class SkillsService {
   }
 
   // Find all skills with pagination and search
-  async findAll(pag?: PaginationDto) {
+  async findAll(pag?: FilterParams) {
     const defaultLimit = 10;
     const defaultPage = 1;
 

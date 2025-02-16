@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 
-import { PaginationDto } from 'src/dto/pagination.dto'; // Adjust the import path as needed
+import { FilterParams } from 'src/dto/filter-params.dto'; // Adjust the import path as needed
 import { Prisma } from '@prisma/client'; // Import Prisma types
 import { CreateFacultyDto } from 'src/generated/nestjs-dto/create-faculty.dto';
 import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
@@ -50,7 +50,7 @@ export class FacultiesService {
   }
 
   // Find all faculties with pagination and search
-  async findAll(pag?: PaginationDto) {
+  async findAll(pag?: FilterParams) {
     const defaultLimit = 10;
     const defaultPage = 1;
 

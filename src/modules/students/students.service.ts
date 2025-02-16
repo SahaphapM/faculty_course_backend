@@ -7,7 +7,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
-import { PaginationDto } from 'src/dto/pagination.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 
 @Injectable()
@@ -47,7 +47,7 @@ export class StudentsService {
   }
 
   // Get all students with pagination and search
-  async findAll(pag?: PaginationDto) {
+  async findAll(pag?: FilterParams) {
     const defaultLimit = 10;
     const defaultPage = 1;
 

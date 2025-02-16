@@ -19,7 +19,7 @@ import { CustomUploadFileTypeValidator } from './users.file.validators';
 import { v4 as uuidv4 } from 'uuid';
 import * as fs from 'fs';
 import * as path from 'path';
-import { PaginationDto } from 'src/dto/pagination.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
@@ -84,7 +84,7 @@ export class UsersController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() pag?: PaginationDto) {
+  findAll(@Query() pag?: FilterParams) {
     return this.usersService.findAll(pag);
   }
 

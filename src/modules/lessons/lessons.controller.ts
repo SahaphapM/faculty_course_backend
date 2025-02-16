@@ -8,7 +8,7 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { PaginationDto } from 'src/dto/pagination.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { LessonsService } from './lessons.service';
 import { CreateLessonDto } from 'src/generated/nestjs-dto/create-lesson.dto';
@@ -20,7 +20,7 @@ export class LessonsController {
   constructor(private subjectsService: LessonsService) {}
 
   @Get()
-  findAll(@Query() pag?: PaginationDto) {
+  findAll(@Query() pag?: FilterParams) {
     return this.subjectsService.findAll(pag);
   }
 
