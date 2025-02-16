@@ -118,7 +118,6 @@ export class BranchesService {
       const branch = await this.prisma.branch.update({
         where: { id },
         data: updateBranchDto,
-        include: { faculty: true, curriculum: true },
       });
 
       return branch;
