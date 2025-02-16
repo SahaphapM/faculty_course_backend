@@ -101,22 +101,10 @@ export class InstructorsController {
     return this.insService.findAll(pag);
   }
 
-  // @Get('curriculum/:curriculumId')
-  // @HttpCode(HttpStatus.OK)
-  // findAllByCurriculum(@Param('curriculumId') curriculumId: string) {
-  //   return this.insService.findAllByCurriculum(+curriculumId);
-  // }
-
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
     return this.insService.findOne(+id);
-  }
-
-  @Get('findExistCode/:code')
-  findExistCode(@Param('code') code: string) {
-    console.log('call controller code', code);
-    // return this.insService.findExistCode(code);
   }
 
   @Patch(':id')
