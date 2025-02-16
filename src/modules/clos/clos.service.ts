@@ -33,22 +33,18 @@ export class ClosService {
   async findAllByPage(
     pag: PaginationDto,
   ): Promise<{ data: clo[]; total: number }> {
-    const {
-      page = 1,
-      limit = 10,
-      sort = 'id',
-      orderBy = 'asc',
-      name,
-    } = pag;
+    const { page = 1, limit = 10, sort = 'id', orderBy = 'asc', name } = pag;
 
+    // Ensure `orderBy` is either 'asc' or 'desc' (default to 'asc')
+    const validOrder = orderBy.toLowerCase() === 'desc' ? 'desc' : 'asc';
+
+    // Prisma query options
     const options: Prisma.cloFindManyArgs = {
       take: limit,
       skip: (page - 1) * limit,
-      orderBy: { [sort]: orderBy },
+      orderBy: { [sort]: validOrder },
       include: { skills: true, plo: true },
-      where: {
-        ...(name && { name: { contains: name } }),
-      },
+      where: name ? { name: { contains: name } } : undefined, // Avoids unnecessary `where`
     };
 
     try {
@@ -58,9 +54,8 @@ export class ClosService {
       ]);
       return { data, total };
     } catch (error) {
-      throw new InternalServerErrorException(
-        `Failed to retrieve data: ${error.message}`,
-      );
+      console.error('Error fetching CLOs:', error);
+      throw new InternalServerErrorException(`Failed to retrieve data`);
     }
   }
 

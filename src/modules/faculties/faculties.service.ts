@@ -54,31 +54,38 @@ export class FacultiesService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { thaiName, engName, limit, page, orderBy: order } = pag || {};
-
     const options: Prisma.facultyFindManyArgs = {
-      take: limit || defaultLimit,
-      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { id: order || 'asc' },
-      include: {
-        branch: true,
-      },
-      where: {
-        ...(thaiName && { thaiName: { contains: thaiName } }),
-        ...(engName && { engName: { contains: engName } }),
-      },
+      include: { branch: true },
+      where: {},
     };
 
-    try {
-      if (pag) {
+    if (pag) {
+      const { thaiName, engName, limit, page, orderBy: order } = pag;
+
+      options.take = limit || defaultLimit;
+      options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
+      options.orderBy = { id: order || 'asc' };
+
+      options.where = {
+        ...(thaiName && { thaiName: { contains: thaiName } }),
+        ...(engName && { engName: { contains: engName } }),
+      };
+
+      try {
         const [faculties, total] = await Promise.all([
           this.prisma.faculty.findMany(options),
           this.prisma.faculty.count({ where: options.where }),
         ]);
         return { data: faculties, total };
-      } else {
-        return await this.prisma.faculty.findMany(options);
+      } catch (error) {
+        console.error('Error fetching faculties:', error);
+        throw new InternalServerErrorException('Failed to fetch faculties');
       }
+    }
+
+    // No pagination applied when pag is undefined
+    try {
+      return await this.prisma.faculty.findMany({ include: { branch: true } });
     } catch (error) {
       console.error('Error fetching faculties:', error);
       throw new InternalServerErrorException('Failed to fetch faculties');
@@ -121,7 +128,7 @@ export class FacultiesService {
   }
 
   // Remove a faculty by ID
-  async remove(id: number){
+  async remove(id: number) {
     try {
       await this.prisma.faculty.delete({
         where: { id },

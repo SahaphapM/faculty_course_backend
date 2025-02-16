@@ -49,39 +49,49 @@ export class CurriculumsService {
       facultyEngName,
     } = pag || {};
 
+    const whereCondition: Prisma.curriculumWhereInput = {
+      ...(thaiName && { thaiName: { contains: thaiName } }),
+      ...(engName && { engName: { contains: engName } }),
+      ...(facultyThaiName && {
+        branch: { faculty: { name: { contains: facultyThaiName } } },
+      }),
+      ...(facultyEngName && {
+        branch: { faculty: { name: { contains: facultyEngName } } },
+      }),
+    };
+
+    const includeCondition: Prisma.curriculumInclude = {
+      branch: {
+        include: {
+          faculty: true,
+        },
+      },
+    };
+
+    if (!pag) {
+      // No pagination → fetch everything without limits
+      return this.prisma.curriculum.findMany({
+        where: whereCondition,
+        include: includeCondition,
+        orderBy: { id: 'asc' }, // Default ordering
+      });
+    }
+
+    // With pagination
     const options: Prisma.curriculumFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
       orderBy: { id: orderBy || 'asc' },
-      include: {
-        branch: {
-          include: {
-            faculty: true,
-          },
-        },
-      },
-      where: {
-        ...(thaiName && { thaiName: { contains: thaiName } }),
-        ...(engName && { engName: { contains: engName } }),
-        ...(facultyThaiName && {
-          branch: { faculty: { name: { contains: facultyThaiName } } },
-        }),
-        ...(facultyEngName && {
-          branch: { faculty: { name: { contains: facultyEngName } } },
-        }),
-      },
+      include: includeCondition,
+      where: whereCondition,
     };
 
     try {
-      if (pag) {
-        const [curriculums, total] = await Promise.all([
-          this.prisma.curriculum.findMany(options),
-          this.prisma.curriculum.count({ where: options.where }),
-        ]);
-        return { data: curriculums, total };
-      } else {
-        return await this.prisma.curriculum.findMany(options);
-      }
+      const [curriculums, total] = await Promise.all([
+        this.prisma.curriculum.findMany(options),
+        this.prisma.curriculum.count({ where: whereCondition }),
+      ]);
+      return { data: curriculums, total };
     } catch (error) {
       throw new InternalServerErrorException('Failed to fetch curriculums');
     }

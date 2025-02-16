@@ -34,16 +34,18 @@ export class UsersService {
       limit = 10,
       sort = 'id',
       orderBy = 'asc',
-      email
-    } = pag;
+      email,
+    } = pag || {};
 
+    // Normalize orderBy and ensure it's either 'asc' or 'desc'
+    const validOrder = orderBy.toLowerCase() === 'desc' ? 'desc' : 'asc';
+
+    // Prisma query options
     const options: Prisma.userFindManyArgs = {
       take: limit,
       skip: (page - 1) * limit,
-      orderBy: { [sort]: orderBy },
-      where: {
-        ...(email && { email: { contains: email } }),
-      },
+      orderBy: { [sort]: validOrder },
+      where: email ? { email: { contains: email } } : undefined, // Avoids unnecessary `where`
       include: {
         student: { select: { id: true, thaiName: true } },
         instructor: { select: { id: true, thaiName: true } },

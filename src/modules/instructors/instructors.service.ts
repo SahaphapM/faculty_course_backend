@@ -42,42 +42,56 @@ export class InstructorsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { thaiName, engName, code, limit, page, orderBy } = pag;
+    const { thaiName, engName, code, limit, page, orderBy } = pag || {};
 
+    const whereCondition: Prisma.instructorWhereInput = {
+      ...(code && { code: { contains: code } }),
+      ...(thaiName && { thaiName: { contains: thaiName } }),
+      ...(engName && { engName: { contains: engName } }),
+    };
+
+    const selectCondition: Prisma.instructorSelect = {
+      id: true,
+      code: true,
+      email: true,
+      thaiName: true,
+      engName: true,
+      tel: true,
+      position: true,
+      branch: {
+        select: {
+          id: true,
+          thaiName: true,
+          engName: true,
+        },
+      },
+    };
+
+    if (!pag) {
+      // No pagination → fetch all
+      return this.prisma.instructor.findMany({
+        where: whereCondition,
+        select: selectCondition,
+        orderBy: { id: 'asc' }, // Default sorting
+      });
+    }
+
+    // With pagination
     const options: Prisma.instructorFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
       orderBy: { id: orderBy || 'asc' },
-      select: {
-        id: true,
-        code: true,
-        email: true,
-        thaiName: true,
-        engName: true,
-        tel: true,
-        position: true,
-        branch: {
-          select: {
-            id: true,
-            thaiName: true,
-            engName: true,
-          },
-        },
-      },
-      where: {
-        ...(code && { code: { contains: code } }),
-        ...(thaiName && { thaiName: { contains: thaiName } }),
-        ...(engName && { engName: { contains: engName } }),
-      },
+      select: selectCondition,
+      where: whereCondition,
     };
+
     try {
-      if (pag) {
-        return await this.prisma.instructor.findMany(options);
-      } else {
-        return await this.prisma.instructor.findMany(options);
-      }
+      const [instructors, total] = await Promise.all([
+        this.prisma.instructor.findMany(options),
+        this.prisma.instructor.count({ where: whereCondition }),
+      ]);
+      return { data: instructors, total };
     } catch (error) {
-      // Log the error for debugging
       console.error('Error fetching instructors:', error);
       throw new InternalServerErrorException('Failed to fetch instructors');
     }

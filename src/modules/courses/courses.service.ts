@@ -55,31 +55,41 @@ export class CourseService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { code, limit, page, orderBy: order } = pag || {};
+    const { code, limit, page, orderBy } = pag || {};
 
+    const whereCondition: Prisma.courseWhereInput = {
+      ...(code && { subject: { code: { contains: code } } }),
+    };
+
+    const includeCondition: Prisma.courseInclude = {
+      course_enrollments: { include: { student: true } },
+      course_instructors: true,
+    };
+
+    if (!pag) {
+      // Fetch all courses if no pagination is provided
+      return this.prisma.course.findMany({
+        where: whereCondition,
+        include: includeCondition,
+        orderBy: { id: 'asc' }, // Default sorting
+      });
+    }
+
+    // Pagination mode
     const options: Prisma.courseFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { id: order || 'asc' },
-      include: {
-        course_enrollments: { include: { student: true } },
-        course_instructors: true,
-      },
-      where: {
-        ...(code && { subject: { code: { contains: code } } }),
-      },
+      orderBy: orderBy ? { id: orderBy } : undefined, // Only add if orderBy exists
+      where: whereCondition,
+      include: includeCondition,
     };
 
     try {
-      if (pag) {
-        const [courses, total] = await Promise.all([
-          this.prisma.course.findMany(options),
-          this.prisma.course.count({ where: options.where }),
-        ]);
-        return { data: courses, total };
-      } else {
-        return await this.prisma.course.findMany(options);
-      }
+      const [courses, total] = await Promise.all([
+        this.prisma.course.findMany(options),
+        this.prisma.course.count({ where: whereCondition }),
+      ]);
+      return { data: courses, total };
     } catch (error) {
       console.error('Error fetching courses:', error);
       throw new InternalServerErrorException('Failed to fetch courses');
