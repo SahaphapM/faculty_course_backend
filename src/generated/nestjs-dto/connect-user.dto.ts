@@ -16,14 +16,6 @@ export class ConnectUserDto {
 @IsInt()
 id?: number ;
 @ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-email?: string ;
-@ApiProperty({
   type: 'integer',
   format: 'int32',
   required: false,
@@ -41,4 +33,12 @@ instructorId?: number ;
 @IsOptional()
 @IsInt()
 studentId?: number ;
+@ApiProperty({
+  type: 'string',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsString()
+email?: string ;
 }

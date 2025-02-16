@@ -9,6 +9,18 @@ export class UserDto {
 })
 id: number ;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+instructorId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+studentId: number  | null;
+@ApiProperty({
   type: 'string',
 })
 email: string ;
@@ -31,16 +43,4 @@ role: string  | null;
   nullable: true,
 })
 hashedRefreshToken: string  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-instructorId: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-studentId: number  | null;
 }

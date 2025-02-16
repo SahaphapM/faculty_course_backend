@@ -8,6 +8,11 @@ import {User} from './user.entity'
 
 export class Student {
   @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+id: number ;
+@ApiProperty({
   type: 'string',
   nullable: true,
 })
@@ -33,11 +38,6 @@ branchId: number  | null;
   type: 'string',
 })
 code: string ;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-})
-id: number ;
 @ApiProperty({
   type: 'string',
 })

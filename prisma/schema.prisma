@@ -119,12 +119,12 @@ model curriculum {
   engName         String?                   @db.VarChar(255)
   thaiDegree      String?                   @db.VarChar(255)
   engDegree       String?                   @db.VarChar(255)
-  period          Int
-  minimumGrade    Int
+  period          Int                       @db.TinyInt()
+  minimumGrade    String                    @db.VarChar(5)
   thaiDescription String?                   @db.Text
   engDescription  String?                   @db.Text
   subjects        subject[]
-  branch          branch?                   @relation(fields: [branchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  branch          branch?                   @relation(fields: [branchId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   coordinators    curriculum_coordinators[]
   // subjects        curriculum_subjects[]
   plos            plo[]

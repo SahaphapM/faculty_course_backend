@@ -10,6 +10,11 @@ export class Lesson {
 })
 id: number ;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+subjectId: number ;
+@ApiProperty({
   type: 'string',
   nullable: true,
 })
@@ -19,11 +24,6 @@ thaiName: string  | null;
   nullable: true,
 })
 engName: string  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-})
-subjectId: number ;
 @ApiProperty({
   type: () => Subject,
   required: false,

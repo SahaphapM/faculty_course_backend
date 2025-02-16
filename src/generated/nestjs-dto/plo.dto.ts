@@ -6,14 +6,14 @@ export class PloDto {
   @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-curriculumId: number  | null;
+id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
+  nullable: true,
 })
-id: number ;
+curriculumId: number  | null;
 @ApiProperty({
   type: 'string',
 })

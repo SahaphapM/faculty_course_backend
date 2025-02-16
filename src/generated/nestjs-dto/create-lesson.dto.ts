@@ -7,6 +7,13 @@ import {IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
 
 export class CreateLessonDto {
   @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+@IsNotEmpty()
+@IsInt()
+subjectId: number ;
+@ApiProperty({
   type: 'string',
   required: false,
   nullable: true,
@@ -22,11 +29,4 @@ thaiName?: string  | null;
 @IsOptional()
 @IsString()
 engName?: string  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-})
-@IsNotEmpty()
-@IsInt()
-subjectId: number ;
 }

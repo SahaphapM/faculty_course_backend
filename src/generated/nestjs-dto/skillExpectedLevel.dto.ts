@@ -13,12 +13,6 @@ id: number ;
   format: 'int32',
   nullable: true,
 })
-expectedLevel: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
 skillId: number  | null;
 @ApiProperty({
   type: 'integer',
@@ -26,4 +20,10 @@ skillId: number  | null;
   nullable: true,
 })
 subjectId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+expectedLevel: number  | null;
 }

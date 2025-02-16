@@ -137,10 +137,10 @@ export class BranchesService {
     }
   }
 
-  async filters(facultyId: string) {
+  async filters(facultyId: number) {
     try {
       const branches = await this.prisma.branch.findMany({
-        where: { facultyId: parseInt(facultyId) },
+        where: { facultyId: facultyId },
         select: {
           id: true,
           thaiName: true,

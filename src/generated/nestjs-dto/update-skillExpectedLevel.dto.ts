@@ -14,15 +14,6 @@ export class UpdateSkillExpectedLevelDto {
 })
 @IsOptional()
 @IsInt()
-expectedLevel?: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsInt()
 skillId?: number  | null;
 @ApiProperty({
   type: 'integer',
@@ -33,4 +24,13 @@ skillId?: number  | null;
 @IsOptional()
 @IsInt()
 subjectId?: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+expectedLevel?: number  | null;
 }

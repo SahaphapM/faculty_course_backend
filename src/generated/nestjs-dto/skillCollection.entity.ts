@@ -14,6 +14,12 @@ id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
+  nullable: true,
+})
+studentId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
 })
 gainedLevel: number ;
 @ApiProperty({
@@ -33,12 +39,6 @@ ExpectedLevelId: number  | null;
   nullable: true,
 })
 courseEnrollmentId: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-studentId: number  | null;
 @ApiProperty({
   type: () => CourseEnrollment,
   required: false,

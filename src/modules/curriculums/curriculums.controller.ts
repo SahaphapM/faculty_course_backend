@@ -48,7 +48,7 @@ export class CurriculumsController {
   }
 
   @Get('filters/:branchId')
-  async filters(@Param('branchId') branchId: string) {
-    return this.curriculumsService.filters(branchId);
+  async filters(@Query('branchId') branchId: string) {
+    return this.curriculumsService.findWithFilters(+branchId);
   }
 }

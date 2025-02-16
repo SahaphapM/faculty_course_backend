@@ -9,25 +9,10 @@ import {Skill} from './skill.entity'
 
 export class Curriculum {
   @ApiProperty({
-  type: 'string',
-  nullable: true,
-})
-engName: string  | null;
-@ApiProperty({
-  type: 'string',
-  nullable: true,
-})
-engDegree: string  | null;
-@ApiProperty({
   type: 'integer',
   format: 'int32',
 })
-period: number ;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-})
-minimumGrade: number ;
+id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
@@ -39,11 +24,6 @@ branchId: number  | null;
 })
 code: string ;
 @ApiProperty({
-  type: 'integer',
-  format: 'int32',
-})
-id: number ;
-@ApiProperty({
   type: 'string',
   nullable: true,
 })
@@ -52,7 +32,26 @@ thaiName: string  | null;
   type: 'string',
   nullable: true,
 })
+engName: string  | null;
+@ApiProperty({
+  type: 'string',
+  nullable: true,
+})
 thaiDegree: string  | null;
+@ApiProperty({
+  type: 'string',
+  nullable: true,
+})
+engDegree: string  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+period: number ;
+@ApiProperty({
+  type: 'string',
+})
+minimumGrade: string ;
 @ApiProperty({
   type: 'string',
   nullable: true,

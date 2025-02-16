@@ -18,27 +18,20 @@ export class CurriculumsService {
 
   // Create a new curriculum
   async create(dto: CreateCurriculumDto) {
-    try {
-      const { branchId, ...rest } = dto;
+    const { branchId, ...rest } = dto;
 
-      const curriculum = await this.prisma.curriculum.create({
-        data: {
-          ...rest,
-          branch: branchId ? { connect: { id: branchId } } : undefined,
-        },
-      });
+    const curriculum = await this.prisma.curriculum.create({
+      data: {
+        ...rest,
+        branch: branchId ? { connect: { id: branchId } } : undefined,
+      },
+    });
 
-      return {
-        statusCode: HttpStatus.CREATED,
-        message: 'Curriculum created successfully',
-        data: curriculum,
-      };
-    } catch (error) {
-      throw new BadRequestException(
-        'Failed to create curriculum',
-        error.message,
-      );
-    }
+    return {
+      statusCode: HttpStatus.CREATED,
+      message: 'Curriculum created successfully',
+      data: curriculum,
+    };
   }
 
   // Find all curriculums with pagination and search
@@ -95,7 +88,6 @@ export class CurriculumsService {
         return await this.prisma.curriculum.findMany(options);
       }
     } catch (error) {
-      console.error('Error fetching curriculums:', error);
       throw new InternalServerErrorException('Failed to fetch curriculums');
     }
   }
@@ -199,23 +191,16 @@ export class CurriculumsService {
 
   // Remove a curriculum by ID
   async remove(id: number): Promise<void> {
-    try {
-      await this.prisma.curriculum.delete({
-        where: { id },
-      });
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Curriculum with ID ${id} not found`);
-      }
-      throw new BadRequestException('Failed to remove curriculum');
-    }
+    await this.prisma.curriculum.delete({
+      where: { id },
+    });
   }
 
   // Filter curriculums by branch ID
-  async filters(branchId: string) {
+  async findWithFilters(branchId: number) {
     try {
       const curriculums = await this.prisma.curriculum.findMany({
-        where: { branchId: parseInt(branchId) },
+        where: { branchId: branchId },
         select: {
           id: true,
           thaiName: true,

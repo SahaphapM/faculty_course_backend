@@ -11,6 +11,12 @@ id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
+  nullable: true,
+})
+studentId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
 })
 gainedLevel: number ;
 @ApiProperty({
@@ -18,10 +24,4 @@ gainedLevel: number ;
   format: 'int32',
 })
 passed: number ;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-studentId: number  | null;
 }

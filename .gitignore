@@ -64,7 +64,7 @@ db
 docker-compose.yml
 
 .vscode
-/prisma/ERD.svg
+prisma/ERD.svg
 /src/generated/*
 
 

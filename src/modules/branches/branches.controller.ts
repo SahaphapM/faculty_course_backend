@@ -50,7 +50,7 @@ export class BranchesController {
   }
 
   @Get('filters/:facultyId')
-  filters(@Param('facultyId') facultyId: string) {
-    return this.branchService.filters(facultyId);
+  filters(@Query('facultyId') facultyId: string) {
+    return this.branchService.filters(+facultyId);
   }
 }
