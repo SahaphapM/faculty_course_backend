@@ -19,15 +19,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
 
     let status = 500;
     let message = 'Internal server error';
-    let details: any = null; //  Store detailed error info
+    let details: any = null; // Store detailed error info
 
-    //  Handle NestJS HttpExceptions
+    // Handle NestJS HttpExceptions (including class-validator errors)
     if (exception instanceof HttpException) {
       status = exception.getStatus();
-      message = exception.message;
-      details = (exception.getResponse() as any)?.message || null;
+      const exceptionResponse = exception.getResponse();
+
+      // Check if it's a class-validator error
+      if (
+        typeof exceptionResponse === 'object' &&
+        'message' in exceptionResponse
+      ) {
+        message = 'Validation failed';
+        details = exceptionResponse['message']; // Capture validation error messages
+      } else {
+        message = exception.message;
+      }
     }
-    //  Handle Prisma Known Errors
+    // Handle Prisma Known Errors
     else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
       switch (exception.code) {
         case 'P2002': // Unique constraint failed
@@ -51,7 +61,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           details = exception.meta;
       }
     }
-    //  Handle Prisma Validation Errors
+    // Handle Prisma Validation Errors
     else if (exception instanceof Prisma.PrismaClientValidationError) {
       status = 400;
       message = 'Validation error: Invalid request data.';

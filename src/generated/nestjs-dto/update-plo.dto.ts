@@ -10,11 +10,10 @@ export class UpdatePloDto {
   type: 'integer',
   format: 'int32',
   required: false,
-  nullable: true,
 })
 @IsOptional()
 @IsInt()
-curriculumId?: number  | null;
+curriculumId?: number ;
 @ApiProperty({
   type: 'string',
   required: false,

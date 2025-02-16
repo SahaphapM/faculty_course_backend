@@ -6,6 +6,7 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { PloService } from './plos.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -27,9 +28,9 @@ export class PlosController {
     return this.plosService.findAll();
   }
 
-  @Get('/curriculumId/:curriculumId')
-  findAllByCurriculum(@Param('curriculumId') curriculumId: number) {
-    return this.plosService.findAllByCurriculum(curriculumId);
+  @Get('filters/:curriculumId')
+  findAllByCurriculum(@Query('curriculumId') curriculumId: string) {
+    return this.plosService.findAllByCurriculum(+curriculumId);
   }
 
   @Get(':id')

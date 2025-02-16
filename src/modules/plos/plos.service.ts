@@ -15,17 +15,6 @@ export class PloService {
   async create(createPloDto: CreatePloDto) {
     const { curriculumId, ...rest } = createPloDto;
 
-    // Check if the curriculum exists
-    const curriculum = await this.prisma.curriculum.findUnique({
-      where: { id: curriculumId },
-    });
-
-    if (!curriculum) {
-      throw new NotFoundException(
-        `Curriculum with ID ${curriculumId} not found`,
-      );
-    }
-
     try {
       const plo = await this.prisma.plo.create({
         data: {
@@ -44,7 +33,14 @@ export class PloService {
     try {
       return await this.prisma.plo.findMany({
         include: {
-          curriculum: true,
+          curriculum: {
+            select: {
+              id: true,
+              code: true,
+              thaiName: true,
+              engName: true,
+            },
+          },
           clos: true,
         },
       });

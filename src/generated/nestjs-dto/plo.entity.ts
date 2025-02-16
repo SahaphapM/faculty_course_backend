@@ -13,9 +13,8 @@ id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-curriculumId: number  | null;
+curriculumId: number ;
 @ApiProperty({
   type: 'string',
 })
@@ -44,7 +43,6 @@ clos?: Clo[] ;
 @ApiProperty({
   type: () => Curriculum,
   required: false,
-  nullable: true,
 })
-curriculum?: Curriculum  | null;
+curriculum?: Curriculum ;
 }
