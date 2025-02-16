@@ -161,7 +161,7 @@ model curriculum_coordinators {
 
 model faculty {
   id              Int      @id @default(autoincrement())
-  thaiName        String   @map("name") @db.VarChar(255)
+  thaiName        String   @db.VarChar(255)
   engName         String?  @db.VarChar(255)
   thaiDescription String?  @db.Text()
   engDescription  String?  @db.Text()
