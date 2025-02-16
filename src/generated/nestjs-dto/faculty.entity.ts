@@ -12,7 +12,7 @@ id: number ;
 @ApiProperty({
   type: 'string',
 })
-name: string ;
+thaiName: string ;
 @ApiProperty({
   type: 'string',
   nullable: true,
@@ -22,7 +22,12 @@ engName: string  | null;
   type: 'string',
   nullable: true,
 })
-description: string  | null;
+thaiDescription: string  | null;
+@ApiProperty({
+  type: 'string',
+  nullable: true,
+})
+engDescription: string  | null;
 @ApiProperty({
   type: 'string',
   nullable: true,

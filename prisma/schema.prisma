@@ -160,12 +160,13 @@ model curriculum_coordinators {
 // }
 
 model faculty {
-  id          Int      @id @default(autoincrement())
-  name        String   @db.VarChar(255)
-  engName     String?  @db.VarChar(255)
-  description String?  @db.VarChar(255)
-  abbrev      String?  @db.VarChar(10)
-  branch      branch[]
+  id              Int      @id @default(autoincrement())
+  thaiName        String   @map("name") @db.VarChar(255)
+  engName         String?  @db.VarChar(255)
+  thaiDescription String?  @db.Text()
+  engDescription  String?  @db.Text()
+  abbrev          String?  @db.VarChar(10)
+  branch          branch[]
 }
 
 model instructor {

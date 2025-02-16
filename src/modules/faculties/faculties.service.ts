@@ -33,7 +33,7 @@ export class FacultiesService {
       return await this.prisma.faculty.findMany({
         select: {
           id: true,
-          name: true,
+          thaiName: true,
           engName: true,
           branch: {
             select: {

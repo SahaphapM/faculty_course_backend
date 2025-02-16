@@ -53,10 +53,10 @@ export class CurriculumsService {
       ...(thaiName && { thaiName: { contains: thaiName } }),
       ...(engName && { engName: { contains: engName } }),
       ...(facultyThaiName && {
-        branch: { faculty: { name: { contains: facultyThaiName } } },
+        branch: { faculty: { thaiName: { contains: facultyThaiName } } },
       }),
       ...(facultyEngName && {
-        branch: { faculty: { name: { contains: facultyEngName } } },
+        branch: { faculty: { engName: { contains: facultyEngName } } },
       }),
     };
 

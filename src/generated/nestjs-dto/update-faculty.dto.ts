@@ -12,7 +12,7 @@ export class UpdateFacultyDto {
 })
 @IsOptional()
 @IsString()
-name?: string ;
+thaiName?: string ;
 @ApiProperty({
   type: 'string',
   required: false,
@@ -28,7 +28,15 @@ engName?: string  | null;
 })
 @IsOptional()
 @IsString()
-description?: string  | null;
+thaiDescription?: string  | null;
+@ApiProperty({
+  type: 'string',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsString()
+engDescription?: string  | null;
 @ApiProperty({
   type: 'string',
   required: false,
