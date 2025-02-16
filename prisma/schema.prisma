@@ -120,7 +120,7 @@ model curriculum {
   thaiDegree      String?                   @db.VarChar(255)
   engDegree       String?                   @db.VarChar(255)
   period          Int                       @db.TinyInt()
-  minimumGrade    String                    @db.VarChar(5)
+  minimumGrade    Decimal                   @db.Decimal(3,2)
   thaiDescription String?                   @db.Text
   engDescription  String?                   @db.Text
   subjects        subject[]

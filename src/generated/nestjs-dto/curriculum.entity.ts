@@ -1,4 +1,5 @@
 
+import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
 import {Subject} from './subject.entity'
 import {Branch} from './branch.entity'
@@ -50,8 +51,9 @@ engDegree: string  | null;
 period: number ;
 @ApiProperty({
   type: 'string',
+  format: 'Decimal.js',
 })
-minimumGrade: string ;
+minimumGrade: Prisma.Decimal ;
 @ApiProperty({
   type: 'string',
   nullable: true,

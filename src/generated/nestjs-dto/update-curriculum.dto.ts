@@ -1,6 +1,7 @@
 
+import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
-import {IsInt,IsOptional,IsString} from 'class-validator'
+import {IsDecimal,IsInt,IsOptional,IsString} from 'class-validator'
 
 
 
@@ -64,11 +65,12 @@ engDegree?: string  | null;
 period?: number ;
 @ApiProperty({
   type: 'string',
+  format: 'Decimal.js',
   required: false,
 })
 @IsOptional()
-@IsString()
-minimumGrade?: string ;
+@IsDecimal()
+minimumGrade?: Prisma.Decimal ;
 @ApiProperty({
   type: 'string',
   required: false,
