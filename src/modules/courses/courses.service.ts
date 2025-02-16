@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PaginationDto } from 'src/dto/pagination.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
@@ -51,7 +51,7 @@ export class CourseService {
   }
 
   // Find all courses with pagination and search
-  async findAll(pag?: PaginationDto) {
+  async findAll(pag?: FilterParams) {
     const defaultLimit = 10;
     const defaultPage = 1;
 

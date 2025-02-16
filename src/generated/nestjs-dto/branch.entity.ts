@@ -56,14 +56,14 @@ faculty?: Faculty  | null;
 curriculum?: Curriculum[] ;
 @ApiProperty({
   type: () => Instructor,
+  isArray: true,
   required: false,
-  nullable: true,
 })
-instructor?: Instructor  | null;
+instructor?: Instructor[] ;
 @ApiProperty({
   type: () => Student,
+  isArray: true,
   required: false,
-  nullable: true,
 })
-student?: Student  | null;
+student?: Student[] ;
 }

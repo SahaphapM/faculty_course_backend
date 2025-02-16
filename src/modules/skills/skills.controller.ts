@@ -11,7 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
-import { PaginationDto } from 'src/dto/pagination.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
 import { UpdateSkillDto } from 'src/generated/nestjs-dto/update-skill.dto';
@@ -23,7 +23,7 @@ export class SkillsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() pag?: PaginationDto) {
+  findAll(@Query() pag?: FilterParams) {
     return this.skillsService.findAll(pag);
   }
 

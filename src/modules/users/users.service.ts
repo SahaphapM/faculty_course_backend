@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PaginationDto } from 'src/dto/pagination.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
@@ -28,7 +28,7 @@ export class UsersService {
     return await this.prisma.user.create({ data: createUserDto });
   }
 
-  async findAll(pag?: PaginationDto) {
+  async findAll(pag?: FilterParams) {
     const {
       page = 1,
       limit = 10,

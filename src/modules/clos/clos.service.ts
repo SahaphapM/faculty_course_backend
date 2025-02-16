@@ -3,7 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PaginationDto } from 'src/dto/pagination.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { clo, Prisma } from 'prisma/prisma-client';
 import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
@@ -31,7 +31,7 @@ export class ClosService {
   }
 
   async findAllByPage(
-    pag: PaginationDto,
+    pag: FilterParams,
   ): Promise<{ data: clo[]; total: number }> {
     const { page = 1, limit = 10, sort = 'id', orderBy = 'asc', name } = pag;
 

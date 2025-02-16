@@ -47,8 +47,8 @@ model branch {
   // Relations
   faculty         faculty?     @relation(fields: [facultyId], references: [id], onUpdate: Cascade, onDelete: Cascade)
   curriculum      curriculum[]
-  instructor      instructor?
-  student         student?
+  instructor      instructor[]
+  student         student[]
 
   @@index([facultyId])
 }
@@ -172,7 +172,7 @@ model faculty {
 model instructor {
   id                 Int                       @id @default(autoincrement())
   /// @DtoRelationIncludeId
-  branchId           Int?                      @unique()
+  branchId           Int?
   code               String?                   @unique() @db.VarChar(255)
   thaiName           String                    @unique() @db.VarChar(255)
   engName            String                    @unique() @db.VarChar(255)
@@ -294,7 +294,7 @@ model student {
   engName            String?             @db.VarChar(255)
   enrollmentDate     DateTime?           @db.DateTime(0)
   socials            String?             @db.VarChar(255)
-  branchId           Int?                @unique()
+  branchId           Int?
   code               String              @db.VarChar(255)
   thaiName           String              @db.VarChar(255)
   course_enrollments course_enrollment[]

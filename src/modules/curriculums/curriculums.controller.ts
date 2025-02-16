@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
-import { PaginationDto } from '../../dto/pagination.dto';
+import { FilterParams } from '../../dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
@@ -25,7 +25,7 @@ export class CurriculumsController {
   }
 
   @Get()
-  findAll(@Query() pag?: PaginationDto) {
+  findAll(@Query() pag?: FilterParams) {
     return this.curriculumsService.findAll(pag);
   }
 

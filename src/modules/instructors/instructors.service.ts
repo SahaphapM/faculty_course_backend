@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { PaginationDto } from '../../dto/pagination.dto';
+import { FilterParams } from '../../dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.dto';
 import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.dto';
@@ -38,7 +38,7 @@ export class InstructorsService {
     return teacher;
   }
 
-  async findAll(pag?: PaginationDto) {
+  async findAll(pag?: FilterParams) {
     const defaultLimit = 10;
     const defaultPage = 1;
 

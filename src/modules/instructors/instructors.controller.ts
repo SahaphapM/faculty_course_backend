@@ -14,7 +14,7 @@ import {
   ParseFilePipeBuilder,
 } from '@nestjs/common';
 import { InstructorsService } from './instructors.service';
-import { PaginationDto } from '../../dto/pagination.dto';
+import { FilterParams } from '../../dto/filter-params.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomUploadFileTypeValidator } from './instructors.file.validators';
 import { v4 as uuidv4 } from 'uuid';
@@ -97,7 +97,7 @@ export class InstructorsController {
 
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() pag?: PaginationDto) {
+  findAll(@Query() pag?: FilterParams) {
     return this.insService.findAll(pag);
   }
 

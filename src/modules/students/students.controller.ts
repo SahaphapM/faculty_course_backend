@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
-import { PaginationDto } from 'src/dto/pagination.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
 import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
@@ -30,7 +30,7 @@ export class StudentsController {
   }
 
   @Get()
-  findAll(@Query() pag?: PaginationDto) {
+  findAll(@Query() pag?: FilterParams) {
     return this.studentsService.findAll(pag);
   }
 
