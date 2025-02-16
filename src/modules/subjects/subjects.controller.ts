@@ -21,7 +21,7 @@ export class SubjectController {
     return this.courseSpecsService.findAll();
   }
 
-  @Get(':curriculumId')
+  @Get('filters/:curriculumId')
   findAllByCurriculum(@Query('curriculumId') id: string) {
     return this.courseSpecsService.findAllByCurriculumId(+id);
   }

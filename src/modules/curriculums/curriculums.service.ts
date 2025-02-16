@@ -59,11 +59,6 @@ export class CurriculumsService {
             faculty: true,
           },
         },
-        skills: {
-          include: {
-            subs: true,
-          },
-        },
       },
       where: {
         ...(thaiName && { thaiName: { contains: thaiName } }),
