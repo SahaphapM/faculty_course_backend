@@ -116,7 +116,6 @@ export class FacultiesService {
       const faculty = await this.prisma.faculty.update({
         where: { id },
         data: updateFacultyDto,
-        include: { branch: true },
       });
       return faculty;
     } catch (error) {
