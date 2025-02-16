@@ -39,9 +39,9 @@ model branch {
   id              Int          @id @default(autoincrement())
   /// @DtoRelationIncludeId
   facultyId       Int?
-  thaiDescription String       @db.VarChar(255)
-  engDescription  String?      @db.VarChar(255)
-  thaiName        String       @db.VarChar(255)
+  thaiDescription String       @db.Text
+  engDescription  String?      @db.Text
+  thaiName        String?      @db.VarChar(255)
   engName         String?      @db.VarChar(255)
   abbrev          String?      @db.VarChar(5)
   // Relations
@@ -163,8 +163,8 @@ model faculty {
   id              Int      @id @default(autoincrement())
   thaiName        String   @db.VarChar(255)
   engName         String?  @db.VarChar(255)
-  thaiDescription String?  @db.Text()
-  engDescription  String?  @db.Text()
+  thaiDescription String?  @db.Text
+  engDescription  String?  @db.Text
   abbrev          String?  @db.VarChar(10)
   branch          branch[]
 }
