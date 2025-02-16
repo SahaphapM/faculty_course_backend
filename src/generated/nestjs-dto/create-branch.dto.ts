@@ -31,10 +31,12 @@ thaiDescription: string ;
 engDescription?: string  | null;
 @ApiProperty({
   type: 'string',
+  required: false,
+  nullable: true,
 })
-@IsNotEmpty()
+@IsOptional()
 @IsString()
-thaiName: string ;
+thaiName?: string  | null;
 @ApiProperty({
   type: 'string',
   required: false,

@@ -33,10 +33,11 @@ engDescription?: string  | null;
 @ApiProperty({
   type: 'string',
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @IsString()
-thaiName?: string ;
+thaiName?: string  | null;
 @ApiProperty({
   type: 'string',
   required: false,

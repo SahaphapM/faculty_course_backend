@@ -25,8 +25,9 @@ thaiDescription: string ;
 engDescription: string  | null;
 @ApiProperty({
   type: 'string',
+  nullable: true,
 })
-thaiName: string ;
+thaiName: string  | null;
 @ApiProperty({
   type: 'string',
   nullable: true,
