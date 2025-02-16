@@ -36,6 +36,10 @@ export class PaginationDto {
   @IsString()
   code?: string;
 
+  @IsOptional()
+  @IsString()
+  curriculumCode?: string;
+
   // for skill
   @IsOptional()
   @IsString()

@@ -17,6 +17,7 @@ import { ClosModule } from 'src/modules/clos/clos.module';
 import { CoursesModule } from 'src/modules/courses/courses.module';
 import { SubjectModule } from 'src/modules/subjects/subjects.module';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { InstructorsModule } from 'src/modules/instructors/instructors.module';
 
 @Module({
   imports: [
@@ -40,6 +41,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
     StudentsModule,
     CoursesModule,
     SubjectModule,
+    InstructorsModule
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

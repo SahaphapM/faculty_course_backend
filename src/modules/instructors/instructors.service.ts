@@ -42,12 +42,34 @@ export class InstructorsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { thaiName, engName, code, limit, page, orderBy } = pag || {};
+    const {
+      thaiName,
+      engName,
+      code,
+      limit,
+      page,
+      orderBy,
+      curriculumCode,
+      email,
+      branchThaiName,
+      branchEngName,
+    } = pag || {};
 
     const whereCondition: Prisma.instructorWhereInput = {
-      ...(code && { code: { contains: code } }),
+      ...(code && { code: code }),
       ...(thaiName && { thaiName: { contains: thaiName } }),
       ...(engName && { engName: { contains: engName } }),
+      ...(email && { email: { contains: email } }),
+      ...(branchThaiName && {
+        branch: { thaiName: { contains: branchThaiName } },
+      }),
+      ...(branchEngName && {
+        branch: { engName: { contains: branchEngName } },
+      }),
+
+      ...(curriculumCode && {
+        curriculums: { some: { curriculum: { code: curriculumCode } } },
+      }),
     };
 
     const selectCondition: Prisma.instructorSelect = {
@@ -106,13 +128,6 @@ export class InstructorsService {
         `Instructor/Coordinator with ID ${id} not found`,
       );
     }
-    return teacher;
-  }
-
-  async findExistCode(code: string) {
-    const teacher = await this.prisma.instructor.findUnique({
-      where: { code },
-    });
     return teacher;
   }
 
