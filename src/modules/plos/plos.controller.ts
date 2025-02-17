@@ -12,6 +12,7 @@ import { PloService } from './plos.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
 import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 
 @ApiBearerAuth()
 @Controller('plos')
@@ -24,13 +25,8 @@ export class PlosController {
   }
 
   @Get()
-  findAll() {
-    return this.plosService.findAll();
-  }
-
-  @Get('filters/:curriculumId')
-  findAllByCurriculum(@Query('curriculumId') curriculumId: string) {
-    return this.plosService.findAllByCurriculum(+curriculumId);
+  findAll(@Query() filter?: FilterParams) {
+    return this.plosService.findAll(filter);
   }
 
   @Get(':id')

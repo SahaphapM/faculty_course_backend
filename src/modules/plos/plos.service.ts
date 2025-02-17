@@ -6,6 +6,8 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
 import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class PloService {
@@ -29,9 +31,16 @@ export class PloService {
   }
 
   // Find all PLOs
-  async findAll() {
+  async findAll(filter?: FilterParams) {
+    const { curriculumCode } = filter || {}; // Ensure filter is not undefined
+
     try {
+      const whereOption: Prisma.ploWhereInput = curriculumCode
+        ? { curriculum: { code: curriculumCode } }
+        : {}; // Only filter if curriculumCode exists
+
       return await this.prisma.plo.findMany({
+        where: whereOption, //  Directly pass whereOption (no extra object)
         include: {
           curriculum: {
             select: {
@@ -45,21 +54,8 @@ export class PloService {
         },
       });
     } catch (error) {
+      console.error('Error fetching PLOs:', error);
       throw new BadRequestException('Failed to fetch PLOs');
-    }
-  }
-
-  // Find all PLOs by curriculum ID
-  async findAllByCurriculum(curriculumId: number) {
-    try {
-      return await this.prisma.plo.findMany({
-        where: { curriculumId },
-        include: { clos: true },
-      });
-    } catch (error) {
-      throw new BadRequestException(
-        `Failed to fetch PLOs for curriculum ID ${curriculumId}`,
-      );
     }
   }
 
