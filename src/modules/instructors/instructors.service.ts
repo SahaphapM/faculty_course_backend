@@ -131,46 +131,47 @@ export class InstructorsService {
     return teacher;
   }
 
-  async updateCoordinatorToCurriculum(teacherId: number, curriculumId: number) {
-    // Find the instructor
-    const teacher = await this.prisma.instructor.findUnique({
-      where: { id: teacherId },
-    });
-
-    // Find the curriculum
-    const curriculum = await this.prisma.curriculum.findUnique({
-      where: { id: curriculumId },
-    });
-
-    // Validate instructor exists
-    if (!teacher) {
-      throw new NotFoundException(`Instructor with ID ${teacherId} not found`);
+  async updateCoordinatorToCurriculum(
+    instructorId: number,
+    curriculumId: number,
+  ) {
+    if (!instructorId) {
+      throw new BadRequestException('Instructor ID is required');
     }
 
-    // Validate curriculum exists
-    if (!curriculum) {
-      throw new NotFoundException(
-        `Curriculum with ID ${curriculumId} not found`,
-      );
-    }
+    // Use a transaction to ensure atomicity
+    return this.prisma.$transaction(async (prisma) => {
+      // If curriculumId is negative or zero, remove only from the specific curriculum
+      if (curriculumId <= 0) {
+        await prisma.curriculum_coordinators.deleteMany({
+          where: {
+            instructorId,
+          },
+        });
+        return {
+          message: `Success: Removed Instructor ID ${instructorId} from all curriculums`,
+        };
+      }
 
-    // Update curriculum with coordinator
-    await this.prisma.curriculum.update({
-      where: { id: curriculumId },
-      data: {
-        coordinators: {
-          // Many to many
-          connect: {
-            instructorId_curriculumId: {
-              instructorId: teacherId,
-              curriculumId,
-            },
+      // Insert/Update only if curriculumId is valid
+      await prisma.curriculum_coordinators.upsert({
+        where: {
+          instructorId_curriculumId: {
+            instructorId,
+            curriculumId,
           },
         },
-      },
-    });
+        create: {
+          instructorId,
+          curriculumId,
+        },
+        update: {}, // No update needed, just ensure existence
+      });
 
-    return `Success: Assigned Instructor ID ${teacherId} to Curriculum ID ${curriculumId}`;
+      return {
+        message: `Success: Updated Instructor ID ${instructorId} to Curriculum ID ${curriculumId}`,
+      };
+    });
   }
 
   async update(id: number, updateTeacherDto: UpdateInstructorDto) {
