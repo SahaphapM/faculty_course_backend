@@ -38,7 +38,7 @@ export class InstructorsController {
     return this.insService.create(createTeacherDto);
   }
 
-  @Patch('assign-coordinator')
+  @Post('assign-coordinator')
   @HttpCode(HttpStatus.OK)
   selectInstructorToCurriculum(
     @Query('curriculumId') curriculumId: string,
