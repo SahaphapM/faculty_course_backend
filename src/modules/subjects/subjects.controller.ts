@@ -11,19 +11,15 @@ import {
 import { SubjectService } from './subjects.service';
 import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
 import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 
 @Controller('subjects')
 export class SubjectController {
   constructor(private readonly courseSpecsService: SubjectService) {}
 
   @Get()
-  findAll() {
-    return this.courseSpecsService.findAll();
-  }
-
-  @Get('filters/:curriculumId')
-  findAllByCurriculum(@Query('curriculumId') id: string) {
-    return this.courseSpecsService.findAllByCurriculumId(+id);
+  findAll(@Query() pag?: FilterParams) {
+    return this.courseSpecsService.findAll(pag);
   }
 
   @Post()
