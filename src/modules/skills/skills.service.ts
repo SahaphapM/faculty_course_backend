@@ -68,7 +68,8 @@ export class SkillsService {
         parent: {
           select: {
             id: true,
-            name: true,
+            thaiName: true,
+            engName: true,
           },
         },
         curriculum: {
@@ -77,7 +78,13 @@ export class SkillsService {
             thaiName: true,
           },
         },
-        subs: true,
+        subs: {
+          select: {
+            id: true,
+            thaiName: true,
+            engName: true,
+          },
+        },
       },
       where: whereCondition,
     };
