@@ -33,11 +33,11 @@ export class ClosService {
   }
 
   async findAll(pag?: FilterParams): Promise<{ data: clo[]; total: number }> {
-    const subjectId = pag?.subjectId;
+    const { subjectId } = pag;
 
     // Prisma query options
     const whereCondition: Prisma.cloWhereInput = {
-      subjectId,
+      subjectId : Number(subjectId),
     };
 
     const options: Prisma.cloFindManyArgs = {
