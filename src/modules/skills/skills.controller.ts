@@ -33,12 +33,6 @@ export class SkillsController {
     return this.skillsService.findOne(id);
   }
 
-  @Get('/curriculumId/:curriculumId')
-  @HttpCode(HttpStatus.OK)
-  findAllByCurriculum(@Param('curriculumId') curriculumId: number) {
-    return this.skillsService.findAllByCurriculum(curriculumId);
-  }
-
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(@Body() createSkillDto: CreateSkillDto) {

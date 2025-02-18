@@ -47,12 +47,23 @@ export class SkillsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { name, limit, page, orderBy } = pag || {};
+    const {
+      name,
+      limit = defaultLimit,
+      page = defaultPage,
+      orderBy = 'asc',
+      curriculumCode,
+    } = pag || {};
+
+    const whereCondition: Prisma.skillWhereInput = {
+      ...(name && { name: { contains: name } }),
+      ...(curriculumCode && { curriculum: { code: curriculumCode } }),
+    };
 
     const options: Prisma.skillFindManyArgs = {
-      take: limit || defaultLimit,
-      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { id: orderBy || 'asc' },
+      take: limit,
+      skip: (page - 1) * limit,
+      orderBy: { id: orderBy },
       include: {
         parent: {
           select: {
@@ -68,66 +79,14 @@ export class SkillsService {
         },
         subs: true,
       },
+      where: whereCondition,
     };
 
-    if (name) {
-      options.where = {
-        OR: [{ name: { contains: name } }],
-      };
-    }
-
-    try {
-      if (pag) {
-        const [skills, total] = await Promise.all([
-          this.prisma.skill.findMany(options),
-          this.prisma.skill.count({ where: options.where }),
-        ]);
-        return { data: skills, total };
-      } else {
-        return await this.prisma.skill.findMany(options);
-      }
-    } catch (error) {
-      console.error('Error fetching skills:', error);
-      throw new InternalServerErrorException('Failed to fetch skills');
-    }
-  }
-
-  // Find all skills by curriculum ID
-  async findAllByCurriculum(curriculumId: number) {
-    try {
-      // Find all child skill IDs
-      const childSkillIds = await this.prisma.skill.findMany({
-        where: {
-          curriculumId,
-          parentId: { not: null }, // Only fetch child skills
-        },
-        select: { id: true }, // Select only IDs
-      });
-
-      const childIdsSet = new Set(childSkillIds.map((skill) => skill.id));
-
-      // Fetch only root skills (excluding children)
-      const skills = await this.prisma.skill.findMany({
-        where: {
-          curriculumId,
-          id: { notIn: [...childIdsSet] }, // Exclude child IDs
-        },
-        include: {
-          subs: {
-            include: {
-              subs: true,
-            },
-          },
-          parent: true,
-        },
-      });
-
-      return skills;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        `Failed to fetch skills for curriculum ID ${curriculumId}`,
-      );
-    }
+    const [skills, total] = await Promise.all([
+      this.prisma.skill.findMany(options),
+      this.prisma.skill.count({ where: whereCondition }),
+    ]);
+    return pag ? { data: skills, total } : skills;
   }
 
   // Find a skill by ID
