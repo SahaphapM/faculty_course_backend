@@ -12,7 +12,35 @@ export class UpdateSkillDto {
 })
 @IsOptional()
 @IsString()
-name?: string ;
+thaiName?: string ;
+@ApiProperty({
+  type: 'string',
+  required: false,
+})
+@IsOptional()
+@IsString()
+engName?: string ;
+@ApiProperty({
+  type: 'string',
+  required: false,
+})
+@IsOptional()
+@IsString()
+thaiDescription?: string ;
+@ApiProperty({
+  type: 'string',
+  required: false,
+})
+@IsOptional()
+@IsString()
+engDescription?: string ;
+@ApiProperty({
+  type: 'string',
+  required: false,
+})
+@IsOptional()
+@IsString()
+domain?: string ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

@@ -124,7 +124,7 @@ model curriculum {
   thaiDescription String?                   @db.Text
   engDescription  String?                   @db.Text
   subjects        curriculum_subjects[]
-  branch          branch                    @relation(fields: [branchId], references: [id], onDelete: Cascade , onUpdate: Cascade)
+  branch          branch                    @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   coordinators    curriculum_coordinators[]
   plos            plo[]
   skills          skill[]
@@ -225,7 +225,11 @@ model clo {
 
 model skill {
   id                   Int                    @id @default(autoincrement())
-  name                 String
+  thaiName             String                 @db.VarChar(255)
+  engName              String                 @db.VarChar(255)
+  thaiDescription      String                 @db.Text
+  engDescription       String                 @db.Text
+  domain               String                 @db.VarChar(100)
   /// @DtoRelationIncludeId
   parentId             Int?
   /// @DtoRelationIncludeId

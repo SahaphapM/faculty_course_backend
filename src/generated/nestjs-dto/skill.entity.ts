@@ -14,7 +14,23 @@ id: number ;
 @ApiProperty({
   type: 'string',
 })
-name: string ;
+thaiName: string ;
+@ApiProperty({
+  type: 'string',
+})
+engName: string ;
+@ApiProperty({
+  type: 'string',
+})
+thaiDescription: string ;
+@ApiProperty({
+  type: 'string',
+})
+engDescription: string ;
+@ApiProperty({
+  type: 'string',
+})
+domain: string ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

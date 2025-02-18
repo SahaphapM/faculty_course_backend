@@ -11,7 +11,31 @@ export class CreateSkillDto {
 })
 @IsNotEmpty()
 @IsString()
-name: string ;
+thaiName: string ;
+@ApiProperty({
+  type: 'string',
+})
+@IsNotEmpty()
+@IsString()
+engName: string ;
+@ApiProperty({
+  type: 'string',
+})
+@IsNotEmpty()
+@IsString()
+thaiDescription: string ;
+@ApiProperty({
+  type: 'string',
+})
+@IsNotEmpty()
+@IsString()
+engDescription: string ;
+@ApiProperty({
+  type: 'string',
+})
+@IsNotEmpty()
+@IsString()
+domain: string ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
