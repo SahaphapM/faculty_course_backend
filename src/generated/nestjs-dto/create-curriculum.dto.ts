@@ -10,12 +10,10 @@ export class CreateCurriculumDto {
   @ApiProperty({
   type: 'integer',
   format: 'int32',
-  required: false,
-  nullable: true,
 })
-@IsOptional()
+@IsNotEmpty()
 @IsInt()
-branchId?: number  | null;
+branchId: number ;
 @ApiProperty({
   type: 'string',
 })

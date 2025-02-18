@@ -11,11 +11,10 @@ export class UpdateCurriculumDto {
   type: 'integer',
   format: 'int32',
   required: false,
-  nullable: true,
 })
 @IsOptional()
 @IsInt()
-branchId?: number  | null;
+branchId?: number ;
 @ApiProperty({
   type: 'string',
   required: false,

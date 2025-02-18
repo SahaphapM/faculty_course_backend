@@ -12,9 +12,8 @@ id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-branchId: number  | null;
+branchId: number ;
 @ApiProperty({
   type: 'string',
 })

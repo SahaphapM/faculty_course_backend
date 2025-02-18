@@ -17,9 +17,8 @@ id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-branchId: number  | null;
+branchId: number ;
 @ApiProperty({
   type: 'string',
 })
@@ -73,9 +72,8 @@ subjects?: CurriculumSubjects[] ;
 @ApiProperty({
   type: () => Branch,
   required: false,
-  nullable: true,
 })
-branch?: Branch  | null;
+branch?: Branch ;
 @ApiProperty({
   type: () => CurriculumCoordinators,
   isArray: true,
