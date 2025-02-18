@@ -213,8 +213,8 @@ model clo {
   thaiDescription String? @db.Text
   engDescription  String? @db.Text
 
-  plo     plo?     @relation(fields: [ploId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subject subject? @relation(fields: [subjectId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  plo     plo?     @relation(fields: [ploId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  subject subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   // One-to-Many relation: A CLO can have many skills
   skills skill[] @relation("CLOToSkills")
@@ -308,7 +308,7 @@ model lesson {
   subjectId Int     @unique()
   thaiName  String? @db.VarChar(255)
   engName   String? @db.VarChar(255)
-  subject   subject @relation(fields: [subjectId], references: [id], onDelete: NoAction, onUpdate: Cascade)
+  subject   subject @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
   @@index([subjectId])
 }
