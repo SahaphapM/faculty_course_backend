@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { FilterParams } from 'src/dto/filter-params.dto';
 import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
@@ -32,7 +29,7 @@ export class SubjectService {
       clos: true,
       curriculums: {
         select: {
-          curriculum: {
+          subject: {
             select: {
               code: true,
             },
@@ -88,6 +85,14 @@ export class SubjectService {
         curriculumId: dto.curriculumId,
       },
     });
+    // update join table
+    await this.prisma.curriculum_subjects.create({
+      data: {
+        curriculumId: dto.curriculumId,
+        subjectId: subject.id,
+      },
+    });
+    // copy subject
     await this.prisma.lesson.create({
       data: {
         thaiName: dto.thaiName,
@@ -96,22 +101,36 @@ export class SubjectService {
       },
     });
 
-    return subject;
+    return {
+      message: `Success: Created Subject ID ${subject.id}`,
+    };
   }
 
   async update(id: number, dto: UpdateSubjectDto) {
-    return await this.prisma.subject.update({
+    const subject = await this.prisma.subject.update({
       where: { id: id },
       data: {
         ...dto,
         curriculumId: dto.curriculumId,
       },
     });
+    await this.prisma.curriculum_subjects.updateMany({
+      data: {
+        curriculumId: dto.curriculumId,
+        subjectId: subject.id,
+      },
+    });
+    return {
+      message: `Success: Updated Subject ID ${id}`,
+    };
   }
 
   async remove(id: number) {
-    return await this.prisma.subject.delete({
+    await this.prisma.subject.delete({
       where: { id },
     });
+    return {
+      message: `Success: Deleted Subject ID ${id}`,
+    };
   }
 }
