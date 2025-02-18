@@ -13,14 +13,16 @@ export class ClosService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateCloDto) {
-    // const { courseSpec, plo, skill } = await this.findDependency(createCloDto);
-
     try {
       return await this.prisma.clo.create({
         data: {
-          ...dto,
-          subjectId: dto.subjectId,
-          ploId: dto.ploId,
+          name: dto.name,
+          thaiDescription: dto.thaiDescription,
+          engDescription: dto.engDescription,
+          ...(dto.subjectId
+            ? { subject: { connect: { id: dto.subjectId } } }
+            : {}),
+          ...(dto.ploId ? { plo: { connect: { id: dto.ploId } } } : {}),
         },
       });
     } catch (error) {
@@ -30,56 +32,31 @@ export class ClosService {
     }
   }
 
-  async findAllByPage(
-    pag: FilterParams,
-  ): Promise<{ data: clo[]; total: number }> {
-    const { page = 1, limit = 10, sort = 'id', orderBy = 'asc', name } = pag;
-
-    // Ensure `orderBy` is either 'asc' or 'desc' (default to 'asc')
-    const validOrder = orderBy.toLowerCase() === 'desc' ? 'desc' : 'asc';
+  async findAll(pag?: FilterParams): Promise<{ data: clo[]; total: number }> {
+    const subjectId = pag?.subjectId;
 
     // Prisma query options
+    const whereCondition: Prisma.cloWhereInput = {
+      subjectId,
+    };
+
     const options: Prisma.cloFindManyArgs = {
-      take: limit,
-      skip: (page - 1) * limit,
-      orderBy: { [sort]: validOrder },
       include: { skills: true, plo: true },
-      where: name ? { name: { contains: name } } : undefined, // Avoids unnecessary `where`
+      where: whereCondition,
     };
 
     try {
       const [data, total] = await Promise.all([
         this.prisma.clo.findMany(options),
-        this.prisma.clo.count({ where: options.where }),
+        this.prisma.clo.count({ where: whereCondition }),
       ]);
+
       return { data, total };
     } catch (error) {
-      console.error('Error fetching CLOs:', error);
-      throw new InternalServerErrorException(`Failed to retrieve data`);
+      console.error(`Error fetching CLOs: ${error.message}`);
+      throw new InternalServerErrorException('Failed to retrieve data');
     }
   }
-
-  async findAll(): Promise<clo[]> {
-    try {
-      return await this.prisma.clo.findMany({
-        include: { skills: true, plo: true },
-      });
-    } catch (error) {
-      throw new NotFoundException('Failed to fetch CLOs: ' + error.message);
-    }
-  }
-
-  // async findAllByCourseSpec(courseSpecId: number): Promise<clo[]> {
-  //   try {
-  //     return await this.prisma.clo.findMany({
-  //       where: { id: courseSpecId },
-  //     });
-  //   } catch (error) {
-  //     throw new NotFoundException(
-  //       `CourseSpec with id ${courseSpecId} not found: ${error.message}`,
-  //     );
-  //   }
-  // }
 
   async findOne(id: number): Promise<clo> {
     try {
@@ -129,39 +106,4 @@ export class ClosService {
       );
     }
   }
-
-  // Helper function to find dependencies
-  // async findDependency(createCloDto: CloDto) {
-  //   const courseSpec = await this.prisma.course_spec.findUnique({
-  //     where: { id: createCloDto.courseSpecId },
-  //   });
-
-  //   if (!courseSpec) {
-  //     throw new NotFoundException(
-  //       `CourseSpec with id ${createCloDto.courseSpecId} not found`,
-  //     );
-  //   }
-
-  //   const skill = await this.prisma.skill.findUnique({
-  //     where: { id: createCloDto },
-  //   });
-
-  //   if (!skill) {
-  //     throw new NotFoundException(
-  //       `Skill with id ${createCloDto.skillId} not found`,
-  //     );
-  //   }
-
-  //   const plo = await this.prisma.plo.findUnique({
-  //     where: { id: createCloDto.ploId },
-  //   });
-
-  //   if (!plo) {
-  //     throw new NotFoundException(
-  //       `PLO with id ${createCloDto.ploId} not found`,
-  //     );
-  //   }
-
-  //   return { courseSpec, skill, plo };
-  // }
 }

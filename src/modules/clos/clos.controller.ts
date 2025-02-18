@@ -24,14 +24,9 @@ export class ClosController {
     return this.closService.create(createCloDto);
   }
 
-  @Get('pages')
-  findAllByPage(@Query() paginationDto: FilterParams) {
-    return this.closService.findAllByPage(paginationDto);
-  }
-
   @Get()
-  findAll() {
-    return this.closService.findAll();
+  findAllByPage(@Query() paginationDto: FilterParams) {
+    return this.closService.findAll(paginationDto);
   }
 
   @Get(':id')

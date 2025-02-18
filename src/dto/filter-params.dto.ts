@@ -45,21 +45,10 @@ export class FilterParams {
   @IsString()
   name?: string;
 
-  // @IsOptional()
-  // @IsString()
-  // search?: string;
-
-  // @IsOptional()
-  // @IsString()
-  // columnId?: string;
-
-  // @IsOptional()
-  // @IsString()
-  // columnName?: string;
-
-  // @IsOptional()
-  // @IsString()
-  // bySubject?: string;
+  // for clo
+  @IsOptional()
+  @IsString()
+  subjectId?: number;
 
   // for curriculum
   @IsOptional()
