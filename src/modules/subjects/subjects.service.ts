@@ -1,6 +1,5 @@
 import {
   Injectable,
-  InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
@@ -25,12 +24,21 @@ export class SubjectService {
       ...(thaiName && { thaiName: { contains: thaiName } }),
       ...(engName && { engName: { contains: engName } }),
       ...(curriculumCode && {
-        curriculums: { some: { curriculum: { code: curriculumCode } } },
+        curriculums: { every: { curriculum: { code: curriculumCode } } },
       }),
     };
 
-    const includeCondition: Prisma.subjectInclude = { 
+    const includeCondition: Prisma.subjectInclude = {
       clos: true,
+      curriculums: {
+        select: {
+          curriculum: {
+            select: {
+              code: true,
+            },
+          },
+        },
+      },
     };
 
     if (!pag) {
@@ -51,16 +59,11 @@ export class SubjectService {
       where: whereCondition,
     };
 
-    try {
-      const [subject, total] = await Promise.all([
-        this.prisma.subject.findMany(options),
-        this.prisma.subject.count({ where: whereCondition }),
-      ]);
-      return { data: subject, total };
-    } catch (error) {
-      console.error('Error fetching instructors:', error);
-      throw new InternalServerErrorException('Failed to fetch instructors');
-    }
+    const [subject, total] = await Promise.all([
+      this.prisma.subject.findMany(options),
+      this.prisma.subject.count({ where: whereCondition }),
+    ]);
+    return { data: subject, total };
   }
 
   async findOne(id: number) {
