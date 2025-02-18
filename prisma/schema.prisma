@@ -103,7 +103,7 @@ model subject {
   engDescription       String?                @db.Text
   clos                 clo[]
   lesson               lesson?
-  curriculum           curriculum?            @relation(fields: [curriculumId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  curriculums          curriculum_subjects[]
   skill_expected_level skill_expected_level[]
   courses              course[]
 
@@ -113,7 +113,7 @@ model subject {
 model curriculum {
   id              Int                       @id @default(autoincrement())
   /// @DtoRelationIncludeId
-  branchId        Int?
+  branchId        Int
   code            String                    @unique() @db.VarChar(255)
   thaiName        String?                   @db.VarChar(255)
   engName         String?                   @db.VarChar(255)
@@ -123,10 +123,9 @@ model curriculum {
   minimumGrade    Decimal                   @db.Decimal(3, 2)
   thaiDescription String?                   @db.Text
   engDescription  String?                   @db.Text
-  subjects        subject[]
-  branch          branch?                   @relation(fields: [branchId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  subjects        curriculum_subjects[]
+  branch          branch                    @relation(fields: [branchId], references: [id], onDelete: Cascade , onUpdate: Cascade)
   coordinators    curriculum_coordinators[]
-  // subjects        curriculum_subjects[]
   plos            plo[]
   skills          skill[]
 
@@ -146,18 +145,18 @@ model curriculum_coordinators {
   @@index([curriculumId])
 }
 
-// model curriculum_subjects {
-//   curriculumId Int
-//   /// @DtoRelationIncludeId
-//   subjectId    Int
-//   subject      subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   curriculum   curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-//   // @@map("curriculum_subjects_subject")
+model curriculum_subjects {
+  /// @DtoRelationIncludeId
+  curriculumId Int
+  /// @DtoRelationIncludeId
+  subjectId    Int
+  subject      subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  curriculum   curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
 
-//   @@id([curriculumId, subjectId])
-//   @@index([subjectId])
-//   @@index([curriculumId])
-// }
+  @@id([curriculumId, subjectId])
+  @@index([subjectId])
+  @@index([curriculumId])
+}
 
 model faculty {
   id              Int      @id @default(autoincrement())
@@ -242,7 +241,7 @@ model skill {
   skill_expected_level skill_expected_level[]
 }
 
-// if skill just have 1 level sub-skill, this no need
+// * if skill just have 1 level sub-skill, this no need
 // model skill_tree {
 //   ancestorId   Int
 //   descendantId Int

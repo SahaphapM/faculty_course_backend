@@ -123,7 +123,11 @@ export class CurriculumsService {
           plos: true,
           subjects: {
             include: {
-              clos: true,
+              subject: {
+                include: {
+                  clos: true
+                }
+              }
             },
           },
           branch: true,
