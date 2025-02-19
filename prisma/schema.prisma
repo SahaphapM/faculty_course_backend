@@ -202,7 +202,6 @@ model plo {
 
   @@index([curriculumId])
 }
-
 model clo {
   id              Int     @id @default(autoincrement())
   name            String? @db.VarChar(255)
@@ -212,15 +211,16 @@ model clo {
   subjectId       Int?
   thaiDescription String? @db.Text
   engDescription  String? @db.Text
+  /// @DtoRelationIncludeId
+  skillId         Int? // New reference to a single skill
 
   plo     plo?     @relation(fields: [ploId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   subject subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  // One-to-Many relation: A CLO can have many skills
-  skills skill[] @relation("CLOToSkills")
+  skill   skill?   @relation(fields: [skillId], references: [id], onDelete: SetNull, onUpdate: NoAction)
 
   @@index([ploId])
   @@index([subjectId])
+  @@index([skillId])
 }
 
 model skill {
@@ -233,17 +233,18 @@ model skill {
   /// @DtoRelationIncludeId
   parentId             Int?
   /// @DtoRelationIncludeId
-  cloId                Int?
-  /// @DtoRelationIncludeId
   curriculumId         Int
   // Self-referencing relation for parent-child skills
   parent               skill?                 @relation("SkillHierarchy", fields: [parentId], references: [id], onDelete: NoAction)
   subs                 skill[]                @relation("SkillHierarchy")
-  // Many-to-One relation: A skill belongs to one CLO
-  clo                  clo?                   @relation("CLOToSkills", fields: [cloId], references: [id], onDelete: NoAction)
+
+  // One-to-Many relation: A skill can have multiple CLOs
+  clos                 clo[]                   // CLOs now belong to a single skill
+
   curriculum           curriculum             @relation(fields: [curriculumId], references: [id])
   skill_expected_level skill_expected_level[]
 }
+
 
 // * if skill just have 1 level sub-skill, this no need
 // model skill_tree {
