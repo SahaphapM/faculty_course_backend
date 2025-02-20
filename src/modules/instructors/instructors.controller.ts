@@ -23,6 +23,8 @@ import * as path from 'path';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.dto';
 import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.dto';
+import { UserRole } from 'src/enums/role.enum';
+import { Role } from 'src/decorators/roles.decorator';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 2 * 1024 * 1024; // 2 mb
 const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
@@ -32,12 +34,14 @@ const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 export class InstructorsController {
   constructor(private readonly insService: InstructorsService) {}
 
+  @Role(UserRole.Admin, UserRole.Coordinator)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createTeacherDto: CreateInstructorDto) {
     return this.insService.create(createTeacherDto);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator)
   @Post('assign-coordinator')
   @HttpCode(HttpStatus.OK)
   selectInstructorToCurriculum(
@@ -95,12 +99,14 @@ export class InstructorsController {
     return { message: 'File upload successful', filename: randomFileName };
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: FilterParams) {
     return this.insService.findAll(pag);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {

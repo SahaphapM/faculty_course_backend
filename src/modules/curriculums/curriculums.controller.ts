@@ -21,11 +21,12 @@ import { UserRole } from 'src/enums/role.enum';
 export class CurriculumsController {
   constructor(private readonly curriculumsService: CurriculumsService) {}
 
+  @Role(UserRole.Admin, UserRole.Coordinator)
   @Post()
   create(@Body() createCurriculumDto: CreateCurriculumDto) {
     return this.curriculumsService.create(createCurriculumDto);
   }
-  @Role(UserRole.Admin, UserRole.Coordinator)
+
   @Get()
   findAll(@Query() pag?: FilterParams) {
     return this.curriculumsService.findAll(pag);
@@ -36,6 +37,7 @@ export class CurriculumsController {
     return this.curriculumsService.findOneByCode(code);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator)
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -44,6 +46,7 @@ export class CurriculumsController {
     return this.curriculumsService.update(+id, updateCurriculumDto);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.curriculumsService.remove(+id);

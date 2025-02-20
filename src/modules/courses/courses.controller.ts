@@ -13,12 +13,15 @@ import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
+import { UserRole } from 'src/enums/role.enum';
+import { Role } from 'src/decorators/roles.decorator';
 
 @ApiBearerAuth()
 @Controller('courses')
 export class CoursesController {
   constructor(private readonly coursesService: CourseService) {}
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Post()
   create(@Body() createCourseDto: CreateCourseDto) {
     return this.coursesService.create(createCourseDto);
@@ -39,16 +42,19 @@ export class CoursesController {
     return this.coursesService.findCourseEnrollmentByCourseId(+id);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
     return this.coursesService.update(+id, updateCourseDto);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.coursesService.remove(+id);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Patch(':id/import-students')
   importStudents(
     @Param('id') courseId: string,
@@ -57,6 +63,7 @@ export class CoursesController {
     return this.coursesService.importStudents(+courseId, studentListId);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Delete(':id/remove-enrollment/:enId')
   removeStudent(
     @Param('id') courseId: string,

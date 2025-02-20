@@ -13,12 +13,15 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { FilterParams } from 'src/dto/filter-params.dto';
 import { CreateFacultyDto } from 'src/generated/nestjs-dto/create-faculty.dto';
 import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
+import { UserRole } from 'src/enums/role.enum';
+import { Role } from 'src/decorators/roles.decorator';
 
 @ApiBearerAuth()
 @Controller('faculties')
 export class FacultiesController {
   constructor(private readonly facultiesService: FacultiesService) {}
 
+  @Role(UserRole.Admin)
   @Post()
   create(@Body() createFacultyDto: CreateFacultyDto) {
     return this.facultiesService.create(createFacultyDto);
@@ -39,11 +42,13 @@ export class FacultiesController {
     return this.facultiesService.findOne(+id);
   }
 
+  @Role(UserRole.Admin)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateFacultyDto: UpdateFacultyDto) {
     return this.facultiesService.update(+id, updateFacultyDto);
   }
 
+  @Role(UserRole.Admin)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.facultiesService.remove(+id);

@@ -13,12 +13,15 @@ import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCloDto } from 'src/generated/nestjs-dto/create-clo.dto';
 import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
+import { UserRole } from 'src/enums/role.enum';
+import { Role } from 'src/decorators/roles.decorator';
 
 @ApiBearerAuth()
 @Controller('clos')
 export class ClosController {
   constructor(private readonly closService: ClosService) {}
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Post()
   create(@Body() createCloDto: CreateCloDto) {
     return this.closService.create(createCloDto);
@@ -34,11 +37,13 @@ export class ClosController {
     return this.closService.findOne(id);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Patch(':id')
   update(@Param('id') id: number, @Body() updateCloDto: UpdateCloDto) {
     return this.closService.update(id, updateCloDto);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Delete(':id')
   async remove(@Param('id') id: number) {
     return await this.closService.remove(id);

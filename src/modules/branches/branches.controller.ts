@@ -22,6 +22,7 @@ import { UserRole } from 'src/enums/role.enum';
 export class BranchesController {
   constructor(private readonly branchService: BranchesService) {}
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Post()
   create(@Body() createBranchDto: CreateBranchDto) {
     return this.branchService.create(createBranchDto);
@@ -42,11 +43,13 @@ export class BranchesController {
     return this.branchService.findOne(+id);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateBranchDto: UpdateBranchDto) {
     return this.branchService.update(+id, updateBranchDto);
   }
 
+  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.branchService.remove(+id);
