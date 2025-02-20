@@ -16,9 +16,11 @@ import jwtConfig from './config/jwt.config';
 import { UsersService } from 'src/modules/users/users.service';
 import { RefreshJwtStrategy } from './strategies/refresh.strategy';
 import { JwtModule } from '@nestjs/jwt';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Module({
   imports: [
+    PrismaModule,
     ConfigModule.forFeature(jwtConfig),
     ConfigModule.forFeature(refreshJwtConfig),
     ConfigModule.forFeature(googleOauthConfig),

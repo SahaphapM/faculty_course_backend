@@ -30,12 +30,11 @@ const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
 @ApiBearerAuth()
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) { }
+  constructor(private readonly usersService: UsersService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto) {
-    console.log(createUserDto);
     return this.usersService.create(createUserDto);
   }
 

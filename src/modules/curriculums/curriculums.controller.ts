@@ -13,6 +13,8 @@ import { FilterParams } from '../../dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
+import { Role } from 'src/decorators/roles.decorator';
+import { UserRole } from 'src/enums/role.enum';
 
 @ApiBearerAuth()
 @Controller('curriculums')
@@ -23,7 +25,7 @@ export class CurriculumsController {
   create(@Body() createCurriculumDto: CreateCurriculumDto) {
     return this.curriculumsService.create(createCurriculumDto);
   }
-
+  @Role(UserRole.Admin, UserRole.Coordinator)
   @Get()
   findAll(@Query() pag?: FilterParams) {
     return this.curriculumsService.findAll(pag);

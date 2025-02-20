@@ -1,49 +1,54 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../modules/users/users.service';
 import { JwtService } from '@nestjs/jwt';
-// import { User } from 'src/users/entities/user.entity';
-// import { InjectRepository } from '@nestjs/typeorm';
-// import { Payload } from './types/payload';
 import { compare } from 'bcrypt';
 import * as argon2 from 'argon2';
-import { ProfilePayload } from './types/current-user';
 import { AuthJwtPayload } from './types/auth-jwtPayload';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
+import { LoginDto } from 'src/dto/login.dto';
+
+const USER_NOT_FOUND_MESSAGE = 'User not found!';
+const INVALID_CREDENTIALS_MESSAGE = 'Invalid credentials';
+const INVALID_REFRESH_TOKEN_MESSAGE = 'Invalid Refresh Token';
 
 @Injectable()
 export class AuthService {
   constructor(
-    // @InjectRepository(User)
     private usersService: UsersService,
     private jwtService: JwtService,
     @Inject(refreshJwtConfig.KEY)
     private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
-  ) { }
+  ) {}
 
-  async validateUser(email: string, password: string): Promise<any> {
-    const user = await this.usersService.findByEmail(email);
-    if (!user) throw new UnauthorizedException('User not found!');
-    const isPasswordMatch = await compare(password, user.password);
+  async validateUserCredentials(dto: LoginDto): Promise<{ id: number }> {
+    const user = await this.usersService.findByEmail(dto.email);
+    if (!user) throw new UnauthorizedException(USER_NOT_FOUND_MESSAGE);
+
+    const isPasswordMatch = await compare(dto.password, user.password);
     if (!isPasswordMatch)
-      throw new UnauthorizedException('Invalid credentials');
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
 
-    return { id: user.id };
+    return user;
   }
 
-  async login(userId: number) {
-    // const payload: AuthJwtPayload = { sub: userId };
-    // const token = this.jwtService.sign(payload);
-    // const refreshToken = this.jwtService.sign(payload, this.refreshTokenConfig);
-    const { accessToken, refreshToken } = await this.generateTokens(userId);
+  async authenticateUser(dto: LoginDto) {
+    // First, validate the user credentials
+    const user = await this.validateUserCredentials(dto);
+
+    // Then generate tokens
+    const { accessToken, refreshToken } = await this.generateTokens(user.id);
     const hashedRefreshToken = await argon2.hash(refreshToken);
+
+    // Update hashed refresh token in the database
     await this.usersService.updateHashedRefreshToken(
-      userId,
+      user.id,
       hashedRefreshToken,
     );
+
     return {
-      id: userId,
+      user,
       accessToken,
       refreshToken,
     };
@@ -55,10 +60,8 @@ export class AuthService {
       this.jwtService.signAsync(payload),
       this.jwtService.signAsync(payload, this.refreshTokenConfig),
     ]);
-    return {
-      accessToken,
-      refreshToken,
-    };
+
+    return { accessToken, refreshToken };
   }
 
   async refreshToken(userId: number) {
@@ -68,6 +71,7 @@ export class AuthService {
       userId,
       hashedRefreshToken,
     );
+
     return {
       id: userId,
       accessToken,
@@ -75,33 +79,17 @@ export class AuthService {
     };
   }
 
-  // google
-  // async googleLogin(req): Promise<any> {
-  //   if (!req.user) {
-  //     throw new Error('Google login failed: No user information received.');
-  //   }
-  //   const payload: Payload = {
-  //     id: req.user.id,
-  //     email: req.user.email,
-  //     name: req.user.name,
-  //     picture: req.user.picture,
-  //   };
-  //   return {
-  //     access_token: this.jwtService.sign(payload),
-  //   };
-  // }
-
   async validateRefreshToken(userId: number, refreshToken: string) {
     const user = await this.usersService.findOne(userId);
     if (!user || !user.hashedRefreshToken)
-      throw new UnauthorizedException('Invalid Refresh Token');
+      throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
 
     const refreshTokenMatches = await argon2.verify(
       user.hashedRefreshToken,
       refreshToken,
     );
     if (!refreshTokenMatches)
-      throw new UnauthorizedException('Invalid Refresh Token');
+      throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
 
     return { id: userId };
   }
@@ -112,73 +100,31 @@ export class AuthService {
 
   async validateJwtUser(userId: number) {
     const user = await this.usersService.findOne(userId);
-    if (!user) throw new UnauthorizedException('User not found!');
-    const currentUser: ProfilePayload = {
-      id: user.id,
-      role: user.role,
-      email: user.email,
-      avatarUrl: user.avatarUrl,
-    };
-    return currentUser;
+    if (!user) throw new UnauthorizedException(USER_NOT_FOUND_MESSAGE);
+
+    // const currentUser: ProfilePayload = {
+    //   id: user.id,
+    //   role: user.role,
+    //   email: user.email,
+    //   avatarUrl: user.avatarUrl,
+    // };
+
+    if (user) {
+      return true;
+    }
+
+    return false;
   }
 
   async validateGoogleUser(googleUser: CreateUserDto) {
     const user = await this.usersService.findByEmail(googleUser.email);
-    if (user) return user;
-    return await this.usersService.create(googleUser);
+    if (user) {
+      // If user exists, generate tokens and return them
+      return this.generateTokens(user.id);
+    } else {
+      // If user does not exist, create a new user and generate tokens
+      const newUser = await this.usersService.create(googleUser);
+      return this.generateTokens(newUser.id);
+    }
   }
-
-  // async getGProfile(token: string) {
-  //   try {
-  //     return axios.get(
-  //       `https://www.googleapis.com/oauth2/v1/userinfo?alt=json&access_token=${token}`,
-  //     );
-  //   } catch (error) {
-  //     console.error('Failed to revoke the token:', error);
-  //   }
-  // }
-
-  // async getNewAccessToken(refreshToken: string): Promise<string> {
-  //   try {
-  //     const response = await axios.post(
-  //       'https://accounts.google.com/o/oauth2/token',
-  //       {
-  //         client_id: process.env.GOOGLE_CLIENT_ID,
-  //         client_secret: process.env.GOOGLE_CLIENT_SECRET,
-  //         refresh_token: refreshToken,
-  //         grant_type: 'refresh_token',
-  //       },
-  //     );
-
-  //     return response.data.access_token;
-  //   } catch (error) {
-  //     throw new Error('Failed to refresh the access token.');
-  //   }
-  // }
-
-  // async isTokenExpired(token: string): Promise<boolean> {
-  //   try {
-  //     const response = await axios.get(
-  //       `https://www.googleapis.com/oauth2/v1/tokeninfo?access_token=${token}`,
-  //     );
-
-  //     const expiresIn = response.data.expires_in;
-
-  //     if (!expiresIn || expiresIn <= 0) {
-  //       return true;
-  //     }
-  //   } catch (error) {
-  //     return true;
-  //   }
-  // }
-
-  // async revokeGoogleToken(token: string) {
-  //   try {
-  //     await axios.get(
-  //       `https://accounts.google.com/o/oauth2/revoke?token=${token}`,
-  //     );
-  //   } catch (error) {
-  //     console.error('Failed to revoke the token:', error);
-  //   }
-  // }
 }

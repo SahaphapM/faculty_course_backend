@@ -13,8 +13,11 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { FilterParams } from 'src/dto/filter-params.dto';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
+import { Role } from 'src/decorators/roles.decorator';
+import { UserRole } from 'src/enums/role.enum';
 
 @ApiBearerAuth()
+@Role(UserRole.Admin)
 @Controller('branches')
 export class BranchesController {
   constructor(private readonly branchService: BranchesService) {}

@@ -41,7 +41,7 @@ export class ClosService {
     };
 
     const options: Prisma.cloFindManyArgs = {
-      include: { skills: true, plo: true },
+      include: { skill: true, plo: true },
       where: whereCondition,
     };
 
@@ -62,7 +62,7 @@ export class ClosService {
     try {
       const clo = await this.prisma.clo.findUnique({
         where: { id },
-        include: { skills: true, plo: true },
+        include: { skill: true, plo: true },
       });
 
       if (!clo) {
