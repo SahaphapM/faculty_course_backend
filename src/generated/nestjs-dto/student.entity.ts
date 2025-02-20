@@ -1,4 +1,5 @@
 
+import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
 import {CourseEnrollment} from './courseEnrollment.entity'
 import {SkillCollection} from './skillCollection.entity'
@@ -24,16 +25,10 @@ engName: string  | null;
 })
 enrollmentDate: Date  | null;
 @ApiProperty({
-  type: 'string',
+  type: () => Object,
   nullable: true,
 })
-socials: string  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-branchId: number  | null;
+socials: Prisma.JsonValue  | null;
 @ApiProperty({
   type: 'string',
 })
@@ -55,11 +50,21 @@ course_enrollments?: CourseEnrollment[] ;
 })
 skill_collections?: SkillCollection[] ;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+branchId: number ;
+@ApiProperty({
   type: () => Branch,
   required: false,
+})
+branch?: Branch ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
   nullable: true,
 })
-branch?: Branch  | null;
+userId: number  | null;
 @ApiProperty({
   type: () => User,
   required: false,

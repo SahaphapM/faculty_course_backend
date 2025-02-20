@@ -7,24 +7,6 @@ import {IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
 
 export class CreateUserDto {
   @ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsInt()
-instructorId?: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsInt()
-studentId?: number  | null;
-@ApiProperty({
   type: 'string',
 })
 @IsNotEmpty()
@@ -60,4 +42,22 @@ role?: string  | null;
 @IsOptional()
 @IsString()
 hashedRefreshToken?: string  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+studentId?: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+instructorId?: number  | null;
 }

@@ -37,12 +37,6 @@ parentId: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
-})
-cloId: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
 })
 curriculumId: number ;
 }

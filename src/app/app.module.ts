@@ -6,7 +6,7 @@ import { LessonModule } from '../modules/lessons/lessons.module';
 import { PlosModule } from '../modules/plos/plos.module';
 import { SkillsModule } from '../modules/skills/skills.module';
 import { FacultiesModule } from '../modules/faculties/faculties.module';
-// import { AuthModule } from '../auth/auth.module';
+import { AuthModule } from '../auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -37,7 +37,7 @@ import { InstructorsModule } from 'src/modules/instructors/instructors.module';
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    // AuthModule,
+    AuthModule,
     StudentsModule,
     CoursesModule,
     SubjectModule,

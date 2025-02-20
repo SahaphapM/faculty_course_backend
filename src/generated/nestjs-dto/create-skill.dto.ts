@@ -48,15 +48,6 @@ parentId?: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsInt()
-cloId?: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
 })
 @IsNotEmpty()
 @IsInt()

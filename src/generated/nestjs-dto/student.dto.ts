@@ -1,4 +1,5 @@
 
+import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
 
 
@@ -20,10 +21,10 @@ engName: string  | null;
 })
 enrollmentDate: Date  | null;
 @ApiProperty({
-  type: 'string',
+  type: () => Object,
   nullable: true,
 })
-socials: string  | null;
+socials: Prisma.JsonValue  | null;
 @ApiProperty({
   type: 'string',
 })
@@ -32,4 +33,15 @@ code: string ;
   type: 'string',
 })
 thaiName: string ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+branchId: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+userId: number  | null;
 }

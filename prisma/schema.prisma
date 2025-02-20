@@ -202,6 +202,7 @@ model plo {
 
   @@index([curriculumId])
 }
+
 model clo {
   id              Int     @id @default(autoincrement())
   name            String? @db.VarChar(255)
@@ -224,27 +225,26 @@ model clo {
 }
 
 model skill {
-  id                   Int                    @id @default(autoincrement())
-  thaiName             String                 @db.VarChar(255)
-  engName              String                 @db.VarChar(255)
-  thaiDescription      String                 @db.Text
-  engDescription       String                 @db.Text
-  domain               String                 @db.VarChar(100)
+  id              Int     @id @default(autoincrement())
+  thaiName        String  @db.VarChar(255)
+  engName         String  @db.VarChar(255)
+  thaiDescription String  @db.Text
+  engDescription  String  @db.Text
+  domain          String  @db.VarChar(100)
   /// @DtoRelationIncludeId
-  parentId             Int?
+  parentId        Int?
   /// @DtoRelationIncludeId
-  curriculumId         Int
+  curriculumId    Int
   // Self-referencing relation for parent-child skills
-  parent               skill?                 @relation("SkillHierarchy", fields: [parentId], references: [id], onDelete: NoAction)
-  subs                 skill[]                @relation("SkillHierarchy")
+  parent          skill?  @relation("SkillHierarchy", fields: [parentId], references: [id], onDelete: NoAction)
+  subs            skill[] @relation("SkillHierarchy")
 
   // One-to-Many relation: A skill can have multiple CLOs
-  clos                 clo[]                   // CLOs now belong to a single skill
+  clos clo[] // CLOs now belong to a single skill
 
   curriculum           curriculum             @relation(fields: [curriculumId], references: [id])
   skill_expected_level skill_expected_level[]
 }
-
 
 // * if skill just have 1 level sub-skill, this no need
 // model skill_tree {
@@ -297,13 +297,17 @@ model student {
   id                 Int                 @id @default(autoincrement())
   engName            String?             @db.VarChar(255)
   enrollmentDate     DateTime?           @db.DateTime(0)
-  socials            String?             @db.VarChar(255)
-  branchId           Int?
+  socials            Json? // Better for multiple social links, Prisma will store this as TEXT in MariaDB
   code               String              @db.VarChar(255)
   thaiName           String              @db.VarChar(255)
+  // One to many
   course_enrollments course_enrollment[]
   skill_collections  skill_collection[]
-  branch             branch?             @relation(fields: [branchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  /// @DtoRelationIncludeId
+  branchId           Int
+  branch             branch              @relation(fields: [branchId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  /// @DtoRelationIncludeId
+  userId             Int?
   user               user?
 }
 
@@ -320,15 +324,17 @@ model lesson {
 
 model user {
   id                 Int         @id @default(autoincrement())
-  /// @DtoRelationIncludeId
-  instructorId       Int?        @unique()
-  /// @DtoRelationIncludeId
-  studentId          Int?        @unique()
-  email              String      @unique() @db.VarChar(255)
+  email              String      @unique @db.VarChar(255)
   password           String      @db.VarChar(255)
   avatarUrl          String?     @db.VarChar(255)
   role               String?     @db.VarChar(255)
   hashedRefreshToken String?     @db.VarChar(255)
-  student            student?    @relation(fields: [studentId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  instructor         instructor? @relation(fields: [instructorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  /// @DtoRelationIncludeId
+  studentId          Int?        @unique
+  student            student?    @relation(fields: [studentId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  /// @DtoRelationIncludeId
+  instructorId       Int?        @unique
+  instructor         instructor? @relation(fields: [instructorId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+
+  @@unique([instructorId, studentId]) // Ensures a user has either instructorId or studentId, but not both
 }

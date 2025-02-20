@@ -35,4 +35,10 @@ thaiDescription: string  | null;
   nullable: true,
 })
 engDescription: string  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+skillId: number  | null;
 }

@@ -1,6 +1,7 @@
 
+import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
-import {IsDateString,IsOptional,IsString} from 'class-validator'
+import {IsDateString,IsInt,IsOptional,IsString} from 'class-validator'
 
 
 
@@ -24,13 +25,12 @@ engName?: string  | null;
 @IsDateString()
 enrollmentDate?: Date  | null;
 @ApiProperty({
-  type: 'string',
+  type: () => Object,
   required: false,
   nullable: true,
 })
 @IsOptional()
-@IsString()
-socials?: string  | null;
+socials?: Prisma.InputJsonValue  | Prisma.NullableJsonNullValueInput;
 @ApiProperty({
   type: 'string',
   required: false,
@@ -45,4 +45,21 @@ code?: string ;
 @IsOptional()
 @IsString()
 thaiName?: string ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+})
+@IsOptional()
+@IsInt()
+branchId?: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+userId?: number  | null;
 }

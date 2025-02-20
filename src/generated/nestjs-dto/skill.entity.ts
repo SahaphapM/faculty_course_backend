@@ -40,12 +40,6 @@ parentId: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
-})
-cloId: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
 })
 curriculumId: number ;
 @ApiProperty({
@@ -62,10 +56,10 @@ parent?: Skill  | null;
 subs?: Skill[] ;
 @ApiProperty({
   type: () => Clo,
+  isArray: true,
   required: false,
-  nullable: true,
 })
-clo?: Clo  | null;
+clos?: Clo[] ;
 @ApiProperty({
   type: () => Curriculum,
   required: false,

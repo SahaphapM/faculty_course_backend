@@ -11,18 +11,6 @@ export class User {
 })
 id: number ;
 @ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-instructorId: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-studentId: number  | null;
-@ApiProperty({
   type: 'string',
 })
 email: string ;
@@ -46,11 +34,23 @@ role: string  | null;
 })
 hashedRefreshToken: string  | null;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+studentId: number  | null;
+@ApiProperty({
   type: () => Student,
   required: false,
   nullable: true,
 })
 student?: Student  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+instructorId: number  | null;
 @ApiProperty({
   type: () => Instructor,
   required: false,

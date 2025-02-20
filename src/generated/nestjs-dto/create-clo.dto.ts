@@ -48,4 +48,13 @@ thaiDescription?: string  | null;
 @IsOptional()
 @IsString()
 engDescription?: string  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+skillId?: number  | null;
 }

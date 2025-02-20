@@ -39,6 +39,12 @@ thaiDescription: string  | null;
 })
 engDescription: string  | null;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+skillId: number  | null;
+@ApiProperty({
   type: () => Plo,
   required: false,
   nullable: true,
@@ -52,8 +58,8 @@ plo?: Plo  | null;
 subject?: Subject  | null;
 @ApiProperty({
   type: () => Skill,
-  isArray: true,
   required: false,
+  nullable: true,
 })
-skills?: Skill[] ;
+skill?: Skill  | null;
 }
