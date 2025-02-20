@@ -2,6 +2,7 @@ import {
   Body,
   Controller,
   Get,
+  Param,
   Post,
   Req,
   Res,
@@ -66,13 +67,13 @@ export class AuthController {
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
   async refreshToken(@Req() req) {
-    return this.authService.refreshToken(req.user.id);
+    return this.authService.refreshToken(req.user.id, req.user.role);
   }
 
   @UseGuards(JwtAuthGuard)
-  @Post('logout')
-  async signOut(@Req() req) {
-    await this.authService.signOut(req.user.id);
+  @Get('logout/:id')
+  async signOut(@Param('id') id: number) {
+    await this.authService.signOut(id);
     return { message: 'Logout successful' };
   }
 }

@@ -22,7 +22,7 @@ export class AuthService {
     private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
 
-  async validateUserCredentials(dto: LoginDto): Promise<{ id: number }> {
+  async validateUserCredentials(dto: LoginDto) {
     const user = await this.usersService.findByEmail(dto.email);
     if (!user) throw new UnauthorizedException(USER_NOT_FOUND_MESSAGE);
 
@@ -38,7 +38,10 @@ export class AuthService {
     const user = await this.validateUserCredentials(dto);
 
     // Then generate tokens
-    const { accessToken, refreshToken } = await this.generateTokens(user.id);
+    const { accessToken, refreshToken } = await this.generateTokens(
+      user.id,
+      user.role,
+    );
     const hashedRefreshToken = await argon2.hash(refreshToken);
 
     // Update hashed refresh token in the database
@@ -54,8 +57,8 @@ export class AuthService {
     };
   }
 
-  async generateTokens(userId: number) {
-    const payload: AuthJwtPayload = { sub: userId };
+  async generateTokens(userId: number, role: string) {
+    const payload: AuthJwtPayload = { sub: userId, role };
     const [accessToken, refreshToken] = await Promise.all([
       this.jwtService.signAsync(payload),
       this.jwtService.signAsync(payload, this.refreshTokenConfig),
@@ -64,8 +67,11 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async refreshToken(userId: number) {
-    const { accessToken, refreshToken } = await this.generateTokens(userId);
+  async refreshToken(userId: number, role: string) {
+    const { accessToken, refreshToken } = await this.generateTokens(
+      userId,
+      role,
+    );
     const hashedRefreshToken = await argon2.hash(refreshToken);
     await this.usersService.updateHashedRefreshToken(
       userId,
@@ -101,30 +107,18 @@ export class AuthService {
   async validateJwtUser(userId: number) {
     const user = await this.usersService.findOne(userId);
     if (!user) throw new UnauthorizedException(USER_NOT_FOUND_MESSAGE);
-
-    // const currentUser: ProfilePayload = {
-    //   id: user.id,
-    //   role: user.role,
-    //   email: user.email,
-    //   avatarUrl: user.avatarUrl,
-    // };
-
-    if (user) {
-      return true;
-    }
-
-    return false;
+    return user;
   }
 
   async validateGoogleUser(googleUser: CreateUserDto) {
     const user = await this.usersService.findByEmail(googleUser.email);
     if (user) {
       // If user exists, generate tokens and return them
-      return this.generateTokens(user.id);
+      return this.generateTokens(user.id, user.role);
     } else {
       // If user does not exist, create a new user and generate tokens
       const newUser = await this.usersService.create(googleUser);
-      return this.generateTokens(newUser.id);
+      return this.generateTokens(newUser.id, user.role);
     }
   }
 }

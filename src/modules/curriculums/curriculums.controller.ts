@@ -13,7 +13,7 @@ import { FilterParams } from '../../dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
-import { Role } from 'src/decorators/roles.decorator';
+import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 
 @ApiBearerAuth()
@@ -21,7 +21,7 @@ import { UserRole } from 'src/enums/role.enum';
 export class CurriculumsController {
   constructor(private readonly curriculumsService: CurriculumsService) {}
 
-  @Role(UserRole.Admin, UserRole.Coordinator)
+  @Roles(UserRole.Admin, UserRole.Coordinator)
   @Post()
   create(@Body() createCurriculumDto: CreateCurriculumDto) {
     return this.curriculumsService.create(createCurriculumDto);
@@ -37,7 +37,7 @@ export class CurriculumsController {
     return this.curriculumsService.findOneByCode(code);
   }
 
-  @Role(UserRole.Admin, UserRole.Coordinator)
+  @Roles(UserRole.Admin, UserRole.Coordinator)
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -46,7 +46,7 @@ export class CurriculumsController {
     return this.curriculumsService.update(+id, updateCurriculumDto);
   }
 
-  @Role(UserRole.Admin, UserRole.Coordinator)
+  @Roles(UserRole.Admin, UserRole.Coordinator)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.curriculumsService.remove(+id);

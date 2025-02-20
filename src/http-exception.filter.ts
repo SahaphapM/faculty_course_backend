@@ -31,11 +31,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         typeof exceptionResponse === 'object' &&
         'message' in exceptionResponse
       ) {
-        message = 'Validation failed';
-        details = exceptionResponse['message']; // Capture validation error messages
-      } else {
         message = exception.message;
-      }
+        details = exceptionResponse['message']; // Capture validation error messages
+      } 
     }
     // Handle Prisma Known Errors
     else if (exception instanceof Prisma.PrismaClientKnownRequestError) {

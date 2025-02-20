@@ -15,18 +15,20 @@ import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
+import { Roles } from 'src/decorators/roles.decorator';
+import { UserRole } from 'src/enums/role.enum';
 
 @ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-
+  @Roles(UserRole.Admin)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
-
+  @Roles(UserRole.Admin)
   @Get()
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: FilterParams) {

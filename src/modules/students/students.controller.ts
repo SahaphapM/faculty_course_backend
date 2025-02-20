@@ -14,14 +14,14 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
 import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 import { UserRole } from 'src/enums/role.enum';
-import { Role } from 'src/decorators/roles.decorator';
+import { Roles } from 'src/decorators/roles.decorator';
 
 @ApiBearerAuth()
 @Controller('students')
 export class StudentsController {
   constructor(private readonly studentsService: StudentsService) {}
 
-  @Role(
+  @Roles(
     UserRole.Admin,
     UserRole.Coordinator,
     UserRole.Instructor,
@@ -32,19 +32,19 @@ export class StudentsController {
     return this.studentsService.create(createStudentDto);
   }
 
-  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Post('import')
   importStudents(@Body() students: CreateStudentDto[]) {
     return this.studentsService.importStudents(students);
   }
 
-  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
   findAll(@Query() pag?: FilterParams) {
     return this.studentsService.findAll(pag);
   }
 
-  @Role(
+  @Roles(
     UserRole.Admin,
     UserRole.Coordinator,
     UserRole.Instructor,
@@ -60,13 +60,13 @@ export class StudentsController {
   //   return this.studentsService.buildSkillCollectionTree(+id);
   // }
 
-  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
     return this.studentsService.update(+id, updateStudentDto);
   }
 
-  @Role(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.studentsService.remove(+id);
