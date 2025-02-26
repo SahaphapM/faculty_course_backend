@@ -23,7 +23,6 @@ import { Public } from 'src/decorators/public.decorator';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  @Roles(UserRole.Admin)
   @Public()
   @Post()
   @HttpCode(HttpStatus.CREATED)
