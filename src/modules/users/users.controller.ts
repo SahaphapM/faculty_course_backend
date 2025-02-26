@@ -17,12 +17,14 @@ import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
+import { Public } from 'src/decorators/public.decorator';
 
 @ApiBearerAuth()
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @Roles(UserRole.Admin)
+  @Public()
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto) {
