@@ -1,8 +1,8 @@
 
 import {ApiProperty} from '@nestjs/swagger'
 import {Subject} from './subject.entity'
-import {CourseEnrollment} from './courseEnrollment.entity'
 import {CourseInstructor} from './courseInstructor.entity'
+import {SkillCollection} from './skillCollection.entity'
 
 
 export class Course {
@@ -28,15 +28,15 @@ subjectId: number ;
 })
 subject?: Subject ;
 @ApiProperty({
-  type: () => CourseEnrollment,
-  isArray: true,
-  required: false,
-})
-course_enrollments?: CourseEnrollment[] ;
-@ApiProperty({
   type: () => CourseInstructor,
   isArray: true,
   required: false,
 })
 course_instructors?: CourseInstructor[] ;
+@ApiProperty({
+  type: () => SkillCollection,
+  isArray: true,
+  required: false,
+})
+skill_collections?: SkillCollection[] ;
 }

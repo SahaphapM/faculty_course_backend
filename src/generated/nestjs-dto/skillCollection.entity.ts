@@ -1,8 +1,9 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {CourseEnrollment} from './courseEnrollment.entity'
-import {SkillExpectedLevel} from './skillExpectedLevel.entity'
 import {Student} from './student.entity'
+import {Course} from './course.entity'
+import {Clo} from './clo.entity'
+import {Skill} from './skill.entity'
 
 
 export class SkillCollection {
@@ -14,47 +15,51 @@ id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-studentId: number  | null;
+gained: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
 })
-gainedLevel: number ;
+expected: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
 })
-passed: number ;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-ExpectedLevelId: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-courseEnrollmentId: number  | null;
-@ApiProperty({
-  type: () => CourseEnrollment,
-  required: false,
-  nullable: true,
-})
-course_enrollment?: CourseEnrollment  | null;
-@ApiProperty({
-  type: () => SkillExpectedLevel,
-  required: false,
-  nullable: true,
-})
-skill_expected_level?: SkillExpectedLevel  | null;
+studentId: number ;
 @ApiProperty({
   type: () => Student,
   required: false,
-  nullable: true,
 })
-student?: Student  | null;
+student?: Student ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+courseId: number ;
+@ApiProperty({
+  type: () => Course,
+  required: false,
+})
+course?: Course ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+cloId: number ;
+@ApiProperty({
+  type: () => Clo,
+  required: false,
+})
+clo?: Clo ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+skillId: number ;
+@ApiProperty({
+  type: () => Skill,
+  required: false,
+})
+skill?: Skill ;
 }

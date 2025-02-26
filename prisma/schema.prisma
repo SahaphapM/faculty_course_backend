@@ -59,25 +59,26 @@ model course {
   /// @DtoRelationIncludeId
   subjectId          Int
   subject            subject             @relation(fields: [subjectId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  course_enrollments course_enrollment[]
+  // course_enrollments course_enrollment[]
   course_instructors course_instructor[]
+  skill_collections  skill_collection[]
 
   @@index([subjectId])
 }
 
-model course_enrollment {
-  id                Int                @id @default(autoincrement())
-  /// @DtoRelationIncludeId
-  courseId          Int?
-  /// @DtoRelationIncludeId
-  studentId         Int?
-  course            course?            @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  student           student?           @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  skill_collections skill_collection[]
+// model course_enrollment {
+//   id                Int                @id @default(autoincrement())
+//   /// @DtoRelationIncludeId
+//   courseId          Int?
+//   /// @DtoRelationIncludeId
+//   studentId         Int?
+//   course            course?            @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+//   student           student?           @relation(fields: [studentId], references: [id], onDelete: Cascade)
+//   skill_collections skill_collection[]
 
-  @@index([courseId])
-  @@index([studentId])
-}
+//   @@index([courseId])
+//   @@index([studentId])
+// }
 
 model course_instructor {
   instructorId Int
@@ -204,20 +205,20 @@ model plo {
 }
 
 model clo {
-  id              Int     @id @default(autoincrement())
-  name            String? @db.VarChar(255)
+  id               Int                @id @default(autoincrement())
+  name             String?            @db.VarChar(255)
+  thaiDescription  String?            @db.Text
+  engDescription   String?            @db.Text
   /// @DtoRelationIncludeId
-  ploId           Int?
+  ploId            Int?
+  plo              plo?               @relation(fields: [ploId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   /// @DtoRelationIncludeId
-  subjectId       Int?
-  thaiDescription String? @db.Text
-  engDescription  String? @db.Text
+  subjectId        Int?
+  subject          subject?           @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   /// @DtoRelationIncludeId
-  skillId         Int? // New reference to a single skill
-
-  plo     plo?     @relation(fields: [ploId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  subject subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  skill   skill?   @relation(fields: [skillId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  skillId          Int? // New reference to a single skill
+  skill            skill?             @relation(fields: [skillId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  skill_collection skill_collection[]
 
   @@index([ploId])
   @@index([subjectId])
@@ -240,10 +241,11 @@ model skill {
   subs            skill[] @relation("SkillHierarchy")
 
   // One-to-Many relation: A skill can have multiple CLOs
-  clos clo[] // CLOs now belong to a single skill
+  clos clo[] 
 
   curriculum           curriculum             @relation(fields: [curriculumId], references: [id])
   skill_expected_level skill_expected_level[]
+  skill_collection     skill_collection[]
 }
 
 // * if skill just have 1 level sub-skill, this no need
@@ -261,54 +263,67 @@ model skill {
 //   @@index([ancestorId])
 // }
 
+// * count as course enrollment of student
 model skill_collection {
-  id                   Int                   @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
+  gained    Int     @default(0) @db.TinyInt //level 1-5
+  expected  Int     @default(0) @db.TinyInt //level 1-5 @map("passed")
+  // courseEnrollmentId   Int?
+  // course_enrollment    course_enrollment?    @relation(fields: [courseEnrollmentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  // ExpectedLevelId      Int?
+  // skill_expected_level skill_expected_level? @relation(fields: [ExpectedLevelId], references: [id], onDelete: Cascade)
   /// @DtoRelationIncludeId
-  studentId            Int?
-  gainedLevel          Int                   @default(0)
-  passed               Int                   @default(0) @db.TinyInt
-  ExpectedLevelId      Int?
-  courseEnrollmentId   Int?
-  course_enrollment    course_enrollment?    @relation(fields: [courseEnrollmentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  skill_expected_level skill_expected_level? @relation(fields: [ExpectedLevelId], references: [id], onDelete: Cascade)
-  student              student?              @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  studentId Int
+  student   student @relation(fields: [studentId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  /// @DtoRelationIncludeId
+  courseId  Int
+  course    course  @relation(fields: [courseId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  /// @DtoRelationIncludeId
+  cloId     Int
+  clo       clo     @relation(fields: [cloId], references: [id], onUpdate: Cascade, onDelete: Cascade)
+  /// @DtoRelationIncludeId
+  skillId   Int
+  skill     skill   @relation(fields: [skillId], references: [id], onUpdate: Cascade, onDelete: Cascade)
 
-  @@index([courseEnrollmentId])
-  @@index([ExpectedLevelId])
+  // @@index([courseEnrollmentId])
+  // @@index([ExpectedLevelId])
   @@index([studentId])
+  @@index([courseId])
+  @@index([cloId])
+  @@index([skillId])
 }
 
 model skill_expected_level {
-  id                Int                @id @default(autoincrement())
+  id            Int      @id @default(autoincrement())
   /// @DtoRelationIncludeId
-  skillId           Int?
+  skillId       Int?
   /// @DtoRelationIncludeId
-  subjectId         Int?
-  expectedLevel     Int?
-  skill_collections skill_collection[]
-  skill             skill?             @relation(fields: [skillId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subject           subject?           @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
+  subjectId     Int?
+  expectedLevel Int?
+  // skill_collections skill_collection[]
+  skill         skill?   @relation(fields: [skillId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  subject       subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
 
   @@index([skillId])
   @@index([subjectId])
 }
 
 model student {
-  id                 Int                 @id @default(autoincrement())
-  engName            String?             @db.VarChar(255)
-  enrollmentDate     DateTime?           @db.DateTime(0)
-  socials            Json? // Better for multiple social links, Prisma will store this as TEXT in MariaDB
-  code               String              @db.VarChar(255)
-  thaiName           String              @db.VarChar(255)
+  id                Int                @id @default(autoincrement())
+  code              String             @db.VarChar(255) // * need to define code first and other can be null on initial
+  engName           String?            @db.VarChar(255)
+  enrollmentDate    DateTime?          @db.DateTime(0)
+  socials           Json? // Better for multiple social links, Prisma will store this as TEXT in MariaDB
+  thaiName          String?            @db.VarChar(255)
   // One to many
-  course_enrollments course_enrollment[]
-  skill_collections  skill_collection[]
+  // course_enrollments course_enrollment[]
+  skill_collections skill_collection[]
   /// @DtoRelationIncludeId
-  branchId           Int
-  branch             branch              @relation(fields: [branchId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  branchId          Int?
+  branch            branch?            @relation(fields: [branchId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   /// @DtoRelationIncludeId
-  userId             Int?
-  user               user?
+  userId            Int?
+  user              user?
 }
 
 model lesson {

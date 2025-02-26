@@ -91,12 +91,18 @@ export class SubjectService {
         curriculumId: dto.curriculumId,
         subjectId: subject.id,
       },
-    });
+    });;
     // copy subject
     await this.prisma.lesson.create({
       data: {
         thaiName: dto.thaiName,
         engName: dto.engName,
+        subjectId: subject.id,
+      },
+    });
+    // create course
+    await this.prisma.course.create({
+      data: {
         subjectId: subject.id,
       },
     });

@@ -10,6 +10,13 @@ export class UpdateStudentDto {
   @ApiProperty({
   type: 'string',
   required: false,
+})
+@IsOptional()
+@IsString()
+code?: string ;
+@ApiProperty({
+  type: 'string',
+  required: false,
   nullable: true,
 })
 @IsOptional()
@@ -34,25 +41,20 @@ socials?: Prisma.InputJsonValue  | Prisma.NullableJsonNullValueInput;
 @ApiProperty({
   type: 'string',
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @IsString()
-code?: string ;
-@ApiProperty({
-  type: 'string',
-  required: false,
-})
-@IsOptional()
-@IsString()
-thaiName?: string ;
+thaiName?: string  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @IsInt()
-branchId?: number ;
+branchId?: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

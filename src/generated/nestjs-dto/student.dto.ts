@@ -11,6 +11,10 @@ export class StudentDto {
 id: number ;
 @ApiProperty({
   type: 'string',
+})
+code: string ;
+@ApiProperty({
+  type: 'string',
   nullable: true,
 })
 engName: string  | null;
@@ -27,17 +31,15 @@ enrollmentDate: Date  | null;
 socials: Prisma.JsonValue  | null;
 @ApiProperty({
   type: 'string',
+  nullable: true,
 })
-code: string ;
-@ApiProperty({
-  type: 'string',
-})
-thaiName: string ;
+thaiName: string  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
+  nullable: true,
 })
-branchId: number ;
+branchId: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

@@ -1,6 +1,5 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {SkillCollection} from './skillCollection.entity'
 import {Skill} from './skill.entity'
 import {Subject} from './subject.entity'
 
@@ -29,12 +28,6 @@ subjectId: number  | null;
   nullable: true,
 })
 expectedLevel: number  | null;
-@ApiProperty({
-  type: () => SkillCollection,
-  isArray: true,
-  required: false,
-})
-skill_collections?: SkillCollection[] ;
 @ApiProperty({
   type: () => Skill,
   required: false,

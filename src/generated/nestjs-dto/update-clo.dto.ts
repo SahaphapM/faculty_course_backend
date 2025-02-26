@@ -15,6 +15,22 @@ export class UpdateCloDto {
 @IsString()
 name?: string  | null;
 @ApiProperty({
+  type: 'string',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsString()
+thaiDescription?: string  | null;
+@ApiProperty({
+  type: 'string',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsString()
+engDescription?: string  | null;
+@ApiProperty({
   type: 'integer',
   format: 'int32',
   required: false,
@@ -32,22 +48,6 @@ ploId?: number  | null;
 @IsOptional()
 @IsInt()
 subjectId?: number  | null;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-thaiDescription?: string  | null;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-engDescription?: string  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

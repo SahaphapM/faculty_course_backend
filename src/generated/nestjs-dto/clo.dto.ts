@@ -14,6 +14,16 @@ id: number ;
 })
 name: string  | null;
 @ApiProperty({
+  type: 'string',
+  nullable: true,
+})
+thaiDescription: string  | null;
+@ApiProperty({
+  type: 'string',
+  nullable: true,
+})
+engDescription: string  | null;
+@ApiProperty({
   type: 'integer',
   format: 'int32',
   nullable: true,
@@ -25,16 +35,6 @@ ploId: number  | null;
   nullable: true,
 })
 subjectId: number  | null;
-@ApiProperty({
-  type: 'string',
-  nullable: true,
-})
-thaiDescription: string  | null;
-@ApiProperty({
-  type: 'string',
-  nullable: true,
-})
-engDescription: string  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

@@ -4,12 +4,13 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { Prisma } from '@prisma/client';
 import { StudentsService } from '../students/students.service';
+import { FilterCourse } from 'src/dto/filter-course.dto';
+import { ScoreSkillCollectionDto } from 'src/dto/score-collection.dto';
 
 @Injectable()
 export class CourseService {
@@ -51,19 +52,25 @@ export class CourseService {
   }
 
   // Find all courses with pagination and search
-  async findAll(pag?: FilterParams) {
+  async findAll(pag?: FilterCourse) {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { code, limit, page, orderBy } = pag || {};
+    const { code, limit, page, orderBy, branchId } = pag || {};
 
     const whereCondition: Prisma.courseWhereInput = {
       ...(code && { subject: { code: { contains: code } } }),
+      ...(branchId && {
+        subject: {
+          curriculums: { some: { curriculum: { branch: { id: branchId } } } },
+        },
+      }),
     };
 
     const includeCondition: Prisma.courseInclude = {
-      course_enrollments: { include: { student: true } },
+      // course_enrollments: { include: { student: true } },
       course_instructors: true,
+      subject: true
     };
 
     if (!pag) {
@@ -130,7 +137,73 @@ export class CourseService {
     }
   }
 
-  // Find course enrollments by course ID
+  // Update an existing course
+  async update(id: number, updateCourseDto: UpdateCourseDto) {
+    try {
+      const course = await this.prisma.course.update({
+        where: { id },
+        data: updateCourseDto,
+        include: {
+          subject: true,
+          course_instructors: true,
+        },
+      });
+      return course;
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Course with ID ${id} not found`);
+      }
+      throw new BadRequestException('Failed to update course');
+    }
+  }
+
+  // Delete a course by ID
+  async remove(id: number): Promise<void> {
+    try {
+      await this.prisma.course.delete({
+        where: { id },
+      });
+    } catch (error) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Course with ID ${id} not found`);
+      }
+      throw new BadRequestException('Failed to delete course');
+    }
+  }
+
+  async upsertSkillCollection(courseId: number, dto: ScoreSkillCollectionDto) {
+    if (!courseId || !dto) {
+      throw new BadRequestException('Invalid request');
+    }
+
+    const { cloId, skillId, branchId, students } = dto;
+
+    try {
+      const studentsCreated = await this.prisma.student.createMany({
+        data: students.map((student) => ({
+          code: student.studentCode,
+          branchId: branchId,
+        })),
+        skipDuplicates: true,
+      });
+
+      await this.prisma.skill_collection.createMany({
+        data: students.map((student, index) => ({
+          courseId,
+          cloId,
+          skillId,
+          studentId: studentsCreated[index]?.id,
+        })),
+      });
+    } catch (error) {
+      throw new BadRequestException(
+        'Failed to upsert skill collection: ' + error.message,
+      );
+    }
+  }
+
+  // * all below is old code
+  /* Find course enrollments by course ID
   async findCourseEnrollmentByCourseId(id: number) {
     try {
       const courseEnrollments = await this.prisma.course_enrollment.findMany({
@@ -168,41 +241,7 @@ export class CourseService {
     }
   }
 
-  // Update an existing course
-  async update(id: number, updateCourseDto: UpdateCourseDto) {
-    try {
-      const course = await this.prisma.course.update({
-        where: { id },
-        data: updateCourseDto,
-        include: {
-          subject: true,
-          course_instructors: true,
-        },
-      });
-      return course;
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Course with ID ${id} not found`);
-      }
-      throw new BadRequestException('Failed to update course');
-    }
-  }
-
-  // Delete a course by ID
-  async remove(id: number): Promise<void> {
-    try {
-      await this.prisma.course.delete({
-        where: { id },
-      });
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Course with ID ${id} not found`);
-      }
-      throw new BadRequestException('Failed to delete course');
-    }
-  }
-
-  // Import students into a course
+  Import students into a course
   async importStudents(id: number, studentListCode: string[]) {
     const course = await this.findOne(+id);
 
@@ -261,5 +300,5 @@ export class CourseService {
       }
       throw new BadRequestException('Failed to remove enrollment');
     }
-  }
+  } */
 }

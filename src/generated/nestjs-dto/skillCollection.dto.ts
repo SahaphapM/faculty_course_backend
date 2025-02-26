@@ -11,17 +11,31 @@ id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-studentId: number  | null;
+gained: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
 })
-gainedLevel: number ;
+expected: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
 })
-passed: number ;
+studentId: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+courseId: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+cloId: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+skillId: number ;
 }

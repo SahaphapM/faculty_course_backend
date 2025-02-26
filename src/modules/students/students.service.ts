@@ -131,11 +131,6 @@ export class StudentsService {
       const student = await this.prisma.student.findUnique({
         where: { id },
         include: {
-          course_enrollments: {
-            include: {
-              course: true,
-            },
-          },
           skill_collections: true,
         },
       });

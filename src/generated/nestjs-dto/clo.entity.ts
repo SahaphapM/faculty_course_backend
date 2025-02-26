@@ -3,6 +3,7 @@ import {ApiProperty} from '@nestjs/swagger'
 import {Plo} from './plo.entity'
 import {Subject} from './subject.entity'
 import {Skill} from './skill.entity'
+import {SkillCollection} from './skillCollection.entity'
 
 
 export class Clo {
@@ -16,18 +17,6 @@ id: number ;
   nullable: true,
 })
 name: string  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-ploId: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-subjectId: number  | null;
 @ApiProperty({
   type: 'string',
   nullable: true,
@@ -43,7 +32,7 @@ engDescription: string  | null;
   format: 'int32',
   nullable: true,
 })
-skillId: number  | null;
+ploId: number  | null;
 @ApiProperty({
   type: () => Plo,
   required: false,
@@ -51,15 +40,33 @@ skillId: number  | null;
 })
 plo?: Plo  | null;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+subjectId: number  | null;
+@ApiProperty({
   type: () => Subject,
   required: false,
   nullable: true,
 })
 subject?: Subject  | null;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+skillId: number  | null;
+@ApiProperty({
   type: () => Skill,
   required: false,
   nullable: true,
 })
 skill?: Skill  | null;
+@ApiProperty({
+  type: () => SkillCollection,
+  isArray: true,
+  required: false,
+})
+skill_collection?: SkillCollection[] ;
 }

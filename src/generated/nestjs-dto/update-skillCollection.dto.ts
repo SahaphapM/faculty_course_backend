@@ -10,9 +10,32 @@ export class UpdateSkillCollectionDto {
   type: 'integer',
   format: 'int32',
   required: false,
-  nullable: true,
 })
 @IsOptional()
 @IsInt()
-studentId?: number  | null;
+studentId?: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+})
+@IsOptional()
+@IsInt()
+courseId?: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+})
+@IsOptional()
+@IsInt()
+cloId?: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+})
+@IsOptional()
+@IsInt()
+skillId?: number ;
 }
