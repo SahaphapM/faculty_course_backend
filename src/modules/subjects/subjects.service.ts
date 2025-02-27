@@ -115,6 +115,10 @@ export class SubjectService {
       },
     });
     await this.prisma.curriculum_subjects.updateMany({
+      where: {
+        subjectId: subject.id, // Match the subject being updated
+        curriculumId: dto.curriculumId, // Match the intended curriculum
+      },
       data: {
         curriculumId: dto.curriculumId,
         subjectId: subject.id,
