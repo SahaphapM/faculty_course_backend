@@ -6,11 +6,10 @@ import {
   Patch,
   Param,
   Delete,
-  ParseIntPipe,
 } from '@nestjs/common';
 import { CourseService } from './courses.service';
 import { Query } from '@nestjs/common';
-import { FilterParams, StudentScoreList } from 'src/dto/filter-params.dto';
+import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
@@ -49,21 +48,5 @@ export class CoursesController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.coursesService.remove(+id);
-  }
-
-  /////// import skill collections
-  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
-  @Patch('import/skill-collections')
-  importSkill(
-    @Query('courseId', ParseIntPipe) courseId: number,
-    @Query('cloId', ParseIntPipe) cloId: number, // ✅ รับค่าจาก Query Params
-    @Body() studentScoreList: StudentScoreList[], // ✅ ใช้ DTO
-  ) {
-    console.log('Import Path');
-    return this.coursesService.importSkillCollections(
-      courseId,
-      cloId,
-      studentScoreList,
-    );
   }
 }
