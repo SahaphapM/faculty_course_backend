@@ -59,24 +59,10 @@ model course {
   /// @DtoRelationIncludeId
   subjectId          Int
   subject            subject             @relation(fields: [subjectId], references: [id], onDelete: Restrict, onUpdate: Cascade)
-  course_enrollments course_enrollment[]
+
   course_instructors course_instructor[]
-
+  skill_collections  skill_collection[]
   @@index([subjectId])
-}
-
-model course_enrollment {
-  id                Int                @id @default(autoincrement())
-  /// @DtoRelationIncludeId
-  courseId          Int?
-  /// @DtoRelationIncludeId
-  studentId         Int?
-  course            course?            @relation(fields: [courseId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  student           student?           @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  skill_collections skill_collection[]
-
-  @@index([courseId])
-  @@index([studentId])
 }
 
 model course_instructor {
@@ -104,7 +90,6 @@ model subject {
   clos                 clo[]
   lesson               lesson?
   curriculums          curriculum_subjects[]
-  skill_expected_level skill_expected_level[]
   courses              course[]
 
   @@index([curriculumId])
@@ -132,6 +117,19 @@ model curriculum {
   @@index([branchId])
 }
 
+model curriculum_subjects {
+  /// @DtoRelationIncludeId
+  curriculumId Int
+  /// @DtoRelationIncludeId
+  subjectId    Int
+  subject      subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  curriculum   curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@id([curriculumId, subjectId])
+  @@index([subjectId])
+  @@index([curriculumId])
+}
+
 model curriculum_coordinators {
   /// @DtoRelationIncludeId
   instructorId Int
@@ -145,18 +143,6 @@ model curriculum_coordinators {
   @@index([curriculumId])
 }
 
-model curriculum_subjects {
-  /// @DtoRelationIncludeId
-  curriculumId Int
-  /// @DtoRelationIncludeId
-  subjectId    Int
-  subject      subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  curriculum   curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-
-  @@id([curriculumId, subjectId])
-  @@index([subjectId])
-  @@index([curriculumId])
-}
 
 model faculty {
   id              Int      @id @default(autoincrement())
@@ -214,10 +200,13 @@ model clo {
   engDescription  String? @db.Text
   /// @DtoRelationIncludeId
   skillId         Int? // New reference to a single skill
+  expectSkillLevel Int? @db.TinyInt 
 
   plo     plo?     @relation(fields: [ploId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   subject subject? @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   skill   skill?   @relation(fields: [skillId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  skill_collections skill_collection[]
+ 
 
   @@index([ploId])
   @@index([subjectId])
@@ -243,7 +232,6 @@ model skill {
   clos clo[] // CLOs now belong to a single skill
 
   curriculum           curriculum             @relation(fields: [curriculumId], references: [id])
-  skill_expected_level skill_expected_level[]
 }
 
 // * if skill just have 1 level sub-skill, this no need
@@ -266,49 +254,34 @@ model skill_collection {
   /// @DtoRelationIncludeId
   studentId            Int?
   gainedLevel          Int                   @default(0)
-  passed               Int                   @default(0) @db.TinyInt
-  ExpectedLevelId      Int?
-  courseEnrollmentId   Int?
-  course_enrollment    course_enrollment?    @relation(fields: [courseEnrollmentId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-  skill_expected_level skill_expected_level? @relation(fields: [ExpectedLevelId], references: [id], onDelete: Cascade)
+  passed               Boolean               @default(false)
+  cloId                Int?
+  courseId             Int?
+  course               course?               @relation(fields: [courseId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  clo                  clo?                  @relation(fields: [cloId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   student              student?              @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
-  @@index([courseEnrollmentId])
-  @@index([ExpectedLevelId])
-  @@index([studentId])
-}
-
-model skill_expected_level {
-  id                Int                @id @default(autoincrement())
-  /// @DtoRelationIncludeId
-  skillId           Int?
-  /// @DtoRelationIncludeId
-  subjectId         Int?
-  expectedLevel     Int?
-  skill_collections skill_collection[]
-  skill             skill?             @relation(fields: [skillId], references: [id], onDelete: NoAction, onUpdate: NoAction)
-  subject           subject?           @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: NoAction)
-
-  @@index([skillId])
-  @@index([subjectId])
+  // Indexes
+  @@index([studentId, cloId, courseId]) // Index เร่งความเร็วในการค้นหาด้วย studentId, cloId, courseId
 }
 
 model student {
   id                 Int                 @id @default(autoincrement())
+  code               String              @unique @db.VarChar(255)
   engName            String?             @db.VarChar(255)
   enrollmentDate     DateTime?           @db.DateTime(0)
   socials            Json? // Better for multiple social links, Prisma will store this as TEXT in MariaDB
-  code               String              @db.VarChar(255)
-  thaiName           String              @db.VarChar(255)
+  thaiName           String?              @db.VarChar(255)
   // One to many
-  course_enrollments course_enrollment[]
   skill_collections  skill_collection[]
   /// @DtoRelationIncludeId
-  branchId           Int
-  branch             branch              @relation(fields: [branchId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  branchId           Int?
+  branch             branch?              @relation(fields: [branchId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   /// @DtoRelationIncludeId
   userId             Int?
   user               user?
+
+  @@index([code]) // Index เร่งความเร็วในการค้นหาด้วย code
 }
 
 model lesson {

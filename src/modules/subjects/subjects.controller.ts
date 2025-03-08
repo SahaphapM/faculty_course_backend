@@ -14,7 +14,9 @@ import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
 import { FilterParams } from 'src/dto/filter-params.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('subjects')
 export class SubjectController {
   constructor(private readonly courseSpecsService: SubjectService) {}

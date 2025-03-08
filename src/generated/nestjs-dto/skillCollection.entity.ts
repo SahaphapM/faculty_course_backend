@@ -1,7 +1,7 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {CourseEnrollment} from './courseEnrollment.entity'
-import {SkillExpectedLevel} from './skillExpectedLevel.entity'
+import {Course} from './course.entity'
+import {Clo} from './clo.entity'
 import {Student} from './student.entity'
 
 
@@ -23,34 +23,33 @@ studentId: number  | null;
 })
 gainedLevel: number ;
 @ApiProperty({
-  type: 'integer',
-  format: 'int32',
+  type: 'boolean',
 })
-passed: number ;
+passed: boolean ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
   nullable: true,
 })
-ExpectedLevelId: number  | null;
+cloId: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
   nullable: true,
 })
-courseEnrollmentId: number  | null;
+courseId: number  | null;
 @ApiProperty({
-  type: () => CourseEnrollment,
+  type: () => Course,
   required: false,
   nullable: true,
 })
-course_enrollment?: CourseEnrollment  | null;
+course?: Course  | null;
 @ApiProperty({
-  type: () => SkillExpectedLevel,
+  type: () => Clo,
   required: false,
   nullable: true,
 })
-skill_expected_level?: SkillExpectedLevel  | null;
+clo?: Clo  | null;
 @ApiProperty({
   type: () => Student,
   required: false,

@@ -6,10 +6,11 @@ import {
   Patch,
   Param,
   Delete,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { CourseService } from './courses.service';
 import { Query } from '@nestjs/common';
-import { FilterParams } from 'src/dto/filter-params.dto';
+import { FilterParams, StudentScoreList } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
@@ -37,14 +38,10 @@ export class CoursesController {
     return this.coursesService.findOne(+id);
   }
 
-  @Get(':id/enrollments')
-  findCourseEnrollment(@Param('id') id: string) {
-    return this.coursesService.findCourseEnrollmentByCourseId(+id);
-  }
-
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateCourseDto: UpdateCourseDto) {
+    console.log('Update Path', updateCourseDto);
     return this.coursesService.update(+id, updateCourseDto);
   }
 
@@ -54,21 +51,19 @@ export class CoursesController {
     return this.coursesService.remove(+id);
   }
 
+  /////// import skill collections
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
-  @Patch(':id/import-students')
-  importStudents(
-    @Param('id') courseId: string,
-    @Body() studentListId: string[],
+  @Patch('import/skill-collections')
+  importSkill(
+    @Query('courseId', ParseIntPipe) courseId: number,
+    @Query('cloId', ParseIntPipe) cloId: number, // ✅ รับค่าจาก Query Params
+    @Body() studentScoreList: StudentScoreList[], // ✅ ใช้ DTO
   ) {
-    return this.coursesService.importStudents(+courseId, studentListId);
-  }
-
-  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
-  @Delete(':id/remove-enrollment/:enId')
-  removeStudent(
-    @Param('id') courseId: string,
-    @Param('enId') enrollId: number,
-  ) {
-    return this.coursesService.removeEnrollment(+courseId, enrollId);
+    console.log('Import Path');
+    return this.coursesService.importSkillCollections(
+      courseId,
+      cloId,
+      studentScoreList,
+    );
   }
 }

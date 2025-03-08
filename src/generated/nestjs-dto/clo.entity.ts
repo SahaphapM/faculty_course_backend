@@ -3,6 +3,7 @@ import {ApiProperty} from '@nestjs/swagger'
 import {Plo} from './plo.entity'
 import {Subject} from './subject.entity'
 import {Skill} from './skill.entity'
+import {SkillCollection} from './skillCollection.entity'
 
 
 export class Clo {
@@ -45,6 +46,12 @@ engDescription: string  | null;
 })
 skillId: number  | null;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+expectSkillLevel: number  | null;
+@ApiProperty({
   type: () => Plo,
   required: false,
   nullable: true,
@@ -62,4 +69,10 @@ subject?: Subject  | null;
   nullable: true,
 })
 skill?: Skill  | null;
+@ApiProperty({
+  type: () => SkillCollection,
+  isArray: true,
+  required: false,
+})
+skill_collections?: SkillCollection[] ;
 }

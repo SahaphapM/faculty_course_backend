@@ -23,6 +23,7 @@ export class ClosService {
             ? { subject: { connect: { id: dto.subjectId } } }
             : {}),
           ...(dto.ploId ? { plo: { connect: { id: dto.ploId } } } : {}),
+          ...(dto.skillId ? { skill: { connect: { id: dto.skillId } } } : {}),
         },
       });
     } catch (error) {
@@ -37,7 +38,7 @@ export class ClosService {
 
     // Prisma query options
     const whereCondition: Prisma.cloWhereInput = {
-      subjectId : Number(subjectId),
+      subjectId: Number(subjectId),
     };
 
     const options: Prisma.cloFindManyArgs = {

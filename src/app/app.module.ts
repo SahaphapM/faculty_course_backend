@@ -37,11 +37,11 @@ import { InstructorsModule } from 'src/modules/instructors/instructors.module';
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    AuthModule,
+    // AuthModule,
     StudentsModule,
     CoursesModule,
     SubjectModule,
-    InstructorsModule
+    InstructorsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

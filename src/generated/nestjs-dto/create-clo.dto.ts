@@ -57,4 +57,13 @@ engDescription?: string  | null;
 @IsOptional()
 @IsInt()
 skillId?: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+expectSkillLevel?: number  | null;
 }

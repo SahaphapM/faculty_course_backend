@@ -20,8 +20,7 @@ studentId: number  | null;
 })
 gainedLevel: number ;
 @ApiProperty({
-  type: 'integer',
-  format: 'int32',
+  type: 'boolean',
 })
-passed: number ;
+passed: boolean ;
 }

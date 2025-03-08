@@ -4,18 +4,21 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { FilterParams } from 'src/dto/filter-params.dto';
+import { FilterParams, StudentScoreList } from 'src/dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { Prisma } from '@prisma/client';
 import { StudentsService } from '../students/students.service';
+import { ClosService } from '../clos/clos.service';
+import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
 
 @Injectable()
 export class CourseService {
   constructor(
     private prisma: PrismaService,
     private studentService: StudentsService,
+    private cloService: ClosService,
   ) {}
 
   // Create a new course
@@ -62,7 +65,7 @@ export class CourseService {
     };
 
     const includeCondition: Prisma.courseInclude = {
-      course_enrollments: { include: { student: true } },
+      skill_collections: { include: { student: true } },
       course_instructors: true,
     };
 
@@ -104,14 +107,9 @@ export class CourseService {
         include: {
           subject: {
             include: {
-              skill_expected_level: {
+              clos: {
                 include: {
-                  skill: {
-                    include: {
-                      parent: true,
-                      subs: true,
-                    },
-                  },
+                  skill: true,
                 },
               },
             },
@@ -130,46 +128,9 @@ export class CourseService {
     }
   }
 
-  // Find course enrollments by course ID
-  async findCourseEnrollmentByCourseId(id: number) {
-    try {
-      const courseEnrollments = await this.prisma.course_enrollment.findMany({
-        where: { courseId: id },
-        include: {
-          student: true,
-          skill_collections: {
-            include: {
-              skill_expected_level: {
-                include: {
-                  skill: {
-                    include: {
-                      parent: true,
-                      subs: true,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
-      });
-
-      if (!courseEnrollments) {
-        throw new NotFoundException(
-          `Course enrollments for course ID ${id} not found`,
-        );
-      }
-
-      return courseEnrollments;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to fetch course enrollments',
-      );
-    }
-  }
-
   // Update an existing course
   async update(id: number, updateCourseDto: UpdateCourseDto) {
+    console.log('Update Path 2');
     try {
       const course = await this.prisma.course.update({
         where: { id },
@@ -184,7 +145,7 @@ export class CourseService {
       if (error.code === 'P2025') {
         throw new NotFoundException(`Course with ID ${id} not found`);
       }
-      throw new BadRequestException('Failed to update course');
+      throw new BadRequestException('Failed to update course' + error.message);
     }
   }
 
@@ -202,64 +163,84 @@ export class CourseService {
     }
   }
 
-  // Import students into a course
-  async importStudents(id: number, studentListCode: string[]) {
-    const course = await this.findOne(+id);
+  // import skill collections for students by clo id
+  async importSkillCollections(
+    courseId: number,
+    cloId: number,
+    studentScoreList: StudentScoreList[],
+  ): Promise<SkillCollection[]> {
+    console.log('Import Path 2', courseId, cloId, studentScoreList);
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+    });
+
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${courseId} not found`);
+    }
+
+    const clo = await this.cloService.findOne(cloId);
+
+    const skillCollections = [];
 
     if (!course.subjectId) {
       throw new BadRequestException(
-        'Course must have a subject before importing students',
+        'Course must have a subject before importing skill collections',
       );
     }
 
-    const students = await this.studentService.findManyByCode(studentListCode);
-    const missingStudents = studentListCode.filter(
-      (code) => !students.some((student) => student.code === code),
-    );
-
-    if (missingStudents.length > 0) {
-      throw new NotFoundException(
-        `Students with IDs ${missingStudents.join(', ')} not found`,
-      );
+    if (!clo) {
+      throw new NotFoundException(`CLO with ID ${cloId} not found`);
     }
 
-    // Bulk insert course enrollments
-    await this.prisma.course_enrollment.createMany({
-      data: students.map((student) => ({
-        studentId: student.id,
-        courseId: course.id,
-      })),
-      skipDuplicates: true, // Avoid duplicate enrollments
-    });
-
-    await this.prisma.skill_collection.createMany({
-      data: students.map(
-        (student) =>
-          ({
-            studentId: student.id,
-            courseId: course.id,
-          }) as Prisma.skill_collectionCreateManyInput,
-      ),
-      skipDuplicates: true, // Avoid duplicate skill records
-    });
-
-    return await this.findOne(id);
-  }
-
-  // Remove a student enrollment from a course
-  async removeEnrollment(courseId: number, courseStudentDetailId: number) {
-    try {
-      await this.prisma.course_enrollment.delete({
-        where: { id: courseStudentDetailId },
+    for (const studentScore of studentScoreList) {
+      let student = await this.prisma.student.findUnique({
+        where: { code: studentScore.studentCode },
       });
-      return await this.findOne(courseId);
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(
-          `Enrollment with ID ${courseStudentDetailId} not found`,
-        );
+      if (!student) {
+        // create student with code
+        const newStudent = await this.prisma.student.create({
+          data: {
+            code: studentScore.studentCode,
+          },
+        });
+        student = newStudent;
       }
-      throw new BadRequestException('Failed to remove enrollment');
+      // check if student has skill collection of this course and clo
+      let skillCollection = await this.prisma.skill_collection.findFirst({
+        where: {
+          studentId: student.id,
+          courseId: course.id,
+          cloId: clo.id,
+        },
+      });
+      if (skillCollection) {
+        // update skill collection
+        skillCollection = await this.prisma.skill_collection.update({
+          where: {
+            id: skillCollection.id,
+          },
+          data: {
+            gainedLevel: studentScore.gained,
+            // check if score more than clo expect skill level
+            passed: studentScore.gained >= clo.expectSkillLevel ? true : false,
+          },
+        });
+      } else {
+        // create skill collection for student
+        skillCollection = await this.prisma.skill_collection.create({
+          data: {
+            studentId: student.id, // FK เชื่อมกับ student
+            courseId: course.id, // FK เชื่อมกับ course
+            cloId: clo.id, // FK เชื่อมกับ clo
+            gainedLevel: studentScore.gained, // ค่าที่ได้จาก studentScore
+            // check if score more than clo expect skill level
+            passed: studentScore.gained >= clo.expectSkillLevel ? true : false,
+          },
+        });
+      }
+
+      skillCollections.push(skillCollection);
     }
+    return skillCollections;
   }
 }

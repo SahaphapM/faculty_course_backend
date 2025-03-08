@@ -9,6 +9,12 @@ import {IsDateString,IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator
 export class CreateStudentDto {
   @ApiProperty({
   type: 'string',
+})
+@IsNotEmpty()
+@IsString()
+code: string ;
+@ApiProperty({
+  type: 'string',
   required: false,
   nullable: true,
 })
@@ -33,23 +39,21 @@ enrollmentDate?: Date  | null;
 socials?: Prisma.InputJsonValue  | Prisma.NullableJsonNullValueInput;
 @ApiProperty({
   type: 'string',
+  required: false,
+  nullable: true,
 })
-@IsNotEmpty()
+@IsOptional()
 @IsString()
-code: string ;
-@ApiProperty({
-  type: 'string',
-})
-@IsNotEmpty()
-@IsString()
-thaiName: string ;
+thaiName?: string  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
+  required: false,
+  nullable: true,
 })
-@IsNotEmpty()
+@IsOptional()
 @IsInt()
-branchId: number ;
+branchId?: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

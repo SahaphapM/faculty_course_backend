@@ -41,4 +41,10 @@ engDescription: string  | null;
   nullable: true,
 })
 skillId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+expectSkillLevel: number  | null;
 }

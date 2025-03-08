@@ -128,4 +128,29 @@ export class UsersService {
       data: { hashedRefreshToken },
     });
   }
+
+  async onModuleInit() {
+    await this.createAdminIfNotExists(); // ✅ Run when the module starts
+  }
+
+  async createAdminIfNotExists() {
+    try {
+      const admin = await this.prisma.user.findUnique({
+        where: { email: 'admin@gmail.com' },
+      });
+
+      if (!admin) {
+        const hashedPassword = await bycrpt.hash('12345', 10);
+        await this.prisma.user.create({
+          data: {
+            email: 'admin@gmail.com',
+            password: hashedPassword,
+            role: 'ADMIN',
+          },
+        });
+      }
+    } catch (error) {
+      console.error('Error creating admin:', error);
+    }
+  }
 }

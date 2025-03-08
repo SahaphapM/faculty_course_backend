@@ -85,6 +85,7 @@ export class SubjectService {
         curriculumId: dto.curriculumId,
       },
     });
+
     // update join table
     await this.prisma.curriculum_subjects.create({
       data: {
@@ -92,6 +93,7 @@ export class SubjectService {
         subjectId: subject.id,
       },
     });
+
     // copy subject
     await this.prisma.lesson.create({
       data: {

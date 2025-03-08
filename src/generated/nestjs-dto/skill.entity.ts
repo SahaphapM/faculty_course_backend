@@ -2,7 +2,6 @@
 import {ApiProperty} from '@nestjs/swagger'
 import {Clo} from './clo.entity'
 import {Curriculum} from './curriculum.entity'
-import {SkillExpectedLevel} from './skillExpectedLevel.entity'
 
 
 export class Skill {
@@ -65,10 +64,4 @@ clos?: Clo[] ;
   required: false,
 })
 curriculum?: Curriculum ;
-@ApiProperty({
-  type: () => SkillExpectedLevel,
-  isArray: true,
-  required: false,
-})
-skill_expected_level?: SkillExpectedLevel[] ;
 }
