@@ -17,6 +17,38 @@ export class SkillCollectiolnsService {
     private cloService: ClosService,
   ) {}
 
+  async getSkillCollectionsByStudentId(studentCode: string) {
+    return this.prisma.student.findMany({
+      where: { code: studentCode },
+      select: {
+        skill_collections: {
+          select: {
+            id: true,
+            gainedLevel: true,
+            passed: true,
+            clo: {
+              select: {
+                id: true,
+                name: true,
+                expectSkillLevel: true,
+                skill: {
+                  select: {
+                    id: true,
+                    thaiName: true,
+                    engName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      // include: {
+      //   skill_collections: { include: { clo: { include: { skill: true } } } },
+      // },
+    });
+  }
+
   async getByCloId(courseId: number, cloId: number) {
     return this.prisma.skill_collection.findMany({
       where: { courseId, cloId },

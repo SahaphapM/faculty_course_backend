@@ -42,4 +42,17 @@ export class SkillCollectiolnsController {
       studentScoreList,
     );
   }
+
+  @Roles(
+    UserRole.Admin,
+    UserRole.Coordinator,
+    UserRole.Instructor,
+    UserRole.Student,
+  )
+  @Get('student')
+  getSkillCollectionByStudentId(@Query('studentCode') studentCode: string) {
+    return this.skillCollectiolnsService.getSkillCollectionsByStudentId(
+      studentCode,
+    );
+  }
 }
