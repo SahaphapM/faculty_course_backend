@@ -1,13 +1,5 @@
 import { Type } from 'class-transformer';
-import {
-  IsOptional,
-  IsPositive,
-  IsInt,
-  IsString,
-  IsNumber,
-} from 'class-validator';
-
-import { ApiProperty } from '@nestjs/swagger';
+import { IsOptional, IsPositive, IsInt, IsString } from 'class-validator';
 
 export class FilterParams {
   // base
@@ -79,24 +71,4 @@ export class FilterParams {
   @IsOptional()
   @IsString()
   email?: string;
-}
-
-export class StudentScoreList {
-  @ApiProperty({
-    type: 'string',
-    required: true,
-    nullable: false,
-    example: '6400000001',
-  })
-  @IsString()
-  studentCode: string;
-
-  @ApiProperty({
-    type: 'integer',
-    required: true,
-    nullable: false,
-    example: 5,
-  })
-  @IsNumber()
-  gained: number;
 }

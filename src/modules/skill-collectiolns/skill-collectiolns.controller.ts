@@ -1,19 +1,33 @@
-import { Controller, Post, Body, Query, ParseIntPipe } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  Query,
+  ParseIntPipe,
+  Get,
+} from '@nestjs/common';
 import { SkillCollectiolnsService } from './skill-collectiolns.service';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
-import { StudentScoreList } from 'src/dto/filter-params.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { StudentScoreList } from 'src/generated/nestjs-dto/studentgained.entity';
 
-@ApiBearerAuth()
 @Controller('skill-collectiolns')
 export class SkillCollectiolnsController {
   constructor(
     private readonly skillCollectiolnsService: SkillCollectiolnsService,
   ) {}
 
-  /////// import skill collections
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @Get()
+  getSkillCollectionByCloId(
+    @Query('courseId', ParseIntPipe) courseId: number,
+    @Query('cloId', ParseIntPipe) cloId: number,
+  ) {
+    // ✅ รับค่าจาก Query Params
+    return this.skillCollectiolnsService.getByCloId(courseId, cloId);
+  }
 
+  /////// import skill collections
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Post('import')
   importSkill(
