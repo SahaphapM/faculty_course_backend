@@ -11,8 +11,9 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
 import { StudentScoreList } from 'src/dto/filter-params.dto';
-import { ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 
+@ApiBearerAuth()
 @Controller('skill-collectiolns')
 export class SkillCollectiolnsController {
   constructor(
