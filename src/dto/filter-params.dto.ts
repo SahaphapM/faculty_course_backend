@@ -72,3 +72,8 @@ export class FilterParams {
   @IsString()
   email?: string;
 }
+
+export class StudentScoreList {
+  studentCode: string;
+  gainedLevel: number;
+}

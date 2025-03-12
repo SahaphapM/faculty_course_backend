@@ -9,7 +9,8 @@ import {
 import { SkillCollectiolnsService } from './skill-collectiolns.service';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
-import { StudentScoreList } from 'src/generated/nestjs-dto/studentgained.entity';
+import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
+import { StudentScoreList } from 'src/dto/filter-params.dto';
 
 @Controller('skill-collectiolns')
 export class SkillCollectiolnsController {
@@ -22,7 +23,7 @@ export class SkillCollectiolnsController {
   getSkillCollectionByCloId(
     @Query('courseId', ParseIntPipe) courseId: number,
     @Query('cloId', ParseIntPipe) cloId: number,
-  ) {
+  ): Promise<Partial<SkillCollection>[]> {
     // ✅ รับค่าจาก Query Params
     return this.skillCollectiolnsService.getByCloId(courseId, cloId);
   }

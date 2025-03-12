@@ -7,7 +7,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { ClosService } from '../clos/clos.service';
 import { StudentsService } from '../students/students.service';
 import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
-import { StudentScoreList } from 'src/generated/nestjs-dto/studentgained.entity';
+import { StudentScoreList } from 'src/dto/filter-params.dto';
 
 @Injectable()
 export class SkillCollectiolnsService {
@@ -49,7 +49,10 @@ export class SkillCollectiolnsService {
     });
   }
 
-  async getByCloId(courseId: number, cloId: number) {
+  async getByCloId(
+    courseId: number,
+    cloId: number,
+  ): Promise<Partial<SkillCollection>[]> {
     return this.prisma.skill_collection.findMany({
       where: { courseId, cloId },
       select: {
@@ -124,9 +127,10 @@ export class SkillCollectiolnsService {
             id: skillCollection.id,
           },
           data: {
-            gainedLevel: studentScore.gained,
+            gainedLevel: studentScore.gainedLevel,
             // check if score more than clo expect skill level
-            passed: studentScore.gained >= clo.expectSkillLevel ? true : false,
+            passed:
+              studentScore.gainedLevel >= clo.expectSkillLevel ? true : false,
           },
         });
       } else {
@@ -136,9 +140,10 @@ export class SkillCollectiolnsService {
             studentId: student.id, // FK เชื่อมกับ student
             courseId: course.id, // FK เชื่อมกับ course
             cloId: clo.id, // FK เชื่อมกับ clo
-            gainedLevel: studentScore.gained, // ค่าที่ได้จาก studentScore
+            gainedLevel: studentScore.gainedLevel, // ค่าที่ได้จาก studentScore
             // check if score more than clo expect skill level
-            passed: studentScore.gained >= clo.expectSkillLevel ? true : false,
+            passed:
+              studentScore.gainedLevel >= clo.expectSkillLevel ? true : false,
           },
         });
       }
