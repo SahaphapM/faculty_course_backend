@@ -8,6 +8,7 @@ import { ClosService } from '../clos/clos.service';
 import { StudentsService } from '../students/students.service';
 import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
 import { StudentScoreList } from 'src/dto/filter-params.dto';
+import { SkillCollectionDto } from 'src/generated/nestjs-dto/skillCollection.dto';
 
 @Injectable()
 export class SkillCollectiolnsService {
@@ -52,7 +53,7 @@ export class SkillCollectiolnsService {
   async getByCloId(
     courseId: number,
     cloId: number,
-  ): Promise<Partial<SkillCollection>[]> {
+  ): Promise<Partial<SkillCollectionDto>[]> {
     return this.prisma.skill_collection.findMany({
       where: { courseId, cloId },
       select: {
