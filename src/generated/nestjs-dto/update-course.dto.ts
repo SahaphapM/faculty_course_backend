@@ -20,6 +20,24 @@ active?: number  | null;
   type: 'integer',
   format: 'int32',
   required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+term?: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+year?: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
 })
 @IsOptional()
 @IsInt()

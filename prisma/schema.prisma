@@ -56,6 +56,9 @@ model branch {
 model course {
   active             Int?                @default(1) @db.TinyInt
   id                 Int                 @id @default(autoincrement())
+  term               Int?                @db.TinyInt
+  year               Int?                @db.TinyInt
+  
   /// @DtoRelationIncludeId
   subjectId          Int
   subject            subject             @relation(fields: [subjectId], references: [id], onDelete: Restrict, onUpdate: Cascade)
