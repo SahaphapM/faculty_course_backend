@@ -80,11 +80,7 @@ export class CourseService {
     const includeCondition: Prisma.courseInclude = {
       // skill_collections: { include: { student: true } },
       course_instructors: true,
-      subject: {
-        include: {
-          curriculums: true,
-        },
-      },
+      subject: true,
     };
 
     if (!pag) {
