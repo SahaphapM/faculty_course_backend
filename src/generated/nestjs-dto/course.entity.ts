@@ -9,26 +9,22 @@ export class Course {
   @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
-})
-active: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
 })
 id: number ;
 @ApiProperty({
-  type: 'integer',
-  format: 'int32',
+  type: 'boolean',
   nullable: true,
 })
-term: number  | null;
+active: boolean  | null;
+@ApiProperty({
+  type: 'string',
+})
+semester: string ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
-  nullable: true,
 })
-year: number  | null;
+year: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

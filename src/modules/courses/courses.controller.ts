@@ -23,7 +23,7 @@ export class CoursesController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Post()
-  create(@Body() createCourseDto: CreateCourseDto) {
+  create(@Body() createCourseDto: CreateCourseDto[]) {
     return this.coursesService.create(createCourseDto);
   }
 

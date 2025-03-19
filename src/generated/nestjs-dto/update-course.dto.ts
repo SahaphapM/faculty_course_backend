@@ -1,39 +1,35 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {IsInt,IsOptional} from 'class-validator'
+import {IsBoolean,IsInt,IsOptional,IsString} from 'class-validator'
 
 
 
 
 export class UpdateCourseDto {
   @ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  default: 1,
+  type: 'boolean',
+  default: true,
   required: false,
   nullable: true,
 })
 @IsOptional()
-@IsInt()
-active?: number  | null;
+@IsBoolean()
+active?: boolean  | null;
+@ApiProperty({
+  type: 'string',
+  required: false,
+})
+@IsOptional()
+@IsString()
+semester?: string ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
   required: false,
-  nullable: true,
 })
 @IsOptional()
 @IsInt()
-term?: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsInt()
-year?: number  | null;
+year?: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

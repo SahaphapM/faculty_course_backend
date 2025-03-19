@@ -20,31 +20,45 @@ export class CourseService {
     private cloService: ClosService,
   ) {}
 
-  // Create a new course
-  async create(createCourseDto: CreateCourseDto) {
-    const { subjectId, ...rest } = createCourseDto;
+  // Create a new course(s)
+  async create(createCourseDtos: CreateCourseDto[]) {
+    const createCoursePromises = createCourseDtos.map(
+      async (createCourseDto) => {
+        const { subjectId, ...rest } = createCourseDto;
+
+        try {
+          // Find the subject
+          const subject = await this.prisma.subject.findUnique({
+            where: { id: subjectId },
+          });
+          if (!subject) {
+            throw new NotFoundException('Subject not found');
+          }
+
+          // Create the course
+          const newCourse = await this.prisma.course.create({
+            data: {
+              ...rest,
+              subject: { connect: { id: subjectId } },
+            },
+            include: {
+              subject: true,
+            },
+          });
+
+          return newCourse;
+        } catch (error) {
+          throw new BadRequestException(
+            `Failed to create course: ${error.message}`,
+          );
+        }
+      },
+    );
 
     try {
-      // Find the subject
-      const subject = await this.prisma.subject.findUnique({
-        where: { id: subjectId },
-      });
-      if (!subject) {
-        throw new NotFoundException('Subject not found');
-      }
+      const newCourses = await Promise.all(createCoursePromises);
 
-      // Create the course
-      const newCourse = await this.prisma.course.create({
-        data: {
-          ...rest,
-          subject: { connect: { id: subjectId } },
-        },
-        include: {
-          subject: true,
-        },
-      });
-
-      return newCourse;
+      return newCourses;
     } catch (error) {
       throw new BadRequestException(
         `Failed to create course: ${error.message}`,
