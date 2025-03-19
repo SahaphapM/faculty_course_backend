@@ -123,8 +123,20 @@ export class SkillCollectiolnsService {
       });
     });
 
-    console.log(result);
-    return result;
+    // Psychomotor = 'ทักษะ', // hard
+    // Affective = 'คุณลักษณะบุคคล', // soft
+    // Cognitive = 'ความรู้', // hard
+    // Ethics = 'จริยธรรม', // soft
+
+    // separate by domain  soft and hard
+    const soft = result.filter(
+      (item) => item.domain === 'คุณลักษณะบุคคล' || item.domain === 'จริยธรรม',
+    );
+    const hard = result.filter(
+      (item) => item.domain === 'ทักษะ' || item.domain === 'ความรู้',
+    );
+
+    return { specific: hard, soft };
   }
 
   async getByCloId(
