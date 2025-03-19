@@ -1,6 +1,6 @@
 export enum LearningDomain {
-  Psychomotor = 'ทักษะ',
-  Affective = 'คุณลักษณะบุคคล',
-  Cognitive = 'ความรู้',
-  Ethics = 'จริยธรรม',
+  Psychomotor = 'ทักษะ', // hard
+  Affective = 'คุณลักษณะบุคคล', // soft
+  Cognitive = 'ความรู้', // hard
+  Ethics = 'จริยธรรม', // soft
 }

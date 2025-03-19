@@ -19,24 +19,49 @@ export class SkillCollectiolnsService {
   ) {}
 
   async getSkillCollectionsByStudentId(studentCode: string) {
-    return this.prisma.student.findMany({
+    const student = await this.prisma.student.findUnique({
       where: { code: studentCode },
+    });
+
+    const skillCollections = await this.prisma.skill_collection.findMany({
+      where: { studentId: student.id },
       select: {
-        skill_collections: {
+        id: true,
+        gainedLevel: true,
+        passed: true,
+        clo: {
           select: {
             id: true,
-            gainedLevel: true,
-            passed: true,
-            clo: {
+            name: true,
+            expectSkillLevel: true,
+            skill: {
               select: {
                 id: true,
-                name: true,
-                expectSkillLevel: true,
-                skill: {
+                thaiName: true,
+                engName: true,
+                domain: true,
+                parent: {
                   select: {
                     id: true,
                     thaiName: true,
                     engName: true,
+                    domain: true,
+                    parent: {
+                      select: {
+                        id: true,
+                        thaiName: true,
+                        engName: true,
+                        domain: true,
+                        parent: {
+                          select: {
+                            id: true,
+                            thaiName: true,
+                            engName: true,
+                            domain: true,
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
@@ -44,10 +69,62 @@ export class SkillCollectiolnsService {
           },
         },
       },
-      // include: {
-      //   skill_collections: { include: { clo: { include: { skill: true } } } },
-      // },
     });
+
+    // Step 1: Group by root skill
+    const rootSkillMap = new Map();
+
+    skillCollections.forEach((sc) => {
+      const currentSkill = sc.clo.skill;
+      let rootSkill = currentSkill;
+
+      // Find root skill (keep traversing up until parent is null)
+      while (rootSkill.parent) {
+        rootSkill = rootSkill.parent;
+      }
+
+      const rootSkillId = rootSkill.id;
+      const rootSkillName = rootSkill.engName;
+      const domain = rootSkill.domain;
+
+      if (!rootSkillMap.has(rootSkillId)) {
+        rootSkillMap.set(rootSkillId, {
+          root_skill: rootSkillName,
+          domain: domain,
+          leafNodes: [],
+        });
+      }
+
+      // Check if it's not parent node itself
+      if (currentSkill.id !== rootSkillId) {
+        rootSkillMap.get(rootSkillId).leafNodes.push(sc.gainedLevel);
+      }
+    });
+
+    // Step 2: Calculate scores
+    const result = [];
+    rootSkillMap.forEach((value) => {
+      const { root_skill, domain, leafNodes } = value;
+      const leafCount = leafNodes.length;
+      let score = 0;
+
+      if (leafCount > 0) {
+        const weight = 1 / leafCount;
+        score = leafNodes.reduce(
+          (sum: number, level: number) => sum + level * weight,
+          0,
+        );
+      }
+
+      result.push({
+        root_skill,
+        domain,
+        score,
+      });
+    });
+
+    console.log(result);
+    return result;
   }
 
   async getByCloId(
