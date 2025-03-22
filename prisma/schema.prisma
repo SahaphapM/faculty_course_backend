@@ -39,7 +39,7 @@ model branch {
   id              Int          @id @default(autoincrement())
   /// @DtoRelationIncludeId
   facultyId       Int?
-  thaiDescription String       @db.Text
+  thaiDescription String?       @db.Text
   engDescription  String?      @db.Text
   thaiName        String?      @db.VarChar(255)
   engName         String?      @db.VarChar(255)

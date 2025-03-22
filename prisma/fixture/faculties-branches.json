@@ -1,0 +1,130 @@
+[
+  {
+    "thaiName": "คณะแพทยศาสตร์",
+    "engName": "Faculty of Medicine",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะเภสัชศาสตร์",
+    "engName": "Faculty of Pharmacy",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะพยาบาลศาสตร์",
+    "engName": "Faculty of Nursing",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะมนุษยศาสตร์และสังคมศาสตร์",
+    "engName": "Faculty of Humanities and Social Sciences",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะบริหารธุรกิจ",
+    "engName": "Faculty of Business Administration",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะรัฐศาสตร์และนิติศาสตร์",
+    "engName": "Faculty of Political Science and Law",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะวิทยาศาสตร์",
+    "engName": "Faculty of Science",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะวิทยาการสารสนเทศ",
+    "engName": "Faculty of Information Technology",
+    "branches": [
+      {
+        "thaiName": "สาขาวิทยาการคอมพิวเตอร์",
+        "engName": "Major of Computer Science"
+      },
+      {
+        "thaiName": "สาขาปัญญาประดิษฐ์ประยุกต์และเทคโนโลยีอัจฉริยะ",
+        "engName": "Major of Applied Artificial Intelligence and Smart Technology"
+      },
+      {
+        "thaiName": "สาขาวิศวกรรมซอฟต์แวร์",
+        "engName": "Major of Software Engineering"
+      },
+      {
+        "thaiName": "สาขาเทคโนโลยีสารสนเทศเพื่ออุตสาหกรรมดิจิทัล",
+        "engName": "Major of Digital Industry Information Technology"
+      }
+    ]
+  },
+  {
+    "thaiName": "คณะวิศวกรรมศาสตร์",
+    "engName": "Faculty of Engineering",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะสาธารณสุขศาสตร์",
+    "engName": "Faculty of Public Health",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะศิลปกรรมศาสตร์",
+    "engName": "Faculty of Fine Arts",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะดนตรีและการแสดง",
+    "engName": "Faculty of Music and Performing Arts",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะศึกษาศาสตร์",
+    "engName": "Faculty of Education",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะโลจิสติกส์",
+    "engName": "Faculty of Logistics",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะวิทยาศาสตร์การกีฬา",
+    "engName": "Faculty of Sports Science",
+    "branches": []
+  },
+  {
+    "thaiName": "วิทยาลัยนานาชาติ",
+    "engName": "International College",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะสหเวชศาสตร์",
+    "engName": "Faculty of Allied Health Sciences",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะวิทยาศาตร์และศิลปศาสตร์",
+    "engName": "Faculty of Science and Liberal Arts",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะเทคโนโลยีทางทะเล",
+    "engName": "Faculty of Marine Technology",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะอัญมณี",
+    "engName": "Faculty of Gemology",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะวิทยาศาตร์และสังคมศาสตร์",
+    "engName": "Faculty of Science and Social Sciences",
+    "branches": []
+  },
+  {
+    "thaiName": "คณะเทคโนโลยีการเกษตร",
+    "engName": "Faculty of Agricultural Technology",
+    "branches": []
+  }
+]
+

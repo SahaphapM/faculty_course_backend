@@ -20,8 +20,9 @@ id: number ;
 facultyId: number  | null;
 @ApiProperty({
   type: 'string',
+  nullable: true,
 })
-thaiDescription: string ;
+thaiDescription: string  | null;
 @ApiProperty({
   type: 'string',
   nullable: true,

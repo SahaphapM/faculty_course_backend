@@ -18,10 +18,11 @@ facultyId?: number  | null;
 @ApiProperty({
   type: 'string',
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @IsString()
-thaiDescription?: string ;
+thaiDescription?: string  | null;
 @ApiProperty({
   type: 'string',
   required: false,

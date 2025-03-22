@@ -1,6 +1,6 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
+import {IsInt,IsOptional,IsString} from 'class-validator'
 
 
 
@@ -17,10 +17,12 @@ export class CreateBranchDto {
 facultyId?: number  | null;
 @ApiProperty({
   type: 'string',
+  required: false,
+  nullable: true,
 })
-@IsNotEmpty()
+@IsOptional()
 @IsString()
-thaiDescription: string ;
+thaiDescription?: string  | null;
 @ApiProperty({
   type: 'string',
   required: false,

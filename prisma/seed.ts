@@ -1,9 +1,73 @@
 import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
-import { UserRole } from '../src/enums/role.enum';
+import * as path from 'path';
+import * as fs from 'fs/promises';
 const prisma = new PrismaClient();
 
-async function main() {
+enum UserRole {
+  Admin = 'Administer',
+  Coordinator = 'Coordinator',
+  Instructor = 'Instructor',
+  Student = 'Student',
+}
+
+async function loadData(fileName: string) {
+  const filePath = path.join(__dirname, fileName);
+  const rawData = await fs.readFile(filePath, 'utf-8');
+  return JSON.parse(rawData);
+}
+
+async function createFacultiesAndBranches() {
+  const data = await loadData('fixture/faculties-branches.json');
+
+  // ใช้ Transaction เพื่อให้แน่ใจว่าทุกอย่างสำเร็จหรือล้มเหลวพร้อมกัน
+  await prisma.$transaction(async (tx) => {
+    // สร้างคณะก่อน
+    const facultyData = data.map((faculty) => ({
+      thaiName: faculty.thaiName,
+      engName: faculty.engName,
+    }));
+    await tx.faculty.createMany({
+      data: facultyData,
+      skipDuplicates: true,
+    });
+
+    // ดึงข้อมูลคณะที่สร้างเพื่อ map ID
+    const createdFaculties = await tx.faculty.findMany({
+      select: { id: true, thaiName: true },
+    });
+    const facultyMap = new Map(createdFaculties.map((f) => [f.thaiName, f.id]));
+
+    // เตรียมข้อมูลสาขา
+    const branchData = [];
+    for (const faculty of data) {
+      const facultyId = facultyMap.get(faculty.thaiName);
+      if (!facultyId) {
+        console.warn(`Faculty not found: ${faculty.thaiName}`);
+        continue;
+      }
+      for (const branch of faculty.branches) {
+        branchData.push({
+          thaiName: branch.thaiName,
+          engName: branch.engName,
+          facultyId: facultyId,
+        });
+      }
+    }
+
+    // สร้างสาขา
+    if (branchData.length > 0) {
+      await tx.branch.createMany({
+        data: branchData,
+        skipDuplicates: true,
+      });
+    }
+  });
+
+  console.log('Faculties and branches created successfully');
+}
+
+async function createUsers() {
   const saltRounds = 10;
   // Seed data
   await prisma.user.createMany({
@@ -31,7 +95,11 @@ async function main() {
     ],
     skipDuplicates: true, // Optional: skips if email already exists
   });
+}
 
+async function main() {
+  await createUsers();
+  await createFacultiesAndBranches();
   console.log('Seeding completed!');
 }
 
