@@ -67,6 +67,48 @@ async function createFacultiesAndBranches() {
   console.log('Faculties and branches created successfully');
 }
 
+async function createCurricula() {
+  const data = await loadData('fixture/curriculums.json');
+
+  await prisma.$transaction(async (tx) => {
+    // ดึงข้อมูลสาขาทั้งหมดเพื่อ map กับ branchThaiName
+    const branches = await tx.branch.findMany({
+      select: { id: true, thaiName: true },
+    });
+    const branchMap = new Map(branches.map((b) => [b.thaiName, b.id]));
+
+    // เตรียมข้อมูลหลักสูตร
+    const curriculaData = data.map((curriculum) => {
+      const branchId = branchMap.get(curriculum.branchThaiName);
+      if (!branchId) {
+        console.warn(`Branch not found for curriculum: ${curriculum.thaiName}`);
+        throw new Error(`Branch "${curriculum.branchThaiName}" not found`);
+      }
+
+      return {
+        code: curriculum.code,
+        thaiName: curriculum.thaiName,
+        engName: curriculum.engName,
+        thaiDegree: curriculum.thaiDegree,
+        engDegree: curriculum.engDegree,
+        period: curriculum.period,
+        minimumGrade: curriculum.minimumGrade,
+        thaiDescription: curriculum.thaiDescription,
+        engDescription: curriculum.engDescription,
+        branchId: branchId,
+      };
+    });
+
+    // เพิ่มหลักสูตรลงในฐานข้อมูล
+    await tx.curriculum.createMany({
+      data: curriculaData,
+      skipDuplicates: true,
+    });
+
+    console.log('Curricula created successfully');
+  });
+}
+
 async function createUsers() {
   const saltRounds = 10;
   // Seed data
@@ -100,6 +142,7 @@ async function createUsers() {
 async function main() {
   await createUsers();
   await createFacultiesAndBranches();
+  await createCurricula()
   console.log('Seeding completed!');
 }
 

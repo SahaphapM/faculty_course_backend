@@ -1,0 +1,27 @@
+[
+  {
+    "branchThaiName": "สาขาวิทยาการคอมพิวเตอร์",
+    "code": "12345678901234",
+    "thaiName": "หลักสูตรวิทยาศาสตรบัณฑิต (วท.บ.) สาขาวิชาวิทยาการคอมพิวเตอร์ ภาคปกติ (ภาษาไทย ปกติ)",
+    "engName": "Bachelor of Science Program in Computer Science",
+    "thaiDegree": "ระดับปริญญาตรี",
+    "engDegree": "Bachelors",
+    "period": 4,
+    "minimumGrade": 3.0,
+    "thaiDescription": "โปรแกรมนี้เน้นการศึกษาเกี่ยวกับเทคโนโลยีคอมพิวเตอร์และการประยุกต์ใช้งาน",
+    "engDescription": "This program focuses on the study of computer technologies and applications"
+  },
+  {
+    "branchThaiName": "สาขาวิศวกรรมซอฟต์แวร์",
+    "code": "23456789012345",
+    "thaiName": "หลักสูตรวิศวกรรมศาสตรบัณฑิต (วศ.บ.) สาขาวิชาวิศวกรรมซอฟต์แวร์ ภาคปกติ",
+    "engName": "Bachelor of Engineering Program in Software Engineering",
+    "thaiDegree": "ระดับปริญญาตรี",
+    "engDegree": "Bachelors",
+    "period": 4,
+    "minimumGrade": 3.2,
+    "thaiDescription": "โปรแกรมนี้เน้นการศึกษาเกี่ยวกับการออกแบบและพัฒนาซอฟต์แวร์",
+    "engDescription": "This program focuses on the design and development of software"
+  }
+]
+
