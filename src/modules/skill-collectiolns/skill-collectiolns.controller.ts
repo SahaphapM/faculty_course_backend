@@ -6,7 +6,7 @@ import {
   ParseIntPipe,
   Get,
 } from '@nestjs/common';
-import { SkillCollectiolnsService } from './skill-collectiolns.service';
+import { SkillCollectionsService } from './skill-collectiolns.service';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
@@ -14,10 +14,10 @@ import { StudentScoreList } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 
 @ApiBearerAuth()
-@Controller('skill-collectiolns')
-export class SkillCollectiolnsController {
+@Controller('skill-collections')
+export class SkillCollectionsController {
   constructor(
-    private readonly skillCollectiolnsService: SkillCollectiolnsService,
+    private readonly skillCollectionsService: SkillCollectionsService,
   ) {}
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
@@ -27,7 +27,7 @@ export class SkillCollectiolnsController {
     @Query('cloId', ParseIntPipe) cloId: number,
   ): Promise<Partial<SkillCollection>[]> {
     // ✅ รับค่าจาก Query Params
-    return this.skillCollectiolnsService.getByCloId(courseId, cloId);
+    return this.skillCollectionsService.getByCloId(courseId, cloId);
   }
 
   /////// import skill collections
@@ -41,7 +41,7 @@ export class SkillCollectiolnsController {
     @Body() studentScoreList: StudentScoreList[], // ✅ ใช้ DTO
   ) {
     console.log('Import Path');
-    return this.skillCollectiolnsService.importSkillCollections(
+    return this.skillCollectionsService.importSkillCollections(
       courseId,
       cloId,
       studentScoreList,
@@ -56,7 +56,7 @@ export class SkillCollectiolnsController {
   )
   @Get('student')
   getSkillCollectionByStudentId(@Query('studentCode') studentCode: string) {
-    return this.skillCollectiolnsService.getSkillCollectionsByStudentId(
+    return this.skillCollectionsService.getSkillCollectionsByStudentId(
       studentCode,
     );
   }

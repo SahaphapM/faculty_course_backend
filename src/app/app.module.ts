@@ -18,7 +18,7 @@ import { CoursesModule } from 'src/modules/courses/courses.module';
 import { SubjectModule } from 'src/modules/subjects/subjects.module';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { InstructorsModule } from 'src/modules/instructors/instructors.module';
-import { SkillCollectiolnsModule } from 'src/modules/skill-collectiolns/skill-collectiolns.module';
+import { SkillCollectionsModule } from 'src/modules/skill-collectiolns/skill-collectiolns.module';
 
 @Module({
   imports: [
@@ -43,7 +43,7 @@ import { SkillCollectiolnsModule } from 'src/modules/skill-collectiolns/skill-co
     CoursesModule,
     SubjectModule,
     InstructorsModule,
-    SkillCollectiolnsModule,
+    SkillCollectionsModule,
   ],
   controllers: [AppController],
   providers: [AppService, PrismaService],

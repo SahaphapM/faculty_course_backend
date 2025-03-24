@@ -5,16 +5,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ClosService } from '../clos/clos.service';
-import { StudentsService } from '../students/students.service';
 import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
 import { StudentScoreList } from 'src/dto/filter-params.dto';
 import { SkillCollectionDto } from 'src/generated/nestjs-dto/skillCollection.dto';
 
 @Injectable()
-export class SkillCollectiolnsService {
+export class SkillCollectionsService {
   constructor(
     private prisma: PrismaService,
-    private studentService: StudentsService,
     private cloService: ClosService,
   ) {}
 
@@ -22,6 +20,11 @@ export class SkillCollectiolnsService {
     const student = await this.prisma.student.findUnique({
       where: { code: studentCode },
     });
+
+    // If no student is found, return empty result or throw an error
+    if (!student) {
+      return { specific: [], soft: [] }; // Or throw new Error('Student not found');
+    }
 
     const skillCollections = await this.prisma.skill_collection.findMany({
       where: { studentId: student.id },
@@ -75,6 +78,11 @@ export class SkillCollectiolnsService {
     const rootSkillMap = new Map();
 
     skillCollections.forEach((sc) => {
+      // Check if clo and skill exist
+      if (!sc.clo || !sc.clo.skill) {
+        return; // Skip this entry if skill is missing
+      }
+
       const currentSkill = sc.clo.skill;
       let rootSkill = currentSkill;
 
@@ -95,7 +103,7 @@ export class SkillCollectiolnsService {
         });
       }
 
-      // Check if it's not parent node itself
+      // Check if it's not the parent node itself
       if (currentSkill.id !== rootSkillId) {
         rootSkillMap.get(rootSkillId).leafNodes.push(sc.gainedLevel);
       }
@@ -123,7 +131,7 @@ export class SkillCollectiolnsService {
       });
     });
 
-    // separate by domain  soft and hard
+    // Separate by domain: soft and hard
     let soft = result.filter(
       (item) => item.domain === 'คุณลักษณะบุคคล' || item.domain === 'จริยธรรม',
     );
@@ -131,8 +139,8 @@ export class SkillCollectiolnsService {
       (item) => item.domain === 'ทักษะ' || item.domain === 'ความรู้',
     );
 
-    // get top 10 for each domain
-    soft = soft.sort((a, b) => b.score - a.score).slice(0, 8); //sort by score desc
+    // Get top 8 for each domain
+    soft = soft.sort((a, b) => b.score - a.score).slice(0, 8); // Sort by score desc
     specific = specific.sort((a, b) => b.score - a.score).slice(0, 8);
 
     return { specific, soft };
