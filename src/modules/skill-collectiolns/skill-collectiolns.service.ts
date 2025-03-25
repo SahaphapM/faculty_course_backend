@@ -19,11 +19,22 @@ export class SkillCollectionsService {
   async getSkillCollectionsByStudentId(studentCode: string) {
     const student = await this.prisma.student.findUnique({
       where: { code: studentCode },
+      include: {
+        skill_collections: {
+          include: {
+            clo: true,
+          },
+        },
+      },
     });
 
     // If no student is found, return empty result or throw an error
     if (!student) {
       return { specific: [], soft: [] }; // Or throw new Error('Student not found');
+    }
+
+    if (!student.skill_collections) {
+      return { specific: [], soft: [] }; // Or throw new Error('student has no skill collections');
     }
 
     const skillCollections = await this.prisma.skill_collection.findMany({
