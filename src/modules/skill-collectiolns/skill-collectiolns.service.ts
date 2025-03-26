@@ -84,6 +84,7 @@ export class SkillCollectionsService {
         },
       },
     });
+    console.log('skillCollections', JSON.stringify(skillCollections));
 
     // Step 1: Group by root skill
     const rootSkillMap = new Map();
@@ -116,7 +117,14 @@ export class SkillCollectionsService {
 
       // Check if it's not the parent node itself
       if (currentSkill.id !== rootSkillId) {
+        // เป็น leaf node จริง
         rootSkillMap.get(rootSkillId).leafNodes.push(sc.gainedLevel);
+      } else {
+        // ถ้าไม่มีลูกจริง ๆ ให้ fallback ใช้ gainedLevel นี้
+        const node = rootSkillMap.get(rootSkillId);
+        if (node.leafNodes.length === 0) {
+          node.leafNodes.push(sc.gainedLevel);
+        }
       }
     });
 
