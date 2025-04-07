@@ -158,9 +158,9 @@ export class SkillCollectionsService {
       (item) => item.domain === 'ทักษะ' || item.domain === 'ความรู้',
     );
 
-    // Get top 8 for each domain
-    soft = soft.sort((a, b) => b.score - a.score).slice(0, 8); // Sort by score desc
-    specific = specific.sort((a, b) => b.score - a.score).slice(0, 8);
+    // // Get top 8 for each domain
+    // soft = soft.sort((a, b) => b.score - a.score).slice(0, 8); // Sort by score desc
+    // specific = specific.sort((a, b) => b.score - a.score).slice(0, 8);
 
     return { specific, soft };
   }
