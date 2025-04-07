@@ -24,6 +24,7 @@ export class ClosService {
             : {}),
           ...(dto.ploId ? { plo: { connect: { id: dto.ploId } } } : {}),
           ...(dto.skillId ? { skill: { connect: { id: dto.skillId } } } : {}),
+          expectSkillLevel: dto.expectSkillLevel,
         },
       });
     } catch (error) {
