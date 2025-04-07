@@ -151,10 +151,10 @@ export class SkillCollectionsService {
     });
 
     // Separate by domain: soft and hard
-    let soft = result.filter(
+    const soft = result.filter(
       (item) => item.domain === 'คุณลักษณะบุคคล' || item.domain === 'จริยธรรม',
     );
-    let specific = result.filter(
+    const specific = result.filter(
       (item) => item.domain === 'ทักษะ' || item.domain === 'ความรู้',
     );
 
