@@ -198,7 +198,9 @@ export class CurriculumsService {
       if (error.code === 'P2025') {
         throw new NotFoundException(`Curriculum with ID ${id} not found`);
       }
-      throw new BadRequestException('Failed to update curriculum');
+      throw new BadRequestException(
+        'Failed to update curriculum' + error.message,
+      );
     }
   }
 
