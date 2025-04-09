@@ -2,8 +2,8 @@ import {
   Injectable,
   NotFoundException,
   InternalServerErrorException,
-  BadRequestException,
   HttpStatus,
+  BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 import { Prisma } from '@prisma/client'; // Import Prisma types
@@ -181,9 +181,30 @@ export class CurriculumsService {
     }
   }
 
-  // Update a curriculum by ID
   async update(id: number, dto: UpdateCurriculumDto) {
     try {
+      // ดึงของเก่ามา
+      const old = await this.prisma.curriculum.findUnique({ where: { id } });
+      if (!old) {
+        throw new NotFoundException(`Curriculum with ID ${id} not found`);
+      }
+
+      // ถ้า code เปลี่ยน → ตรวจสอบว่าไม่ชน
+      if (dto.code && dto.code !== old.code) {
+        const codeExists = await this.prisma.curriculum.findFirst({
+          where: {
+            code: dto.code,
+            NOT: { id },
+          },
+        });
+        if (codeExists) {
+          throw new BadRequestException(
+            `Curriculum code "${dto.code}" is already in use.`,
+          );
+        }
+      }
+
+      // ทำการอัปเดต
       const curriculum = await this.prisma.curriculum.update({
         where: { id },
         data: dto,
@@ -199,7 +220,7 @@ export class CurriculumsService {
         throw new NotFoundException(`Curriculum with ID ${id} not found`);
       }
       throw new BadRequestException(
-        'Failed to update curriculum' + error.message,
+        'Failed to update curriculum: ' + error.message,
       );
     }
   }
