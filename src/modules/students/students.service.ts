@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -94,81 +93,52 @@ export class StudentsService {
       },
     };
 
-    try {
-      const [students, total] = await Promise.all([
-        this.prisma.student.findMany(options),
-        this.prisma.student.count({ where: options.where }),
-      ]);
+    const [students, total] = await Promise.all([
+      this.prisma.student.findMany(options),
+      this.prisma.student.count({ where: options.where }),
+    ]);
 
-      return { data: students, total };
-    } catch (error) {
-      console.error('Error fetching students:', error);
-      throw new InternalServerErrorException('Failed to fetch students');
-    }
+    return { data: students, total };
   }
 
   // Find students by a list of IDs
   async findManyByCode(studentListCode: string[]) {
-    try {
-      return await this.prisma.student.findMany({
-        where: {
-          code: { in: studentListCode },
-        },
-      });
-    } catch (error) {
-      throw new InternalServerErrorException(
-        'Failed to fetch students by Codes',
-      );
-    }
+    return await this.prisma.student.findMany({
+      where: {
+        code: { in: studentListCode },
+      },
+    });
   }
 
   // Get a student by ID
   async findOne(id: number) {
-    try {
-      const student = await this.prisma.student.findUnique({
-        where: { id },
-        include: {
-          skill_collections: true,
-        },
-      });
+    const student = await this.prisma.student.findFirstOrThrow({
+      where: { id },
+      include: {
+        skill_collections: true,
+      },
+    });
 
-      if (!student) {
-        throw new NotFoundException(`Student with ID "${id}" not found`);
-      }
-
-      return student;
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch student');
+    if (!student) {
+      throw new NotFoundException(`Student with ID "${id}" not found`);
     }
+
+    return student;
   }
 
   // Update a student by ID
   async update(id: number, studentDto: UpdateStudentDto) {
-    try {
-      const student = await this.prisma.student.update({
-        where: { id },
-        data: studentDto,
-      });
-      return student;
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Student with ID "${id}" not found`);
-      }
-      throw new BadRequestException('Failed to update student');
-    }
+    const student = await this.prisma.student.update({
+      where: { id },
+      data: studentDto,
+    });
+    return student;
   }
 
   // Delete a student by ID
   async remove(id: number): Promise<void> {
-    try {
-      await this.prisma.student.delete({
-        where: { id },
-      });
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Student with ID "${id}" not found`);
-      }
-      throw new BadRequestException('Failed to delete student');
-    }
+    await this.prisma.student.delete({
+      where: { id },
+    });
   }
 }
