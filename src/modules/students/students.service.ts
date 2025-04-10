@@ -32,18 +32,14 @@ export class StudentsService {
       throw new BadRequestException('Expected students to be an array');
     }
 
-    try {
-      const newStudents = students.map((student) => ({
-        ...student,
-        enrollmentDate: new Date(student.enrollmentDate),
-      }));
+    const newStudents = students.map((student) => ({
+      ...student,
+      enrollmentDate: new Date(student.enrollmentDate),
+    }));
 
-      await this.prisma.student.createMany({
-        data: newStudents,
-      });
-    } catch (error) {
-      throw new BadRequestException('Failed to import students', error.message);
-    }
+    await this.prisma.student.createMany({
+      data: newStudents,
+    });
   }
 
   // Get all students with pagination and search
