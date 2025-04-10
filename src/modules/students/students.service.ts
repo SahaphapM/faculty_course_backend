@@ -32,14 +32,15 @@ export class StudentsService {
       throw new BadRequestException('Expected students to be an array');
     }
 
-    const newStudents = students.map((student) => ({
-      ...student,
-      enrollmentDate: new Date(student.enrollmentDate),
-    }));
-
-    await this.prisma.student.createMany({
-      data: newStudents,
-    });
+    await this.prisma.$transaction(
+      students.map((cur) =>
+        this.prisma.student.upsert({
+          where: { code: cur.code },
+          update: { ...cur },
+          create: { ...cur },
+        }),
+      ),
+    );
   }
 
   // Get all students with pagination and search
