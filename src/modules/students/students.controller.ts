@@ -50,9 +50,9 @@ export class StudentsController {
     UserRole.Instructor,
     UserRole.Student,
   )
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.studentsService.findOne(+id);
+  @Get(':code')
+  findOne(@Param('code') code: string) {
+    return this.studentsService.findOne(code);
   }
 
   // @Get('skill-tree/:id')

@@ -111,16 +111,16 @@ export class StudentsService {
   }
 
   // Get a student by ID
-  async findOne(id: number) {
-    const student = await this.prisma.student.findFirstOrThrow({
-      where: { id },
+  async findOne(code: string) {
+    const student = await this.prisma.student.findUnique({
+      where: { code },
       include: {
         skill_collections: true,
       },
     });
 
     if (!student) {
-      throw new NotFoundException(`Student with ID "${id}" not found`);
+      throw new NotFoundException(`Student with ID "${code}" not found`);
     }
 
     return student;
