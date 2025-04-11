@@ -1,7 +1,4 @@
-import {
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
 import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
@@ -29,12 +26,12 @@ export class PloService {
   async findAll(filter?: FilterParams) {
     const { curriculumCode } = filter || {}; // Ensure filter is not undefined
 
-    const whereOption: Prisma.ploWhereInput = curriculumCode
+    const whereCondition: Prisma.ploWhereInput = curriculumCode
       ? { curriculum: { code: curriculumCode } }
       : {}; // Only filter if curriculumCode exists
 
-    return await this.prisma.plo.findMany({
-      where: whereOption, //  Directly pass whereOption (no extra object)
+    const options: Prisma.ploFindManyArgs = {
+      where: whereCondition, //  Directly pass whereOption (no extra object)
       include: {
         curriculum: {
           select: {
@@ -46,7 +43,12 @@ export class PloService {
         },
         clos: true,
       },
-    });
+    };
+    const [list, total] = await Promise.all([
+      this.prisma.plo.findMany(options),
+      this.prisma.plo.count({ where: whereCondition }),
+    ]);
+    return { data: list, total };
   }
 
   // Find a PLO by ID
