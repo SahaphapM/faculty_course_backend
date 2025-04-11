@@ -9,6 +9,7 @@ import { Prisma } from '@prisma/client'; // Import Prisma types
 import { FilterParams } from 'src/dto/filter-params.dto'; // Adjust the import path as needed
 import { UpdateSkillDto } from 'src/generated/nestjs-dto/update-skill.dto';
 import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
+import { Skill } from 'src/generated/nestjs-dto/skill.entity';
 
 @Injectable()
 export class SkillsService {
@@ -118,7 +119,7 @@ export class SkillsService {
       this.prisma.skill.findMany(options),
       this.prisma.skill.count({ where: whereCondition }),
     ]);
-    return pag ? { data: skills, total } : skills;
+    return pag ? { data: this.normalizeTopLevelSkills(skills), total } : skills;
   }
 
   // Find a skill by ID
@@ -175,57 +176,23 @@ export class SkillsService {
     }
   }
 
-  // Create a sub-skill under a parent skill
-  // async createSubSkills(parentId: number, createSkillDto: CreateSkillDto) {
-  //   const parentSkill = await this.findOne(parentId);
+  // New method to normalize top-level skills
+  private normalizeTopLevelSkills(skills: Skill[]): Skill[] {
+    // Create a set of all skill IDs that are subs of any skill
+    const subIds = new Set<number>();
+    skills.forEach((skill) => {
+      skill.subs.forEach((sub) => subIds.add(sub.id));
+    });
 
-  //   const curriculum = await this.prisma.curriculum.findUnique({
-  //     where: { id: createSkillDto.curriculumId || parentSkill.curriculumId },
-  //   });
+    // Filter out skills from the top level if their ID is in subIds
+    const normSkills = skills.reduce((acc: Skill[], cur: Skill) => {
+      if (!subIds.has(cur.id)) {
+        // Only keep skills that are not subs of others
+        acc.push(cur);
+      }
+      return acc;
+    }, []);
 
-  //   if (!curriculum) {
-  //     throw new NotFoundException(
-  //       `Curriculum with ID ${createSkillDto.curriculumId} not found`,
-  //     );
-  //   }
-
-  //   try {
-  //     const subSkill = await this.prisma.skill.create({
-  //       data: {
-  //         ...createSkillDto,
-  //         curriculumId: curriculum.id,
-  //         parentId: parentId,
-  //       },
-  //     });
-  //     return subSkill;
-  //   } catch (error) {
-  //     throw new BadRequestException(
-  //       `Failed to create sub-skill: ${error.message}`,
-  //     );
-  //   }
-  // }
-
-  // // Remove a sub-skill from a parent skill
-  // async removeSubSkillId(parentId: number, subSkillId: number) {
-  //   const parentSkill = await this.findOne(parentId);
-  //   const childSkill = await this.findOne(subSkillId);
-
-  //   if (!parentSkill || !childSkill) {
-  //     throw new NotFoundException('Parent or child skill not found');
-  //   }
-
-  //   try {
-  //     await this.prisma.skill.update({
-  //       where: { id: subSkillId },
-  //       data: {
-  //         parent: { disconnect: true },
-  //       },
-  //     });
-  //     return parentSkill;
-  //   } catch (error) {
-  //     throw new BadRequestException(
-  //       `Failed to remove sub-skill: ${error.message}`,
-  //     );
-  //   }
-  // }
+    return normSkills;
+  }
 }
