@@ -65,24 +65,49 @@ export class SkillsService {
       skip: (page - 1) * limit,
       orderBy: { id: orderBy },
       include: {
-        parent: {
-          select: {
-            id: true,
-            thaiName: true,
-            engName: true,
-          },
-        },
-        curriculum: {
-          select: {
-            id: true,
-            thaiName: true,
-          },
-        },
+        // parent: {
+        //   select: {
+        //     id: true,
+        //     thaiName: true,
+        //     engName: true,
+        //   },
+        // },
+        // curriculum: {
+        //   select: {
+        //     id: true,
+        //     thaiName: true,
+        //   },
+        // },
         subs: {
+          // level 2
           select: {
             id: true,
             thaiName: true,
             engName: true,
+            subs: {
+              // level 3
+              select: {
+                id: true,
+                thaiName: true,
+                engName: true,
+                subs: {
+                  // level 4
+                  select: {
+                    id: true,
+                    thaiName: true,
+                    engName: true,
+                    subs: {
+                      // level 5
+                      select: {
+                        id: true,
+                        thaiName: true,
+                        engName: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           },
         },
       },
