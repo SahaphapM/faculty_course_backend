@@ -10,7 +10,6 @@ import { Prisma } from '@prisma/client'; // Import Prisma types
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { FilterParams } from 'src/dto/filter-params.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
-import { Skill } from 'src/generated/nestjs-dto/skill.entity';
 
 @Injectable()
 export class CurriculumsService {
@@ -86,99 +85,44 @@ export class CurriculumsService {
       where: whereCondition,
     };
 
-    try {
-      const [curriculums, total] = await Promise.all([
-        this.prisma.curriculum.findMany(options),
-        this.prisma.curriculum.count({ where: whereCondition }),
-      ]);
-      return { data: curriculums, total };
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch curriculums');
-    }
+    const [curriculums, total] = await Promise.all([
+      this.prisma.curriculum.findMany(options),
+      this.prisma.curriculum.count({ where: whereCondition }),
+    ]);
+    return { data: curriculums, total };
   }
 
   // Find a curriculum by ID
   async findOne(id: number) {
-    try {
-      const curriculum = await this.prisma.curriculum.findUnique({
-        where: { id },
-      });
+    const curriculum = await this.prisma.curriculum.findUnique({
+      where: { id },
+    });
 
-      if (!curriculum) {
-        throw new NotFoundException(`Curriculum with ID ${id} not found`);
-      }
-
-      return curriculum;
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch curriculum');
+    if (!curriculum) {
+      throw new NotFoundException(`Curriculum with ID ${id} not found`);
     }
+
+    return curriculum;
   }
 
   // Find a curriculum by code with relations
   async findOneByCode(code: string) {
-    try {
-      const curriculum = await this.prisma.curriculum.findUnique({
-        where: { code },
-        include: {
-          plos: true,
-          subjects: {
-            include: {
-              subject: {
-                include: {
-                  clos: true,
-                },
-              },
-            },
-          },
-          branch: true,
-          coordinators: true,
-          skills: {
-            include: {
-              subs: {
-                include: {
-                  subs: true, // Include deeper nested subs if needed
-                },
-              },
-            },
-          },
-        },
-      });
+    const curriculum = await this.prisma.curriculum.findUnique({
+      where: { code },
+      include: {
+        branch: true,
+      },
+    });
 
-      if (!curriculum) {
-        // throw new NotFoundException(`Curriculum with code ${code} not found`);
-        return {
-          statusCode: HttpStatus.NOT_FOUND,
-          message: `Curriculum with code ${code} not found`,
-        };
-      }
-
-      // Function to collect all child skill IDs
-      const collectChildSkillIds = (skills: Skill[], childIds: Set<number>) => {
-        for (const skill of skills) {
-          if (skill.subs) {
-            for (const sub of skill.subs) {
-              childIds.add(sub.id);
-              collectChildSkillIds(sub.subs || [], childIds); // Recursively collect deeper subs
-            }
-          }
-        }
+    if (!curriculum) {
+      // throw new NotFoundException(`Curriculum with code ${code} not found`);
+      return {
+        statusCode: HttpStatus.NOT_FOUND,
+        message: `Curriculum with code ${code} not found`,
       };
-
-      // Collect child skill IDs
-      const childSkillIds = new Set<number>();
-      collectChildSkillIds(curriculum.skills, childSkillIds);
-
-      // Filter out skills that are in subs
-      curriculum.skills = curriculum.skills.filter(
-        (skill) => !childSkillIds.has(skill.id),
-      );
-
-      return curriculum;
-    } catch (error) {
-      throw new InternalServerErrorException(
-        `Failed to fetch curriculum by code ${error.message}`,
-      );
     }
+
+    return curriculum;
   }
 
   async update(id: number, dto: UpdateCurriculumDto) {
