@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { FilterParams } from 'src/dto/filter-params.dto';
 import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
@@ -26,9 +26,14 @@ export class SubjectService {
     };
 
     const includeCondition: Prisma.subjectInclude = {
-      clos: true,
+      clos: curriculumCode ? true : false,
       curriculums: {
         select: {
+          curriculum: {
+            select: {
+              code: true
+            }
+          },
           subject: {
             select: {
               code: true,
@@ -64,18 +69,14 @@ export class SubjectService {
   }
 
   async findOne(id: number) {
-    const courseSpec = await this.prisma.subject.findUnique({
+    const subject = await this.prisma.subject.findUnique({
       where: { id },
       include: {
         clos: true,
       },
     });
 
-    if (!courseSpec) {
-      throw new NotFoundException(`CourseSpec with ID ${id} not found`);
-    }
-
-    return courseSpec;
+    return subject;
   }
 
   async create(dto: CreateSubjectDto) {
