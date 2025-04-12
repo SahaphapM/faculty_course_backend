@@ -126,7 +126,7 @@ model curriculum_subjects {
   curriculumId Int
   /// @DtoRelationIncludeId
   subjectId    Int
-  subject      subject    @relation(fields: [subjectId], references: [id],  onUpdate: Cascade)
+  subject      subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade,  onUpdate: Cascade)
   curriculum   curriculum @relation(fields: [curriculumId], references: [id], onUpdate: Cascade)
 
   @@id([curriculumId, subjectId])
