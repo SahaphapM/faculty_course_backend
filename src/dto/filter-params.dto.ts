@@ -67,6 +67,10 @@ export class FilterParams {
   @IsString()
   branchEngName?: string;
 
+  @IsOptional()
+  @IsString()
+  skill_collection?: boolean;
+
   // user
   @IsOptional()
   @IsString()

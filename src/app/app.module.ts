@@ -19,6 +19,7 @@ import { SubjectModule } from 'src/modules/subjects/subjects.module';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { InstructorsModule } from 'src/modules/instructors/instructors.module';
 import { SkillCollectionsModule } from 'src/modules/skill-collectiolns/skill-collectiolns.module';
+import { providePrismaClientExceptionFilter } from 'nestjs-prisma';
 
 @Module({
   imports: [
@@ -46,6 +47,6 @@ import { SkillCollectionsModule } from 'src/modules/skill-collectiolns/skill-col
     SkillCollectionsModule,
   ],
   controllers: [AppController],
-  providers: [AppService, PrismaService],
+  providers: [AppService, PrismaService, providePrismaClientExceptionFilter()],
 })
 export class AppModule {}

@@ -1,9 +1,9 @@
-import { NestFactory } from '@nestjs/core';
+import { HttpAdapterHost, NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { AllExceptionsFilter } from './http-exception.filter';
+import { PrismaClientExceptionFilter } from 'nestjs-prisma';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -20,7 +20,11 @@ async function bootstrap() {
       // forbidNonWhitelisted: true,
     }),
   );
-  app.useGlobalFilters(new AllExceptionsFilter());
+
+  // app.useGlobalFilters(new AllExceptionsFilter());
+  const { httpAdapter } = app.get(HttpAdapterHost);
+  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
+
   const config = new DocumentBuilder()
     .setTitle('BUU APIs')
     .setDescription('The API description')

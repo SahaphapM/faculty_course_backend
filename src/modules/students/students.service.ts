@@ -58,6 +58,7 @@ export class StudentsService {
       branchEngName,
       facultyThaiName,
       facultyEngName,
+      skill_collection,
     } = pag || {};
 
     const options: Prisma.studentFindManyArgs = {
@@ -72,7 +73,7 @@ export class StudentsService {
             faculty: { select: { thaiName: true, engName: true } },
           },
         },
-        skill_collections: true,
+        skill_collections: skill_collection || false,
       },
       where: {
         ...(code && { code: { contains: code } }),
@@ -128,7 +129,7 @@ export class StudentsService {
 
   // Update a student by ID
   async update(id: number, studentDto: UpdateStudentDto) {
-    const student = await this.prisma.student.update({
+  const student = await this.prisma.student.update({
       where: { id },
       data: studentDto,
     });

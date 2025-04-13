@@ -21,7 +21,7 @@ export class InstructorsService {
   async create(dto: CreateInstructorDto) {
     // Check if the teacher with this email already exists
     const existingTeacher = await this.prisma.instructor.findUnique({
-      where: { code: dto.email },
+      where: { email: dto.email },
     });
 
     if (existingTeacher) {

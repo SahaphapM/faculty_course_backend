@@ -83,7 +83,6 @@ export class AllExceptionsFilter implements ExceptionFilter {
       timestamp: new Date().toISOString(),
       path: request.url,
       message,
-      details, // Provide additional error details
     });
   }
 }
