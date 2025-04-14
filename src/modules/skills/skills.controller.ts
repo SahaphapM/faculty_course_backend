@@ -35,8 +35,8 @@ export class SkillsController {
     return this.skillsService.findOne(id);
   }
 
-  @Get('options/:curriculumId')
-  findOptions(@Param('curriculumId') id: string) {
+  @Get('options')
+  findOptions(@Query('curriculumId') id: string) {
     return this.skillsService.findOptions(+id);
   }
 
