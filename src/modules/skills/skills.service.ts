@@ -52,7 +52,7 @@ export class SkillsService {
       },
       where: {
         curriculumId,
-        subs: { isEmpty: true || null },
+        subs: { is: null },
       },
     } as Prisma.skillFindManyArgs;
     return await this.prisma.skill.findMany(options);
