@@ -38,7 +38,7 @@ export class PlosController {
   }
 
   @Get('options')
-  findOptions(@Query('curriculumId') curriculumId: number) {
+  findOptions(@Query() curriculumId: number) {
     return this.plosService.findOptions(curriculumId);
   }
 

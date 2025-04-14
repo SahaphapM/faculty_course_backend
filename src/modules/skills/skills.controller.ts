@@ -36,7 +36,7 @@ export class SkillsController {
   }
 
   @Get('options')
-  findOptions(@Query('curriculumId') curriculumId: number) {
+  findOptions(@Query() curriculumId: number) {
     return this.skillsService.findOptions(curriculumId);
   }
 
