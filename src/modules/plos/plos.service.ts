@@ -69,8 +69,7 @@ export class PloService {
     const options = {
       select: {
         id: true,
-        thaiName: true,
-        engName: true,
+        name: true,
       },
       where: { curriculumId },
     } as Prisma.ploFindManyArgs;
