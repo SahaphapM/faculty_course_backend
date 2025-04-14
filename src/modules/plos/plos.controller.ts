@@ -38,8 +38,8 @@ export class PlosController {
   }
 
   @Get('options')
-  findOptions(@Query('curriculumId') id: string) {
-    return this.plosService.findOptions(+id);
+  findOptions(@Query('curriculumId') curriculumId: number) {
+    return this.plosService.findOptions(curriculumId);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
