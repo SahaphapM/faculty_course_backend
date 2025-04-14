@@ -49,10 +49,13 @@ export class SkillsService {
         id: true,
         thaiName: true,
         engName: true,
+        subs: true,
       },
       where: {
         curriculumId,
-        subs: { is: null },
+        subs: {
+          none: {}, // ไม่มี subs
+        },
       },
     } as Prisma.skillFindManyArgs;
     return await this.prisma.skill.findMany(options);
