@@ -176,11 +176,11 @@ export class InstructorsService {
 
   async update(id: number, updateTeacherDto: UpdateInstructorDto) {
     try {
-      await this.prisma.instructor.update({
+      const teacher = await this.prisma.instructor.update({
         where: { id },
         data: updateTeacherDto,
       });
-      return `Success Update ID ${id}`;
+      return teacher;
     } catch (error) {
       throw new BadRequestException('Failed to update Instructor/Coordinator');
     }
