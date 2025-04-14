@@ -79,14 +79,15 @@ export class ClosService {
     }
   }
 
-  async update(id: number, updateCloDto: UpdateCloDto): Promise<clo> {
+  async update(id: number, updateCloDto: UpdateCloDto) {
     await this.findOne(id); // Ensure the CLO exists
 
     try {
-      return await this.prisma.clo.update({
+      const clo = await this.prisma.clo.update({
         where: { id },
         data: updateCloDto,
       });
+      return clo;
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to update CLO: ${error.message}`,
@@ -94,14 +95,15 @@ export class ClosService {
     }
   }
 
-  async remove(id: number): Promise<void> {
+  async remove(id: number) {
     const clo = await this.findOne(id);
     if (!clo) {
       throw new NotFoundException(`CLO with ID ${id} not found`);
     }
 
     try {
-      await this.prisma.clo.delete({ where: { id } });
+      const clo = await this.prisma.clo.delete({ where: { id } });
+      return clo;
     } catch (error) {
       throw new InternalServerErrorException(
         `Failed to delete CLO: ${error.message}`,

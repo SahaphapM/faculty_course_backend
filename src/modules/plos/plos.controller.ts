@@ -37,6 +37,11 @@ export class PlosController {
     return this.plosService.findOne(+id);
   }
 
+  @Get('options')
+  findOptions(@Param('curriculumId') id: string) {
+    return this.plosService.findOptions(+id);
+  }
+
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePloDto: UpdatePloDto) {

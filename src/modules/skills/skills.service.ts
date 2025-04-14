@@ -43,6 +43,20 @@ export class SkillsService {
     }
   }
 
+  async findOptions(curriculumId: number) {
+    const options = {
+      select: {
+        id: true,
+        thaiName: true,
+        engName: true,
+      },
+      where: {
+        curriculumId,
+      },
+    } as Prisma.skillFindManyArgs;
+    return await this.prisma.skill.findMany(options);
+  }
+
   // Find all skills with pagination and search
   async findAll(pag?: FilterParams) {
     const defaultLimit = 10;
@@ -130,7 +144,7 @@ export class SkillsService {
         include: {
           subs: true,
           parent: true,
-          curriculum: true,
+          // curriculum: true,
         },
       });
 
@@ -163,11 +177,12 @@ export class SkillsService {
   }
 
   // Remove a skill by ID
-  async remove(id: number): Promise<void> {
+  async remove(id: number) {
     try {
-      await this.prisma.skill.delete({
+      const skill = await this.prisma.skill.delete({
         where: { id },
       });
+      return skill;
     } catch (error) {
       if (error.code === 'P2025') {
         throw new NotFoundException(`Skill with ID ${id} not found`);

@@ -35,7 +35,7 @@ export class BranchesController {
 
   @Get('options')
   findAllOptions() {
-    return this.branchService.findAllOptions();
+    return this.branchService.findOptions();
   }
 
   @Get(':id')

@@ -84,7 +84,7 @@ export class BranchesService {
     }
   }
 
-  async findAllOptions() {
+  async findOptions() {
     const options = {
       select: {
         id: true,
@@ -92,7 +92,7 @@ export class BranchesService {
         engName: true,
         abbrev: true,
       },
-    };
+    } as Prisma.branchFindManyArgs;
     return await this.prisma.branch.findMany(options);
   }
 

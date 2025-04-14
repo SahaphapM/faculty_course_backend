@@ -35,6 +35,11 @@ export class SkillsController {
     return this.skillsService.findOne(id);
   }
 
+  @Get('options')
+  findOptions(@Param('curriculumId') id: string) {
+    return this.skillsService.findOptions(+id);
+  }
+
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Post()
   @HttpCode(HttpStatus.CREATED)

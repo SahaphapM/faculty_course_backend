@@ -65,6 +65,18 @@ export class PloService {
     return plo;
   }
 
+  async findOptions(curriculumId: number) {
+    const options = {
+      select: {
+        id: true,
+        thaiName: true,
+        engName: true,
+      },
+      where: { curriculumId },
+    } as Prisma.ploFindManyArgs;
+    return await this.prisma.plo.findMany(options);
+  }
+
   // Update a PLO by ID
   async update(id: number, updatePloDto: UpdatePloDto) {
     const plo = await this.prisma.plo.update({

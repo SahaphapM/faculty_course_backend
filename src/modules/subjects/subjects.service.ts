@@ -31,8 +31,8 @@ export class SubjectService {
         select: {
           curriculum: {
             select: {
-              code: true
-            }
+              code: true,
+            },
           },
           subject: {
             select: {
@@ -104,9 +104,7 @@ export class SubjectService {
       },
     });
 
-    return {
-      message: `Success: Created Subject ID ${subject.id}`,
-    };
+    return subject;
   }
 
   async update(id: number, dto: UpdateSubjectDto) {
@@ -127,17 +125,13 @@ export class SubjectService {
         subjectId: subject.id,
       },
     });
-    return {
-      message: `Success: Updated Subject ID ${id}`,
-    };
+    return subject;
   }
 
   async remove(id: number) {
-    await this.prisma.subject.delete({
+    const subject = await this.prisma.subject.delete({
       where: { id },
     });
-    return {
-      message: `Success: Deleted Subject ID ${id}`,
-    };
+    return subject;
   }
 }
