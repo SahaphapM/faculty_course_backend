@@ -139,10 +139,6 @@ export class SkillCollectionsService {
         score = calculateMode(leafNodes); // ✅ ใช้ mode
       }
 
-      const testLeafnodes = [1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10];
-      const testscore = calculateMode(testLeafnodes);
-      console.log('testscore', testscore);
-
       result.push({
         root_skill,
         domain,
@@ -277,17 +273,18 @@ function calculateMode(arr: number[]): number {
     freqMap.set(num, (freqMap.get(num) || 0) + 1);
   }
 
-  // หาค่าที่มีความถี่สูงสุด
-  let mode = arr[0];
   let maxCount = 0;
+  let modes: number[] = [];
+
   for (const [num, count] of freqMap.entries()) {
     if (count > maxCount) {
-      mode = num;
       maxCount = count;
+      modes = [num];
+    } else if (count === maxCount) {
+      modes.push(num);
     }
   }
-  // console.log('arr', arr);
-  // console.log('mode', mode);
 
-  return mode;
+  // ถ้ามี mode หลายค่า ให้เลือกค่าที่มากที่สุด
+  return Math.max(...modes);
 }
