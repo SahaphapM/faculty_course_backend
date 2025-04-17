@@ -84,7 +84,7 @@ export class SkillCollectionsService {
         },
       },
     });
-    console.log('skillCollections', JSON.stringify(skillCollections));
+    // console.log('skillCollections', JSON.stringify(skillCollections));
 
     // Step 1: Group by root skill
     const rootSkillMap = new Map();
@@ -136,12 +136,12 @@ export class SkillCollectionsService {
       let score = 0;
 
       if (leafCount > 0) {
-        const weight = 1 / leafCount;
-        score = leafNodes.reduce(
-          (sum: number, level: number) => sum + level * weight,
-          0,
-        );
+        score = calculateMode(leafNodes); // ✅ ใช้ mode
       }
+
+      const testLeafnodes = [1, 2, 3, 4, 5, 5, 6, 7, 8, 9, 10, 10, 10, 10, 10];
+      const testscore = calculateMode(testLeafnodes);
+      console.log('testscore', testscore);
 
       result.push({
         root_skill,
@@ -268,4 +268,26 @@ export class SkillCollectionsService {
     }
     return skillCollections;
   }
+}
+
+function calculateMode(arr: number[]): number {
+  const freqMap = new Map<number, number>();
+
+  for (const num of arr) {
+    freqMap.set(num, (freqMap.get(num) || 0) + 1);
+  }
+
+  // หาค่าที่มีความถี่สูงสุด
+  let mode = arr[0];
+  let maxCount = 0;
+  for (const [num, count] of freqMap.entries()) {
+    if (count > maxCount) {
+      mode = num;
+      maxCount = count;
+    }
+  }
+  // console.log('arr', arr);
+  // console.log('mode', mode);
+
+  return mode;
 }

@@ -77,6 +77,7 @@ export class SkillsService {
     const whereCondition: Prisma.skillWhereInput = {
       ...(name && { name: { contains: name } }),
       ...(curriculumCode && { curriculum: { code: curriculumCode } }),
+      parentId: null, // ดึงเฉพาะ root skill
     };
 
     const options: Prisma.skillFindManyArgs = {
@@ -137,7 +138,7 @@ export class SkillsService {
       this.prisma.skill.findMany(options),
       this.prisma.skill.count({ where: whereCondition }),
     ]);
-    return pag ? { data: this.normalizeTopLevelSkills(skills), total } : skills;
+    return pag ? { data: skills, total } : skills;
   }
 
   // Find a skill by ID
