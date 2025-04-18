@@ -4,12 +4,12 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
 import { Prisma } from '@prisma/client';
 import * as bycrpt from 'bcrypt';
+import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
 
 @Injectable()
 export class UsersService {
@@ -33,7 +33,7 @@ export class UsersService {
     });
   }
 
-  async findAll(pag?: FilterParams) {
+  async findAll(pag?: UserFilterDto) {
     const {
       page = 1,
       limit = 10,

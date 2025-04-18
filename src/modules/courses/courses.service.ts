@@ -4,13 +4,13 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { Prisma } from '@prisma/client';
 import { StudentsService } from '../students/students.service';
 import { ClosService } from '../clos/clos.service';
+import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
 
 @Injectable()
 export class CourseService {
@@ -67,7 +67,7 @@ export class CourseService {
   }
 
   // Find all courses with pagination and search
-  async findAll(pag?: FilterParams) {
+  async findAll(pag?: CourseFilterDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 

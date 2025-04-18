@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
-import { FilterParams } from 'src/dto/filter-params.dto';
+import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
 import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
@@ -40,7 +40,7 @@ export class StudentsController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
-  findAll(@Query() pag?: FilterParams) {
+  findAll(@Query() pag?: BaseFilterParams) {
     return this.studentsService.findAll(pag);
   }
 

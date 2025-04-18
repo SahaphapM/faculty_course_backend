@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { CreateLessonDto } from 'src/generated/nestjs-dto/create-lesson.dto';
 import { UpdateLessonDto } from 'src/generated/nestjs-dto/update-lesson.dto';
+import { LessonFilterDto } from 'src/dto/filters/filter.lesson.dto';
 
 @Injectable()
 export class LessonsService {
@@ -42,7 +42,7 @@ export class LessonsService {
   }
 
   // Find all lessons with pagination and search
-  async findAll(pag?: FilterParams) {
+  async findAll(pag?: LessonFilterDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 

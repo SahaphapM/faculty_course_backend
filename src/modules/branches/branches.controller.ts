@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { FilterParams } from 'src/dto/filter-params.dto';
+import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -29,7 +29,7 @@ export class BranchesController {
   }
 
   @Get()
-  findAll(@Query() pag?: FilterParams) {
+  findAll(@Query() pag?: BaseFilterParams) {
     return this.branchService.findAll(pag);
   }
 

@@ -14,7 +14,7 @@ import {
   ParseFilePipeBuilder,
 } from '@nestjs/common';
 import { InstructorsService } from './instructors.service';
-import { FilterParams } from '../../dto/filter-params.dto';
+import { BaseFilterParams } from '../../dto/filters/filter.base.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomUploadFileTypeValidator } from './instructors.file.validators';
 import { v4 as uuidv4 } from 'uuid';
@@ -102,7 +102,7 @@ export class InstructorsController {
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() pag?: FilterParams) {
+  findAll(@Query() pag?: BaseFilterParams) {
     return this.insService.findAll(pag);
   }
 

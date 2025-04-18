@@ -10,7 +10,7 @@ import {
 } from '@nestjs/common';
 import { FacultiesService } from './faculties.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { FilterParams } from 'src/dto/filter-params.dto';
+import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { CreateFacultyDto } from 'src/generated/nestjs-dto/create-faculty.dto';
 import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -28,7 +28,7 @@ export class FacultiesController {
   }
 
   @Get()
-  findAll(@Query() pag?: FilterParams) {
+  findAll(@Query() pag?: BaseFilterParams) {
     return this.facultiesService.findAll(pag);
   }
 

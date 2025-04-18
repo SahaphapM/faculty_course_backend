@@ -4,12 +4,12 @@ import {
   BadRequestException,
   InternalServerErrorException,
 } from '@nestjs/common';
-import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
-import { Prisma } from '@prisma/client'; // Import Prisma types
-import { FilterParams } from 'src/dto/filter-params.dto'; // Adjust the import path as needed
+import { PrismaService } from 'src/prisma/prisma.service';
+import { Prisma } from '@prisma/client';
 import { UpdateSkillDto } from 'src/generated/nestjs-dto/update-skill.dto';
 import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
 import { Skill } from 'src/generated/nestjs-dto/skill.entity';
+import { SkillFilterDto } from 'src/dto/filters/filter.skill.dto';
 
 @Injectable()
 export class SkillsService {
@@ -62,7 +62,7 @@ export class SkillsService {
   }
 
   // Find all skills with pagination and search
-  async findAll(pag?: FilterParams) {
+  async findAll(pag?: SkillFilterDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 

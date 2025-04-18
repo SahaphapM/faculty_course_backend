@@ -12,7 +12,7 @@ import { PloService } from './plos.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
 import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
-import { FilterParams } from 'src/dto/filter-params.dto';
+import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 
@@ -28,7 +28,7 @@ export class PlosController {
   }
 
   @Get()
-  findAll(@Query() filter?: FilterParams) {
+  findAll(@Query() filter?: BaseFilterParams) {
     return this.plosService.findAll(filter);
   }
 

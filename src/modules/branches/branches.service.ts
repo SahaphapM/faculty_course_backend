@@ -3,11 +3,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { branch, Prisma } from '@prisma/client'; // Import the Prisma-generated Branch type
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
+import { BranchFilterDto } from 'src/dto/filters/filter.branch.dto';
 
 @Injectable()
 export class BranchesService {
@@ -47,7 +47,7 @@ export class BranchesService {
     }
   }
 
-  async findAll(pag: FilterParams) {
+  async findAll(pag: BranchFilterDto) {
     const {
       page = 1,
       limit = 10,
