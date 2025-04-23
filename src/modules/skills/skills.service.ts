@@ -67,7 +67,7 @@ export class SkillsService {
     const defaultPage = 1;
 
     const {
-      name,
+      thaiName,
       limit = defaultLimit,
       page = defaultPage,
       orderBy = 'asc',
@@ -75,7 +75,7 @@ export class SkillsService {
     } = pag || {};
 
     const whereCondition: Prisma.skillWhereInput = {
-      ...(name && { name: { contains: name } }),
+      ...(thaiName && { thaiName: { contains: thaiName } }),
       ...(curriculumCode && { curriculum: { code: curriculumCode } }),
       parentId: null, // ดึงเฉพาะ root skill
     };
@@ -85,19 +85,6 @@ export class SkillsService {
       skip: (page - 1) * limit,
       orderBy: { id: orderBy },
       include: {
-        // parent: {
-        //   select: {
-        //     id: true,
-        //     thaiName: true,
-        //     engName: true,
-        //   },
-        // },
-        // curriculum: {
-        //   select: {
-        //     id: true,
-        //     thaiName: true,
-        //   },
-        // },
         subs: {
           // level 2
           select: {

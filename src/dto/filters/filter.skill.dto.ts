@@ -5,7 +5,7 @@ export class SkillFilterDto extends BaseFilterParams {
   //search
   @IsOptional()
   @IsString()
-  name?: string;
+  thaiName?: string;
 
   @IsOptional()
   @IsString()
