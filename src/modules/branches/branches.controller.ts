@@ -10,11 +10,11 @@ import {
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
+import { BranchFilterDto } from 'src/dto/filters/filter.branch.dto';
 
 @ApiBearerAuth()
 @Roles(UserRole.Admin)
@@ -29,7 +29,7 @@ export class BranchesController {
   }
 
   @Get()
-  findAll(@Query() pag?: BaseFilterParams) {
+  findAll(@Query() pag?: BranchFilterDto) {
     return this.branchService.findAll(pag);
   }
 

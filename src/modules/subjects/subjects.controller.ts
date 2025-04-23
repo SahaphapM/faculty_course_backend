@@ -11,10 +11,10 @@ import {
 import { SubjectService } from './subjects.service';
 import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
 import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
-import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
+import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
 
 @ApiBearerAuth()
 @Controller('subjects')
@@ -22,7 +22,7 @@ export class SubjectController {
   constructor(private readonly courseSpecsService: SubjectService) {}
 
   @Get()
-  findAll(@Query() pag?: BaseFilterParams) {
+  findAll(@Query() pag?: CourseFilterDto) {
     return this.courseSpecsService.findAll(pag);
   }
 
