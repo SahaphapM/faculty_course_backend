@@ -6,4 +6,8 @@ export class CourseFilterDto extends BaseFilterParams {
   @IsOptional()
   @IsString()
   code?: string;
+
+  @IsOptional()
+  @IsString()
+  thaiName?: string;
 }
