@@ -6,10 +6,10 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 
-import { FilterParams } from 'src/dto/filter-params.dto'; // Adjust the import path as needed
 import { Prisma } from '@prisma/client'; // Import Prisma types
 import { CreateFacultyDto } from 'src/generated/nestjs-dto/create-faculty.dto';
 import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
+import { FacultyFilterDto } from 'src/dto/filters/filter.faculties.dto';
 
 @Injectable()
 export class FacultiesService {
@@ -50,7 +50,7 @@ export class FacultiesService {
   }
 
   // Find all faculties with pagination and search
-  async findAll(pag?: FilterParams) {
+  async findAll(pag?: FacultyFilterDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 

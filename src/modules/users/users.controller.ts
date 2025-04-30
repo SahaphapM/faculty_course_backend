@@ -11,13 +11,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { Public } from 'src/decorators/public.decorator';
+import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
 
 @ApiBearerAuth()
 @Controller('users')
@@ -32,7 +32,7 @@ export class UsersController {
   @Roles(UserRole.Admin)
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() pag?: FilterParams) {
+  findAll(@Query() pag?: UserFilterDto) {
     return this.usersService.findAll(pag);
   }
 

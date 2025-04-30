@@ -3,11 +3,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { clo, Prisma } from 'prisma/prisma-client';
 import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
 import { CreateCloDto } from 'src/generated/nestjs-dto/create-clo.dto';
+import { CloFilterDto } from 'src/dto/filters/filter.clo.dto';
 @Injectable()
 export class ClosService {
   constructor(private prisma: PrismaService) {}
@@ -34,7 +34,7 @@ export class ClosService {
     }
   }
 
-  async findAll(pag?: FilterParams): Promise<{ data: clo[]; total: number }> {
+  async findAll(pag?: CloFilterDto): Promise<{ data: clo[]; total: number }> {
     const { subjectId } = pag;
 
     // Prisma query options

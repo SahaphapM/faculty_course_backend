@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import { FilterParams } from 'src/dto/filter-params.dto';
+import { SubjectFilterDto } from 'src/dto/filters/filter.subject.dto';
 import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
 import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
@@ -9,7 +9,7 @@ import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import 
 export class SubjectService {
   constructor(private prisma: PrismaService) {}
 
-  async findAll(pag?: FilterParams) {
+  async findAll(pag?: SubjectFilterDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 
@@ -17,7 +17,7 @@ export class SubjectService {
       pag || {};
 
     const whereCondition: Prisma.subjectWhereInput = {
-      ...(code && { code: code }),
+      ...(code && { code: { contains: code } }),
       ...(thaiName && { thaiName: { contains: thaiName } }),
       ...(engName && { engName: { contains: engName } }),
       ...(curriculumCode && {

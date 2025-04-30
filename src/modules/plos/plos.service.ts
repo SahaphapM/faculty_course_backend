@@ -2,8 +2,8 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
 import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { Prisma } from '@prisma/client';
+import { PloFilterDto } from 'src/dto/filters/filter.plo.dto';
 
 @Injectable()
 export class PloService {
@@ -23,7 +23,7 @@ export class PloService {
   }
 
   // Find all PLOs
-  async findAll(filter?: FilterParams) {
+  async findAll(filter?: PloFilterDto) {
     const { curriculumCode } = filter || {}; // Ensure filter is not undefined
 
     const whereCondition: Prisma.ploWhereInput = curriculumCode

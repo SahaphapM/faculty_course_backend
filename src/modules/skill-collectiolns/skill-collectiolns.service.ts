@@ -6,7 +6,7 @@ import {
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ClosService } from '../clos/clos.service';
 import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
-import { StudentScoreList } from 'src/dto/filter-params.dto';
+import { StudentScoreList } from 'src/dto/filters/filter.base.dto';
 import { SkillCollectionDto } from 'src/generated/nestjs-dto/skillCollection.dto';
 
 @Injectable()

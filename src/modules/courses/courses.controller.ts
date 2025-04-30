@@ -9,12 +9,12 @@ import {
 } from '@nestjs/common';
 import { CourseService } from './courses.service';
 import { Query } from '@nestjs/common';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
+import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
 
 @ApiBearerAuth()
 @Controller('courses')
@@ -28,7 +28,7 @@ export class CoursesController {
   }
 
   @Get()
-  findAll(@Query() pag?: FilterParams) {
+  findAll(@Query() pag?: CourseFilterDto) {
     return this.coursesService.findAll(pag);
   }
 

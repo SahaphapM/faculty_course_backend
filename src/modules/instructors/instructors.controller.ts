@@ -14,7 +14,6 @@ import {
   ParseFilePipeBuilder,
 } from '@nestjs/common';
 import { InstructorsService } from './instructors.service';
-import { FilterParams } from '../../dto/filter-params.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { CustomUploadFileTypeValidator } from './instructors.file.validators';
 import { v4 as uuidv4 } from 'uuid';
@@ -25,6 +24,7 @@ import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.
 import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
+import { InstructorFilterDto } from 'src/dto/filters/filter.instructors.dto';
 
 const MAX_PROFILE_PICTURE_SIZE_IN_BYTES = 2 * 1024 * 1024; // 2 mb
 const VALID_UPLOADS_MIME_TYPES = ['image/jpeg', 'image/png'];
@@ -102,7 +102,7 @@ export class InstructorsController {
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
   @HttpCode(HttpStatus.OK)
-  findAll(@Query() pag?: FilterParams) {
+  findAll(@Query() pag?: InstructorFilterDto) {
     return this.insService.findAll(pag);
   }
 

@@ -8,13 +8,13 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { LessonsService } from './lessons.service';
 import { CreateLessonDto } from 'src/generated/nestjs-dto/create-lesson.dto';
 import { UpdateLessonDto } from 'src/generated/nestjs-dto/update-lesson.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
+import { LessonFilterDto } from 'src/dto/filters/filter.lesson.dto';
 
 @ApiBearerAuth()
 @Controller('lessons')
@@ -23,7 +23,7 @@ export class LessonsController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
-  findAll(@Query() pag?: FilterParams) {
+  findAll(@Query() pag?: LessonFilterDto) {
     return this.subjectsService.findAll(pag);
   }
 

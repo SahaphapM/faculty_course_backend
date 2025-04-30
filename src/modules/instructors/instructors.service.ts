@@ -4,11 +4,11 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { FilterParams } from '../../dto/filter-params.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.dto';
 import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.dto';
 import { Prisma } from '@prisma/client';
+import { InstructorFilterDto } from 'src/dto/filters/filter.instructors.dto';
 
 @Injectable()
 export class InstructorsService {
@@ -38,7 +38,7 @@ export class InstructorsService {
     return teacher;
   }
 
-  async findAll(pag?: FilterParams) {
+  async findAll(pag?: InstructorFilterDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 

@@ -9,12 +9,12 @@ import {
   Query,
 } from '@nestjs/common';
 import { ClosService } from './clos.service';
-import { FilterParams } from 'src/dto/filter-params.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCloDto } from 'src/generated/nestjs-dto/create-clo.dto';
 import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
+import { CloFilterDto } from 'src/dto/filters/filter.clo.dto';
 
 @ApiBearerAuth()
 @Controller('clos')
@@ -28,7 +28,7 @@ export class ClosController {
   }
 
   @Get()
-  findAllByPage(@Query() paginationDto: FilterParams) {
+  findAllByPage(@Query() paginationDto: CloFilterDto) {
     return this.closService.findAll(paginationDto);
   }
 
