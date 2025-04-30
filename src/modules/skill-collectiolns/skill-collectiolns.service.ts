@@ -84,79 +84,84 @@ export class SkillCollectionsService {
         },
       },
     });
-    // console.log('skillCollections', JSON.stringify(skillCollections));
 
-    // Step 1: Group by root skill
-    const rootSkillMap = new Map();
+    // สร้าง skillLevelMap เพื่อเก็บ gainedLevel ที่ดีที่สุดต่อ skillId
+    const skillLevelMap = new Map<number, number>();
+    skillCollections.forEach((sc) => {
+      const skill = sc.clo?.skill;
+      if (!skill) return;
+      const current = skillLevelMap.get(skill.id) || 0;
+      skillLevelMap.set(skill.id, Math.max(current, sc.gainedLevel));
+    });
+
+    // ดึงเฉพาะ skill ที่มีใน skillCollections
+    const skillIds = new Set<number>();
 
     skillCollections.forEach((sc) => {
-      // Check if clo and skill exist
-      if (!sc.clo || !sc.clo.skill) {
-        return; // Skip this entry if skill is missing
-      }
-
-      const currentSkill = sc.clo.skill;
-      let rootSkill = currentSkill;
-
-      // Find root skill (keep traversing up until parent is null)
-      while (rootSkill.parent) {
-        rootSkill = rootSkill.parent;
-      }
-
-      const rootSkillId = rootSkill.id;
-      const rootSkillName = rootSkill.engName;
-      const domain = rootSkill.domain;
-
-      if (!rootSkillMap.has(rootSkillId)) {
-        rootSkillMap.set(rootSkillId, {
-          root_skill: rootSkillName,
-          domain: domain,
-          leafNodes: [],
-        });
-      }
-
-      // Check if it's not the parent node itself
-      if (currentSkill.id !== rootSkillId) {
-        // เป็น leaf node จริง
-        rootSkillMap.get(rootSkillId).leafNodes.push(sc.gainedLevel);
-      } else {
-        // ถ้าไม่มีลูกจริง ๆ ให้ fallback ใช้ gainedLevel นี้
-        const node = rootSkillMap.get(rootSkillId);
-        if (node.leafNodes.length === 0) {
-          node.leafNodes.push(sc.gainedLevel);
-        }
+      let skill = sc.clo?.skill;
+      while (skill) {
+        skillIds.add(skill.id);
+        skill = skill.parent;
       }
     });
 
-    // Step 2: Calculate scores
-    const result = [];
-    rootSkillMap.forEach((value) => {
-      const { root_skill, domain, leafNodes } = value;
-      const leafCount = leafNodes.length;
-      let score = 0;
+    const relatedSkills = await this.prisma.skill.findMany({
+      where: { id: { in: Array.from(skillIds) } },
+      include: { parent: true },
+    });
 
-      if (leafCount > 0) {
-        score = calculateMode(leafNodes); // ✅ ใช้ mode
-      }
-
-      result.push({
-        root_skill,
-        domain,
-        score,
+    // แปลง skill hierarchy เป็น tree (ใช้ข้อมูล parent)
+    const skillMap = new Map<number, any>();
+    for (const skill of relatedSkills) {
+      skillMap.set(skill.id, {
+        id: skill.id,
+        name: skill.engName,
+        domain: skill.domain,
+        parentId: skill.parent?.id || null,
+        gained: skillLevelMap.get(skill.id),
+        subskills: [],
       });
-    });
+    }
 
-    // Separate by domain: soft and hard
-    const soft = result.filter(
-      (item) => item.domain === 'คุณลักษณะบุคคล' || item.domain === 'จริยธรรม',
-    );
-    const specific = result.filter(
-      (item) => item.domain === 'ทักษะ' || item.domain === 'ความรู้',
-    );
+    // ต่อโครงสร้าง parent → children
+    for (const node of skillMap.values()) {
+      if (node.parentId) {
+        const parent = skillMap.get(node.parentId);
+        if (parent) parent.subskills.push(node);
+      }
+    }
 
-    // // Get top 8 for each domain
-    // soft = soft.sort((a, b) => b.score - a.score).slice(0, 8); // Sort by score desc
-    // specific = specific.sort((a, b) => b.score - a.score).slice(0, 8);
+    // เติม gained แบบ mode (recursive)
+    function calculateMode(arr: number[]): number {
+      const count = new Map<number, number>();
+      arr.forEach((n) => count.set(n, (count.get(n) || 0) + 1));
+      const max = Math.max(...count.values());
+      const modes = [...count.entries()]
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, c]) => c === max)
+        .map(([n]) => n);
+      return Math.max(...modes);
+    }
+
+    function fillGained(node: any): number | undefined {
+      if (!node.subskills.length) return node.gained;
+      const childGained = node.subskills
+        .map(fillGained)
+        .filter((x) => x !== undefined) as number[];
+      if (childGained.length > 0) node.gained = calculateMode(childGained);
+      return node.gained;
+    }
+
+    const roots = [...skillMap.values()].filter((n) => n.parentId === null);
+    roots.forEach(fillGained);
+
+    //  แยก specific กับ soft และ return
+    const specific = roots.filter(
+      (r) => r.domain === 'ทักษะ' || r.domain === 'ความรู้',
+    );
+    const soft = roots.filter(
+      (r) => r.domain === 'คุณลักษณะบุคคล' || r.domain === 'จริยธรรม',
+    );
 
     return { specific, soft };
   }
@@ -264,27 +269,4 @@ export class SkillCollectionsService {
     }
     return skillCollections;
   }
-}
-
-function calculateMode(arr: number[]): number {
-  const freqMap = new Map<number, number>();
-
-  for (const num of arr) {
-    freqMap.set(num, (freqMap.get(num) || 0) + 1);
-  }
-
-  let maxCount = 0;
-  let modes: number[] = [];
-
-  for (const [num, count] of freqMap.entries()) {
-    if (count > maxCount) {
-      maxCount = count;
-      modes = [num];
-    } else if (count === maxCount) {
-      modes.push(num);
-    }
-  }
-
-  // ถ้ามี mode หลายค่า ให้เลือกค่าที่มากที่สุด
-  return Math.max(...modes);
 }

@@ -147,7 +147,15 @@ export class SkillsService {
       const skill = await this.prisma.skill.findUnique({
         where: { id },
         include: {
-          subs: true,
+          subs: {
+            include: {
+              subs: {
+                include: {
+                  subs: true,
+                },
+              },
+            },
+          },
           parent: true,
           // curriculum: true,
         },
