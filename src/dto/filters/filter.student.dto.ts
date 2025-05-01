@@ -33,4 +33,8 @@ export class StudentFilterDto extends BaseFilterParams {
   @IsOptional()
   @IsString()
   skill_collection?: boolean;
+
+  @IsOptional()
+  @IsString()
+  skill_collection_name?: string;
 }

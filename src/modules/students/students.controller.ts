@@ -39,6 +39,12 @@ export class StudentsController {
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @Get('skill-search')
+  findAllBySkill(@Query() pag?: StudentFilterDto) {
+    return this.studentsService.findAllBySkill(pag);
+  }
+
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
   findAll(@Query() pag?: StudentFilterDto) {
     return this.studentsService.findAll(pag);

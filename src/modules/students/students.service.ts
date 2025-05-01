@@ -143,4 +143,76 @@ export class StudentsService {
     });
     return student;
   }
+
+  async findAllBySkill(pag?: StudentFilterDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const { limit, page, orderBy, skill_collection_name } = pag || {};
+
+    const options: Prisma.studentFindManyArgs = {
+      where: {
+        skill_collections: {
+          some: {
+            clo: {
+              is: {
+                skill: {
+                  is: {
+                    OR: [
+                      { thaiName: { contains: skill_collection_name } },
+                      { engName: { contains: skill_collection_name } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      take: limit ?? defaultLimit,
+      skip: ((page ?? defaultPage) - 1) * (limit ?? defaultLimit),
+      orderBy: { id: orderBy ?? 'asc' },
+
+      // include: {
+      //   skill_collections: {
+      //     where: {
+      //       clo: {
+      //         is: {
+      //           skill: {
+      //             is: {
+      //               OR: [
+      //                 { thaiName: { contains: skill_collection_name } },
+      //                 { engName: { contains: skill_collection_name } },
+      //               ],
+      //             },
+      //           },
+      //         },
+      //       },
+      //     },
+      //     select: {
+      //       gainedLevel: true,
+      //       clo: {
+      //         select: {
+      //           name: true,
+      //           skill: {
+      //             select: {
+      //               id: true,
+      //               thaiName: true,
+      //               engName: true,
+      //             },
+      //           },
+      //         },
+      //       },
+      //     },
+      //   },
+      // },
+    };
+
+    const [students, total] = await Promise.all([
+      this.prisma.student.findMany(options),
+      this.prisma.student.count({ where: options.where }),
+    ]);
+
+    return { data: students, total };
+  }
 }

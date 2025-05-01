@@ -269,4 +269,23 @@ export class SkillCollectionsService {
     }
     return skillCollections;
   }
+
+  // async searchSkillCollection(
+  //   skillName: string,
+  //   curriculumId: number,
+  // ): Promise<any[]> {
+  //   return this.prisma.skill_collection.findMany({
+  //     where: {
+  //       clo: {
+  //         skill: {
+  //           // engName or thaiName
+  //           OR: [
+  //             { engName: { contains: skillName } },
+  //             { thaiName: { contains: skillName } },
+  //           ],
+  //         },
+  //       },
+  //     },
+  //   });
+  // }
 }
