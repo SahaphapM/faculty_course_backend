@@ -48,20 +48,67 @@ export class StudentsService {
     const defaultPage = 1;
 
     const {
-      thaiName,
-      engName,
-      code,
       limit,
       page,
       orderBy,
-      branchThaiName,
-      branchEngName,
-      facultyThaiName,
-      facultyEngName,
-      skill_collection,
+      nameCode,
+      branchName,
+      facultyName,
+      skillName,
     } = pag || {};
 
+    console.log(pag);
+
+    const where: Prisma.studentWhereInput = {
+      ...(nameCode && {
+        OR: [
+          { thaiName: { contains: nameCode } },
+          { engName: { contains: nameCode } },
+          { code: { contains: nameCode } },
+        ],
+      }),
+      ...(branchName || facultyName
+        ? {
+            branch: {
+              ...(branchName && {
+                OR: [
+                  { thaiName: { contains: branchName } },
+                  { engName: { contains: branchName } },
+                ],
+              }),
+              ...(facultyName && {
+                faculty: {
+                  OR: [
+                    { thaiName: { contains: facultyName } },
+                    { engName: { contains: facultyName } },
+                  ],
+                },
+              }),
+            },
+          }
+        : {}),
+      ...(skillName && {
+        skill_collections: {
+          some: {
+            clo: {
+              is: {
+                skill: {
+                  is: {
+                    OR: [
+                      { thaiName: { contains: skillName } },
+                      { engName: { contains: skillName } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    };
+
     const options: Prisma.studentFindManyArgs = {
+      where,
       take: limit ?? defaultLimit,
       skip: ((page ?? defaultPage) - 1) * (limit ?? defaultLimit),
       orderBy: { id: orderBy ?? 'asc' },
@@ -73,24 +120,6 @@ export class StudentsService {
             faculty: { select: { thaiName: true, engName: true } },
           },
         },
-        skill_collections: skill_collection || false,
-      },
-      where: {
-        ...(code && { code: { contains: code } }),
-        ...(thaiName && { thaiName: { contains: thaiName } }),
-        ...(engName && { engName: { contains: engName } }),
-        ...(branchThaiName && {
-          branch: { thaiName: { contains: branchThaiName } },
-        }),
-        ...(branchEngName && {
-          branch: { engName: { contains: branchEngName } },
-        }),
-        ...(facultyThaiName && {
-          branch: { faculty: { thaiName: { contains: facultyThaiName } } },
-        }),
-        ...(facultyEngName && {
-          branch: { faculty: { engName: { contains: facultyEngName } } },
-        }),
       },
     };
 
@@ -148,7 +177,7 @@ export class StudentsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { limit, page, orderBy, skill_collection_name } = pag || {};
+    const { limit, page, orderBy, skillName } = pag || {};
 
     const options: Prisma.studentFindManyArgs = {
       where: {
@@ -159,8 +188,8 @@ export class StudentsService {
                 skill: {
                   is: {
                     OR: [
-                      { thaiName: { contains: skill_collection_name } },
-                      { engName: { contains: skill_collection_name } },
+                      { thaiName: { contains: skillName } },
+                      { engName: { contains: skillName } },
                     ],
                   },
                 },
@@ -172,40 +201,40 @@ export class StudentsService {
       take: limit ?? defaultLimit,
       skip: ((page ?? defaultPage) - 1) * (limit ?? defaultLimit),
       orderBy: { id: orderBy ?? 'asc' },
-
-      // include: {
-      //   skill_collections: {
-      //     where: {
-      //       clo: {
-      //         is: {
-      //           skill: {
-      //             is: {
-      //               OR: [
-      //                 { thaiName: { contains: skill_collection_name } },
-      //                 { engName: { contains: skill_collection_name } },
-      //               ],
-      //             },
-      //           },
-      //         },
-      //       },
-      //     },
-      //     select: {
-      //       gainedLevel: true,
-      //       clo: {
-      //         select: {
-      //           name: true,
-      //           skill: {
-      //             select: {
-      //               id: true,
-      //               thaiName: true,
-      //               engName: true,
-      //             },
-      //           },
-      //         },
-      //       },
-      //     },
-      //   },
-      // },
+      //
+      include: {
+        skill_collections: {
+          where: {
+            clo: {
+              is: {
+                skill: {
+                  is: {
+                    OR: [
+                      { thaiName: { contains: skillName } },
+                      { engName: { contains: skillName } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+          select: {
+            gainedLevel: true,
+            clo: {
+              select: {
+                name: true,
+                skill: {
+                  select: {
+                    id: true,
+                    thaiName: true,
+                    engName: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
     };
 
     const [students, total] = await Promise.all([

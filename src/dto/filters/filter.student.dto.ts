@@ -4,37 +4,17 @@ import { BaseFilterParams } from './filter.base.dto';
 export class StudentFilterDto extends BaseFilterParams {
   @IsOptional()
   @IsString()
-  code?: string;
+  nameCode?: string;
 
   @IsOptional()
   @IsString()
-  thaiName?: string;
+  branchName?: string;
 
   @IsOptional()
   @IsString()
-  engName?: string;
+  facultyName?: string;
 
   @IsOptional()
   @IsString()
-  branchThaiName?: string;
-
-  @IsOptional()
-  @IsString()
-  branchEngName?: string;
-
-  @IsOptional()
-  @IsString()
-  facultyThaiName?: string;
-
-  @IsOptional()
-  @IsString()
-  facultyEngName?: string;
-
-  @IsOptional()
-  @IsString()
-  skill_collection?: boolean;
-
-  @IsOptional()
-  @IsString()
-  skill_collection_name?: string;
+  skillName?: string;
 }
