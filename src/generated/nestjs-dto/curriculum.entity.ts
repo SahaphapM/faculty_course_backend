@@ -1,9 +1,9 @@
 
 import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
-import {CurriculumSubjects} from './curriculumSubjects.entity'
 import {Branch} from './branch.entity'
 import {CurriculumCoordinators} from './curriculumCoordinators.entity'
+import {Subject} from './subject.entity'
 import {Plo} from './plo.entity'
 import {Skill} from './skill.entity'
 
@@ -64,12 +64,6 @@ thaiDescription: string  | null;
 })
 engDescription: string  | null;
 @ApiProperty({
-  type: () => CurriculumSubjects,
-  isArray: true,
-  required: false,
-})
-subjects?: CurriculumSubjects[] ;
-@ApiProperty({
   type: () => Branch,
   required: false,
 })
@@ -80,6 +74,12 @@ branch?: Branch ;
   required: false,
 })
 coordinators?: CurriculumCoordinators[] ;
+@ApiProperty({
+  type: () => Subject,
+  isArray: true,
+  required: false,
+})
+subjects?: Subject[] ;
 @ApiProperty({
   type: () => Plo,
   isArray: true,

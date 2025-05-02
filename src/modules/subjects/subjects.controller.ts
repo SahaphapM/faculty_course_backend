@@ -31,6 +31,10 @@ export class SubjectController {
   create(@Body() dto: CreateSubjectDto) {
     return this.subjectsService.create(dto);
   }
+  @Get('subject-code/:code')
+  findOneByCode(@Param('code') code: string) {
+    return this.subjectsService.findOneByCode(code);
+  }
 
   @Get(':id')
   findOne(@Param('id') id: string) {

@@ -85,6 +85,9 @@ export class SubjectService {
       orderBy: {
         [sortField]: sortOrder,
       },
+      include: {
+        clos: true,
+      },
     };
 
     const [subjects, total] = await Promise.all([
@@ -105,19 +108,22 @@ export class SubjectService {
     return subject;
   }
 
+  async findOneByCode(code: string) {
+    const subject = await this.prisma.subject.findUnique({
+      where: { code },
+      include: {
+        clos: true,
+      },
+    });
+
+    return subject;
+  }
+
   async create(dto: CreateSubjectDto) {
     const subject = await this.prisma.subject.create({
       data: {
         ...dto,
         curriculumId: dto.curriculumId,
-      },
-    });
-
-    // update join table
-    await this.prisma.curriculum_subjects.create({
-      data: {
-        curriculumId: dto.curriculumId,
-        subjectId: subject.id,
       },
     });
 
@@ -141,16 +147,7 @@ export class SubjectService {
         curriculumId: dto.curriculumId,
       },
     });
-    await this.prisma.curriculum_subjects.updateMany({
-      where: {
-        subjectId: subject.id, // Match the subject being updated
-        curriculumId: dto.curriculumId, // Match the intended curriculum
-      },
-      data: {
-        curriculumId: dto.curriculumId,
-        subjectId: subject.id,
-      },
-    });
+
     return subject;
   }
 

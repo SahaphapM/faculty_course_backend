@@ -1,13 +1,34 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
+import { Type } from 'class-transformer';
 
 export class SkillFilterDto extends BaseFilterParams {
   //search
   @IsOptional()
   @IsString()
-  thaiName?: string;
+  nameCode?: string;
 
   @IsOptional()
   @IsString()
-  curriculumCode?: string;
+  domain?: string;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  curriculumId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  branchId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  facultyId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  subjectId?: number;
 }

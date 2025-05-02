@@ -82,7 +82,7 @@ model course_instructor {
 
 model subject {
   id              Int                   @id @default(autoincrement())
-  code            String
+  code            String                @unique() @db.VarChar(50)
   /// @DtoRelationIncludeId
   curriculumId    Int
   thaiName        String?               @db.VarChar(255)
@@ -93,7 +93,7 @@ model subject {
   engDescription  String?               @db.Text
   clos            clo[]
   lesson          lesson?
-  curriculums     curriculum_subjects[]
+  curriculum     curriculum @relation(fields: [curriculumId], references: [id])
   courses         course[]
 
   @@index([curriculumId])
@@ -112,27 +112,16 @@ model curriculum {
   minimumGrade    Decimal                   @db.Decimal(3, 2)
   thaiDescription String?                   @db.Text
   engDescription  String?                   @db.Text
-  subjects        curriculum_subjects[]
+            
   branch          branch                    @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   coordinators    curriculum_coordinators[]
+  subjects        subject[]   
   plos            plo[]
   skills          skill[]
 
   @@index([branchId])
 }
 
-model curriculum_subjects {
-  /// @DtoRelationIncludeId
-  curriculumId Int
-  /// @DtoRelationIncludeId
-  subjectId    Int
-  subject      subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade,  onUpdate: Cascade)
-  curriculum   curriculum @relation(fields: [curriculumId], references: [id], onUpdate: Cascade)
-
-  @@id([curriculumId, subjectId])
-  @@index([subjectId])
-  @@index([curriculumId])
-}
 
 model curriculum_coordinators {
   /// @DtoRelationIncludeId

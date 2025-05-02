@@ -1,6 +1,6 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {IsInt,IsNotEmpty} from 'class-validator'
+import {IsInt,IsOptional,IsString} from 'class-validator'
 
 
 
@@ -9,8 +9,16 @@ export class ConnectSubjectDto {
   @ApiProperty({
   type: 'integer',
   format: 'int32',
+  required: false,
 })
-@IsNotEmpty()
+@IsOptional()
 @IsInt()
-id: number ;
+id?: number ;
+@ApiProperty({
+  type: 'string',
+  required: false,
+})
+@IsOptional()
+@IsString()
+code?: string ;
 }

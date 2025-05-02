@@ -77,7 +77,7 @@ export class CourseService {
       course_instructors: true,
       subject: {
         include: {
-          curriculums: true,
+          curriculum: true,
         },
       },
     };
