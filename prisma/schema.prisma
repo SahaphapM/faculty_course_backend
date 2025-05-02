@@ -154,13 +154,13 @@ model instructor {
   thaiName           String                    @unique() @db.VarChar(255)
   engName            String                    @unique() @db.VarChar(255)
   tel                String?                   @db.VarChar(255)
-  picture            String?                   @db.VarChar(255)
+  // picture            String?                   @db.VarChar(255)
   position           String?                   @db.VarChar(255)
   email              String                    @unique() @db.VarChar(255)
-  officeRoom         String?                   @db.VarChar(255)
-  specialists        String?                   @db.VarChar(255)
-  socials            String?                   @db.VarChar(255)
-  bio                String?                   @db.Text
+  // officeRoom         String?                   @db.VarChar(255)
+  // specialists        String?                   @db.VarChar(255)
+  // socials            String?                   @db.VarChar(255)
+  // bio                String?                   @db.Text
   course_instructors course_instructor[]
   curriculums        curriculum_coordinators[]
   branch             branch?                   @relation(fields: [branchId], references: [id], onDelete: NoAction, onUpdate: NoAction)

@@ -52,14 +52,6 @@ tel?: string  | null;
 })
 @IsOptional()
 @IsString()
-picture?: string  | null;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
 position?: string  | null;
 @ApiProperty({
   type: 'string',
@@ -68,36 +60,4 @@ position?: string  | null;
 @IsOptional()
 @IsString()
 email?: string ;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-officeRoom?: string  | null;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-specialists?: string  | null;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-socials?: string  | null;
-@ApiProperty({
-  type: 'string',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsString()
-bio?: string  | null;
 }
