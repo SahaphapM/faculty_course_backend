@@ -13,59 +13,85 @@ export class SubjectService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { thaiName, engName, code, limit, page, orderBy, curriculumCode } =
-      pag || {};
+    const {
+      limit,
+      page,
+      sort,
+      orderBy,
+      nameCode,
+      type,
+      branchId,
+      curriculumId,
+      facultyId,
+    } = pag || {};
 
-    const whereCondition: Prisma.subjectWhereInput = {
-      ...(code && { code: { contains: code } }),
-      ...(thaiName && { thaiName: { contains: thaiName } }),
-      ...(engName && { engName: { contains: engName } }),
-      ...(curriculumCode && {
-        curriculums: { every: { curriculum: { code: curriculumCode } } },
+    console.log(pag);
+
+    const where: Prisma.subjectWhereInput = {
+      ...(nameCode && {
+        OR: [
+          { thaiName: { contains: nameCode } },
+          { engName: { contains: nameCode } },
+          { code: { contains: nameCode } },
+        ],
       }),
+      ...(type && { type }),
+
+      // Handle curriculum, branch, faculty like else if
+
+      ...(facultyId
+        ? {
+            curriculums: {
+              some: {
+                curriculum: {
+                  branch: {
+                    facultyId,
+                  },
+                },
+              },
+            },
+          }
+        : {}),
+      ...(branchId
+        ? {
+            curriculums: {
+              some: {
+                curriculum: {
+                  branchId,
+                },
+              },
+            },
+          }
+        : {}),
+
+      ...(curriculumId
+        ? {
+            curriculumId,
+          }
+        : {}),
     };
 
-    const includeCondition: Prisma.subjectInclude = {
-      clos: curriculumCode ? true : false,
-      curriculums: {
-        select: {
-          curriculum: {
-            select: {
-              code: true,
-            },
-          },
-          subject: {
-            select: {
-              code: true,
-            },
-          },
-        },
+    const sortField = ['id', 'code', 'thaiName', 'engName', 'type'].includes(
+      orderBy,
+    )
+      ? orderBy
+      : 'id';
+    const sortOrder: Prisma.SortOrder = sort === 'desc' ? 'desc' : 'asc';
+
+    const options: Prisma.subjectFindManyArgs = {
+      where,
+      skip: ((page ?? defaultPage) - 1) * (limit || defaultLimit),
+      take: limit || defaultLimit,
+      orderBy: {
+        [sortField]: sortOrder,
       },
     };
 
-    if (!pag) {
-      // No pagination → fetch all
-      return this.prisma.subject.findMany({
-        where: whereCondition,
-        include: includeCondition,
-        orderBy: { id: 'asc' }, // Default sorting
-      });
-    }
-
-    // With pagination
-    const options: Prisma.subjectFindManyArgs = {
-      take: limit || defaultLimit,
-      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { id: orderBy || 'asc' },
-      include: includeCondition,
-      where: whereCondition,
-    };
-
-    const [subject, total] = await Promise.all([
+    const [subjects, total] = await Promise.all([
       this.prisma.subject.findMany(options),
-      this.prisma.subject.count({ where: whereCondition }),
+      this.prisma.subject.count({ where: options.where }),
     ]);
-    return { data: subject, total };
+    return { data: subjects, total };
   }
 
   async findOne(id: number) {

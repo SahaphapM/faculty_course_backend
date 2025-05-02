@@ -14,41 +14,41 @@ import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
+import { SubjectFilterDto } from 'src/dto/filters/filter.subject.dto';
 
 @ApiBearerAuth()
 @Controller('subjects')
 export class SubjectController {
-  constructor(private readonly courseSpecsService: SubjectService) {}
+  constructor(private readonly subjectsService: SubjectService) {}
 
   @Get()
-  findAll(@Query() pag?: CourseFilterDto) {
-    return this.courseSpecsService.findAll(pag);
+  findAll(@Query() pag?: SubjectFilterDto) {
+    return this.subjectsService.findAll(pag);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Post()
   create(@Body() dto: CreateSubjectDto) {
-    return this.courseSpecsService.create(dto);
+    return this.subjectsService.create(dto);
   }
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.courseSpecsService.findOne(+id);
+    return this.subjectsService.findOne(+id);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Patch(':id')
   update(
     @Param('id') id: string,
-    @Body() updateCourseSpecDto: UpdateSubjectDto,
+    @Body() updateSubjectSpecDto: UpdateSubjectDto,
   ) {
-    return this.courseSpecsService.update(+id, updateCourseSpecDto);
+    return this.subjectsService.update(+id, updateSubjectSpecDto);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Delete(':id')
   remove(@Param('id') id: string) {
-    return this.courseSpecsService.remove(+id);
+    return this.subjectsService.remove(+id);
   }
 }
