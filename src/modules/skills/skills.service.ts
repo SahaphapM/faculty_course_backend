@@ -67,23 +67,215 @@ export class SkillsService {
     const defaultPage = 1;
 
     const {
-      thaiName,
-      limit = defaultLimit,
-      page = defaultPage,
-      orderBy = 'asc',
-      curriculumCode,
+      limit,
+      page,
+      orderBy,
+      sort,
+      nameCode,
+      domain,
+      curriculumId,
+      branchId,
+      facultyId,
+      subjectId,
     } = pag || {};
 
+    console.log('pag', pag);
+
     const whereCondition: Prisma.skillWhereInput = {
-      ...(thaiName && { thaiName: { contains: thaiName } }),
-      ...(curriculumCode && { curriculum: { code: curriculumCode } }),
-      parentId: null, // ดึงเฉพาะ root skill
+      parentId: null, // Root skill เท่านั้น
+      ...(facultyId && {
+        OR: [
+          {
+            curriculum: {
+              branch: {
+                facultyId: facultyId,
+              },
+            },
+          },
+          {
+            subs: {
+              some: {
+                curriculum: {
+                  branch: {
+                    facultyId: facultyId,
+                  },
+                },
+              },
+            },
+          },
+          {
+            subs: {
+              some: {
+                subs: {
+                  some: {
+                    curriculum: {
+                      branch: {
+                        facultyId: facultyId,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      }),
+
+      ...(branchId && {
+        OR: [
+          {
+            curriculum: {
+              branchId: branchId,
+            },
+          },
+          {
+            subs: {
+              some: {
+                curriculum: {
+                  branchId: branchId,
+                },
+              },
+            },
+          },
+          {
+            subs: {
+              some: {
+                subs: {
+                  some: {
+                    curriculum: {
+                      branchId: branchId,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      }),
+
+      ...(curriculumId && {
+        OR: [
+          { curriculumId: curriculumId },
+          {
+            subs: {
+              some: {
+                curriculumId: curriculumId,
+              },
+            },
+          },
+          {
+            subs: {
+              some: {
+                subs: {
+                  some: {
+                    curriculumId: curriculumId,
+                  },
+                },
+              },
+            },
+          },
+          {
+            subs: {
+              some: {
+                subs: {
+                  some: {
+                    subs: {
+                      some: {
+                        curriculumId: curriculumId,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      }),
+
+      ...(subjectId && {
+        OR: [
+          { clos: { some: { subjectId } } },
+          {
+            subs: {
+              some: {
+                clos: { some: { subjectId } },
+              },
+            },
+          },
+          {
+            subs: {
+              some: {
+                subs: {
+                  some: {
+                    clos: { some: { subjectId } },
+                  },
+                },
+              },
+            },
+          },
+          {
+            subs: {
+              some: {
+                subs: {
+                  some: {
+                    subs: {
+                      some: {
+                        clos: { some: { subjectId } },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      }),
+
+      ...(nameCode && {
+        OR: [
+          { thaiName: { contains: nameCode } },
+          { engName: { contains: nameCode } },
+          {
+            subs: {
+              some: {
+                OR: [
+                  { thaiName: { contains: nameCode } },
+                  { engName: { contains: nameCode } },
+                  {
+                    subs: {
+                      some: {
+                        OR: [
+                          { thaiName: { contains: nameCode } },
+                          { engName: { contains: nameCode } },
+                          {
+                            subs: {
+                              some: {
+                                OR: [
+                                  { thaiName: { contains: nameCode } },
+                                  { engName: { contains: nameCode } },
+                                  // เพิ่มต่อถ้าจำเป็น
+                                ],
+                              },
+                            },
+                          },
+                          // เพิ่มต่อถ้าจำเป็น
+                        ],
+                      },
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      }),
+      ...(domain && { domain }),
     };
 
     const options: Prisma.skillFindManyArgs = {
-      take: limit,
-      skip: (page - 1) * limit,
-      orderBy: { id: orderBy },
+      take: limit || defaultLimit,
+      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
+      orderBy: { [sort ?? 'id']: orderBy ?? 'asc' },
       include: {
         subs: {
           // level 2
@@ -123,7 +315,7 @@ export class SkillsService {
 
     const [skills, total] = await Promise.all([
       this.prisma.skill.findMany(options),
-      this.prisma.skill.count({ where: whereCondition }),
+      this.prisma.skill.count({ where: options.where }),
     ]);
     return pag ? { data: skills, total } : skills;
   }
