@@ -42,8 +42,16 @@ export class InstructorsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { limit, page, orderBy, sort, nameCodeMail, branchId, facultyId } =
-      pag || {};
+    const {
+      limit,
+      page,
+      orderBy,
+      sort,
+      nameCodeMail,
+      curriculumId,
+      branchId,
+      facultyId,
+    } = pag || {};
 
     const whereCondition: Prisma.instructorWhereInput = {
       ...(nameCodeMail && {
@@ -54,6 +62,7 @@ export class InstructorsService {
           { email: { contains: nameCodeMail } },
         ],
       }),
+      ...(curriculumId && { curriculums: { some: { curriculumId } } }),
       ...(branchId && { branchId }),
       ...(facultyId && { branch: { facultyId } }),
     };
@@ -62,7 +71,7 @@ export class InstructorsService {
     const options: Prisma.instructorFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { [sort ?? 'id']: orderBy ?? 'asc' },
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
       include: {
         branch: {
           select: {

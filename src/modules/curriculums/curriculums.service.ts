@@ -42,46 +42,51 @@ export class CurriculumsService {
       limit,
       page,
       orderBy,
-      thaiName,
-      engName,
-      facultyThaiName,
-      facultyEngName,
+      sort,
+      nameCode,
+      degree,
+      branchId,
+      facultyId,
     } = pag || {};
 
     const whereCondition: Prisma.curriculumWhereInput = {
-      ...(thaiName && { thaiName: { contains: thaiName } }),
-      ...(engName && { engName: { contains: engName } }),
-      ...(facultyThaiName && {
-        branch: { faculty: { thaiName: { contains: facultyThaiName } } },
+      ...(nameCode && {
+        OR: [
+          {
+            thaiName: { contains: nameCode },
+          },
+          {
+            engName: { contains: nameCode },
+          },
+          {
+            code: { contains: nameCode },
+          },
+        ],
       }),
-      ...(facultyEngName && {
-        branch: { faculty: { engName: { contains: facultyEngName } } },
+      ...(degree && {
+        OR: [
+          { engDegree: { contains: degree } },
+          { thaiDegree: { contains: degree } },
+        ],
       }),
+      ...(branchId && { branchId }),
+      ...(facultyId && { branch: { facultyId } }),
     };
-
-    const includeCondition: Prisma.curriculumInclude = {
-      branch: {
-        include: {
-          faculty: true,
-        },
-      },
-    };
-
-    if (!pag) {
-      // No pagination → fetch everything without limits
-      return this.prisma.curriculum.findMany({
-        where: whereCondition,
-        include: includeCondition,
-        orderBy: { id: 'asc' }, // Default ordering
-      });
-    }
 
     // With pagination
     const options: Prisma.curriculumFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { id: orderBy || 'asc' },
-      include: includeCondition,
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+      include: {
+        branch: {
+          select: {
+            id: true,
+            thaiName: true,
+            engName: true,
+          },
+        },
+      },
       where: whereCondition,
     };
 

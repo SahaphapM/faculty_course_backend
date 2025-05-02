@@ -14,6 +14,11 @@ export class InstructorFilterDto extends BaseFilterParams {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  curriculumId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
   branchId?: number;
 
   @IsOptional()
