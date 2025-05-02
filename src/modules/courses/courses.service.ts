@@ -65,39 +65,47 @@ export class CourseService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { code, limit, page, orderBy, thaiName } = pag || {};
+    const {
+      limit,
+      page,
+      orderBy,
+      sort,
+      nameCode,
+      active,
+      year,
+      semester,
+      subjectId,
+      curriculumId,
+      branchId,
+      facultyId,
+    } = pag || {};
 
     const whereCondition: Prisma.courseWhereInput = {
-      ...(code && { subject: { code: { contains: code } } }),
-      ...(thaiName && { subject: { thaiName: { contains: thaiName } } }),
+      ...(nameCode && {
+        OR: [
+          { subject: { thaiName: { contains: nameCode } } },
+          { subject: { engName: { contains: nameCode } } },
+          { subject: { code: { contains: nameCode } } },
+        ],
+      }),
+      ...(active && { active }),
+      ...(year && { year }),
+      ...(semester && { semester }),
+      ...(subjectId && { subjectId }),
+      ...(curriculumId && { subject: { curriculumId } }),
+      ...(branchId && { subject: { curriculum: { branchId } } }),
+      ...(facultyId && { subject: { curriculum: { branch: { facultyId } } } }),
     };
-
-    const includeCondition: Prisma.courseInclude = {
-      // skill_collections: { include: { student: true } },
-      course_instructors: true,
-      subject: {
-        include: {
-          curriculum: true,
-        },
-      },
-    };
-
-    if (!pag) {
-      // Fetch all courses if no pagination is provided
-      return this.prisma.course.findMany({
-        where: whereCondition,
-        include: includeCondition,
-        orderBy: { id: 'asc' }, // Default sorting
-      });
-    }
 
     // Pagination mode
     const options: Prisma.courseFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: orderBy ? { id: orderBy } : undefined, // Only add if orderBy exists
+      orderBy: { [sort ?? 'id']: orderBy ?? 'asc' },
       where: whereCondition,
-      include: includeCondition,
+      include: {
+        subject: true,
+      },
     };
 
     try {
