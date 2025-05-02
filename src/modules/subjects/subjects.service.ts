@@ -70,21 +70,11 @@ export class SubjectService {
           }
         : {}),
     };
-
-    const sortField = ['id', 'code', 'thaiName', 'engName', 'type'].includes(
-      orderBy,
-    )
-      ? orderBy
-      : 'id';
-    const sortOrder: Prisma.SortOrder = sort === 'desc' ? 'desc' : 'asc';
-
     const options: Prisma.subjectFindManyArgs = {
       where,
       skip: ((page ?? defaultPage) - 1) * (limit || defaultLimit),
       take: limit || defaultLimit,
-      orderBy: {
-        [sortField]: sortOrder,
-      },
+      orderBy: { [sort ?? 'id']: orderBy ?? 'asc' },
       include: {
         clos: true,
       },

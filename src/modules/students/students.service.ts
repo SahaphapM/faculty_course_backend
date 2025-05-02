@@ -51,6 +51,7 @@ export class StudentsService {
       limit,
       page,
       orderBy,
+      sort,
       nameCode,
       branchName,
       facultyName,
@@ -111,7 +112,7 @@ export class StudentsService {
       where,
       take: limit ?? defaultLimit,
       skip: ((page ?? defaultPage) - 1) * (limit ?? defaultLimit),
-      orderBy: { id: orderBy ?? 'asc' },
+      orderBy: { [sort ?? 'id']: orderBy ?? 'asc' },
       include: {
         branch: {
           select: {
