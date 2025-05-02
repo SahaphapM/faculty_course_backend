@@ -42,68 +42,36 @@ export class InstructorsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const {
-      thaiName,
-      engName,
-      code,
-      limit,
-      page,
-      orderBy,
-      curriculumCode,
-      email,
-      branchThaiName,
-      branchEngName,
-    } = pag || {};
+    const { limit, page, orderBy, sort, nameCodeMail, branchId, facultyId } =
+      pag || {};
 
     const whereCondition: Prisma.instructorWhereInput = {
-      ...(code && { code: code }),
-      ...(thaiName && { thaiName: { contains: thaiName } }),
-      ...(engName && { engName: { contains: engName } }),
-      ...(email && { email: { contains: email } }),
-      ...(branchThaiName && {
-        branch: { thaiName: { contains: branchThaiName } },
+      ...(nameCodeMail && {
+        OR: [
+          { code: { contains: nameCodeMail } },
+          { thaiName: { contains: nameCodeMail } },
+          { engName: { contains: nameCodeMail } },
+          { email: { contains: nameCodeMail } },
+        ],
       }),
-      ...(branchEngName && {
-        branch: { engName: { contains: branchEngName } },
-      }),
-
-      ...(curriculumCode && {
-        curriculums: { some: { curriculum: { code: curriculumCode } } },
-      }),
+      ...(branchId && { branchId }),
+      ...(facultyId && { branch: { facultyId } }),
     };
-
-    const selectCondition: Prisma.instructorSelect = {
-      id: true,
-      code: true,
-      email: true,
-      thaiName: true,
-      engName: true,
-      tel: true,
-      position: true,
-      branch: {
-        select: {
-          id: true,
-          thaiName: true,
-          engName: true,
-        },
-      },
-    };
-
-    if (!pag) {
-      // No pagination → fetch all
-      return this.prisma.instructor.findMany({
-        where: whereCondition,
-        select: selectCondition,
-        orderBy: { id: 'asc' }, // Default sorting
-      });
-    }
 
     // With pagination
     const options: Prisma.instructorFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { id: orderBy || 'asc' },
-      select: selectCondition,
+      orderBy: { [sort ?? 'id']: orderBy ?? 'asc' },
+      include: {
+        branch: {
+          select: {
+            id: true,
+            thaiName: true,
+            engName: true,
+          },
+        },
+      },
       where: whereCondition,
     };
 
