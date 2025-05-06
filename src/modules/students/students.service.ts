@@ -57,10 +57,8 @@ export class StudentsService {
       facultyId,
       curriculumId,
       skillName,
-      codeYear,
+      codeYears,
     } = pag || {};
-
-    console.log(pag);
 
     const where: Prisma.studentWhereInput = {
       ...(nameCode && {
@@ -91,7 +89,14 @@ export class StudentsService {
           },
         },
       }),
-      ...(codeYear && { code: { startsWith: codeYear } }),
+
+      ...(codeYears?.length && {
+        OR: codeYears.map((prefix) => ({
+          code: {
+            startsWith: prefix,
+          },
+        })),
+      }),
     };
 
     const options: Prisma.studentFindManyArgs = {

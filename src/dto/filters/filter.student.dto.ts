@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsArray, IsNumber, IsOptional, IsString } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
 import { Type } from 'class-transformer';
 
@@ -12,8 +12,8 @@ export class StudentFilterDto extends BaseFilterParams {
   skillName?: string;
 
   @IsOptional()
-  @IsString()
-  codeYear?: string;
+  @IsArray()
+  codeYears?: string[];
 
   @IsOptional()
   @Type(() => Number) // 👈 สำคัญ!
