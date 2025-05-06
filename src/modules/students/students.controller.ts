@@ -7,9 +7,10 @@ import {
   Param,
   Delete,
   Query,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiProperty, ApiQuery } from '@nestjs/swagger';
 import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
 import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -46,8 +47,19 @@ export class StudentsController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get('code-year')
-  getExistYearFromCode() {
-    return this.studentsService.getExistYearFromCode();
+  @ApiQuery({ name: 'facultyId', required: false, type: Number })
+  @ApiQuery({ name: 'branchId', required: false, type: Number })
+  @ApiQuery({ name: 'curriculumId', required: false, type: Number })
+  getExistYearFromCode(
+    @Query('facultyId') facultyId?: number,
+    @Query('branchId') branchId?: number,
+    @Query('curriculumId') curriculumId?: number,
+  ) {
+    return this.studentsService.getExistYearFromCode(
+      facultyId || 0,
+      branchId || 0,
+      curriculumId || 0,
+    );
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)

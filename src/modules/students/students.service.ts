@@ -102,7 +102,6 @@ export class StudentsService {
           select: {
             thaiName: true,
             engName: true,
-            faculty: { select: { thaiName: true, engName: true } },
           },
         },
       },
@@ -117,13 +116,24 @@ export class StudentsService {
   }
 
   // get exist student year from code like 65160123, 66160123, 67160123 => [65, 66, 67]
-  async getExistYearFromCode(): Promise<string[]> {
+  async getExistYearFromCode(
+    facultyId: number,
+    branchId: number,
+    curriculumId: number,
+  ): Promise<string[]> {
+    const where: Prisma.studentWhereInput = {
+      ...(curriculumId > 0 && { curriculumId }),
+      ...(branchId > 0 && { branchId }),
+      ...(facultyId > 0 && { branch: { facultyId } }),
+    };
+
     const codes = await this.prisma.student.findMany({
+      where,
       select: {
         code: true,
       },
-      distinct: ['code'],
     });
+
     // slice code to year
     const slice = codes.map((code) => code.code.slice(0, 2));
     // remove duplicate
