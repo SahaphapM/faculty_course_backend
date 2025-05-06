@@ -12,6 +12,10 @@ export class StudentFilterDto extends BaseFilterParams {
   skillName?: string;
 
   @IsOptional()
+  @IsString()
+  codeYear?: string;
+
+  @IsOptional()
   @Type(() => Number) // 👈 สำคัญ!
   @IsNumber()
   curriculumId?: number;

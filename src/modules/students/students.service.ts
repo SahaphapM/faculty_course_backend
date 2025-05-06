@@ -57,6 +57,7 @@ export class StudentsService {
       facultyId,
       curriculumId,
       skillName,
+      codeYear,
     } = pag || {};
 
     console.log(pag);
@@ -90,6 +91,7 @@ export class StudentsService {
           },
         },
       }),
+      ...(codeYear && { code: { startsWith: codeYear } }),
     };
 
     const options: Prisma.studentFindManyArgs = {
