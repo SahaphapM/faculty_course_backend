@@ -113,6 +113,7 @@ model curriculum {
   thaiDescription String?                   @db.Text
   engDescription  String?                   @db.Text
             
+  students        student[]    
   branch          branch                    @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   coordinators    curriculum_coordinators[]
   subjects        subject[]   
@@ -266,6 +267,8 @@ model student {
   // One to many
   skill_collections skill_collection[]
   /// @DtoRelationIncludeId
+  curriculumId      Int?
+  curriculum        curriculum?        @relation(fields: [curriculumId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   branchId          Int?
   branch            branch?            @relation(fields: [branchId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   /// @DtoRelationIncludeId

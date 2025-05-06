@@ -6,7 +6,6 @@ import { LessonModule } from '../modules/lessons/lessons.module';
 import { PlosModule } from '../modules/plos/plos.module';
 import { SkillsModule } from '../modules/skills/skills.module';
 import { FacultiesModule } from '../modules/faculties/faculties.module';
-import { AuthModule } from '../auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
@@ -39,7 +38,7 @@ import { providePrismaClientExceptionFilter } from 'nestjs-prisma';
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    AuthModule,
+    // AuthModule,
     StudentsModule,
     CoursesModule,
     SubjectModule,

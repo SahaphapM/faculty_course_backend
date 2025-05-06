@@ -275,7 +275,7 @@ export class SkillsService {
     const options: Prisma.skillFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { [sort ?? 'id']: orderBy ?? 'asc' },
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
       include: {
         subs: {
           // level 2

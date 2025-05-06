@@ -1,5 +1,6 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
+import { Type } from 'class-transformer';
 
 export class StudentFilterDto extends BaseFilterParams {
   @IsOptional()
@@ -8,13 +9,20 @@ export class StudentFilterDto extends BaseFilterParams {
 
   @IsOptional()
   @IsString()
-  branchName?: string;
-
-  @IsOptional()
-  @IsString()
-  facultyName?: string;
-
-  @IsOptional()
-  @IsString()
   skillName?: string;
+
+  @IsOptional()
+  @Type(() => Number) // 👈 สำคัญ!
+  @IsNumber()
+  curriculumId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  facultyId?: number;
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsNumber()
+  branchId?: number;
 }

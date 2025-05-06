@@ -32,18 +32,8 @@ export class PloService {
 
     const options: Prisma.ploFindManyArgs = {
       where: whereCondition, //  Directly pass whereOption (no extra object)
-      include: {
-        curriculum: {
-          select: {
-            id: true,
-            code: true,
-            thaiName: true,
-            engName: true,
-          },
-        },
-        clos: true,
-      },
     };
+
     const [list, total] = await Promise.all([
       this.prisma.plo.findMany(options),
       this.prisma.plo.count({ where: whereCondition }),

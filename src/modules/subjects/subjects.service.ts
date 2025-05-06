@@ -74,7 +74,7 @@ export class SubjectService {
       where,
       skip: ((page ?? defaultPage) - 1) * (limit || defaultLimit),
       take: limit || defaultLimit,
-      orderBy: { [sort ?? 'id']: orderBy ?? 'asc' },
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
       include: {
         clos: true,
       },

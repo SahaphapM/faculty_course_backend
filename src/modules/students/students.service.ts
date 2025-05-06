@@ -53,8 +53,9 @@ export class StudentsService {
       orderBy,
       sort,
       nameCode,
-      branchName,
-      facultyName,
+      branchId,
+      facultyId,
+      curriculumId,
       skillName,
     } = pag || {};
 
@@ -68,26 +69,9 @@ export class StudentsService {
           { code: { contains: nameCode } },
         ],
       }),
-      ...(branchName || facultyName
-        ? {
-            branch: {
-              ...(branchName && {
-                OR: [
-                  { thaiName: { contains: branchName } },
-                  { engName: { contains: branchName } },
-                ],
-              }),
-              ...(facultyName && {
-                faculty: {
-                  OR: [
-                    { thaiName: { contains: facultyName } },
-                    { engName: { contains: facultyName } },
-                  ],
-                },
-              }),
-            },
-          }
-        : {}),
+      ...(curriculumId && { curriculumId }),
+      ...(branchId && { branchId }),
+      ...(facultyId && { branch: { facultyId } }),
       ...(skillName && {
         skill_collections: {
           some: {
@@ -112,7 +96,7 @@ export class StudentsService {
       where,
       take: limit ?? defaultLimit,
       skip: ((page ?? defaultPage) - 1) * (limit ?? defaultLimit),
-      orderBy: { [sort ?? 'id']: orderBy ?? 'asc' },
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
       include: {
         branch: {
           select: {
@@ -132,6 +116,20 @@ export class StudentsService {
     return { data: students, total };
   }
 
+  // get exist student year from code like 65160123, 66160123, 67160123 => [65, 66, 67]
+  async getExistYearFromCode(): Promise<string[]> {
+    const codes = await this.prisma.student.findMany({
+      select: {
+        code: true,
+      },
+      distinct: ['code'],
+    });
+    // slice code to year
+    const slice = codes.map((code) => code.code.slice(0, 2));
+    // remove duplicate
+    const uniqueCodes = [...new Set(slice.map((item) => item))];
+    return uniqueCodes;
+  }
   // Find students by a list of IDs
   async findManyByCode(studentListCode: string[]) {
     return await this.prisma.student.findMany({

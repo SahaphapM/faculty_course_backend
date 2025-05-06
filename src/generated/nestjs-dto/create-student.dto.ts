@@ -53,7 +53,7 @@ thaiName?: string  | null;
 })
 @IsOptional()
 @IsInt()
-branchId?: number  | null;
+curriculumId?: number  | null;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

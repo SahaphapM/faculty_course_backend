@@ -45,6 +45,12 @@ export class StudentsController {
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @Get('code-year')
+  getExistYearFromCode() {
+    return this.studentsService.getExistYearFromCode();
+  }
+
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
   findAll(@Query() pag?: StudentFilterDto) {
     return this.studentsService.findAll(pag);
