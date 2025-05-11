@@ -21,11 +21,11 @@ export class CourseFilterDto extends BaseFilterParams {
 
   @IsOptional()
   @IsArray()
-  year?: number[];
+  years?: number[];
 
   @IsOptional()
   @IsString()
-  semester?: number[];
+  semesters?: number[];
 
   @IsOptional()
   @Type(() => Number)
