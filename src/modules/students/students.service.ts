@@ -126,10 +126,10 @@ export class StudentsService {
   async getExistYearFromCode(
     facultyId: number,
     branchId: number,
-    curriculumId: number,
+    curriculumCode: string,
   ): Promise<string[]> {
     const where: Prisma.studentWhereInput = {
-      ...(curriculumId > 0 && { curriculumId }),
+      ...(curriculumCode && { curriculum: { code: curriculumCode } }),
       ...(branchId > 0 && { branchId }),
       ...(facultyId > 0 && { branch: { facultyId } }),
     };

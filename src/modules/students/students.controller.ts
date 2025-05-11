@@ -48,16 +48,16 @@ export class StudentsController {
   @Get('code-year')
   @ApiQuery({ name: 'facultyId', required: false, type: Number })
   @ApiQuery({ name: 'branchId', required: false, type: Number })
-  @ApiQuery({ name: 'curriculumId', required: false, type: Number })
+  @ApiQuery({ name: 'curriculumCode', required: false })
   getExistYearFromCode(
     @Query('facultyId') facultyId?: number,
     @Query('branchId') branchId?: number,
-    @Query('curriculumId') curriculumId?: number,
+    @Query('curriculumCode') curriculumCode?: string,
   ) {
     return this.studentsService.getExistYearFromCode(
       facultyId || 0,
       branchId || 0,
-      curriculumId || 0,
+      curriculumCode,
     );
   }
 
