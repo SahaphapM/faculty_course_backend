@@ -51,6 +51,11 @@ thaiDescription: string  | null;
 })
 engDescription: string  | null;
 @ApiProperty({
+  type: 'boolean',
+  nullable: true,
+})
+isRoot: boolean  | null;
+@ApiProperty({
   type: () => Clo,
   isArray: true,
   required: false,

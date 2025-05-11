@@ -39,7 +39,7 @@ model branch {
   id              Int          @id @default(autoincrement())
   /// @DtoRelationIncludeId
   facultyId       Int?
-  thaiDescription String?       @db.Text
+  thaiDescription String?      @db.Text
   engDescription  String?      @db.Text
   thaiName        String?      @db.VarChar(255)
   engName         String?      @db.VarChar(255)
@@ -56,7 +56,7 @@ model branch {
 model course {
   id       Int      @id @default(autoincrement())
   active   Boolean? @default(true) @db.TinyInt
-  semester String   @db.VarChar(50) // 'first' | 'second' | 'summer'
+  semester Int      @db.TinyInt // TinyInt is  -128 to 127
   year     Int      @db.SmallInt // more acceptable range
 
   /// @DtoRelationIncludeId
@@ -81,56 +81,56 @@ model course_instructor {
 }
 
 model subject {
-  id              Int                   @id @default(autoincrement())
-  code            String                @unique() @db.VarChar(50)
+  id              Int        @id @default(autoincrement())
+  code            String     @unique() @db.VarChar(50)
   /// @DtoRelationIncludeId
   curriculumId    Int
-  thaiName        String?               @db.VarChar(255)
-  engName         String?               @db.VarChar(255)
-  credit          String?               @db.VarChar(10)
-  type            String                @default("บังคับ") @db.VarChar(255)
-  thaiDescription String?               @db.Text
-  engDescription  String?               @db.Text
+  thaiName        String?    @db.VarChar(255)
+  engName         String?    @db.VarChar(255)
+  credit          String?    @db.VarChar(10)
+  type            String     @default("บังคับ") @db.VarChar(255)
+  thaiDescription String?    @db.Text
+  engDescription  String?    @db.Text
+  isRoot          Boolean?   @default(false)
   clos            clo[]
   lesson          lesson?
-  curriculum     curriculum @relation(fields: [curriculumId], references: [id])
+  curriculum      curriculum @relation(fields: [curriculumId], references: [id])
   courses         course[]
 
   @@index([curriculumId])
 }
 
 model curriculum {
-  id              Int                       @id @default(autoincrement())
+  id              Int     @id @default(autoincrement())
   /// @DtoRelationIncludeId
   branchId        Int
-  code            String                    @unique() @db.VarChar(255)
-  thaiName        String?                   @db.VarChar(255)
-  engName         String?                   @db.VarChar(255)
-  thaiDegree      String?                   @db.VarChar(255)
-  engDegree       String?                   @db.VarChar(255)
-  period          Int                       @db.TinyInt()
-  minimumGrade    Decimal                   @db.Decimal(3, 2)
-  thaiDescription String?                   @db.Text
-  engDescription  String?                   @db.Text
-            
-  students        student[]    
-  branch          branch                    @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  coordinators    curriculum_coordinators[]
-  subjects        subject[]   
-  plos            plo[]
-  skills          skill[]
+  code            String  @unique() @db.VarChar(255)
+  thaiName        String? @db.VarChar(255)
+  engName         String? @db.VarChar(255)
+  thaiDegree      String? @db.VarChar(255)
+  engDegree       String? @db.VarChar(255)
+  period          Int     @db.TinyInt()
+  minimumGrade    Decimal @db.Decimal(3, 2)
+  thaiDescription String? @db.Text
+  engDescription  String? @db.Text
+
+  students     student[]
+  branch       branch                    @relation(fields: [branchId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  coordinators curriculum_coordinators[]
+  subjects     subject[]
+  plos         plo[]
+  skills       skill[]
 
   @@index([branchId])
 }
-
 
 model curriculum_coordinators {
   /// @DtoRelationIncludeId
   instructorId Int
   /// @DtoRelationIncludeId
   curriculumId Int
-  instructor   instructor @relation(fields: [instructorId], references: [id],  onUpdate: Cascade)
-  curriculum   curriculum @relation(fields: [curriculumId], references: [id],  onUpdate: Cascade)
+  instructor   instructor @relation(fields: [instructorId], references: [id], onUpdate: Cascade)
+  curriculum   curriculum @relation(fields: [curriculumId], references: [id], onUpdate: Cascade)
 
   @@id([instructorId, curriculumId])
   @@index([instructorId])

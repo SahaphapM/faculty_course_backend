@@ -1,4 +1,10 @@
-import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
 import { Type } from 'class-transformer';
 
@@ -14,13 +20,12 @@ export class CourseFilterDto extends BaseFilterParams {
   active?: boolean;
 
   @IsOptional()
-  @Type(() => Number)
-  @IsNumber()
-  year?: number;
+  @IsArray()
+  year?: number[];
 
   @IsOptional()
   @IsString()
-  semester?: string;
+  semester?: number[];
 
   @IsOptional()
   @Type(() => Number)

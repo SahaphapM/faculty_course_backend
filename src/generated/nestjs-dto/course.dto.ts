@@ -14,9 +14,10 @@ id: number ;
 })
 active: boolean  | null;
 @ApiProperty({
-  type: 'string',
+  type: 'integer',
+  format: 'int32',
 })
-semester: string ;
+semester: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

@@ -1,6 +1,6 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
+import {IsBoolean,IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
 
 
 
@@ -59,4 +59,13 @@ thaiDescription?: string  | null;
 @IsOptional()
 @IsString()
 engDescription?: string  | null;
+@ApiProperty({
+  type: 'boolean',
+  default: false,
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsBoolean()
+isRoot?: boolean  | null;
 }
