@@ -21,7 +21,7 @@ export class CourseFilterDto extends BaseFilterParams {
 
   @IsOptional()
   @IsArray()
-  codeYears?: number[];
+  years?: number[];
 
   @IsOptional()
   @IsString()
