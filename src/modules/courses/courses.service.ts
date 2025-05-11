@@ -72,7 +72,7 @@ export class CourseService {
       sort,
       nameCode,
       active,
-      years,
+      codeYears,
       semesters,
       subjectId,
       curriculumId,
@@ -90,7 +90,7 @@ export class CourseService {
       }),
 
       ...(active && { active }),
-      ...(years?.length && { OR: years.map((y) => ({ year: y })) }),
+      ...(codeYears?.length && { OR: codeYears.map((y) => ({ year: y })) }),
       ...(semesters?.length && { OR: semesters.map((s) => ({ semester: s })) }),
       ...(subjectId && { subjectId }),
       ...(curriculumId && { subject: { curriculumId } }),
