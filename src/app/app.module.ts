@@ -39,7 +39,7 @@ import { AuthModule } from 'src/auth/auth.module';
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    AuthModule,
+    // AuthModule,
     StudentsModule,
     CoursesModule,
     SubjectModule,

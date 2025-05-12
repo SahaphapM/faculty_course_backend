@@ -90,8 +90,10 @@ export class CourseService {
       }),
 
       ...(active && { active }),
-      ...(years?.length && { OR: years.map((y) => ({ year: y })) }),
-      ...(semesters?.length && { OR: semesters.map((s) => ({ semester: s })) }),
+      ...(years?.length && { OR: years.map((y) => ({ year: Number(y) })) }),
+      ...(semesters?.length && {
+        OR: semesters.map((s) => ({ semester: Number(s) })),
+      }),
       ...(subjectId && { subjectId }),
       ...(curriculumId && { subject: { curriculumId } }),
       ...(branchId && { subject: { curriculum: { branchId } } }),

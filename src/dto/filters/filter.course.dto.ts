@@ -6,7 +6,7 @@ import {
   IsString,
 } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 
 export class CourseFilterDto extends BaseFilterParams {
   //search
@@ -20,11 +20,23 @@ export class CourseFilterDto extends BaseFilterParams {
   active?: boolean;
 
   @IsOptional()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) return value.map(Number); // [ '2568', '2569' ]
+    if (typeof value === 'string') return [Number(value)]; // '2568' → [2568]
+    return [];
+  })
   @IsArray()
+  @IsNumber({}, { each: true })
   years?: number[];
 
   @IsOptional()
-  @IsString()
+  @Transform(({ value }) => {
+    if (Array.isArray(value)) return value.map(Number);
+    if (typeof value === 'string') return [Number(value)];
+    return [];
+  })
+  @IsArray()
+  @IsNumber({}, { each: true })
   semesters?: number[];
 
   @IsOptional()
