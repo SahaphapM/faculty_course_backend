@@ -32,6 +32,19 @@ export class CurriculumsController {
     return this.curriculumsService.findAll(pag);
   }
 
+  @Get('summary:curriculumId')
+  async getSkillSummaryByCurriculum(
+    @Param('curriculumId') curriculumId: string,
+    @Query('year') year?: number,
+    @Query('skillType') skillType?: string,
+  ) {
+    return this.curriculumsService.getSkillSummaryByCurriculum(
+      +curriculumId,
+      year,
+      skillType,
+    );
+  }
+
   @Get(':code')
   findOneByCode(@Param('code') code: string) {
     return this.curriculumsService.findOneByCode(code);

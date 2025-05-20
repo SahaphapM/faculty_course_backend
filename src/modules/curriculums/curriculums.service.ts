@@ -10,6 +10,7 @@ import { Prisma } from '@prisma/client'; // Import Prisma types
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
+import { LearningDomain } from 'src/enums/learning-domain.enum';
 
 @Injectable()
 export class CurriculumsService {
@@ -196,5 +197,137 @@ export class CurriculumsService {
     } catch (error) {
       throw new InternalServerErrorException('Failed to filter curriculums');
     }
+  }
+
+  async getSkillSummaryByCurriculum(
+    curriculumId: number,
+    year?: number,
+    skillType?: string,
+  ) {
+    //  กำหนดประเภทของ skill ที่จะดึง
+    let domain = [LearningDomain.Cognitive, LearningDomain.Psychomotor];
+    if (skillType === 'soft') {
+      domain = [LearningDomain.Affective, LearningDomain.Ethics];
+    }
+
+    //  หานิสิตในหลักสูตร และปีนั้น ๆ (จากรหัสนิสิต เช่น 68160001 = ปี 1 ใน 2568)
+    const currentYear = new Date().getFullYear(); // 2025
+    const currentAcademicYear = currentYear + 543; // 2568
+
+    const prefix = year
+      ? String(currentAcademicYear - year + 1).slice(-2) // ปี 1 → "68"
+      : undefined;
+
+    const students = await this.prisma.student.findMany({
+      where: {
+        curriculumId,
+        ...(prefix && {
+          code: { startsWith: prefix }, // รหัสนิสิตขึ้นต้นด้วย "68" = ปี 1
+        }),
+      },
+      select: { id: true },
+    });
+
+    const studentIds = students.map((s) => s.id);
+
+    //  ดึงข้อมูล skill ทั้งหมดใน curriculum พร้อม CLO และระดับที่นิสิตได้ (gainedLevel)
+    const skills = await this.prisma.skill.findMany({
+      where: {
+        curriculumId,
+        ...(domain?.length ? { domain: { in: domain } } : {}),
+      },
+      include: {
+        clos: {
+          include: {
+            skill_collections: {
+              where: { studentId: { in: studentIds } },
+              select: {
+                studentId: true,
+                gainedLevel: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    //  สรุปข้อมูล skill ทีละตัว
+    const result = [];
+
+    for (const skill of skills) {
+      // 👉 levelCounts คือ object ที่เก็บว่า gainedLevel แต่ละค่ามีคนได้กี่คน
+      // เช่น { 1: 5, 2: 10, 3: 15 }
+      const levelCounts: Record<number, number> = {};
+      // 👉 Record<number, number> = object ที่ key เป็นตัวเลข (level), value เป็นจำนวนคน
+
+      const levelSummary: { level: number; count: number; category: string }[] =
+        [];
+      let total = 0;
+
+      // 👉 ใช้เก็บ target range
+      let onTargetMin: number | null = null;
+      let onTargetMax: number | null = null;
+      let aboveTargetMin: number | null = null;
+
+      for (const clo of skill.clos) {
+        // หา min/max ของระดับเป้าหมายจาก CLO ที่เชื่อมกับ skill นี้
+        if (clo.onTargetLevel != null) {
+          onTargetMin =
+            onTargetMin === null
+              ? clo.onTargetLevel
+              : Math.min(onTargetMin, clo.onTargetLevel);
+        }
+        if (clo.aboveTargetLevel != null) {
+          aboveTargetMin =
+            aboveTargetMin === null
+              ? clo.aboveTargetLevel
+              : Math.min(aboveTargetMin, clo.aboveTargetLevel);
+        }
+        if (clo.onTargetLevel != null && clo.aboveTargetLevel != null) {
+          onTargetMax =
+            onTargetMax === null
+              ? clo.aboveTargetLevel - 1
+              : Math.max(onTargetMax, clo.aboveTargetLevel - 1);
+        }
+
+        // ✨ รวมจำนวน gainedLevel ของนิสิต
+        for (const col of clo.skill_collections) {
+          const level = col.gainedLevel;
+          if (level == null) continue;
+
+          total++;
+          levelCounts[level] = (levelCounts[level] || 0) + 1;
+        }
+      }
+
+      // 🧩 ฟังก์ชันจำแนกว่า level นั้นอยู่ช่วงใด
+      const classify = (level: number): string => {
+        if (aboveTargetMin != null && level >= aboveTargetMin) return 'above';
+        if (
+          onTargetMin != null &&
+          onTargetMax != null &&
+          level >= onTargetMin &&
+          level <= onTargetMax
+        )
+          return 'on';
+        return 'below';
+      };
+
+      // 🔄 แปลง object levelCounts เป็น array levelSummary
+      for (const [levelStr, count] of Object.entries(levelCounts)) {
+        const level = Number(levelStr);
+        levelSummary.push({ level, count, category: classify(level) });
+      }
+
+      // 🎯 เพิ่มผลลัพธ์ของ skill นี้ใน array
+      result.push({
+        skillName: skill.thaiName,
+        domain: skill.domain,
+        totalStudent: total,
+        levelSummary,
+      });
+    }
+
+    return result;
   }
 }
