@@ -183,17 +183,23 @@ model plo {
 }
 
 model clo {
-  id               Int     @id @default(autoincrement())
-  name             String? @db.VarChar(255)
+  id              Int     @id @default(autoincrement())
+  name            String? @db.VarChar(255)
   /// @DtoRelationIncludeId
-  ploId            Int?
+  ploId           Int?
   /// @DtoRelationIncludeId
-  subjectId        Int?
-  thaiDescription  String? @db.Text
-  engDescription   String? @db.Text
+  subjectId       Int?
+  thaiDescription String? @db.Text
+  engDescription  String? @db.Text
   /// @DtoRelationIncludeId
-  skillId          Int? // New reference to a single skill
-  expectSkillLevel Int?    @db.TinyInt
+  skillId         Int? // New reference to a single skill
+
+  expectSkillLevel Int? @db.TinyInt // may delete this after
+
+  // below target, on target, above target
+  belowTargetLevel Int? @db.TinyInt
+  onTargetLevel    Int? @db.TinyInt
+  aboveTargetLevel Int? @db.TinyInt
 
   plo               plo?               @relation(fields: [ploId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   subject           subject?           @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)

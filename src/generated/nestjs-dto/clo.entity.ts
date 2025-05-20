@@ -52,6 +52,24 @@ skillId: number  | null;
 })
 expectSkillLevel: number  | null;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+belowTargetLevel: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+onTargetLevel: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+aboveTargetLevel: number  | null;
+@ApiProperty({
   type: () => Plo,
   required: false,
   nullable: true,
