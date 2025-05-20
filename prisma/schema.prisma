@@ -197,7 +197,6 @@ model clo {
   expectSkillLevel Int? @db.TinyInt // may delete this after
 
   // below target, on target, above target
-  belowTargetLevel Int? @db.TinyInt
   onTargetLevel    Int? @db.TinyInt
   aboveTargetLevel Int? @db.TinyInt
 

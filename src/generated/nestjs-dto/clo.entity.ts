@@ -56,12 +56,6 @@ expectSkillLevel: number  | null;
   format: 'int32',
   nullable: true,
 })
-belowTargetLevel: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
 onTargetLevel: number  | null;
 @ApiProperty({
   type: 'integer',
