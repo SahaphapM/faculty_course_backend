@@ -196,10 +196,6 @@ model clo {
 
   expectSkillLevel Int? @db.TinyInt // may delete this after
 
-  // below target, on target, above target
-  onTargetLevel    Int? @db.TinyInt
-  aboveTargetLevel Int? @db.TinyInt
-
   plo               plo?               @relation(fields: [ploId], references: [id], onDelete: SetNull, onUpdate: NoAction)
   subject           subject?           @relation(fields: [subjectId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   skill             skill?             @relation(fields: [skillId], references: [id], onDelete: SetNull, onUpdate: NoAction)

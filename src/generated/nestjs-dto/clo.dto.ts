@@ -47,16 +47,4 @@ skillId: number  | null;
   nullable: true,
 })
 expectSkillLevel: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-onTargetLevel: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  nullable: true,
-})
-aboveTargetLevel: number  | null;
 }

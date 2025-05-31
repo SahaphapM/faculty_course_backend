@@ -204,37 +204,37 @@ export class CurriculumsService {
     year?: number,
     skillType?: string,
   ) {
-    //  กำหนดประเภทของ skill ที่จะดึง
+    // 🔷 1) กำหนด domain ของ skill
     let domain = [LearningDomain.Cognitive, LearningDomain.Psychomotor];
     if (skillType === 'soft') {
       domain = [LearningDomain.Affective, LearningDomain.Ethics];
     }
 
-    //  หานิสิตในหลักสูตร และปีนั้น ๆ (จากรหัสนิสิต เช่น 68160001 = ปี 1 ใน 2568)
-    const currentYear = new Date().getFullYear(); // 2025
-    const currentAcademicYear = currentYear + 543; // 2568
-
+    // 🔷 2) คำนวณ prefix สำหรับกรอง student (เช่น "68" สำหรับปี 1 ของ 2568)
+    const currentYear = new Date().getFullYear();
+    const currentAcademicYear = currentYear + 543;
     const prefix = year
-      ? String(currentAcademicYear - year + 1).slice(-2) // ปี 1 → "68"
+      ? String(currentAcademicYear - year + 1).slice(-2)
       : undefined;
 
+    // 🔷 3) ดึง studentIds
     const students = await this.prisma.student.findMany({
       where: {
         curriculumId,
         ...(prefix && {
-          code: { startsWith: prefix }, // รหัสนิสิตขึ้นต้นด้วย "68" = ปี 1
+          code: { startsWith: prefix },
         }),
       },
       select: { id: true },
     });
-
     const studentIds = students.map((s) => s.id);
+    console.log('totalStudent', studentIds.length);
 
-    //  ดึงข้อมูล skill ทั้งหมดใน curriculum พร้อม CLO และระดับที่นิสิตได้ (gainedLevel)
+    // 🔷 4) ดึง skill ทั้งหมด (พร้อม clo, skill_collections)
     const skills = await this.prisma.skill.findMany({
       where: {
         curriculumId,
-        ...(domain?.length ? { domain: { in: domain } } : {}),
+        ...(domain.length ? { domain: { in: domain } } : {}),
       },
       include: {
         clos: {
@@ -251,79 +251,98 @@ export class CurriculumsService {
       },
     });
 
-    //  สรุปข้อมูล skill ทีละตัว
-    const result = [];
+    console.log('totalSkills', skills.length);
 
-    for (const skill of skills) {
-      // 👉 levelCounts คือ object ที่เก็บว่า gainedLevel แต่ละค่ามีคนได้กี่คน
-      // เช่น { 1: 5, 2: 10, 3: 15 }
-      const levelCounts: Record<number, number> = {};
-      // 👉 Record<number, number> = object ที่ key เป็นตัวเลข (level), value เป็นจำนวนคน
+    // 🔷 5) Helper function to find all descendant skills (leaf skills) of a root skill
+    const findAllDescendants = (rootSkillId: number): any[] => {
+      const descendants = [];
+      const directChildren = skills.filter((s) => s.parentId === rootSkillId);
 
-      const levelSummary: { level: number; count: number; category: string }[] =
-        [];
-      let total = 0;
-
-      // 👉 ใช้เก็บ target range
-      let onTargetMin: number | null = null;
-      let onTargetMax: number | null = null;
-      let aboveTargetMin: number | null = null;
-
-      for (const clo of skill.clos) {
-        // หา min/max ของระดับเป้าหมายจาก CLO ที่เชื่อมกับ skill นี้
-        if (clo.onTargetLevel != null) {
-          onTargetMin =
-            onTargetMin === null
-              ? clo.onTargetLevel
-              : Math.min(onTargetMin, clo.onTargetLevel);
-        }
-        if (clo.aboveTargetLevel != null) {
-          aboveTargetMin =
-            aboveTargetMin === null
-              ? clo.aboveTargetLevel
-              : Math.min(aboveTargetMin, clo.aboveTargetLevel);
-        }
-        if (clo.onTargetLevel != null && clo.aboveTargetLevel != null) {
-          onTargetMax =
-            onTargetMax === null
-              ? clo.aboveTargetLevel - 1
-              : Math.max(onTargetMax, clo.aboveTargetLevel - 1);
-        }
-
-        // ✨ รวมจำนวน gainedLevel ของนิสิต
-        for (const col of clo.skill_collections) {
-          const level = col.gainedLevel;
-          if (level == null) continue;
-
-          total++;
-          levelCounts[level] = (levelCounts[level] || 0) + 1;
+      for (const child of directChildren) {
+        const childDescendants = findAllDescendants(child.id);
+        if (childDescendants.length === 0) {
+          // This is a leaf skill (no children)
+          descendants.push(child);
+        } else {
+          // This skill has children, so include its descendants
+          descendants.push(...childDescendants);
         }
       }
 
-      // 🧩 ฟังก์ชันจำแนกว่า level นั้นอยู่ช่วงใด
+      return descendants;
+    };
+
+    // 🔷 6) สรุปเฉพาะ root skill (parentId === null)
+    const rootSkills = skills.filter((s) => s.parentId === null);
+    const result = [];
+
+    for (const root of rootSkills) {
+      const expectedLevels: number[] = [];
+      const studentMaxLevels = new Map<number, number>(); // studentId -> max gainedLevel
+
+      // 🔷 หา leaf skill ทั้งหมดของ root (รวมถึง root เองถ้าไม่มี children)
+      let leafSkills = findAllDescendants(root.id);
+      if (leafSkills.length === 0) {
+        // Root skill itself is a leaf skill
+        leafSkills = [root];
+      }
+
+      for (const leaf of leafSkills) {
+        for (const clo of leaf.clos) {
+          if (clo.expectSkillLevel != null) {
+            expectedLevels.push(clo.expectSkillLevel);
+          }
+
+          for (const col of clo.skill_collections) {
+            const level = col.gainedLevel;
+            if (level == null || col.studentId == null) continue;
+
+            // Track the maximum level per student for this root skill
+            const currentMax = studentMaxLevels.get(col.studentId) || 0;
+            studentMaxLevels.set(col.studentId, Math.max(currentMax, level));
+          }
+        }
+      }
+
+      // 🔷 ถ้าไม่มี expectedLevel → ให้เป็น 0
+      const expectedLevelRoot =
+        expectedLevels.length > 0
+          ? Math.round(
+              expectedLevels.reduce((a, b) => a + b, 0) / expectedLevels.length,
+            )
+          : 0;
+
+      // 🔷 ฟังก์ชันจำแนกช่วงของ level
       const classify = (level: number): string => {
-        if (aboveTargetMin != null && level >= aboveTargetMin) return 'above';
-        if (
-          onTargetMin != null &&
-          onTargetMax != null &&
-          level >= onTargetMin &&
-          level <= onTargetMax
-        )
-          return 'on';
+        if (level > expectedLevelRoot) return 'above';
+        if (level === expectedLevelRoot) return 'on';
         return 'below';
       };
 
-      // 🔄 แปลง object levelCounts เป็น array levelSummary
-      for (const [levelStr, count] of Object.entries(levelCounts)) {
-        const level = Number(levelStr);
-        levelSummary.push({ level, count, category: classify(level) });
+      // 🔷 นับจำนวนนักเรียนในแต่ละ level (แต่ละคนนับครั้งเดียวตาม max level)
+      const levelCounts: Record<number, number> = {};
+      for (const maxLevel of studentMaxLevels.values()) {
+        levelCounts[maxLevel] = (levelCounts[maxLevel] || 0) + 1;
       }
 
-      // 🎯 เพิ่มผลลัพธ์ของ skill นี้ใน array
+      // 🔷 สร้าง levelSummary
+      const levelSummary: { level: number; count: number; category: string }[] =
+        [];
+      for (const [levelStr, count] of Object.entries(levelCounts)) {
+        const level = Number(levelStr);
+        levelSummary.push({
+          level,
+          count,
+          category: classify(level),
+        });
+      }
+
+      // 🔷 เพิ่มข้อมูล root skill ในผลลัพธ์
       result.push({
-        skillName: skill.thaiName,
-        domain: skill.domain,
-        totalStudent: total,
+        skillName: root.thaiName,
+        domain: root.domain,
+        totalStudent: studentMaxLevels.size, // Count unique students
+        expectedLevel: expectedLevelRoot,
         levelSummary,
       });
     }

@@ -66,22 +66,4 @@ skillId?: number  | null;
 @IsOptional()
 @IsInt()
 expectSkillLevel?: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsInt()
-onTargetLevel?: number  | null;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-  required: false,
-  nullable: true,
-})
-@IsOptional()
-@IsInt()
-aboveTargetLevel?: number  | null;
 }
