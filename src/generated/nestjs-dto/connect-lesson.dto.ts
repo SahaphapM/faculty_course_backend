@@ -10,6 +10,7 @@ export class ConnectLessonDto {
   type: 'integer',
   format: 'int32',
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @IsInt()
@@ -18,6 +19,7 @@ id?: number ;
   type: 'integer',
   format: 'int32',
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @IsInt()
