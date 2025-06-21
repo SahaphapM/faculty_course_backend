@@ -45,13 +45,6 @@ export class FacultiesService {
                   id: true,
                   thaiName: true,
                   engName: true,
-                  subjects: {
-                    select: {
-                      id: true,
-                      thaiName: true,
-                      engName: true,
-                    },
-                  },
                 },
               },
             },
