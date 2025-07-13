@@ -52,24 +52,34 @@ export async function fetchSkillsWithCollections(
 export function generateSkillSummary(skills: any[]) {
   const rootSkills = skills.filter((skill) => skill.parentId === null);
 
-  return rootSkills
-    .map((rootSkill) => {
-      const leafSkills = findAllLeafSkills(rootSkill.id, skills);
-      const studentCategories = categorizeStudents(leafSkills);
+  return rootSkills.map((rootSkill) => {
+    const leafSkills = findAllLeafSkills(rootSkill.id, skills);
+    const studentCategories = categorizeStudents(leafSkills);
+    const { levelSummary, totalStudents } =
+      calculateLevelSummary(studentCategories);
 
-      if (studentCategories.size === 0) return null;
+    // Create default level summary with zero counts
+    const defaultLevels = [
+      { category: 'above', count: 0, studentIds: [] },
+      { category: 'on', count: 0, studentIds: [] },
+      { category: 'below', count: 0, studentIds: [] },
+    ];
 
-      const { levelSummary, totalStudents } =
-        calculateLevelSummary(studentCategories);
+    // Merge with actual data if exists
+    const mergedLevels = defaultLevels.map((defaultLevel) => {
+      const existingLevel = levelSummary.find(
+        (l) => l.category === defaultLevel.category,
+      );
+      return existingLevel || defaultLevel;
+    });
 
-      return {
-        skillName: rootSkill.thaiName,
-        domain: rootSkill.domain,
-        totalStudent: totalStudents,
-        levelSummary: levelSummary.filter((item) => item.count > 0),
-      };
-    })
-    .filter(Boolean); // Remove null entries
+    return {
+      skillName: rootSkill.thaiName,
+      domain: rootSkill.domain,
+      totalStudent: totalStudents,
+      levelSummary: mergedLevels,
+    };
+  });
 }
 
 export function findAllLeafSkills(rootId: number, skills: any[]): any[] {

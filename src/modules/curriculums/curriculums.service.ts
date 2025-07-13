@@ -222,7 +222,7 @@ export class CurriculumsService {
       domains,
       studentIds,
     );
-    console.log('totalSkills', skills.length);
+    console.log('totalSkills', skills);
 
     // 4. Process root skills and generate summary
     return generateSkillSummary(skills);
