@@ -10,8 +10,12 @@ import { Prisma } from '@prisma/client'; // Import Prisma types
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
-import { LearningDomain } from 'src/enums/learning-domain.enum';
-import { Student } from 'src/generated/nestjs-dto/student.entity';
+import {
+  fetchSkillsWithCollections,
+  generateSkillSummary,
+  getSkillDomains,
+  getStudentIds,
+} from './curriculums.helper';
 
 @Injectable()
 export class CurriculumsService {
@@ -202,177 +206,164 @@ export class CurriculumsService {
 
   async getSkillSummaryByCurriculum(
     curriculumId: number,
-    yearCode: string, // รหัสปีการศึกษา
-    skillType: string, // soft or hard
+    yearCode: string,
+    skillType: string,
   ) {
-    // 🔷 1) กำหนด domain ของ skill
-    let domain = [LearningDomain.Cognitive, LearningDomain.Psychomotor];
-    if (skillType === 'soft') {
-      domain = [LearningDomain.Affective, LearningDomain.Ethics];
-    }
+    // 1. Determine domains based on skill type
+    const domains = getSkillDomains(skillType);
 
-    // 🔷 3) ดึง studentIds
-    const students = await this.prisma.student.findMany({
-      where: {
-        curriculumId,
-        ...(yearCode && {
-          code: { startsWith: yearCode },
-        }),
-      },
-      select: { id: true },
-    });
-    const studentIds = students.map((s) => s.id);
+    // 2. Get student IDs for the given curriculum and year
+    const studentIds = await getStudentIds(curriculumId, yearCode);
     console.log('totalStudent', studentIds.length);
 
-    // 🔷 4) ดึง skill ทั้งหมด (พร้อม clo, skill_collections)
-    const skills = await this.prisma.skill.findMany({
-      where: {
-        curriculumId,
-        ...(domain.length ? { domain: { in: domain } } : {}),
-      },
-      include: {
-        clos: {
-          include: {
-            skill_collections: {
-              where: { studentId: { in: studentIds } },
-              select: {
-                studentId: true,
-                gainedLevel: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
+    // 3. Fetch skills with their CLOs and skill collections
+    const skills = await fetchSkillsWithCollections(
+      curriculumId,
+      domains,
+      studentIds,
+    );
     console.log('totalSkills', skills.length);
 
-    // 🔷 5) Helper function to find all descendant skills (leaf skills) of a root skill
-    const findAllDescendants = (rootSkillId: number): any[] => {
-      const descendants = [];
-      const directChildren = skills.filter((s) => s.parentId === rootSkillId);
+    // 4. Process root skills and generate summary
+    return generateSkillSummary(skills);
+  }
 
-      for (const child of directChildren) {
-        const childDescendants = findAllDescendants(child.id);
-        if (childDescendants.length === 0) {
-          // This is a leaf skill (no children)
-          descendants.push(child);
-        } else {
-          // This skill has children, so include its descendants
-          descendants.push(...childDescendants);
-        }
-      }
+  async findStudentsBySkillLevel(
+    skillId: number,
+    targetLevel: 'on' | 'above' | 'below' | 'all',
+    yearCode: string, // 68 69 70
+    page: number,
+    limit: number,
+    search?: string,
+  ) {
+    const offset = (page - 1) * limit;
 
-      return descendants;
-    };
+    // 1. Find all descendant skills (including the root skill itself)
+    const allSkills = await this.findAllDescendants(skillId);
+    const skillIds = allSkills.map((skill) => skill.id);
 
-    // 🔷 6) สรุปเฉพาะ root skill (parentId === null)
-    const rootSkills = skills.filter((s) => s.parentId === null);
-    const result = [];
+    // 2. Find all CLOs related to these skills
+    const closData = await this.prisma.clo.findMany({
+      where: {
+        skillId: { in: skillIds },
+      },
+      select: {
+        id: true,
+        expectSkillLevel: true,
+      },
+    });
+    const cloIds = closData.map((clo) => clo.id);
 
-    for (const root of rootSkills) {
-      const studentCategories = new Map<number, 'above' | 'on' | 'below'>();
-      const expectedLevels = new Set<number>();
-
-      // 🔷 หา leaf skill ทั้งหมดของ root (รวมถึง root เองถ้าไม่มี children)
-      let leafSkills = findAllDescendants(root.id);
-      if (leafSkills.length === 0) {
-        // Root skill itself is a leaf skill
-        leafSkills = [root];
-      }
-
-      // First pass: Collect all expected levels and initialize student categories
-      for (const leaf of leafSkills) {
-        for (const clo of leaf.clos) {
-          if (clo.expectSkillLevel != null) {
-            expectedLevels.add(clo.expectSkillLevel);
-          }
-        }
-      }
-
-      // If no expected levels, skip this root skill
-      if (expectedLevels.size === 0) continue;
-
-      // Second pass: Categorize students
-      for (const leaf of leafSkills) {
-        for (const clo of leaf.clos) {
-          if (clo.expectSkillLevel == null) continue;
-
-          for (const col of clo.skill_collections) {
-            const level = col.gainedLevel;
-            if (level == null || col.studentId == null) continue;
-
-            // Determine category for this student's level
-            let category: 'above' | 'on' | 'below';
-            if (level > clo.expectSkillLevel) {
-              category = 'above';
-            } else if (level === clo.expectSkillLevel) {
-              category = 'on';
-            } else {
-              category = 'below';
-            }
-
-            // Update student's category (keep the worst case)
-            const currentCategory = studentCategories.get(col.studentId);
-            if (
-              !currentCategory ||
-              category === 'below' ||
-              (currentCategory === 'on' && category === 'above')
-            ) {
-              studentCategories.set(col.studentId, category);
-            }
-          }
-        }
-      }
-
-      // Count students in each category
-      const categoryCounts = {
-        above: 0,
-        on: 0,
-        below: 0,
+    if (cloIds.length === 0) {
+      return {
+        data: [],
+        meta: {
+          total: 0,
+          page,
+          limit,
+          totalPages: 0,
+        },
       };
-
-      const categorizedStudents = {
-        above: [],
-        on: [],
-        below: [],
-      };
-
-      // Group students by category
-      for (const [studentId, category] of studentCategories.entries()) {
-        categoryCounts[category]++;
-        categorizedStudents[category].push(studentId);
-      }
-
-      // Prepare level summary (now just categories)
-      const levelSummary = [
-        {
-          category: 'above',
-          count: categoryCounts.above,
-          studentIds: categorizedStudents.above,
-        },
-        {
-          category: 'on',
-          count: categoryCounts.on,
-          studentIds: categorizedStudents.on,
-        },
-        {
-          category: 'below',
-          count: categoryCounts.below,
-          studentIds: categorizedStudents.below,
-        },
-      ].filter((item) => item.count > 0);
-
-      // Add root skill to results
-      result.push({
-        skillName: root.thaiName,
-        domain: root.domain,
-        totalStudent: studentCategories.size,
-        levelSummary,
-      });
     }
 
-    return result;
+    // 3. Build student filter for yearCode and search
+    const studentWhere: any = {};
+    if (yearCode) {
+      studentWhere.code = { startsWith: yearCode };
+    }
+    if (search) {
+      studentWhere.OR = [
+        { thaiName: { contains: search, mode: 'insensitive' } },
+        { engName: { contains: search, mode: 'insensitive' } },
+        { code: { contains: search } },
+      ];
+    }
+    // 4. Build the main query conditions
+    const whereClause: any = {
+      cloId: { in: cloIds },
+      student: studentWhere,
+    };
+
+    if (targetLevel !== 'all') {
+      // For non-'all' cases, we need to handle each CLO's expected level separately
+      const orConditions = closData.map((clo) => {
+        let levelCondition: any;
+        if (targetLevel === 'on') {
+          levelCondition = { equals: clo.expectSkillLevel };
+        } else if (targetLevel === 'above') {
+          levelCondition = { gt: clo.expectSkillLevel };
+        } else if (targetLevel === 'below') {
+          levelCondition = { lt: clo.expectSkillLevel };
+        }
+
+        return {
+          AND: [{ cloId: clo.id }, { gainedLevel: levelCondition }],
+        };
+      });
+
+      whereClause.OR = orConditions;
+    }
+
+    // 5. Get total count for pagination
+    const total = await this.prisma.skill_collection.count({
+      where: whereClause,
+    });
+
+    // 6. Get paginated results with students as main objects
+    const results = await this.prisma.student.findMany({
+      where: {
+        id: {
+          in: await this.prisma.skill_collection
+            .findMany({
+              where: whereClause,
+              select: { studentId: true },
+              distinct: ['studentId'],
+            })
+            .then((sc) => sc.map((s) => s.studentId)),
+        },
+      },
+      include: {
+        skill_collections: {
+          where: whereClause,
+          select: {
+            studentId: true,
+            gainedLevel: true,
+            cloId: true,
+          },
+          // include: {
+          //   clo: true,
+          // },
+        },
+      },
+      take: limit,
+      skip: offset,
+    });
+
+    // map closData from first query to skill_collections
+    const studentWithClo = results.map((student) => {
+      const skillCollections = student.skill_collections.map((sc) => {
+        const clo = closData.find((clo) => clo.id === sc.cloId);
+        return {
+          ...sc,
+          clo,
+        };
+      });
+      return {
+        ...student,
+        skill_collections: skillCollections,
+      };
+    });
+
+    // 7. Return formatted response
+    return {
+      data: studentWithClo,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   private async findAllDescendants(
@@ -415,107 +406,5 @@ export class CurriculumsService {
     }
 
     return result;
-  }
-
-  async findStudentsBySkillLevel(
-    skillId: number,
-    targetLevel: 'on' | 'above' | 'below' | 'all',
-    yearCode: string, // 68 69 70
-    page: number,
-    limit: number,
-    search?: string,
-  ): Promise<[Student[], number]> {
-    const offset = (page - 1) * limit;
-
-    // 1. Find all descendant skills (including the root skill itself)
-    const allSkills = await this.findAllDescendants(skillId);
-    const skillIds = allSkills.map((skill) => skill.id);
-
-    console.log('allSkills', allSkills);
-
-    // 2. Find all CLOs related to these skills
-    const clos = await this.prisma.clo.findMany({
-      where: {
-        skillId: { in: skillIds },
-      },
-      select: {
-        id: true,
-        expectSkillLevel: true,
-      },
-    });
-    const cloIds = clos.map((clo) => clo.id);
-
-    // 3. Build student filter for yearCode and search
-    const studentWhere: any = {};
-    if (yearCode) {
-      studentWhere.code = { startsWith: yearCode };
-    }
-    if (search) {
-      studentWhere.OR = [
-        { thaiName: { contains: search, mode: 'insensitive' } },
-        { engName: { contains: search, mode: 'insensitive' } },
-        { code: { contains: search } },
-      ];
-    }
-    // 4. Find all studentIds that match the targetLevel condition
-    const studentIdSet = new Set<number>();
-    if (targetLevel === 'all') {
-      // For 'all', no need to filter by gainedLevel vs expectSkillLevel
-      const skillCollections = await this.prisma.skill_collection.findMany({
-        where: {
-          cloId: { in: cloIds },
-          student: studentWhere,
-        },
-        select: { studentId: true },
-      });
-      skillCollections.forEach((sc) => studentIdSet.add(sc.studentId));
-    } else {
-      // For each CLO, filter skill_collections based on its expectSkillLevel
-      const scPromises = clos.map((clo) => {
-        let condition: any;
-        if (targetLevel === 'on') {
-          condition = { equals: clo.expectSkillLevel };
-        } else if (targetLevel === 'above') {
-          condition = { gt: clo.expectSkillLevel };
-        } else if (targetLevel === 'below') {
-          condition = { lt: clo.expectSkillLevel };
-        }
-
-        return this.prisma.skill_collection.findMany({
-          where: {
-            cloId: clo.id,
-            gainedLevel: condition,
-            student: studentWhere,
-          },
-          select: { studentId: true },
-        });
-      });
-
-      const scResults = await Promise.all(scPromises);
-      scResults.forEach((scs) =>
-        scs.forEach((sc) => studentIdSet.add(sc.studentId)),
-      );
-    }
-
-    const studentIds = Array.from(studentIdSet);
-    const totalCount = studentIds.length;
-
-    // 5. Fetch paginated students with their skill_collections
-    const students = await this.prisma.student.findMany({
-      where: {
-        id: { in: studentIds },
-      },
-      include: {
-        skill_collections: {
-          where: { cloId: { in: cloIds } },
-          include: { clo: { include: { skill: true } } },
-        },
-      },
-      orderBy: { code: 'asc' },
-      skip: offset,
-      take: limit,
-    });
-
-    return [students as Student[], totalCount];
   }
 }
