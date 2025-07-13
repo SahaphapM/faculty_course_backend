@@ -75,6 +75,7 @@ export function generateSkillSummary(skills: any[]) {
 
     return {
       skillName: rootSkill.thaiName,
+      skillId: rootSkill.id,
       domain: rootSkill.domain,
       totalStudent: totalStudents,
       levelSummary: mergedLevels,
