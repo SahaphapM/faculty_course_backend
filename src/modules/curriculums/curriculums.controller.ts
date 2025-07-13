@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -34,16 +34,18 @@ export class CurriculumsController {
 
   @Get('summary:curriculumId')
   async getSkillSummaryByCurriculum(
-    @Param('curriculumId') curriculumId: string,
-    @Query('year') year?: number,
-    @Query('skillType') skillType?: string,
+    @Param('curriculumId') curriculumId: number,
+    @Query('yearCode') yearCode: string,
+    @Query('skillType') skillType: string,
   ) {
     return this.curriculumsService.getSkillSummaryByCurriculum(
-      +curriculumId,
-      year,
+      curriculumId,
+      yearCode,
       skillType,
     );
   }
+
+
 
   @Get(':code')
   findOneByCode(@Param('code') code: string) {
@@ -69,4 +71,38 @@ export class CurriculumsController {
   async filters(@Query('branchId') branchId: string) {
     return this.curriculumsService.findWithFilters(+branchId);
   }
+
+  @ApiQuery({ name: 'yearCode', required: false, description: 'Optional year code filter' })
+  @ApiQuery({ name: 'targetLevel', required: true, description: 'Required level filter' })
+  @ApiQuery({ name: 'page', required: false, description: 'Optional page number' })
+  @ApiQuery({ name: 'limit', required: false, description: 'Optional limit per page' })
+  @ApiQuery({ name: 'search', required: false, description: 'Optional search query' })
+  @Get('filters/skill/:skillId/students')
+async getStudentsBySkillLevel(
+  @Param('skillId') skillId: number,
+  @Query('targetLevel') targetLevel: 'on' | 'above' | 'below' | 'all',
+  @Query('yearCode') yearCode: string,
+  @Query('page') page = 1,
+  @Query('limit') limit = 10,
+  @Query('search') search?: string    // optional
+) {
+  const [students, total] = await this.curriculumsService.findStudentsBySkillLevel(
+    skillId,
+    targetLevel,
+    yearCode,
+    page,
+    limit,
+    search
+  );
+
+  return {
+    data: students,
+    meta: {
+      total,
+      page,
+      limit,
+      totalPages: Math.ceil(total / limit)
+    }
+  };
+}
 }
