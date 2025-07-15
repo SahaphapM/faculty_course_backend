@@ -113,4 +113,9 @@ export class CurriculumsController {
       search,
     );
   }
+
+    @Get('summary/by-curriculum/:curriculumId')
+  async getSkillCollectionSummaryByCurriculum(@Param('curriculumId') curriculumId: number) {
+    return this.curriculumsService.getSkillCollectionSummaryByCurriculum(+curriculumId)
+  }
 }

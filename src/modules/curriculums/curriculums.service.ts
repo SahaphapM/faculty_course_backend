@@ -407,4 +407,67 @@ export class CurriculumsService {
 
     return result;
   }
+
+  async getSkillCollectionSummaryByCurriculum(curriculumId: number) {
+    // 1. ดึงนิสิตในหลักสูตร
+    const students = await this.prisma.student.findMany({
+      where: { curriculumId },
+      select: {
+        id: true,
+        code: true,
+        thaiName: true,
+        skill_collections: {
+          include: {
+            clo: {
+              include: {
+                skill: {
+                  select: {
+                    id: true,
+                    thaiName: true
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    })
+
+    // 2. ดึง skill ทั้งหมดใน curriculum นี้ (ที่มีใน CLO)
+    const skills = await this.prisma.skill.findMany({
+      where: { curriculumId },
+      select: {
+        id: true,
+        thaiName: true
+      }
+    })
+
+    // 3. จัดกลุ่มข้อมูลให้เป็นตาม format
+    const result = {
+      curriculumId,
+      students: students.map((stu) => {
+        const skillMap = new Map<number, number>()
+
+        for (const sc of stu.skill_collections) {
+          const skill = sc.clo?.skill
+          if (skill) {
+            skillMap.set(skill.id, sc.gainedLevel)
+          }
+        }
+
+        return {
+          studentId: stu.id,
+          studentName: stu.thaiName,
+          studentCode: stu.code,
+          skills: skills.map((sk) => ({
+            skillId: sk.id,
+            skillName: sk.thaiName,
+            gainedLevel: skillMap.get(sk.id) ?? null
+          }))
+        }
+      })
+    }
+
+    return result
+  }
 }
