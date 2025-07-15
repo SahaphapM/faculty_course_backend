@@ -10,7 +10,7 @@ import { CreateCloDto } from 'src/generated/nestjs-dto/create-clo.dto';
 import { CloFilterDto } from 'src/dto/filters/filter.clo.dto';
 @Injectable()
 export class ClosService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateCloDto) {
     try {

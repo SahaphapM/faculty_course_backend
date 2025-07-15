@@ -306,3 +306,14 @@ model user {
 
   @@unique([instructorId, studentId]) // Ensures a user has either instructorId or studentId, but not both
 }
+
+model company {
+  id              Int      @id @default(autoincrement())
+  name            String   @db.VarChar(255)
+  thaiDescription String?  @db.Text
+  engDescription  String?  @db.Text
+  address         String?  @db.Text
+  tel             String?  @db.VarChar(50)
+  email           String?  @db.VarChar(255)
+  website         String?  @db.VarChar(255)
+}
