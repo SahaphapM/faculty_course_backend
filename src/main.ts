@@ -21,7 +21,6 @@ async function bootstrap() {
     }),
   );
 
-  // app.useGlobalFilters(new AllExceptionsFilter());
   const { httpAdapter } = app.get(HttpAdapterHost);
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
 
