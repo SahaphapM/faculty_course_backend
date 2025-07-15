@@ -6,9 +6,9 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { CourseService } from './courses.service';
-import { Query } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';

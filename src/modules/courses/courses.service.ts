@@ -12,7 +12,7 @@ import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
 
 @Injectable()
 export class CourseService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // Create a new course(s)
   async create(createCourseDtos: CreateCourseDto[]) {
@@ -148,7 +148,10 @@ export class CourseService {
 
       return course;
     } catch (error) {
-      throw new InternalServerErrorException('Failed to fetch course');
+      throw new InternalServerErrorException(
+        'Failed to fetch course',
+        error.message,
+      );
     }
   }
 

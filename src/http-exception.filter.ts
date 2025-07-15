@@ -33,7 +33,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
       ) {
         message = exception.message;
         details = exceptionResponse['message']; // Capture validation error messages
-      } 
+      } else {
+        message = exception.message;
+      }
     }
     // Handle Prisma Known Errors
     else if (exception instanceof Prisma.PrismaClientKnownRequestError) {
@@ -54,7 +56,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
           details = exception.meta;
           break;
         default:
-          status = 500;
+          // status is already 500 from initialization
           message = 'Database error occurred.';
           details = exception.meta;
       }
