@@ -114,8 +114,19 @@ export class CurriculumsController {
     );
   }
 
-    @Get('summary/by-curriculum/:curriculumId')
-  async getSkillCollectionSummaryByCurriculum(@Param('curriculumId') curriculumId: number) {
-    return this.curriculumsService.getSkillCollectionSummaryByCurriculum(+curriculumId)
+  @Get('summary/skill-collection/:curriculumId')
+  async getSkillCollectionSummaryByCurriculum(
+    @Param('curriculumId') curriculumId: number, // รับ curriculumId
+    @Query('studentName') studentName: string, // รับ studentName จาก query parameter
+    @Query('studentCode') studentCode: string, // รับ studentCode จาก query parameter
+    @Query('subjectName') subjectName: string, // รับ subjectName จาก query parameter
+  ) {
+    // ส่งข้อมูล curriculumId และ params ไปยัง service เพื่อกรองข้อมูล
+    return this.curriculumsService.getSkillCollectionSummaryByCurriculum(
+      curriculumId,
+      studentName,
+      studentCode,
+      subjectName,
+    );
   }
 }
