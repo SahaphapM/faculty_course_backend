@@ -250,6 +250,14 @@ export class CurriculumsService {
       select: {
         id: true,
         expectSkillLevel: true,
+        skill: {
+          select: {
+            id: true,
+            thaiName: true,
+            engName: true,
+            domain: true,
+          },
+        },
       },
     });
     const cloIds = closData.map((clo) => clo.id);
@@ -408,121 +416,119 @@ export class CurriculumsService {
     return result;
   }
 
-async getSkillCollectionSummaryByCurriculum(
-  curriculumId: number,
-  studentName?: string,
-  studentCode?: string,
-  subjectName?: string
-) {
-  // 1. ดึง student + skill_collections
-  const students = await this.prisma.student.findMany({
-    where: {
-      curriculumId,
-      thaiName: studentName ? { contains: studentName } : undefined,
-      code: studentCode ? { startsWith: studentCode.slice(0, 2) } : undefined,
-    },
-    select: {
-      id: true,
-      code: true,
-      thaiName: true,
-      skill_collections: {
-        include: {
-          clo: {
-            include: {
-              skill: {
-                select: {
-                  id: true,
-                  thaiName: true,
+  async getSkillCollectionSummaryByCurriculum(
+    curriculumId: number,
+    studentName?: string,
+    studentCode?: string,
+    subjectName?: string,
+  ) {
+    // 1. ดึง student + skill_collections
+    const students = await this.prisma.student.findMany({
+      where: {
+        curriculumId,
+        thaiName: studentName ? { contains: studentName } : undefined,
+        code: studentCode ? { startsWith: studentCode.slice(0, 2) } : undefined,
+      },
+      select: {
+        id: true,
+        code: true,
+        thaiName: true,
+        skill_collections: {
+          include: {
+            clo: {
+              include: {
+                skill: {
+                  select: {
+                    id: true,
+                    thaiName: true,
+                  },
                 },
               },
             },
           },
         },
       },
-    },
-  });
+    });
 
-  // 2. เตรียมดึงเฉพาะ skill ที่มีใน subjectName (ถ้ามีระบุ)
-  let skills: { id: number; thaiName: string }[];
+    // 2. เตรียมดึงเฉพาะ skill ที่มีใน subjectName (ถ้ามีระบุ)
+    let skills: { id: number; thaiName: string }[];
 
-  if (subjectName) {
-    // หา subject ที่ชื่อ match
-    const matchedSubjects = await this.prisma.subject.findMany({
-      where: {
-        curriculumId,
-        OR: [
-          { thaiName: { contains: subjectName } },
-          { engName: { contains: subjectName } },
-        ],
-      },
-      select: {
-        id: true,
-        clos: {
-          select: {
-            skillId: true,
+    if (subjectName) {
+      // หา subject ที่ชื่อ match
+      const matchedSubjects = await this.prisma.subject.findMany({
+        where: {
+          curriculumId,
+          OR: [
+            { thaiName: { contains: subjectName } },
+            { engName: { contains: subjectName } },
+          ],
+        },
+        select: {
+          id: true,
+          clos: {
+            select: {
+              skillId: true,
+            },
           },
         },
-      },
-    });
+      });
 
-    // รวม skillId ที่มีใน CLO ของ subject เหล่านั้น
-    const skillIds = [
-      ...new Set(
-        matchedSubjects
-          .flatMap((subj) => subj.clos.map((clo) => clo.skillId))
-          .filter((id): id is number => id !== null)
-      ),
-    ];
+      // รวม skillId ที่มีใน CLO ของ subject เหล่านั้น
+      const skillIds = [
+        ...new Set(
+          matchedSubjects
+            .flatMap((subj) => subj.clos.map((clo) => clo.skillId))
+            .filter((id): id is number => id !== null),
+        ),
+      ];
 
-    // ดึง skill ตาม skillId ที่เจอ
-    skills = await this.prisma.skill.findMany({
-      where: {
-        id: { in: skillIds },
-      },
-      select: {
-        id: true,
-        thaiName: true,
-      },
-    });
-  } else {
-    // ดึง skill ทั้งหมดใน curriculum
-    skills = await this.prisma.skill.findMany({
-      where: { curriculumId },
-      select: {
-        id: true,
-        thaiName: true,
-      },
-    });
-  }
+      // ดึง skill ตาม skillId ที่เจอ
+      skills = await this.prisma.skill.findMany({
+        where: {
+          id: { in: skillIds },
+        },
+        select: {
+          id: true,
+          thaiName: true,
+        },
+      });
+    } else {
+      // ดึง skill ทั้งหมดใน curriculum
+      skills = await this.prisma.skill.findMany({
+        where: { curriculumId },
+        select: {
+          id: true,
+          thaiName: true,
+        },
+      });
+    }
 
-  // 3. รวมข้อมูลผลลัพธ์
-  const result = {
-    curriculumId,
-    students: students.map((stu) => {
-      const skillMap = new Map<number, number>();
+    // 3. รวมข้อมูลผลลัพธ์
+    const result = {
+      curriculumId,
+      students: students.map((stu) => {
+        const skillMap = new Map<number, number>();
 
-      for (const sc of stu.skill_collections) {
-        const skill = sc.clo?.skill;
-        if (skill) {
-          skillMap.set(skill.id, sc.gainedLevel);
+        for (const sc of stu.skill_collections) {
+          const skill = sc.clo?.skill;
+          if (skill) {
+            skillMap.set(skill.id, sc.gainedLevel);
+          }
         }
-      }
 
-      return {
-        studentId: stu.id,
-        studentName: stu.thaiName,
-        studentCode: stu.code,
-        skills: skills.map((sk) => ({
-          skillId: sk.id,
-          skillName: sk.thaiName,
-          gainedLevel: skillMap.get(sk.id) ?? null,
-        })),
-      };
-    }),
-  };
+        return {
+          studentId: stu.id,
+          studentName: stu.thaiName,
+          studentCode: stu.code,
+          skills: skills.map((sk) => ({
+            skillId: sk.id,
+            skillName: sk.thaiName,
+            gainedLevel: skillMap.get(sk.id) ?? null,
+          })),
+        };
+      }),
+    };
 
-  return result;
-}
-
-
+    return result;
+  }
 }
