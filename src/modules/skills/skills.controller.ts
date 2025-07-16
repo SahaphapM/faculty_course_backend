@@ -26,6 +26,19 @@ export class SkillsController {
   @Get()
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: SkillFilterDto) {
+    if (pag?.curriculumId) {
+      return this.skillsService.findByCurriculum(pag.curriculumId, pag);
+    }
+    if (pag?.branchId) {
+      return this.skillsService.findByBranch(pag.branchId, pag);
+    }
+    if (pag?.facultyId) {
+      return this.skillsService.findByFaculty(pag.facultyId, pag);
+    }
+    if (pag?.subjectId) {
+      return this.skillsService.findBySubject(pag.subjectId, pag);
+    }
+
     return this.skillsService.findAll(pag);
   }
 
@@ -34,12 +47,6 @@ export class SkillsController {
   findOne(@Param('id') id: number) {
     return this.skillsService.findOne(id);
   }
-
-  // ! bug
-  // @Get('options')
-  // findOptions(@Query() curriculumId: number) {
-  //   return this.skillsService.findOptions(curriculumId);
-  // }
 
   @Get('options/:curriculumId')
   findOptions(@Param('curriculumId') curriculumId: number) {

@@ -13,7 +13,7 @@ import { SkillFilterDto } from 'src/dto/filters/filter.skill.dto';
 
 @Injectable()
 export class SkillsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   // Create a new skill
   async create(createSkillDto: CreateSkillDto) {
@@ -61,212 +61,19 @@ export class SkillsService {
     return await this.prisma.skill.findMany(options);
   }
 
-  // Find all skills with pagination and search
+  // Find all skills with pagination and basic search
   async findAll(pag?: SkillFilterDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const {
-      limit,
-      page,
-      orderBy,
-      sort,
-      nameCode,
-      domain,
-      curriculumId,
-      branchId,
-      facultyId,
-      subjectId,
-    } = pag || {};
-
-    console.log('pag', pag);
+    const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
 
     const whereCondition: Prisma.skillWhereInput = {
-      parentId: null, // Root skill เท่านั้น
-      ...(facultyId && {
-        OR: [
-          {
-            curriculum: {
-              branch: {
-                facultyId: facultyId,
-              },
-            },
-          },
-          {
-            subs: {
-              some: {
-                curriculum: {
-                  branch: {
-                    facultyId: facultyId,
-                  },
-                },
-              },
-            },
-          },
-          {
-            subs: {
-              some: {
-                subs: {
-                  some: {
-                    curriculum: {
-                      branch: {
-                        facultyId: facultyId,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        ],
-      }),
-
-      ...(branchId && {
-        OR: [
-          {
-            curriculum: {
-              branchId: branchId,
-            },
-          },
-          {
-            subs: {
-              some: {
-                curriculum: {
-                  branchId: branchId,
-                },
-              },
-            },
-          },
-          {
-            subs: {
-              some: {
-                subs: {
-                  some: {
-                    curriculum: {
-                      branchId: branchId,
-                    },
-                  },
-                },
-              },
-            },
-          },
-        ],
-      }),
-
-      ...(curriculumId && {
-        OR: [
-          { curriculumId: curriculumId },
-          {
-            subs: {
-              some: {
-                curriculumId: curriculumId,
-              },
-            },
-          },
-          {
-            subs: {
-              some: {
-                subs: {
-                  some: {
-                    curriculumId: curriculumId,
-                  },
-                },
-              },
-            },
-          },
-          {
-            subs: {
-              some: {
-                subs: {
-                  some: {
-                    subs: {
-                      some: {
-                        curriculumId: curriculumId,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        ],
-      }),
-
-      ...(subjectId && {
-        OR: [
-          { clos: { some: { subjectId } } },
-          {
-            subs: {
-              some: {
-                clos: { some: { subjectId } },
-              },
-            },
-          },
-          {
-            subs: {
-              some: {
-                subs: {
-                  some: {
-                    clos: { some: { subjectId } },
-                  },
-                },
-              },
-            },
-          },
-          {
-            subs: {
-              some: {
-                subs: {
-                  some: {
-                    subs: {
-                      some: {
-                        clos: { some: { subjectId } },
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        ],
-      }),
-
+      parentId: null, // Root skills only
       ...(nameCode && {
         OR: [
           { thaiName: { contains: nameCode } },
           { engName: { contains: nameCode } },
-          {
-            subs: {
-              some: {
-                OR: [
-                  { thaiName: { contains: nameCode } },
-                  { engName: { contains: nameCode } },
-                  {
-                    subs: {
-                      some: {
-                        OR: [
-                          { thaiName: { contains: nameCode } },
-                          { engName: { contains: nameCode } },
-                          {
-                            subs: {
-                              some: {
-                                OR: [
-                                  { thaiName: { contains: nameCode } },
-                                  { engName: { contains: nameCode } },
-                                  // เพิ่มต่อถ้าจำเป็น
-                                ],
-                              },
-                            },
-                          },
-                          // เพิ่มต่อถ้าจำเป็น
-                        ],
-                      },
-                    },
-                  },
-                ],
-              },
-            },
-          },
         ],
       }),
       ...(domain && { domain }),
@@ -276,32 +83,282 @@ export class SkillsService {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
       orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
-      include: {
-        subs: {
-          // level 2
-          select: {
-            id: true,
-            thaiName: true,
-            engName: true,
-            subs: {
-              // level 3
-              select: {
-                id: true,
-                thaiName: true,
-                engName: true,
-                subs: {
-                  // level 4
-                  select: {
-                    id: true,
-                    thaiName: true,
-                    engName: true,
-                    subs: {
-                      // level 5
-                      select: {
-                        id: true,
-                        thaiName: true,
-                        engName: true,
-                      },
+      include: this.getSkillIncludeStructure(),
+      where: whereCondition,
+    };
+
+    const [skills, total] = await Promise.all([
+      this.prisma.skill.findMany(options),
+      this.prisma.skill.count({ where: options.where }),
+    ]);
+    
+    return pag ? { data: skills, total } : skills;
+  }
+
+  // Find skills by curriculum with pagination
+  async findByCurriculum(curriculumId: number, pag?: SkillFilterDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
+
+    const whereCondition: Prisma.skillWhereInput = {
+      parentId: null,
+      curriculumId: curriculumId,
+      ...(nameCode && {
+        OR: [
+          { thaiName: { contains: nameCode } },
+          { engName: { contains: nameCode } },
+        ],
+      }),
+      ...(domain && { domain }),
+    };
+
+    const options: Prisma.skillFindManyArgs = {
+      take: limit || defaultLimit,
+      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+      include: this.getSkillIncludeStructure(),
+      where: whereCondition,
+    };
+
+    const [skills, total] = await Promise.all([
+      this.prisma.skill.findMany(options),
+      this.prisma.skill.count({ where: options.where }),
+    ]);
+    
+    return pag ? { data: skills, total } : skills;
+  }
+
+  // Find skills by branch
+  async findByBranch(branchId: number, pag?: SkillFilterDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
+
+    const whereCondition: Prisma.skillWhereInput = {
+      parentId: null,
+      OR: [
+        {
+          curriculum: {
+            branchId: branchId,
+          },
+        },
+        {
+          subs: {
+            some: {
+              curriculum: {
+                branchId: branchId,
+              },
+            },
+          },
+        },
+        {
+          subs: {
+            some: {
+              subs: {
+                some: {
+                  curriculum: {
+                    branchId: branchId,
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+      ...(nameCode && {
+        OR: [
+          { thaiName: { contains: nameCode } },
+          { engName: { contains: nameCode } },
+        ],
+      }),
+      ...(domain && { domain }),
+    };
+
+    const options: Prisma.skillFindManyArgs = {
+      take: limit || defaultLimit,
+      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+      include: this.getSkillIncludeStructure(),
+      where: whereCondition,
+    };
+
+    const [skills, total] = await Promise.all([
+      this.prisma.skill.findMany(options),
+      this.prisma.skill.count({ where: options.where }),
+    ]);
+    
+    return pag ? { data: skills, total } : skills;
+  }
+
+  // Find skills by faculty
+  async findByFaculty(facultyId: number, pag?: SkillFilterDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
+
+    const whereCondition: Prisma.skillWhereInput = {
+      parentId: null,
+      OR: [
+        {
+          curriculum: {
+            branch: {
+              facultyId: facultyId,
+            },
+          },
+        },
+        {
+          subs: {
+            some: {
+              curriculum: {
+                branch: {
+                  facultyId: facultyId,
+                },
+              },
+            },
+          },
+        },
+        {
+          subs: {
+            some: {
+              subs: {
+                some: {
+                  curriculum: {
+                    branch: {
+                      facultyId: facultyId,
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+      ...(nameCode && {
+        OR: [
+          { thaiName: { contains: nameCode } },
+          { engName: { contains: nameCode } },
+        ],
+      }),
+      ...(domain && { domain }),
+    };
+
+    const options: Prisma.skillFindManyArgs = {
+      take: limit || defaultLimit,
+      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+      include: this.getSkillIncludeStructure(),
+      where: whereCondition,
+    };
+
+    const [skills, total] = await Promise.all([
+      this.prisma.skill.findMany(options),
+      this.prisma.skill.count({ where: options.where }),
+    ]);
+    
+    return pag ? { data: skills, total } : skills;
+  }
+
+  // Find skills by subject
+  async findBySubject(subjectId: number, pag?: SkillFilterDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
+
+    const whereCondition: Prisma.skillWhereInput = {
+      parentId: null,
+      OR: [
+        { clos: { some: { subjectId } } },
+        {
+          subs: {
+            some: {
+              clos: { some: { subjectId } },
+            },
+          },
+        },
+        {
+          subs: {
+            some: {
+              subs: {
+                some: {
+                  clos: { some: { subjectId } },
+                },
+              },
+            },
+          },
+        },
+        {
+          subs: {
+            some: {
+              subs: {
+                some: {
+                  subs: {
+                    some: {
+                      clos: { some: { subjectId } },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      ],
+      ...(nameCode && {
+        OR: [
+          { thaiName: { contains: nameCode } },
+          { engName: { contains: nameCode } },
+        ],
+      }),
+      ...(domain && { domain }),
+    };
+
+    const options: Prisma.skillFindManyArgs = {
+      take: limit || defaultLimit,
+      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+      include: this.getSkillIncludeStructure(),
+      where: whereCondition,
+    };
+
+    const [skills, total] = await Promise.all([
+      this.prisma.skill.findMany(options),
+      this.prisma.skill.count({ where: options.where }),
+    ]);
+    
+    return pag ? { data: skills, total } : skills;
+  }
+
+  // Helper method for consistent include structure
+  private getSkillIncludeStructure() {
+    return {
+      subs: {
+        // level 2
+        select: {
+          id: true,
+          thaiName: true,
+          engName: true,
+          subs: {
+            // level 3
+            select: {
+              id: true,
+              thaiName: true,
+              engName: true,
+              subs: {
+                // level 4
+                select: {
+                  id: true,
+                  thaiName: true,
+                  engName: true,
+                  subs: {
+                    // level 5
+                    select: {
+                      id: true,
+                      thaiName: true,
+                      engName: true,
                     },
                   },
                 },
@@ -310,14 +367,7 @@ export class SkillsService {
           },
         },
       },
-      where: whereCondition,
     };
-
-    const [skills, total] = await Promise.all([
-      this.prisma.skill.findMany(options),
-      this.prisma.skill.count({ where: options.where }),
-    ]);
-    return pag ? { data: skills, total } : skills;
   }
 
   // Find a skill by ID
@@ -347,7 +397,7 @@ export class SkillsService {
       return skill;
     } catch (error) {
       throw new InternalServerErrorException(
-        `Failed to fetch skill with ID ${id}`,
+        `Failed to fetch skill with ID ${id}, ${error.message}`,
       );
     }
   }
