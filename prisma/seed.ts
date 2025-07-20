@@ -2,14 +2,8 @@ import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as path from 'path';
 import * as fs from 'fs/promises';
+import { UserRole } from 'src/enums/role.enum';
 const prisma = new PrismaClient();
-
-enum UserRole {
-  Admin = 'Administer',
-  Coordinator = 'Coordinator',
-  Instructor = 'Instructor',
-  Student = 'Student',
-}
 
 async function loadData(fileName: string) {
   const filePath = path.join(__dirname, fileName);
@@ -142,7 +136,7 @@ async function createUsers() {
 async function main() {
   await createUsers();
   await createFacultiesAndBranches();
-  await createCurricula()
+  await createCurricula();
   console.log('Seeding completed!');
 }
 
