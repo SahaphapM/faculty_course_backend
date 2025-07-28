@@ -267,6 +267,7 @@ model student {
   thaiName          String?            @db.VarChar(255)
   // One to many
   skill_collections skill_collection[]
+  internships       Internship[]
   /// @DtoRelationIncludeId
   curriculumId      Int?
   curriculum        curriculum?        @relation(fields: [curriculumId], references: [id], onDelete: SetNull, onUpdate: NoAction)
@@ -307,6 +308,23 @@ model user {
   @@unique([instructorId, studentId]) // Ensures a user has either instructorId or studentId, but not both
 }
 
+model Internship {
+  id          Int      @id @default(autoincrement())
+  studentId   Int
+  companyId   Int
+  startDate   DateTime
+  endDate     DateTime
+  position    String   @db.VarChar(255)
+  description String?  @db.Text
+  status      String   @db.VarChar(50) @default("pending")
+
+  student     student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  company     company @relation(fields: [companyId], references: [id], onDelete: Restrict)
+
+  @@index([studentId])
+  @@index([companyId])
+}
+
 model company {
   id              Int      @id @default(autoincrement())
   name            String   @db.VarChar(255)
@@ -316,4 +334,5 @@ model company {
   tel             String?  @db.VarChar(50)
   email           String?  @db.VarChar(255)
   website         String?  @db.VarChar(255)
+  internships     Internship[]
 }

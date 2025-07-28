@@ -2,7 +2,6 @@ import { HttpStatus, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from '../modules/users/users.module';
-import { LessonModule } from '../modules/lessons/lessons.module';
 import { PlosModule } from '../modules/plos/plos.module';
 import { SkillsModule } from '../modules/skills/skills.module';
 import { FacultiesModule } from '../modules/faculties/faculties.module';
@@ -20,12 +19,15 @@ import { InstructorsModule } from 'src/modules/instructors/instructors.module';
 import { SkillCollectionsModule } from 'src/modules/skill-collectiolns/skill-collectiolns.module';
 import { providePrismaClientExceptionFilter } from 'nestjs-prisma';
 import { AuthModule } from 'src/auth/auth.module';
+import { CompaniesModule } from 'src/modules/companies/companies.module';
+import { InternshipsModule } from '../modules/internships/internships.module';
+import { LessonModule } from 'src/modules/lessons/lessons.module';
 
 @Module({
   imports: [
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public'), // Serve files from 'public' directory
-      serveRoot: '/public', // URL path to serve static files
+      rootPath: join(__dirname, '..', 'public'), 
+      serveRoot: '/public', 
     }),
     ConfigModule.forRoot({
       isGlobal: true,
@@ -45,13 +47,14 @@ import { AuthModule } from 'src/auth/auth.module';
     SubjectModule,
     InstructorsModule,
     SkillCollectionsModule,
+    CompaniesModule,
+    InternshipsModule,
   ],
   controllers: [AppController],
   providers: [
     AppService,
     PrismaService,
     providePrismaClientExceptionFilter({
-      // Prisma Error Code: HTTP Status Response
       P2000: HttpStatus.BAD_REQUEST,
       P2002: HttpStatus.CONFLICT,
       P2025: HttpStatus.NOT_FOUND,

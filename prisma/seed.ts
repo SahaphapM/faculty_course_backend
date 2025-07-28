@@ -2,7 +2,7 @@ import { PrismaClient } from '@prisma/client';
 import * as bcrypt from 'bcrypt';
 import * as path from 'path';
 import * as fs from 'fs/promises';
-import { UserRole } from 'src/enums/role.enum';
+import { UserRole } from '../src/enums/role.enum';
 const prisma = new PrismaClient();
 
 async function loadData(fileName: string) {
