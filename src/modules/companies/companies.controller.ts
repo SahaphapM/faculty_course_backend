@@ -9,8 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-import { CreateCompanyDto } from 'src/generated/nestjs-dto/create-company.dto';
-import { UpdateCompanyDto } from 'src/generated/nestjs-dto/update-company.dto';
+import { CreateCompanyWithJobPositionsDto } from './dto/create.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -23,7 +22,7 @@ export class CompaniesController {
 
   @ApiBearerAuth()
   @Post()
-  create(@Body() createCompanyDto: CreateCompanyDto) {
+  create(@Body() createCompanyDto: CreateCompanyWithJobPositionsDto) {
     return this.companiesService.create(createCompanyDto);
   }
 
@@ -41,7 +40,10 @@ export class CompaniesController {
 
   @ApiBearerAuth()
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCompanyDto: UpdateCompanyDto) {
+  update(
+    @Param('id') id: string,
+    @Body() updateCompanyDto: CreateCompanyWithJobPositionsDto,
+  ) {
     return this.companiesService.update(+id, updateCompanyDto);
   }
 
