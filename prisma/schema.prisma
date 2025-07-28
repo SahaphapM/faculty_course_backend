@@ -224,6 +224,8 @@ model skill {
   // One-to-Many relation: A skill can have multiple CLOs
   clos clo[] // CLOs now belong to a single skill
 
+  skill_assessments skill_assessment[]
+
   curriculum curriculum @relation(fields: [curriculumId], references: [id])
 }
 
@@ -259,22 +261,23 @@ model skill_collection {
 }
 
 model student {
-  id                Int                @id @default(autoincrement())
-  code              String             @unique @db.VarChar(255)
-  engName           String?            @db.VarChar(255)
-  enrollmentDate    DateTime?          @db.DateTime(0)
-  socials           Json? // Better for multiple social links, Prisma will store this as TEXT in MariaDB
-  thaiName          String?            @db.VarChar(255)
+  id                  Int                  @id @default(autoincrement())
+  code                String               @unique @db.VarChar(255)
+  engName             String?              @db.VarChar(255)
+  enrollmentDate      DateTime?            @db.DateTime(0)
+  socials             Json? // Better for multiple social links, Prisma will store this as TEXT in MariaDB
+  thaiName            String?              @db.VarChar(255)
   // One to many
-  skill_collections skill_collection[]
+  skill_collections   skill_collection[]
+  student_internships student_internship[]
   /// @DtoRelationIncludeId
-  curriculumId      Int?
-  curriculum        curriculum?        @relation(fields: [curriculumId], references: [id], onDelete: SetNull, onUpdate: NoAction)
-  branchId          Int?
-  branch            branch?            @relation(fields: [branchId], references: [id], onDelete: Restrict, onUpdate: NoAction)
+  curriculumId        Int?
+  curriculum          curriculum?          @relation(fields: [curriculumId], references: [id], onDelete: SetNull, onUpdate: NoAction)
+  branchId            Int?
+  branch              branch?              @relation(fields: [branchId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   /// @DtoRelationIncludeId
-  userId            Int?
-  user              user?
+  userId              Int?
+  user                user?
 
   @@index([code]) // Index เร่งความเร็วในการค้นหาด้วย code
 }
@@ -307,13 +310,76 @@ model user {
   @@unique([instructorId, studentId]) // Ensures a user has either instructorId or studentId, but not both
 }
 
+// create company and job_position to many to many
 model company {
-  id              Int      @id @default(autoincrement())
-  name            String   @db.VarChar(255)
-  thaiDescription String?  @db.Text
-  engDescription  String?  @db.Text
-  address         String?  @db.Text
-  tel             String?  @db.VarChar(50)
-  email           String?  @db.VarChar(255)
-  website         String?  @db.VarChar(255)
+  id              Int     @id @default(autoincrement())
+  name            String  @db.VarChar(255)
+  thaiDescription String? @db.Text
+  engDescription  String? @db.Text
+  address         String? @db.Text
+  tel             String? @db.VarChar(50)
+  email           String? @db.VarChar(255)
+
+  company_job_positions company_job_position[]
+  internships           internship[]
+}
+
+model job_position {
+  id              Int     @id @default(autoincrement())
+  thaiName        String  @db.VarChar(255)
+  engName         String  @db.VarChar(255)
+  thaiDescription String? @db.Text
+  engDescription  String? @db.Text
+
+  company_job_positions company_job_position[]
+  student_internships   student_internship[]
+}
+
+model company_job_position {
+  id            Int @id @default(autoincrement())
+  companyId     Int
+  jobPositionId Int
+
+  company     company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  jobPosition job_position @relation(fields: [jobPositionId], references: [id], onDelete: Cascade)
+}
+
+model internship {
+  id        Int      @id @default(autoincrement())
+  startDate DateTime
+  endDate   DateTime
+
+  companyId Int
+  company   company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  studentInternships student_internship[]
+}
+
+model student_internship {
+  id            Int @id @default(autoincrement())
+  studentId     Int
+  jobPositionId Int
+  internshipId  Int
+
+  student     student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  jobPosition job_position @relation(fields: [jobPositionId], references: [id], onDelete: Cascade)
+  internship  internship   @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+
+  skillAssessments skill_assessment[]
+
+  @@index([internshipId])
+  @@index([jobPositionId])
+}
+
+model skill_assessment {
+  id          Int     @id @default(autoincrement())
+  gainedLevel Int
+  comment     String? @db.Text
+
+  studentInternshipId Int
+  skillId             Int
+  studentInternship   student_internship @relation(fields: [studentInternshipId], references: [id], onDelete: Cascade)
+  skill               skill              @relation(fields: [skillId], references: [id], onDelete: Cascade)
+
+  @@index([skillId, studentInternshipId])
 }

@@ -1,6 +1,7 @@
 
 import {ApiProperty} from '@nestjs/swagger'
 import {Clo} from './clo.entity'
+import {SkillAssessment} from './skillAssessment.entity'
 import {Curriculum} from './curriculum.entity'
 
 
@@ -59,6 +60,12 @@ subs?: Skill[] ;
   required: false,
 })
 clos?: Clo[] ;
+@ApiProperty({
+  type: () => SkillAssessment,
+  isArray: true,
+  required: false,
+})
+skill_assessments?: SkillAssessment[] ;
 @ApiProperty({
   type: () => Curriculum,
   required: false,

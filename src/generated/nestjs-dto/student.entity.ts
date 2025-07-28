@@ -2,6 +2,7 @@
 import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
 import {SkillCollection} from './skillCollection.entity'
+import {StudentInternship} from './studentInternship.entity'
 import {Curriculum} from './curriculum.entity'
 import {Branch} from './branch.entity'
 import {User} from './user.entity'
@@ -44,6 +45,12 @@ thaiName: string  | null;
   required: false,
 })
 skill_collections?: SkillCollection[] ;
+@ApiProperty({
+  type: () => StudentInternship,
+  isArray: true,
+  required: false,
+})
+student_internships?: StudentInternship[] ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
