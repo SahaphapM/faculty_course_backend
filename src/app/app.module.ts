@@ -20,6 +20,9 @@ import { InstructorsModule } from 'src/modules/instructors/instructors.module';
 import { SkillCollectionsModule } from 'src/modules/skill-collectiolns/skill-collectiolns.module';
 import { providePrismaClientExceptionFilter } from 'nestjs-prisma';
 import { AuthModule } from 'src/auth/auth.module';
+import { CompaniesModule } from 'src/modules/companies/companies.module';
+import { InternshipsModule } from 'src/modules/internships/internships.module';
+import { JobPositionsModule } from 'src/modules/job-positions/job-positions.module';
 
 @Module({
   imports: [
@@ -39,12 +42,15 @@ import { AuthModule } from 'src/auth/auth.module';
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    AuthModule,
+    // AuthModule,
     StudentsModule,
     CoursesModule,
     SubjectModule,
     InstructorsModule,
     SkillCollectionsModule,
+    CompaniesModule,
+    InternshipsModule,
+    JobPositionsModule,
   ],
   controllers: [AppController],
   providers: [

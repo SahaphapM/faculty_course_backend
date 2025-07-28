@@ -1,7 +1,20 @@
 import { Type } from 'class-transformer';
 import { IsOptional, IsPositive, IsInt, IsString } from 'class-validator';
 
+export type PaginatedResult<T> = {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
+};
+
 export class BaseFilterParams {
+  @IsOptional()
+  @IsString()
+  search?: string;
   // base
   @IsOptional()
   @IsInt()

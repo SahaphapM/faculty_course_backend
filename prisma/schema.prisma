@@ -325,45 +325,46 @@ model company {
 }
 
 model job_position {
-  id              Int     @id @default(autoincrement())
-  thaiName        String  @db.VarChar(255)
-  engName         String  @db.VarChar(255)
-  thaiDescription String? @db.Text
-  engDescription  String? @db.Text
+  id   Int    @id @default(autoincrement())
+  name String @db.VarChar(255)
 
   company_job_positions company_job_position[]
   student_internships   student_internship[]
 }
 
 model company_job_position {
-  id            Int @id @default(autoincrement())
-  companyId     Int
-  jobPositionId Int
+  id            Int  @id @default(autoincrement())
+  companyId     Int?
+  jobPositionId Int?
 
-  company     company      @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  jobPosition job_position @relation(fields: [jobPositionId], references: [id], onDelete: Cascade)
+  company     company?      @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  jobPosition job_position? @relation(fields: [jobPositionId], references: [id], onDelete: SetNull)
 }
 
 model internship {
-  id        Int      @id @default(autoincrement())
-  startDate DateTime
-  endDate   DateTime
+  id   Int  @id @default(autoincrement())
+  year Int?
 
-  companyId Int
-  company   company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  /// @DtoRelationIncludeId
+  companyId Int?
+  company   company? @relation(fields: [companyId], references: [id], onDelete: SetNull)
 
   studentInternships student_internship[]
 }
 
 model student_internship {
-  id            Int @id @default(autoincrement())
-  studentId     Int
-  jobPositionId Int
-  internshipId  Int
+  id Int @id @default(autoincrement())
 
-  student     student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  jobPosition job_position @relation(fields: [jobPositionId], references: [id], onDelete: Cascade)
-  internship  internship   @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  /// @DtoRelationIncludeId
+  studentId     Int?
+  /// @DtoRelationIncludeId 
+  jobPositionId Int?
+  /// @DtoRelationIncludeId
+  internshipId  Int?
+
+  student     student?      @relation(fields: [studentId], references: [id], onDelete: SetNull)
+  jobPosition job_position? @relation(fields: [jobPositionId], references: [id], onDelete: SetNull)
+  internship  internship?   @relation(fields: [internshipId], references: [id], onDelete: SetNull)
 
   skillAssessments skill_assessment[]
 
@@ -376,10 +377,12 @@ model skill_assessment {
   gainedLevel Int
   comment     String? @db.Text
 
-  studentInternshipId Int
-  skillId             Int
-  studentInternship   student_internship @relation(fields: [studentInternshipId], references: [id], onDelete: Cascade)
-  skill               skill              @relation(fields: [skillId], references: [id], onDelete: Cascade)
+  /// @DtoRelationIncludeId
+  studentInternshipId Int?
+  /// @DtoRelationIncludeId
+  skillId             Int?
+  studentInternship   student_internship? @relation(fields: [studentInternshipId], references: [id], onDelete: SetNull)
+  skill               skill?              @relation(fields: [skillId], references: [id], onDelete: SetNull)
 
   @@index([skillId, studentInternshipId])
 }
