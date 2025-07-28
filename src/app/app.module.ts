@@ -42,7 +42,7 @@ import { JobPositionsModule } from 'src/modules/job-positions/job-positions.modu
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    // AuthModule,
+    AuthModule,
     StudentsModule,
     CoursesModule,
     SubjectModule,
