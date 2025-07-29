@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInternshipWithStudentDto } from './dto/create.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
@@ -6,6 +6,11 @@ import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 @Injectable()
 export class InternshipsService {
   constructor(private readonly prisma: PrismaService) {}
+
+
+  
+
+
   async create(createInternshipDto: CreateInternshipWithStudentDto) {
     const { studentInternships, companyId, ...rest } = createInternshipDto;
 
@@ -26,13 +31,67 @@ export class InternshipsService {
         internshipId: internship.id,
         jobPositionId: student.jobPositionId,
       })),
+      skipDuplicates: true,
+    });
+
+    // ดึงข้อมูลใหม่
+    const savedStudentInternships =
+      await this.prisma.student_internship.findMany({
+        where: { internshipId: internship.id },
+      });
+
+    // one student
+    const student = await this.prisma.student.findUnique({
+      where: { id: studentInternships[0].studentId },
+      select: {
+        curriculumId: true,
+      },
+    });
+
+    if (!student || !student.curriculumId) {
+      throw new Error('Student not found or curriculum not found' + student);
+    }
+
+    // get skill
+    const skills = await this.prisma.skill.findMany({
+      where: {
+        curriculumId: student.curriculumId,
+        subs: {
+          none: {},
+        }, // is null
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    if (!skills || skills.length === 0) {
+      throw new Error('Skills not found or Empty' + student.curriculumId);
+    }
+
+    // create skill_assessment for each skill
+    skills.map(async (skill) => {
+      await this.prisma.skill_assessment.createMany({
+        data: savedStudentInternships.map((si) => ({
+          studentInternshipId: si.id,
+          skillId: skill.id,
+          gainedLevel: 0,
+        })),
+        skipDuplicates: true,
+      });
     });
 
     // Finally, fetch the complete internship with its relations
     const result = await this.prisma.internship.findUnique({
       where: { id: internship.id },
       include: {
-        studentInternships: true,
+        studentInternships: {
+          include: {
+            student: true,
+            jobPosition: true,
+            skillAssessments: true,
+          },
+        },
         company: true,
       },
     });
@@ -57,7 +116,10 @@ export class InternshipsService {
       where,
       skip: (page - 1) * limit,
       take: limit,
-      include: { company: true, studentInternships: true },
+      include: {
+        company: { select: { name: true } },
+        studentInternships: { select: { studentId: true } },
+      },
     });
 
     const total = Math.ceil(
@@ -141,6 +203,11 @@ export class InternshipsService {
           id: { in: toDelete.map((si) => si.id) },
         },
       });
+      await this.prisma.skill_assessment.deleteMany({
+        where: {
+          studentInternshipId: { in: toDelete.map((si) => si.id) },
+        },
+      });
     }
 
     // Add new relationships
@@ -152,6 +219,53 @@ export class InternshipsService {
           jobPositionId: si.jobPositionId,
         })),
         skipDuplicates: true,
+      });
+
+      // ดึงข้อมูลใหม่
+      const savedStudentInternships =
+        await this.prisma.student_internship.findMany({
+          where: { internshipId: id },
+        });
+
+      // one student
+      const student = await this.prisma.student.findUnique({
+        where: { id: savedStudentInternships[0].studentId },
+        select: {
+          curriculumId: true,
+        },
+      });
+
+      if (!student || !student.curriculumId) {
+        throw new Error('Student not found or curriculum not found' + student);
+      }
+
+      // get skill
+      const skills = await this.prisma.skill.findMany({
+        where: {
+          curriculumId: student.curriculumId,
+          subs: {
+            none: {},
+          }, // is null
+        },
+        select: {
+          id: true,
+        },
+      });
+
+      if (!skills || skills.length === 0) {
+        throw new Error('Skills not found or Empty' + student.curriculumId);
+      }
+
+      // create skill_assessment for each skill
+      skills.map(async (skill) => {
+        await this.prisma.skill_assessment.createMany({
+          data: savedStudentInternships.map((si) => ({
+            studentInternshipId: si.id,
+            skillId: skill.id,
+            gainedLevel: 0,
+          })),
+          skipDuplicates: true,
+        });
       });
     }
 
@@ -184,5 +298,61 @@ export class InternshipsService {
 
   remove(id: number) {
     return this.prisma.internship.delete({ where: { id } });
+  }
+
+  skillAssessment(internshipId: number) {
+    return this.prisma.internship.findUnique({
+      where: { id: internshipId },
+      include: {
+        studentInternships: {
+          include: {
+            jobPosition: {
+              select: {
+                name: true,
+              },
+            },
+            student: {
+              select: {
+                id: true,
+                code: true,
+                thaiName: true,
+                branch: { select: { id: true, thaiName: true } },
+              },
+            },
+          },
+        },
+        company: { select: { name: true } },
+      },
+    });
+  }
+
+  getStudentAssessment(internshipId: number, studentId: number) {
+    /// get student assessment by internship id and student id
+    return this.prisma.student_internship.findFirst({
+      where: { internshipId, studentId },
+      include: {
+        jobPosition: {
+          select: {
+            name: true,
+          },
+        },
+        student: {
+          include: {
+            branch: {
+              select: {
+                thaiName: true,
+                faculty: { select: { thaiName: true } },
+              },
+            },
+            curriculum: { select: { thaiName: true } },
+          },
+        },
+        skillAssessments: {
+          include: {
+            skill: { select: { thaiName: true, thaiDescription: true } },
+          },
+        },
+      },
+    });
   }
 }

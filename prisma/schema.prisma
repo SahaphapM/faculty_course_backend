@@ -312,13 +312,11 @@ model user {
 
 // create company and job_position to many to many
 model company {
-  id              Int     @id @default(autoincrement())
-  name            String  @db.VarChar(255)
-  thaiDescription String? @db.Text
-  engDescription  String? @db.Text
-  address         String? @db.Text
-  tel             String? @db.VarChar(50)
-  email           String? @db.VarChar(255)
+  id      Int     @id @default(autoincrement())
+  name    String  @db.VarChar(255)
+  address String? @db.Text
+  tel     String? @db.VarChar(50)
+  email   String? @db.VarChar(255)
 
   company_job_positions company_job_position[]
   internships           internship[]
