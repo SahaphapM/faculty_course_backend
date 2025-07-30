@@ -5,6 +5,23 @@ const prisma = new PrismaClient();
 async function main() {
   console.log('🌱 Starting complete curriculum seed...');
 
+  // ลบข้อมูลเก่าก่อนสร้างใหม่
+  console.log('🗑️ Cleaning up existing data...');
+  await prisma.skill_collection.deleteMany();
+  await prisma.clo.deleteMany();
+  await prisma.course_instructor.deleteMany();
+  await prisma.course.deleteMany();
+  await prisma.student.deleteMany();
+  await prisma.instructor.deleteMany();
+  await prisma.subject.deleteMany();
+  await prisma.plo.deleteMany();
+  await prisma.skill.deleteMany();
+  await prisma.curriculum_coordinators.deleteMany();
+  await prisma.curriculum.deleteMany();
+  await prisma.branch.deleteMany();
+  await prisma.faculty.deleteMany();
+  console.log('✅ Cleaned up existing data');
+
   // 1. สร้าง Faculty
   const faculty = await prisma.faculty.create({
     data: {
@@ -33,7 +50,7 @@ async function main() {
   // 3. สร้าง Curriculum
   const curriculum = await prisma.curriculum.create({
     data: {
-      code: '2567',
+      code: '45442567',
       thaiName: 'หลักสูตรวิศวกรรมศาสตรบัณฑิต สาขาวิชาวิศวกรรมคอมพิวเตอร์',
       engName: 'Bachelor of Engineering Program in Computer Engineering',
       thaiDegree: 'วิศวกรรมศาสตรบัณฑิต (วิศวกรรมคอมพิวเตอร์)',
@@ -47,10 +64,10 @@ async function main() {
   });
   console.log('✅ Created curriculum:', curriculum.code);
 
-  // 4. สร้าง Skills (แยกตาม Domain)
+  // 4. สร้าง Skills (แยกตาม Domain) - เพิ่มความหลากหลาย
   const skills = await prisma.skill.createMany({
     data: [
-      // ทักษะ (Psychomotor)
+      // ทักษะ (Psychomotor) - 6 ทักษะ
       {
         thaiName: 'การเขียนโปรแกรมคอมพิวเตอร์',
         engName: 'Computer Programming',
@@ -83,8 +100,24 @@ async function main() {
         domain: 'ทักษะ',
         curriculumId: curriculum.id,
       },
+      {
+        thaiName: 'การทดสอบซอฟต์แวร์',
+        engName: 'Software Testing',
+        thaiDescription: 'ความสามารถในการทดสอบซอฟต์แวร์',
+        engDescription: 'Ability to test software',
+        domain: 'ทักษะ',
+        curriculumId: curriculum.id,
+      },
+      {
+        thaiName: 'การจัดการโปรเจกต์',
+        engName: 'Project Management',
+        thaiDescription: 'ความสามารถในการจัดการโปรเจกต์',
+        engDescription: 'Ability to manage projects',
+        domain: 'ทักษะ',
+        curriculumId: curriculum.id,
+      },
       
-      // ความรู้ (Cognitive)
+      // ความรู้ (Cognitive) - 6 ทักษะ
       {
         thaiName: 'ความรู้ด้านโครงสร้างข้อมูลและอัลกอริทึม',
         engName: 'Data Structures and Algorithms',
@@ -117,8 +150,24 @@ async function main() {
         domain: 'ความรู้',
         curriculumId: curriculum.id,
       },
+      {
+        thaiName: 'ความรู้ด้านความปลอดภัยไซเบอร์',
+        engName: 'Cybersecurity',
+        thaiDescription: 'ความรู้เกี่ยวกับความปลอดภัยไซเบอร์',
+        engDescription: 'Knowledge of cybersecurity',
+        domain: 'ความรู้',
+        curriculumId: curriculum.id,
+      },
+      {
+        thaiName: 'ความรู้ด้านปัญญาประดิษฐ์',
+        engName: 'Artificial Intelligence',
+        thaiDescription: 'ความรู้เกี่ยวกับปัญญาประดิษฐ์',
+        engDescription: 'Knowledge of artificial intelligence',
+        domain: 'ความรู้',
+        curriculumId: curriculum.id,
+      },
       
-      // คุณลักษณะบุคคล (Affective)
+      // คุณลักษณะบุคคล (Affective) - 4 ทักษะ
       {
         thaiName: 'ความรับผิดชอบต่อสังคม',
         engName: 'Social Responsibility',
@@ -143,8 +192,16 @@ async function main() {
         domain: 'คุณลักษณะบุคคล',
         curriculumId: curriculum.id,
       },
+      {
+        thaiName: 'ภาวะผู้นำ',
+        engName: 'Leadership',
+        thaiDescription: 'ความสามารถในการเป็นผู้นำ',
+        engDescription: 'Ability to lead',
+        domain: 'คุณลักษณะบุคคล',
+        curriculumId: curriculum.id,
+      },
       
-      // จริยธรรม (Ethics)
+      // จริยธรรม (Ethics) - 3 ทักษะ
       {
         thaiName: 'จริยธรรมในการใช้เทคโนโลยี',
         engName: 'Technology Ethics',
@@ -158,6 +215,14 @@ async function main() {
         engName: 'Academic Integrity',
         thaiDescription: 'ความซื่อสัตย์ในการทำงานวิชาการ',
         engDescription: 'Integrity in academic work',
+        domain: 'จริยธรรม',
+        curriculumId: curriculum.id,
+      },
+      {
+        thaiName: 'ความเป็นส่วนตัวของข้อมูล',
+        engName: 'Data Privacy',
+        thaiDescription: 'การรักษาความเป็นส่วนตัวของข้อมูล',
+        engDescription: 'Protection of data privacy',
         domain: 'จริยธรรม',
         curriculumId: curriculum.id,
       },
@@ -200,7 +265,7 @@ async function main() {
   });
   console.log('✅ Created PLOs');
 
-  // 6. สร้าง Subjects
+  // 6. สร้าง Subjects - เพิ่มความหลากหลาย
   const subjects = await prisma.subject.createMany({
     data: [
       {
@@ -244,6 +309,16 @@ async function main() {
         engDescription: 'Information system analysis and design',
       },
       {
+        code: 'CPE203',
+        curriculumId: curriculum.id,
+        thaiName: 'การทดสอบซอฟต์แวร์',
+        engName: 'Software Testing',
+        credit: '3(2-2-5)',
+        type: 'บังคับ',
+        thaiDescription: 'หลักการและเทคนิคการทดสอบซอฟต์แวร์',
+        engDescription: 'Principles and techniques of software testing',
+      },
+      {
         code: 'CPE301',
         curriculumId: curriculum.id,
         thaiName: 'การพัฒนาเว็บแอปพลิเคชัน',
@@ -264,6 +339,16 @@ async function main() {
         engDescription: 'Principles and technologies of computer networks',
       },
       {
+        code: 'CPE303',
+        curriculumId: curriculum.id,
+        thaiName: 'ความปลอดภัยไซเบอร์',
+        engName: 'Cybersecurity',
+        credit: '3(2-2-5)',
+        type: 'บังคับ',
+        thaiDescription: 'หลักการความปลอดภัยไซเบอร์และการป้องกัน',
+        engDescription: 'Cybersecurity principles and protection',
+      },
+      {
         code: 'CPE401',
         curriculumId: curriculum.id,
         thaiName: 'ระบบฐานข้อมูล',
@@ -282,6 +367,26 @@ async function main() {
         type: 'บังคับ',
         thaiDescription: 'จริยธรรมและความปลอดภัยในการใช้เทคโนโลยี',
         engDescription: 'Ethics and security in technology use',
+      },
+      {
+        code: 'CPE403',
+        curriculumId: curriculum.id,
+        thaiName: 'การจัดการโปรเจกต์ซอฟต์แวร์',
+        engName: 'Software Project Management',
+        credit: '3(2-2-5)',
+        type: 'บังคับ',
+        thaiDescription: 'การจัดการโปรเจกต์ซอฟต์แวร์และทีมงาน',
+        engDescription: 'Software project and team management',
+      },
+      {
+        code: 'CPE404',
+        curriculumId: curriculum.id,
+        thaiName: 'ปัญญาประดิษฐ์เบื้องต้น',
+        engName: 'Introduction to Artificial Intelligence',
+        credit: '3(2-2-5)',
+        type: 'บังคับ',
+        thaiDescription: 'พื้นฐานปัญญาประดิษฐ์และแมชชีนเลิร์นนิง',
+        engDescription: 'Fundamentals of AI and machine learning',
       },
     ],
   });
@@ -368,72 +473,107 @@ async function main() {
   });
   console.log('✅ Created students');
 
-  // 9. สร้าง Courses
+  // 9. สร้าง Courses - เพิ่มความหลากหลาย
+  const createdSubjects = await prisma.subject.findMany({
+    where: { curriculumId: curriculum.id },
+  });
+
   const courses = await prisma.course.createMany({
     data: [
       {
-        subjectId: 1, // CPE101
+        subjectId: createdSubjects[0].id, // CPE101
         active: true,
         semester: 1,
         year: 2024,
       },
       {
-        subjectId: 2, // CPE102
+        subjectId: createdSubjects[1].id, // CPE102
         active: true,
         semester: 2,
         year: 2024,
       },
       {
-        subjectId: 3, // CPE201
+        subjectId: createdSubjects[2].id, // CPE201
         active: true,
         semester: 1,
         year: 2025,
       },
       {
-        subjectId: 4, // CPE202
+        subjectId: createdSubjects[3].id, // CPE202
         active: true,
         semester: 2,
         year: 2025,
       },
       {
-        subjectId: 5, // CPE301
+        subjectId: createdSubjects[4].id, // CPE203
         active: true,
         semester: 1,
         year: 2026,
       },
       {
-        subjectId: 6, // CPE302
+        subjectId: createdSubjects[5].id, // CPE301
         active: true,
         semester: 2,
         year: 2026,
       },
       {
-        subjectId: 7, // CPE401
+        subjectId: createdSubjects[6].id, // CPE302
         active: true,
         semester: 1,
         year: 2027,
       },
       {
-        subjectId: 8, // CPE402
+        subjectId: createdSubjects[7].id, // CPE303
         active: true,
         semester: 2,
         year: 2027,
+      },
+      {
+        subjectId: createdSubjects[8].id, // CPE401
+        active: true,
+        semester: 1,
+        year: 2028,
+      },
+      {
+        subjectId: createdSubjects[9].id, // CPE402
+        active: true,
+        semester: 2,
+        year: 2028,
+      },
+      {
+        subjectId: createdSubjects[10].id, // CPE403
+        active: true,
+        semester: 1,
+        year: 2029,
+      },
+      {
+        subjectId: createdSubjects[11].id, // CPE404
+        active: true,
+        semester: 2,
+        year: 2029,
       },
     ],
   });
   console.log('✅ Created courses');
 
-  // 10. สร้าง Course Instructors
+  // 10. สร้าง Course Instructors - เพิ่มความหลากหลาย
+  const createdInstructors = await prisma.instructor.findMany();
+  const allCourses = await prisma.course.findMany();
+
   const courseInstructors = await prisma.course_instructor.createMany({
     data: [
-      { instructorId: 1, courseId: 1 },
-      { instructorId: 1, courseId: 2 },
-      { instructorId: 2, courseId: 3 },
-      { instructorId: 2, courseId: 4 },
-      { instructorId: 3, courseId: 5 },
-      { instructorId: 3, courseId: 6 },
-      { instructorId: 1, courseId: 7 },
-      { instructorId: 2, courseId: 8 },
+      { instructorId: createdInstructors[0].id, courseId: allCourses[0].id },  // CPE101
+      { instructorId: createdInstructors[0].id, courseId: allCourses[1].id },  // CPE102
+      { instructorId: createdInstructors[1].id, courseId: allCourses[2].id },  // CPE201
+      { instructorId: createdInstructors[1].id, courseId: allCourses[3].id },  // CPE202
+      { instructorId: createdInstructors[2].id, courseId: allCourses[4].id },  // CPE203
+      { instructorId: createdInstructors[0].id, courseId: allCourses[5].id },  // CPE301
+      { instructorId: createdInstructors[1].id, courseId: allCourses[6].id },  // CPE302
+      { instructorId: createdInstructors[2].id, courseId: allCourses[7].id },  // CPE303
+      { instructorId: createdInstructors[0].id, courseId: allCourses[8].id },  // CPE401
+      { instructorId: createdInstructors[1].id, courseId: allCourses[9].id },  // CPE402
+      { instructorId: createdInstructors[2].id, courseId: allCourses[10].id }, // CPE403
+      { instructorId: createdInstructors[0].id, courseId: allCourses[11].id }, // CPE404
     ],
   });
   console.log('✅ Created course instructors');
@@ -453,7 +593,7 @@ async function main() {
       {
         name: 'CLO1.1',
         ploId: createdPlos[1].id, // PLO2 (ทักษะ)
-        subjectId: 1,
+        subjectId: createdSubjects[0].id,
         skillId: createdSkills[0].id, // การเขียนโปรแกรมคอมพิวเตอร์
         thaiDescription: 'สามารถเขียนโปรแกรมคอมพิวเตอร์พื้นฐานได้',
         engDescription: 'Can write basic computer programs',
@@ -462,30 +602,39 @@ async function main() {
       {
         name: 'CLO1.2',
         ploId: createdPlos[0].id, // PLO1 (ความรู้)
-        subjectId: 1,
-        skillId: createdSkills[4].id, // โครงสร้างข้อมูลและอัลกอริทึม
+        subjectId: createdSubjects[0].id,
+        skillId: createdSkills[6].id, // โครงสร้างข้อมูลและอัลกอริทึม
         thaiDescription: 'เข้าใจหลักการเขียนโปรแกรม',
         engDescription: 'Understand programming principles',
         expectSkillLevel: 2,
       },
 
-      // CPE102 - การเขียนโปรแกรมคอมพิวเตอร์ 2
+      // CPE102 - การเขียนโปรแกรมคอมพิวเตอร์ 2 (ระดับสูงขึ้น)
       {
         name: 'CLO2.1',
         ploId: createdPlos[1].id, // PLO2 (ทักษะ)
-        subjectId: 2,
-        skillId: createdSkills[0].id, // การเขียนโปรแกรมคอมพิวเตอร์
+        subjectId: createdSubjects[1].id,
+        skillId: createdSkills[0].id, // การเขียนโปรแกรมคอมพิวเตอร์ (ระดับ 4)
         thaiDescription: 'สามารถเขียนโปรแกรมเชิงวัตถุได้',
         engDescription: 'Can write object-oriented programs',
         expectSkillLevel: 4,
+      },
+      {
+        name: 'CLO2.2',
+        ploId: createdPlos[2].id, // PLO3 (คุณลักษณะบุคคล)
+        subjectId: createdSubjects[1].id,
+        skillId: createdSkills[13].id, // การทำงานเป็นทีม
+        thaiDescription: 'สามารถทำงานเป็นทีมได้',
+        engDescription: 'Can work in teams',
+        expectSkillLevel: 3,
       },
 
       // CPE201 - โครงสร้างข้อมูลและอัลกอริทึม
       {
         name: 'CLO3.1',
         ploId: createdPlos[0].id, // PLO1 (ความรู้)
-        subjectId: 3,
-        skillId: createdSkills[4].id, // โครงสร้างข้อมูลและอัลกอริทึม
+        subjectId: createdSubjects[2].id,
+        skillId: createdSkills[6].id, // โครงสร้างข้อมูลและอัลกอริทึม
         thaiDescription: 'เข้าใจโครงสร้างข้อมูลและอัลกอริทึม',
         engDescription: 'Understand data structures and algorithms',
         expectSkillLevel: 3,
@@ -495,40 +644,89 @@ async function main() {
       {
         name: 'CLO4.1',
         ploId: createdPlos[1].id, // PLO2 (ทักษะ)
-        subjectId: 4,
+        subjectId: createdSubjects[3].id,
         skillId: createdSkills[3].id, // การวิเคราะห์และออกแบบระบบ
         thaiDescription: 'สามารถวิเคราะห์และออกแบบระบบได้',
         engDescription: 'Can analyze and design systems',
         expectSkillLevel: 3,
       },
+      {
+        name: 'CLO4.2',
+        ploId: createdPlos[2].id, // PLO3 (คุณลักษณะบุคคล)
+        subjectId: createdSubjects[3].id,
+        skillId: createdSkills[14].id, // การสื่อสารอย่างมีประสิทธิภาพ
+        thaiDescription: 'สามารถสื่อสารอย่างมีประสิทธิภาพได้',
+        engDescription: 'Can communicate effectively',
+        expectSkillLevel: 3,
+      },
 
-      // CPE301 - การพัฒนาเว็บแอปพลิเคชัน
+      // CPE203 - การทดสอบซอฟต์แวร์
       {
         name: 'CLO5.1',
         ploId: createdPlos[1].id, // PLO2 (ทักษะ)
-        subjectId: 5,
+        subjectId: createdSubjects[4].id,
+        skillId: createdSkills[4].id, // การทดสอบซอฟต์แวร์
+        thaiDescription: 'สามารถทดสอบซอฟต์แวร์ได้',
+        engDescription: 'Can test software',
+        expectSkillLevel: 3,
+      },
+
+      // CPE301 - การพัฒนาเว็บแอปพลิเคชัน
+      {
+        name: 'CLO6.1',
+        ploId: createdPlos[1].id, // PLO2 (ทักษะ)
+        subjectId: createdSubjects[5].id,
         skillId: createdSkills[2].id, // การพัฒนาเว็บแอปพลิเคชัน
         thaiDescription: 'สามารถพัฒนาเว็บแอปพลิเคชันได้',
         engDescription: 'Can develop web applications',
         expectSkillLevel: 4,
       },
+      {
+        name: 'CLO6.2',
+        ploId: createdPlos[1].id, // PLO2 (ทักษะ)
+        subjectId: createdSubjects[5].id,
+        skillId: createdSkills[0].id, // การเขียนโปรแกรมคอมพิวเตอร์ (ระดับ 5)
+        thaiDescription: 'สามารถเขียนโปรแกรมขั้นสูงได้',
+        engDescription: 'Can write advanced programs',
+        expectSkillLevel: 5,
+      },
 
       // CPE302 - เครือข่ายคอมพิวเตอร์
       {
-        name: 'CLO6.1',
+        name: 'CLO7.1',
         ploId: createdPlos[0].id, // PLO1 (ความรู้)
-        subjectId: 6,
-        skillId: createdSkills[5].id, // เครือข่ายคอมพิวเตอร์
+        subjectId: createdSubjects[6].id,
+        skillId: createdSkills[7].id, // เครือข่ายคอมพิวเตอร์
         thaiDescription: 'เข้าใจหลักการเครือข่ายคอมพิวเตอร์',
         engDescription: 'Understand computer network principles',
         expectSkillLevel: 3,
       },
 
+      // CPE303 - ความปลอดภัยไซเบอร์
+      {
+        name: 'CLO8.1',
+        ploId: createdPlos[0].id, // PLO1 (ความรู้)
+        subjectId: createdSubjects[7].id,
+        skillId: createdSkills[10].id, // ความรู้ด้านความปลอดภัยไซเบอร์
+        thaiDescription: 'เข้าใจหลักการความปลอดภัยไซเบอร์',
+        engDescription: 'Understand cybersecurity principles',
+        expectSkillLevel: 3,
+      },
+      {
+        name: 'CLO8.2',
+        ploId: createdPlos[3].id, // PLO4 (จริยธรรม)
+        subjectId: createdSubjects[7].id,
+        skillId: createdSkills[18].id, // ความเป็นส่วนตัวของข้อมูล
+        thaiDescription: 'เข้าใจความเป็นส่วนตัวของข้อมูล',
+        engDescription: 'Understand data privacy',
+        expectSkillLevel: 4,
+      },
+
       // CPE401 - ระบบฐานข้อมูล
       {
-        name: 'CLO7.1',
+        name: 'CLO9.1',
         ploId: createdPlos[1].id, // PLO2 (ทักษะ)
-        subjectId: 7,
+        subjectId: createdSubjects[8].id,
         skillId: createdSkills[1].id, // การออกแบบระบบฐานข้อมูล
         thaiDescription: 'สามารถออกแบบระบบฐานข้อมูลได้',
         engDescription: 'Can design database systems',
@@ -537,28 +735,59 @@ async function main() {
 
       // CPE402 - จริยธรรมและความปลอดภัยทางไซเบอร์
       {
-        name: 'CLO8.1',
+        name: 'CLO10.1',
         ploId: createdPlos[3].id, // PLO4 (จริยธรรม)
-        subjectId: 8,
-        skillId: createdSkills[11].id, // จริยธรรมในการใช้เทคโนโลยี
+        subjectId: createdSubjects[9].id,
+        skillId: createdSkills[16].id, // จริยธรรมในการใช้เทคโนโลยี
         thaiDescription: 'มีจริยธรรมในการใช้เทคโนโลยี',
         engDescription: 'Have ethics in using technology',
         expectSkillLevel: 4,
       },
       {
-        name: 'CLO8.2',
+        name: 'CLO10.2',
         ploId: createdPlos[2].id, // PLO3 (คุณลักษณะบุคคล)
-        subjectId: 8,
-        skillId: createdSkills[8].id, // ความรับผิดชอบต่อสังคม
+        subjectId: createdSubjects[9].id,
+        skillId: createdSkills[12].id, // ความรับผิดชอบต่อสังคม
         thaiDescription: 'มีความรับผิดชอบต่อสังคม',
         engDescription: 'Have responsibility to society',
         expectSkillLevel: 4,
+      },
+
+      // CPE403 - การจัดการโปรเจกต์ซอฟต์แวร์
+      {
+        name: 'CLO11.1',
+        ploId: createdPlos[1].id, // PLO2 (ทักษะ)
+        subjectId: createdSubjects[10].id,
+        skillId: createdSkills[5].id, // การจัดการโปรเจกต์
+        thaiDescription: 'สามารถจัดการโปรเจกต์ได้',
+        engDescription: 'Can manage projects',
+        expectSkillLevel: 4,
+      },
+      {
+        name: 'CLO11.2',
+        ploId: createdPlos[2].id, // PLO3 (คุณลักษณะบุคคล)
+        subjectId: createdSubjects[10].id,
+        skillId: createdSkills[15].id, // ภาวะผู้นำ
+        thaiDescription: 'สามารถเป็นผู้นำได้',
+        engDescription: 'Can lead',
+        expectSkillLevel: 3,
+      },
+
+      // CPE404 - ปัญญาประดิษฐ์เบื้องต้น
+      {
+        name: 'CLO12.1',
+        ploId: createdPlos[0].id, // PLO1 (ความรู้)
+        subjectId: createdSubjects[11].id,
+        skillId: createdSkills[11].id, // ความรู้ด้านปัญญาประดิษฐ์
+        thaiDescription: 'เข้าใจพื้นฐานปัญญาประดิษฐ์',
+        engDescription: 'Understand AI fundamentals',
+        expectSkillLevel: 3,
       },
     ],
   });
   console.log('✅ Created CLOs');
 
-  // 12. สร้าง Skill Collections (ข้อมูลการประเมินทักษะ)
+  // 12. สร้าง Skill Collections (ข้อมูลการประเมินทักษะ) - เพิ่มความหลากหลาย
   const createdClos = await prisma.clo.findMany();
   const createdStudents = await prisma.student.findMany();
   const createdCourses = await prisma.course.findMany();
@@ -568,14 +797,29 @@ async function main() {
   // สร้างข้อมูล skill_collection สำหรับแต่ละนักเรียน
   for (const student of createdStudents) {
     for (const clo of createdClos) {
-      // สุ่ม gainedLevel ระหว่าง 1-5
-      const gainedLevel = Math.floor(Math.random() * 5) + 1;
-      const passed = gainedLevel >= 3; // ผ่านถ้าได้ 3 ขึ้นไป
-      
       // หา course ที่เกี่ยวข้องกับ subject ของ CLO
       const relatedCourse = createdCourses.find(course => course.subjectId === clo.subjectId);
       
       if (relatedCourse) {
+        // สร้างความหลากหลายในการให้คะแนน
+        let gainedLevel;
+        const random = Math.random();
+        
+        // 70% โอกาสได้คะแนนปกติ (2-4)
+        if (random < 0.7) {
+          gainedLevel = Math.floor(Math.random() * 3) + 2; // 2-4
+        }
+        // 20% โอกาสได้คะแนนสูง (4-5)
+        else if (random < 0.9) {
+          gainedLevel = Math.floor(Math.random() * 2) + 4; // 4-5
+        }
+        // 10% โอกาสได้คะแนนต่ำ (1-2)
+        else {
+          gainedLevel = Math.floor(Math.random() * 2) + 1; // 1-2
+        }
+        
+        const passed = gainedLevel >= 3; // ผ่านถ้าได้ 3 ขึ้นไป
+        
         skillCollections.push({
           studentId: student.id,
           cloId: clo.id,
@@ -595,8 +839,8 @@ async function main() {
   // 13. สร้าง Curriculum Coordinators
   const curriculumCoordinators = await prisma.curriculum_coordinators.createMany({
     data: [
-      { instructorId: 1, curriculumId: curriculum.id },
-      { instructorId: 2, curriculumId: curriculum.id },
+      { instructorId: createdInstructors[0].id, curriculumId: curriculum.id },
+      { instructorId: createdInstructors[1].id, curriculumId: curriculum.id },
     ],
   });
   console.log('✅ Created curriculum coordinators');
@@ -606,14 +850,14 @@ async function main() {
   console.log(`   - Faculty: ${faculty.thaiName}`);
   console.log(`   - Branch: ${branch.thaiName}`);
   console.log(`   - Curriculum: ${curriculum.code} - ${curriculum.thaiName}`);
-  console.log(`   - Skills: ${createdSkills.length} skills`);
+  console.log(`   - Skills: ${createdSkills.length} skills (6 ทักษะ, 6 ความรู้, 4 คุณลักษณะบุคคล, 3 จริยธรรม)`);
   console.log(`   - PLOs: ${createdPlos.length} PLOs`);
-  console.log(`   - Subjects: 8 subjects`);
+  console.log(`   - Subjects: 12 subjects (เพิ่มความหลากหลาย)`);
   console.log(`   - Instructors: 3 instructors`);
   console.log(`   - Students: ${createdStudents.length} students (รุ่น 67)`);
-  console.log(`   - Courses: ${createdCourses.length} courses`);
-  console.log(`   - CLOs: ${createdClos.length} CLOs`);
-  console.log(`   - Skill Collections: ${skillCollections.length} records`);
+  console.log(`   - Courses: ${createdCourses.length} courses (รองรับรายวิชาใหม่)`);
+  console.log(`   - CLOs: ${createdClos.length} CLOs (skill เดียวกันแต่ expectedLevel ต่างกัน)`);
+  console.log(`   - Skill Collections: ${skillCollections.length} records (ความหลากหลายในการให้คะแนน)`);
 }
 
 main()
