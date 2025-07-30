@@ -187,23 +187,6 @@ export class CurriculumsService {
     });
   }
 
-  // Filter curriculums by branch ID
-  async findWithFilters(branchId: number) {
-    try {
-      const curriculums = await this.prisma.curriculum.findMany({
-        where: { branchId: branchId },
-        select: {
-          id: true,
-          thaiName: true,
-          engName: true,
-        },
-      });
-      return curriculums;
-    } catch (error) {
-      throw new InternalServerErrorException('Failed to filter curriculums');
-    }
-  }
-
   async getSkillSummaryByCurriculum(
     curriculumId: number,
     yearCode: string,

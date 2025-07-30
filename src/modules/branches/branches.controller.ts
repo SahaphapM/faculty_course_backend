@@ -54,11 +54,4 @@ export class BranchesController {
   remove(@Param('id') id: string) {
     return this.branchService.remove(+id);
   }
-
-  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
-  @Get('filters/:facultyId')
-  @ApiParam({ name: 'facultyId', type: String, description: 'Faculty ID' })
-  filters(@Param('facultyId') facultyId: string) {
-    return this.branchService.filters(+facultyId);
-  }
 }

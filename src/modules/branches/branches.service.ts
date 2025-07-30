@@ -135,21 +135,4 @@ export class BranchesService {
       throw new Error('Failed to remove branch');
     }
   }
-
-  async filters(facultyId: number) {
-    try {
-      const branches = await this.prisma.branch.findMany({
-        where: { facultyId: facultyId },
-        select: {
-          id: true,
-          thaiName: true,
-          engName: true,
-        },
-      });
-
-      return branches;
-    } catch (error) {
-      throw new Error('Failed to fetch branches');
-    }
-  }
 }
