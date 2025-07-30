@@ -12,6 +12,7 @@ import { CreateInternshipWithStudentDto } from './dto/create.dto';
 import { Query } from '@nestjs/common';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { ApiParam, ApiQuery } from '@nestjs/swagger';
+import { UpdateSkillAssessmentDto } from 'src/generated/nestjs-dto/update-skillAssessment.dto';
 
 @Controller('internships')
 export class InternshipsController {
@@ -44,6 +45,19 @@ export class InternshipsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.internshipsService.remove(+id);
+  }
+
+  
+
+  @Patch('skill-assessments/:skillAssessmentId')
+  updateSkillAssessment(
+    @Param('skillAssessmentId') skillAssessmentId: string,
+    @Body() updateSkillAssessmentDto: UpdateSkillAssessmentDto,
+  ) {
+    return this.internshipsService.updateSkillAssessment(
+      +skillAssessmentId,
+      updateSkillAssessmentDto,
+    );
   }
 
   @Get(':id/skill-assessment')

@@ -6,6 +6,7 @@ import {
   createSkillAssessments,
   getSkillsByStudent,
 } from './internships.helper';
+import { UpdateSkillAssessmentDto } from 'src/generated/nestjs-dto/update-skillAssessment.dto';
 
 @Injectable()
 export class InternshipsService {
@@ -255,6 +256,16 @@ export class InternshipsService {
           },
         },
       },
+    });
+  }
+
+  updateSkillAssessment(
+    skillAssessmentId: number,
+    updateSkillAssessmentDto: UpdateSkillAssessmentDto,
+  ) {
+    return this.prisma.skill_assessment.update({
+      where: { id: skillAssessmentId },
+      data: { ...updateSkillAssessmentDto },
     });
   }
 }
