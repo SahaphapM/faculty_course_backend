@@ -67,7 +67,7 @@ export class CurriculumsController {
 
   @Get('filters/:branchId')
   @ApiParam({ name: 'branchId', type: String, description: 'Branch ID' })
-  async filters(@Query('branchId') branchId: string) {
+  async filters(@Param('branchId') branchId: string) {
     return this.curriculumsService.findWithFilters(+branchId);
   }
 
