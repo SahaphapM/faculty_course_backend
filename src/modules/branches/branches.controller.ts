@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -57,6 +57,7 @@ export class BranchesController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get('filters/:facultyId')
+  @ApiParam({ name: 'facultyId', type: String, description: 'Faculty ID' })
   filters(@Query('facultyId') facultyId: string) {
     return this.branchService.filters(+facultyId);
   }

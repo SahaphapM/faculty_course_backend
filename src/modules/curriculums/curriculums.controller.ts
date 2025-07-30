@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
-import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -66,6 +66,7 @@ export class CurriculumsController {
   }
 
   @Get('filters/:branchId')
+  @ApiParam({ name: 'branchId', type: String, description: 'Branch ID' })
   async filters(@Query('branchId') branchId: string) {
     return this.curriculumsService.findWithFilters(+branchId);
   }
@@ -96,6 +97,7 @@ export class CurriculumsController {
     description: 'Optional search query',
   })
   @Get('filters/skill/:skillId/students')
+  @ApiParam({ name: 'skillId', type: String, description: 'Skill ID' })
   async getStudentsBySkillLevel(
     @Param('skillId') skillId: number,
     @Query('targetLevel') targetLevel: 'on' | 'above' | 'below' | 'all',

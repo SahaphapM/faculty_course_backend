@@ -57,7 +57,7 @@ export class InternshipsService {
     const { search, page = 1, limit = 10 } = filter;
 
     const where = {
-      year: year ? year : undefined,
+      year: year || undefined,
       company: {
         name: {
           contains: search,

@@ -11,7 +11,7 @@ import { InternshipsService } from './internships.service';
 import { CreateInternshipWithStudentDto } from './dto/create.dto';
 import { Query } from '@nestjs/common';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiParam, ApiQuery } from '@nestjs/swagger';
 
 @Controller('internships')
 export class InternshipsController {
@@ -44,5 +44,19 @@ export class InternshipsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.internshipsService.remove(+id);
+  }
+
+  @Get(':id/skill-assessment')
+  getSkillAssessment(@Param('id') id: string) {
+    return this.internshipsService.skillAssessment(+id);
+  }
+
+  @Get(':id/students/:studentId/assessment')
+  @ApiParam({ name: 'studentId', type: String, description: 'Student ID' })
+  getStudentAssessment(
+    @Param('id') id: string,
+    @Param('studentId') studentId: string,
+  ) {
+    return this.internshipsService.getStudentAssessment(+id, +studentId);
   }
 }
