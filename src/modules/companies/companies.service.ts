@@ -14,7 +14,12 @@ export class CompaniesService {
     const { jobPositions, ...rest } = createCompanyDto;
     const company = this.prisma.company.create({
       data: {
-        ...rest,
+        name: rest.name,
+        thaiDescription: rest.thaiDescription,
+        engDescription: rest.engDescription,
+        address: rest.address,
+        tel: rest.tel,
+        email: rest.email,
         company_job_positions: {
           create: jobPositions.map((jobPosition) => ({
             jobPositionId: jobPosition.id,
@@ -43,6 +48,13 @@ export class CompaniesService {
           { email: { contains: search ? search : '' } },
         ],
       },
+      include: {
+        company_job_positions: {
+          include: {
+            jobPosition: true
+          }
+        }
+      },
     });
 
     const totalPages = Math.ceil(data.length / limit);
@@ -61,7 +73,13 @@ export class CompaniesService {
   findOne(id: number): Promise<Company> {
     return this.prisma.company.findUnique({
       where: { id },
-      include: { company_job_positions: { include: { jobPosition: true } } },
+      include: {
+        company_job_positions: {
+          include: {
+            jobPosition: true
+          }
+        }
+      },
     });
   }
 
@@ -97,20 +115,29 @@ export class CompaniesService {
         });
       }
 
-      // Add new positions
+      // Add new positions using create to avoid conflicts
       if (positionsToAdd.length > 0) {
-        await prisma.company_job_position.createMany({
-          data: positionsToAdd.map((jobPositionId) => ({
-            companyId: id,
-            jobPositionId,
-          })),
-        });
+        for (const jobPositionId of positionsToAdd) {
+          await prisma.company_job_position.create({
+            data: {
+              companyId: id,
+              jobPositionId,
+            },
+          });
+        }
       }
 
-      // Update company details
+      // Update company details with explicit field mapping
       return prisma.company.update({
         where: { id },
-        data: rest,
+        data: {
+          name: rest.name,
+          thaiDescription: rest.thaiDescription,
+          engDescription: rest.engDescription,
+          address: rest.address,
+          tel: rest.tel,
+          email: rest.email,
+        },
         include: {
           company_job_positions: {
             include: {

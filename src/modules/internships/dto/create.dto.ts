@@ -1,7 +1,6 @@
 import { CreateInternshipDto } from 'src/generated/nestjs-dto/create-internship.dto';
 import { CreateStudentInternshipDto } from 'src/generated/nestjs-dto/create-studentInternship.dto';
-import { IsArray } from 'class-validator';
-import { ValidateNested } from 'class-validator';
+import { IsArray , ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class CreateInternshipWithStudentDto extends CreateInternshipDto {

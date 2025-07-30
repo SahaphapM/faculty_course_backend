@@ -6,10 +6,10 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { InternshipsService } from './internships.service';
 import { CreateInternshipWithStudentDto } from './dto/create.dto';
-import { Query } from '@nestjs/common';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { ApiParam, ApiQuery } from '@nestjs/swagger';
 import { UpdateSkillAssessmentDto } from 'src/generated/nestjs-dto/update-skillAssessment.dto';

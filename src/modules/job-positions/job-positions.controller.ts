@@ -6,12 +6,12 @@ import {
   Patch,
   Param,
   Delete,
+  Query,
 } from '@nestjs/common';
 import { JobPositionsService } from './job-positions.service';
 import { CreateJobPositionDto } from 'src/generated/nestjs-dto/create-jobPosition.dto';
 import { UpdateJobPositionDto } from 'src/generated/nestjs-dto/update-jobPosition.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
-import { Query } from '@nestjs/common';
 
 @Controller('job-positions')
 export class JobPositionsController {
