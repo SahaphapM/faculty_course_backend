@@ -1,7 +1,6 @@
 import {
   Injectable,
   NotFoundException,
-  InternalServerErrorException,
   HttpStatus,
   BadRequestException,
 } from '@nestjs/common';
@@ -417,13 +416,18 @@ export class CurriculumsService {
         code: true,
         thaiName: true,
         skill_collections: {
-          include: {
+          select: {
+            id: true,
+            gainedLevel: true,
             clo: {
-              include: {
+              select: {
+                id: true,
+                expectSkillLevel: true,
                 skill: {
                   select: {
                     id: true,
                     thaiName: true,
+                    domain: true,
                   },
                 },
               },
@@ -434,7 +438,7 @@ export class CurriculumsService {
     });
 
     // 2. เตรียมดึงเฉพาะ skill ที่มีใน subjectName (ถ้ามีระบุ)
-    let skills: { id: number; thaiName: string }[];
+    let skills: { id: number; thaiName: string; domain: string }[];
 
     if (subjectName) {
       // หา subject ที่ชื่อ match
@@ -473,6 +477,7 @@ export class CurriculumsService {
         select: {
           id: true,
           thaiName: true,
+          domain: true,
         },
       });
     } else {
@@ -482,35 +487,123 @@ export class CurriculumsService {
         select: {
           id: true,
           thaiName: true,
+          domain: true,
         },
       });
     }
 
-    // 3. รวมข้อมูลผลลัพธ์
+    // 3. แยก skills ตาม domain และหา expectedLevel สำหรับแต่ละ skill
+    const cognitivePsychomotorSkills = skills.filter(
+      (skill) => skill.domain === 'ความรู้' || skill.domain === 'ทักษะ'
+    );
+    const affectiveEthicsSkills = skills.filter(
+      (skill) => skill.domain === 'คุณลักษณะบุคคล' || skill.domain === 'จริยธรรม'
+    );
+
+    // หา expectedLevel สำหรับแต่ละ skill เมื่อมี subjectName
+    const getExpectedLevelForSkill = async (skillId: number): Promise<number | null> => {
+      if (!subjectName) return null;
+      
+      // หา CLO ที่เกี่ยวข้องกับ skill นี้และ subject ที่เลือก
+      const matchedSubjects = await this.prisma.subject.findMany({
+        where: {
+          curriculumId,
+          OR: [
+            { thaiName: { contains: subjectName } },
+            { engName: { contains: subjectName } },
+          ],
+        },
+        select: {
+          id: true,
+          clos: {
+            where: { skillId },
+            select: { expectSkillLevel: true },
+          },
+        },
+      });
+
+      // หา expectedLevel จาก CLO แรกที่เจอ
+      for (const subject of matchedSubjects) {
+        if (subject.clos.length > 0) {
+          return subject.clos[0].expectSkillLevel;
+        }
+      }
+      
+      return null;
+    };
+
+    // 4. รวมข้อมูลผลลัพธ์
     const result = {
       curriculumId,
-      students: students.map((stu) => {
-        const skillMap = new Map<number, number>();
-
-        for (const sc of stu.skill_collections) {
-          const skill = sc.clo?.skill;
-          if (skill) {
-            skillMap.set(skill.id, sc.gainedLevel);
-          }
-        }
-
-        return {
-          studentId: stu.id,
-          studentName: stu.thaiName,
-          studentCode: stu.code,
-          skills: skills.map((sk) => ({
-            skillId: sk.id,
-            skillName: sk.thaiName,
-            gainedLevel: skillMap.get(sk.id) ?? null,
-          })),
-        };
-      }),
+      students: [],
     };
+
+    // ฟังก์ชันหาความถี่สูงสุด
+    const getMostFrequentLevel = (levels: number[]): number | null => {
+      if (levels.length === 0) return null;
+      
+      const frequency: { [key: number]: number } = {};
+      levels.forEach(level => {
+        frequency[level] = (frequency[level] || 0) + 1;
+      });
+      
+      let maxFreq = 0;
+      let mostFrequent = levels[0];
+      
+      Object.entries(frequency).forEach(([level, freq]) => {
+        if (freq > maxFreq) {
+          maxFreq = freq;
+          mostFrequent = parseInt(level);
+        }
+      });
+      
+      return mostFrequent;
+    };
+
+    const createSkillData = async (skillList: typeof skills, skillMap: Map<number, number[]>) => {
+      const skillData = [];
+      for (const sk of skillList) {
+        const levels = skillMap.get(sk.id) || [];
+        const gainedLevel = subjectName ? levels[0] || null : getMostFrequentLevel(levels);
+        
+        // หา expectedLevel จาก CLO เมื่อมี subjectName
+        const expectedLevel = await getExpectedLevelForSkill(sk.id);
+        
+        skillData.push({
+          skillId: sk.id,
+          skillName: sk.thaiName,
+          gainedLevel,
+          expectedLevel,
+        });
+      }
+      return skillData;
+    };
+
+    // ประมวลผลข้อมูลนักเรียนทีละคน
+    for (const stu of students) {
+      const skillMap = new Map<number, number[]>();
+
+      // รวบรวม gainedLevel ทั้งหมดสำหรับแต่ละ skill
+      for (const sc of stu.skill_collections) {
+        const skill = sc.clo?.skill;
+        if (skill) {
+          if (!skillMap.has(skill.id)) {
+            skillMap.set(skill.id, []);
+          }
+          skillMap.get(skill.id)?.push(sc.gainedLevel);
+        }
+      }
+
+      const studentData = {
+        studentId: stu.id,
+        studentName: stu.thaiName,
+        studentCode: stu.code,
+        cognitivePsychomotorSkills: await createSkillData(cognitivePsychomotorSkills, skillMap),
+        affectiveEthicsSkills: await createSkillData(affectiveEthicsSkills, skillMap),
+      };
+
+      result.students.push(studentData);
+    }
 
     return result;
   }
