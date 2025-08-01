@@ -62,7 +62,7 @@ export class CourseService {
 
   // Find all courses with pagination and search
   async findAll(pag?: CourseFilterDto) {
-    const defaultLimit = 10;
+    const defaultLimit = 16;
     const defaultPage = 1;
 
     const {

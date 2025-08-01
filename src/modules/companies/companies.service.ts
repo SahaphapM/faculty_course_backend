@@ -15,8 +15,6 @@ export class CompaniesService {
     const company = this.prisma.company.create({
       data: {
         name: rest.name,
-        thaiDescription: rest.thaiDescription,
-        engDescription: rest.engDescription,
         address: rest.address,
         tel: rest.tel,
         email: rest.email,
@@ -132,8 +130,6 @@ export class CompaniesService {
         where: { id },
         data: {
           name: rest.name,
-          thaiDescription: rest.thaiDescription,
-          engDescription: rest.engDescription,
           address: rest.address,
           tel: rest.tel,
           email: rest.email,

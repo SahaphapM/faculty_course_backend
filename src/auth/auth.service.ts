@@ -8,6 +8,12 @@ import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { LoginDto } from 'src/dto/login.dto';
+import { User } from 'src/generated/nestjs-dto/user.entity';
+
+export type AuthenticatedUser = User & {
+  accessToken: string;
+  refreshToken: string;
+};
 
 const USER_NOT_FOUND_MESSAGE = 'User not found!';
 const INVALID_CREDENTIALS_MESSAGE = 'Invalid credentials';
@@ -16,10 +22,10 @@ const INVALID_REFRESH_TOKEN_MESSAGE = 'Invalid Refresh Token';
 @Injectable()
 export class AuthService {
   constructor(
-    private usersService: UsersService,
-    private jwtService: JwtService,
+    private readonly usersService: UsersService,
+    private readonly jwtService: JwtService,
     @Inject(refreshJwtConfig.KEY)
-    private refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
+    private readonly refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
   ) {}
 
   async validateUserCredentials(dto: LoginDto) {
@@ -33,7 +39,7 @@ export class AuthService {
     return user;
   }
 
-  async authenticateUser(dto: LoginDto) {
+  async authenticateUser(dto: LoginDto): Promise<AuthenticatedUser> {
     // First, validate the user credentials
     const user = await this.validateUserCredentials(dto);
 
@@ -51,7 +57,7 @@ export class AuthService {
     );
 
     return {
-      user,
+      ...user,
       accessToken,
       refreshToken,
     };
@@ -110,15 +116,38 @@ export class AuthService {
     return user;
   }
 
-  async validateGoogleUser(googleUser: CreateUserDto) {
+  async validateGoogleUser(
+    googleUser: CreateUserDto,
+    name: string,
+  ): Promise<AuthenticatedUser> {
     const user = await this.usersService.findByEmail(googleUser.email);
     if (user) {
       // If user exists, generate tokens and return them
-      return this.generateTokens(user.id, user.role);
+      const { accessToken, refreshToken } = await this.generateTokens(
+        user.id,
+        user.role,
+      );
+      return {
+        ...user,
+        accessToken,
+        refreshToken,
+      };
     } else {
-      // If user does not exist, create a new user and generate tokens
-      const newUser = await this.usersService.create(googleUser);
-      return this.generateTokens(newUser.id, user.role);
+      // If user does not exist, create a new user with default role and generate tokens
+      const userWithDefaultRole = {
+        ...googleUser,
+        role: 'Student', // Default role for Google OAuth users
+      };
+      const newUser = await this.usersService.create(userWithDefaultRole);
+      const { accessToken, refreshToken } = await this.generateTokens(
+        newUser.id,
+        newUser.role,
+      );
+      return {
+        ...newUser,
+        accessToken,
+        refreshToken,
+      };
     }
   }
 }

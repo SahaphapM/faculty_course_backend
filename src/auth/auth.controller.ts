@@ -8,6 +8,7 @@ import {
   Res,
   UseGuards,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
 import { GoogleAuthGuard } from './guard/google-auth.guard';
@@ -15,6 +16,8 @@ import { JwtAuthGuard } from './guard/jwt-auth.guard';
 import { RefreshAuthGuard } from './guard/refresh-auth.guard';
 import { Public } from '../decorators/public.decorator';
 import { LoginDto } from 'src/dto/login.dto';
+import type { ProfilePayload } from './types/current-user.d.ts';
+import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -23,19 +26,12 @@ export class AuthController {
   @Public()
   @Post('/login')
   async login(@Body() dto: LoginDto) {
-    const { accessToken, refreshToken, user } =
-      await this.authService.authenticateUser(dto);
+    const response = await this.authService.authenticateUser(dto);
 
     // Optionally set the access token in a cookie
     // res.cookie('access_token', accessToken, { httpOnly: true });
 
-    return {
-      statusCode: 200,
-      message: 'Login successful',
-      user,
-      accessToken,
-      refreshToken,
-    };
+    return response;
   }
 
   @UseGuards(JwtAuthGuard)
@@ -54,14 +50,35 @@ export class AuthController {
   @Public()
   @UseGuards(GoogleAuthGuard)
   @Get('/google/redirect')
-  async googleAuthRedirect(@Req() req, @Res() res) {
-    const googleUser = req.user; // Assuming req.user contains Google user info
+  async googleAuthRedirect(
+    @Req() req: Request & { user: ProfilePayload },
+    @Res() res: Response,
+  ) {
+    try {
+      const googleUser = req.user; // req.user is now type-safe as ProfilePayload
 
-    // Call a service method to handle Google user creation or retrieval
-    const response = await this.authService.validateGoogleUser(googleUser);
+      // Convert ProfilePayload to CreateUserDto format for the service method
+      const userDto: CreateUserDto = {
+        email: googleUser.email,
+        password: '', // Google OAuth doesn't use password
+        avatarUrl: googleUser.avatarUrl,
+        role: googleUser.role,
+      };
 
-    // Redirect to the frontend with the access token
-    res.redirect(`${process.env.FRONTEND_URL}?token=${response.accessToken}`);
+      // Call a service method to handle Google user creation or retrieval
+      const response = await this.authService.validateGoogleUser(
+        userDto,
+        googleUser.name,
+      );
+
+      // Redirect to the frontend with the access token
+      const url = `${process.env.FRONTEND_URL}/google/redirect/?token=${response.accessToken}`;
+      res.redirect(url);
+    } catch (error) {
+      console.error('Google OAuth error:', error);
+      // Redirect to the frontend with an error message
+      res.redirect(`${process.env.FRONTEND_URL}?error=Google OAuth failed`);
+    }
   }
 
   @UseGuards(RefreshAuthGuard)

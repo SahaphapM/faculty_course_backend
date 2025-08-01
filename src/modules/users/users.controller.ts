@@ -9,6 +9,8 @@ import {
   HttpStatus,
   HttpCode,
   Query,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
@@ -20,6 +22,7 @@ import { Public } from 'src/decorators/public.decorator';
 import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
 
 @ApiBearerAuth()
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}

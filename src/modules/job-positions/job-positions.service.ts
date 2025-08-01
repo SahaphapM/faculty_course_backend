@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
 import { CreateJobPositionDto } from 'src/generated/nestjs-dto/create-jobPosition.dto';
 import { UpdateJobPositionDto } from 'src/generated/nestjs-dto/update-jobPosition.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -12,8 +12,17 @@ import { JobPosition } from 'src/generated/nestjs-dto/jobPosition.entity';
 export class JobPositionsService {
   constructor(private readonly prisma: PrismaService) {}
 
-  create(createJobPositionDto: CreateJobPositionDto) {
-    const jobPosition = this.prisma.job_position.create({
+  async create(createJobPositionDto: CreateJobPositionDto) {
+    // Check if job position with the same name already exists
+    const existingJobPosition = await this.prisma.job_position.findFirst({
+      where: { name: createJobPositionDto.name }
+    });
+
+    if (existingJobPosition) {
+      throw new ConflictException(`Job position with name '${createJobPositionDto.name}' already exists`);
+    }
+
+    const jobPosition = await this.prisma.job_position.create({
       data: createJobPositionDto,
     });
     return jobPosition;
@@ -56,7 +65,21 @@ export class JobPositionsService {
     return this.prisma.job_position.findUnique({ where: { id } });
   }
 
-  update(id: number, updateJobPositionDto: UpdateJobPositionDto) {
+  async update(id: number, updateJobPositionDto: UpdateJobPositionDto) {
+    // Check if job position with the same name already exists (excluding current record)
+    if (updateJobPositionDto.name) {
+      const existingJobPosition = await this.prisma.job_position.findFirst({
+        where: {
+          name: updateJobPositionDto.name,
+          NOT: { id: id }
+        }
+      });
+
+      if (existingJobPosition) {
+        throw new ConflictException(`Job position with name '${updateJobPositionDto.name}' already exists`);
+      }
+    }
+
     return this.prisma.job_position.update({
       where: { id },
       data: updateJobPositionDto,

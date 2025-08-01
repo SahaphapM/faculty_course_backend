@@ -7,6 +7,9 @@ import {
   Param,
   Delete,
   Query,
+  HttpException,
+  HttpStatus,
+  ConflictException,
 } from '@nestjs/common';
 import { JobPositionsService } from './job-positions.service';
 import { CreateJobPositionDto } from 'src/generated/nestjs-dto/create-jobPosition.dto';
@@ -18,8 +21,18 @@ export class JobPositionsController {
   constructor(private readonly jobPositionsService: JobPositionsService) {}
 
   @Post()
-  create(@Body() createJobPositionDto: CreateJobPositionDto) {
-    return this.jobPositionsService.create(createJobPositionDto);
+  async create(@Body() createJobPositionDto: CreateJobPositionDto) {
+    try {
+      return await this.jobPositionsService.create(createJobPositionDto);
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.CONFLICT
+        );
+      }
+      throw error;
+    }
   }
 
   @Get()
@@ -33,11 +46,21 @@ export class JobPositionsController {
   }
 
   @Patch(':id')
-  update(
+  async update(
     @Param('id') id: string,
     @Body() updateJobPositionDto: UpdateJobPositionDto,
   ) {
-    return this.jobPositionsService.update(+id, updateJobPositionDto);
+    try {
+      return await this.jobPositionsService.update(+id, updateJobPositionDto);
+    } catch (error) {
+      if (error instanceof ConflictException) {
+        throw new HttpException(
+          error.message,
+          HttpStatus.CONFLICT
+        );
+      }
+      throw error;
+    }
   }
 
   @Delete(':id')

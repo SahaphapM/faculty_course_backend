@@ -26,6 +26,7 @@ export class ConnectUserDto {
   type: 'integer',
   format: 'int32',
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @IsInt()
@@ -33,6 +34,7 @@ id?: number ;
 @ApiProperty({
   type: 'string',
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @IsString()
@@ -41,6 +43,7 @@ email?: string ;
   type: 'integer',
   format: 'int32',
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @IsInt()
@@ -49,6 +52,7 @@ studentId?: number ;
   type: 'integer',
   format: 'int32',
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @IsInt()
@@ -56,6 +60,7 @@ instructorId?: number ;
 @ApiProperty({
   type: UserInstructorIdStudentIdUniqueInputDto,
   required: false,
+  nullable: true,
 })
 @IsOptional()
 @ValidateNested()

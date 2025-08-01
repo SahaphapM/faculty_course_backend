@@ -4,4 +4,5 @@ export type ProfilePayload = {
   email: string;
   avatarUrl: string;
   role: string;
+  name: string;
 };
