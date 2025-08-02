@@ -94,12 +94,12 @@ export class UsersService {
 
     const data: Prisma.userUpdateInput = {
       ...dto,
-      student: {
-        connect: { id: dto.studentId },
-      },
-      instructor: {
-        connect: { id: dto.instructorId },
-      },
+      ...(dto.studentId && {
+        student: { connect: { id: dto.studentId } },
+      }),
+      ...(dto.instructorId && {
+        instructor: { connect: { id: dto.instructorId } },
+      }),
     };
 
     try {
@@ -108,6 +108,7 @@ export class UsersService {
         data,
       });
     } catch (error) {
+      console.error('Error updating user:', error);
       throw new BadRequestException('Failed to update user');
     }
   }
@@ -118,6 +119,7 @@ export class UsersService {
       await this.prisma.user.delete({ where: { id } });
       return `Success Delete ID ${id}`;
     } catch (error) {
+      console.error('Error updating user:', error);
       throw new BadRequestException('Failed to remove user');
     }
   }
@@ -127,30 +129,5 @@ export class UsersService {
       where: { id: userId },
       data: { hashedRefreshToken },
     });
-  }
-
-  async onModuleInit() {
-    await this.createAdminIfNotExists(); // ✅ Run when the module starts
-  }
-
-  async createAdminIfNotExists() {
-    try {
-      const admin = await this.prisma.user.findUnique({
-        where: { email: 'admin@gmail.com' },
-      });
-
-      if (!admin) {
-        const hashedPassword = await bycrpt.hash('12345', 10);
-        await this.prisma.user.create({
-          data: {
-            email: 'admin@gmail.com',
-            password: hashedPassword,
-            role: 'ADMIN',
-          },
-        });
-      }
-    } catch (error) {
-      console.error('Error creating admin:', error);
-    }
   }
 }

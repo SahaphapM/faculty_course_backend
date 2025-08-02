@@ -27,34 +27,29 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
   @Roles(UserRole.Admin)
   @Post()
-  @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto) {
     return this.usersService.create(createUserDto);
   }
   @Roles(UserRole.Admin)
   @Get()
-  @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: UserFilterDto) {
     return this.usersService.findAll(pag);
   }
 
   @Roles(UserRole.Admin)
   @Get(':id')
-  @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
   @Roles(UserRole.Admin)
   @Patch(':id')
-  @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
   @Roles(UserRole.Admin)
   @Delete(':id')
-  @HttpCode(HttpStatus.OK)
   remove(@Param('id') id: string) {
     return this.usersService.remove(+id);
   }
