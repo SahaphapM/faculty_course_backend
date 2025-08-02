@@ -18,7 +18,6 @@ import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
-import { Public } from 'src/decorators/public.decorator';
 import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
 
 @ApiBearerAuth()
@@ -26,7 +25,7 @@ import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
 @Controller('users')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
-  @Public()
+  @Roles(UserRole.Admin)
   @Post()
   @HttpCode(HttpStatus.CREATED)
   create(@Body() createUserDto: CreateUserDto) {
@@ -39,18 +38,21 @@ export class UsersController {
     return this.usersService.findAll(pag);
   }
 
+  @Roles(UserRole.Admin)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   findOne(@Param('id') id: string) {
     return this.usersService.findOne(+id);
   }
 
+  @Roles(UserRole.Admin)
   @Patch(':id')
   @HttpCode(HttpStatus.OK)
   update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     return this.usersService.update(+id, updateUserDto);
   }
 
+  @Roles(UserRole.Admin)
   @Delete(':id')
   @HttpCode(HttpStatus.OK)
   remove(@Param('id') id: string) {
