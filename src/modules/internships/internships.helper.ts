@@ -11,7 +11,7 @@ export async function getSkillsByStudent(
     select: { curriculumId: true },
   });
 
-  if (!student || !student.curriculumId) {
+  if (!student?.curriculumId) {
     throw new Error('Student not found or curriculum not found ' + studentId);
   }
 

@@ -72,7 +72,12 @@ export class InternshipsService {
       take: limit,
       include: {
         company: { select: { name: true } },
-        studentInternships: { select: { studentId: true } },
+        studentInternships: {
+          select: {
+            student: { select: { id: true, code: true, thaiName: true } },
+            jobPosition: { select: { id: true, name: true } },
+          },
+        },
       },
     });
 
