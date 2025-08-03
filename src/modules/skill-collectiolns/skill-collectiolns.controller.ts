@@ -60,8 +60,8 @@ export class SkillCollectionsController {
     UserRole.Student,
   )
   @Get('student')
-  getSkillCollectionByStudentId(@Query('studentCode') studentCode: string) {
-    return this.skillCollectionsService.getSkillCollectionsByStudentId(
+  getTranscriptFromAssessment(@Query('studentCode') studentCode: string) {
+    return this.skillCollectionsService.getTranscriptFromAssessment(
       studentCode,
     );
   }
