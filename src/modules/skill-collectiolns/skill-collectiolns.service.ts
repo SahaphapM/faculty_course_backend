@@ -199,6 +199,19 @@ export class SkillCollectionsService {
     console.log('Import Path 2', courseId, cloId, studentScoreList);
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
+      select: {
+        id: true,
+        subjectId: true,
+        subject: {
+          select: {
+            curriculum: {
+              select: {
+                id: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!course) {
@@ -216,6 +229,10 @@ export class SkillCollectionsService {
     if (!clo) {
       throw new NotFoundException(`CLO with ID ${cloId} not found`);
     }
+
+    const allRootSkills = await this.prisma.skill.findMany({
+      where: { parent: null, curriculumId: course.subject.curriculum.id },
+    });
 
     const skillCollections = [];
 
@@ -261,7 +278,10 @@ export class SkillCollectionsService {
       }
 
       // 3. คำนวณ root skill assessment จาก leaf skill ของ student
-      await this.skillCollectionsHelper.updateSkillAssessments(student);
+      await this.skillCollectionsHelper.updateSkillAssessments(
+        student,
+        allRootSkills,
+      );
 
       skillCollections.push(skillCollection);
     }
