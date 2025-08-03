@@ -270,6 +270,7 @@ model student {
   // One to many
   skill_collections   skill_collection[]
   student_internships student_internship[]
+  skill_assessments   skill_assessment[]
   /// @DtoRelationIncludeId
   curriculumId        Int?
   curriculum          curriculum?          @relation(fields: [curriculumId], references: [id], onDelete: SetNull, onUpdate: NoAction)
@@ -312,11 +313,12 @@ model user {
 
 // create company and job_position to many to many
 model company {
-  id      Int     @id @default(autoincrement())
-  name    String  @db.VarChar(255)
-  address String? @db.Text
-  tel     String? @db.VarChar(50)
-  email   String? @db.VarChar(255)
+  id          Int     @id @default(autoincrement())
+  name        String  @db.VarChar(255)
+  description String? @db.Text
+  address     String? @db.Text
+  tel         String? @db.VarChar(50)
+  email       String? @db.VarChar(255)
 
   company_job_positions company_job_position[]
   internships           internship[]
@@ -364,23 +366,26 @@ model student_internship {
   jobPosition job_position? @relation(fields: [jobPositionId], references: [id], onDelete: SetNull)
   internship  internship?   @relation(fields: [internshipId], references: [id], onDelete: SetNull)
 
-  skillAssessments skill_assessment[]
-
   @@index([internshipId])
   @@index([jobPositionId])
 }
 
 model skill_assessment {
-  id          Int     @id @default(autoincrement())
-  gainedLevel Int
-  comment     String? @db.Text
+  id                Int     @id @default(autoincrement())
+  curriculumLevel   Int     @default(0)
+  companyLevel      Int     @default(0) // ไม่ควรมีการประเมินจากหลายบริษัทแล้ว เพราะเมือมี 1 บริษัทประเมิน ก็จะจบ คงไม่มีฝึกงานซ้ำหลังจากมีการประเมิน
+  finalLevel        Int     @default(0)
+  curriculumComment String? @db.Text
+  companyComment    String? @db.Text
 
   /// @DtoRelationIncludeId
-  studentInternshipId Int?
-  /// @DtoRelationIncludeId
-  skillId             Int?
-  studentInternship   student_internship? @relation(fields: [studentInternshipId], references: [id], onDelete: SetNull)
-  skill               skill?              @relation(fields: [skillId], references: [id], onDelete: SetNull)
+  skillId Int?
+  skill   skill? @relation(fields: [skillId], references: [id], onDelete: SetNull)
 
-  @@index([skillId, studentInternshipId])
+  /// @DtoRelationIncludeId
+  studentId Int?
+  student   student? @relation(fields: [studentId], references: [id], onDelete: SetNull)
+
+  @@unique([skillId, studentId]) // ✅ เพิ่มบรรทัดนี้
+  @@index([skillId, studentId])
 }

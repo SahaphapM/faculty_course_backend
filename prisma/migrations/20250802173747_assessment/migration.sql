@@ -219,8 +219,7 @@ CREATE TABLE `user` (
 CREATE TABLE `company` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `name` VARCHAR(255) NOT NULL,
-    `thaiDescription` TEXT NULL,
-    `engDescription` TEXT NULL,
+    `description` TEXT NULL,
     `address` TEXT NULL,
     `tel` VARCHAR(50) NULL,
     `email` VARCHAR(255) NULL,
@@ -269,12 +268,16 @@ CREATE TABLE `student_internship` (
 -- CreateTable
 CREATE TABLE `skill_assessment` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `gainedLevel` INTEGER NOT NULL,
-    `comment` TEXT NULL,
-    `studentInternshipId` INTEGER NULL,
+    `curriculumLevel` INTEGER NOT NULL DEFAULT 0,
+    `companyLevel` INTEGER NOT NULL DEFAULT 0,
+    `finalLevel` INTEGER NOT NULL DEFAULT 0,
+    `curriculumComment` TEXT NULL,
+    `companyComment` TEXT NULL,
     `skillId` INTEGER NULL,
+    `studentId` INTEGER NULL,
 
-    INDEX `skill_assessment_skillId_studentInternshipId_idx`(`skillId`, `studentInternshipId`),
+    INDEX `skill_assessment_skillId_studentId_idx`(`skillId`, `studentId`),
+    UNIQUE INDEX `skill_assessment_skillId_studentId_key`(`skillId`, `studentId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -366,7 +369,7 @@ ALTER TABLE `student_internship` ADD CONSTRAINT `student_internship_jobPositionI
 ALTER TABLE `student_internship` ADD CONSTRAINT `student_internship_internshipId_fkey` FOREIGN KEY (`internshipId`) REFERENCES `internship`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `skill_assessment` ADD CONSTRAINT `skill_assessment_studentInternshipId_fkey` FOREIGN KEY (`studentInternshipId`) REFERENCES `student_internship`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `skill_assessment` ADD CONSTRAINT `skill_assessment_skillId_fkey` FOREIGN KEY (`skillId`) REFERENCES `skill`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `skill_assessment` ADD CONSTRAINT `skill_assessment_skillId_fkey` FOREIGN KEY (`skillId`) REFERENCES `skill`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `skill_assessment` ADD CONSTRAINT `skill_assessment_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `student`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;

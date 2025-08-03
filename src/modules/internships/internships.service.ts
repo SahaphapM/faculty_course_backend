@@ -2,10 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInternshipWithStudentDto } from './dto/create.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
-import {
-  createSkillAssessments,
-  getSkillsByStudent,
-} from './internships.helper';
 import { UpdateSkillAssessmentDto } from 'src/generated/nestjs-dto/update-skillAssessment.dto';
 
 @Injectable()
@@ -31,22 +27,11 @@ export class InternshipsService {
       skipDuplicates: true,
     });
 
-    const savedStudentInternships =
-      await this.prisma.student_internship.findMany({
-        where: { internshipId: internship.id },
-      });
-
-    const skills = await getSkillsByStudent(
-      studentInternships[0].studentId,
-      this.prisma,
-    );
-    await createSkillAssessments(savedStudentInternships, skills, this.prisma);
-
     return this.prisma.internship.findUnique({
       where: { id: internship.id },
       include: {
         studentInternships: {
-          include: { student: true, jobPosition: true, skillAssessments: true },
+          include: { student: true, jobPosition: true },
         },
         company: true,
       },
@@ -144,9 +129,6 @@ export class InternshipsService {
     );
 
     if (toDelete.length > 0) {
-      await this.prisma.skill_assessment.deleteMany({
-        where: { studentInternshipId: { in: toDelete.map((si) => si.id) } },
-      });
       await this.prisma.student_internship.deleteMany({
         where: { id: { in: toDelete.map((si) => si.id) } },
       });
@@ -161,18 +143,6 @@ export class InternshipsService {
         })),
         skipDuplicates: true,
       });
-
-      const savedStudentInternships =
-        await this.prisma.student_internship.findMany({
-          where: { internshipId: id },
-        });
-
-      const skills = await getSkillsByStudent(toAdd[0].studentId, this.prisma);
-      await createSkillAssessments(
-        savedStudentInternships,
-        skills,
-        this.prisma,
-      );
     }
 
     if (toUpdate.length > 0) {
@@ -253,11 +223,11 @@ export class InternshipsService {
               },
             },
             curriculum: { select: { thaiName: true } },
-          },
-        },
-        skillAssessments: {
-          include: {
-            skill: { select: { thaiName: true, thaiDescription: true } },
+            skill_assessments: {
+              include: {
+                skill: { select: { thaiName: true, thaiDescription: true } },
+              },
+            },
           },
         },
       },

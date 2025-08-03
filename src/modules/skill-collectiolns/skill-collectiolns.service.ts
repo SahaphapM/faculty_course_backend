@@ -9,12 +9,14 @@ import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity
 import { StudentScoreList } from 'src/dto/filters/filter.base.dto';
 import { SkillCollectionDto } from 'src/generated/nestjs-dto/skillCollection.dto';
 import { Prisma } from '@prisma/client';
+import { SkillCollectionsHelper } from './skill-collectiolns.helper';
 
 @Injectable()
 export class SkillCollectionsService {
   constructor(
     private prisma: PrismaService,
     private cloService: ClosService,
+    private skillCollectionsHelper: SkillCollectionsHelper,
   ) {}
 
   async getSkillCollectionsByStudentId(studentCode: string) {
@@ -132,7 +134,7 @@ export class SkillCollectionsService {
       }
     }
 
-    // เติม gained แบบ mode (recursive)
+    // เติม gained level แบบ mode (recursive)
     function calculateMode(arr: number[]): number {
       const count = new Map<number, number>();
       arr.forEach((n) => count.set(n, (count.get(n) || 0) + 1));
@@ -205,8 +207,6 @@ export class SkillCollectionsService {
 
     const clo = await this.cloService.findOne(cloId);
 
-    const skillCollections = [];
-
     if (!course.subjectId) {
       throw new BadRequestException(
         'Course must have a subject before importing skill collections',
@@ -217,20 +217,21 @@ export class SkillCollectionsService {
       throw new NotFoundException(`CLO with ID ${cloId} not found`);
     }
 
+    const skillCollections = [];
+
     for (const studentScore of studentScoreList) {
+      // 1. หา student หรือสร้างใหม่
       let student = await this.prisma.student.findUnique({
         where: { code: studentScore.studentCode },
       });
+
       if (!student) {
-        // create student with code
-        const newStudent = await this.prisma.student.create({
-          data: {
-            code: studentScore.studentCode,
-          },
+        student = await this.prisma.student.create({
+          data: { code: studentScore.studentCode },
         });
-        student = newStudent;
       }
-      // check if student has skill collection of this course and clo
+
+      // 2. สร้างหรืออัปเดต skill_collection
       let skillCollection = await this.prisma.skill_collection.findFirst({
         where: {
           studentId: student.id,
@@ -238,63 +239,36 @@ export class SkillCollectionsService {
           cloId: clo.id,
         },
       });
+
       if (skillCollection) {
-        // update skill collection
         skillCollection = await this.prisma.skill_collection.update({
-          where: {
-            id: skillCollection.id,
-          },
+          where: { id: skillCollection.id },
           data: {
             gainedLevel: studentScore.gainedLevel,
-            // check if score more than clo expect skill level
-            passed:
-              studentScore.gainedLevel >= clo.expectSkillLevel ? true : false,
+            passed: studentScore.gainedLevel >= clo.expectSkillLevel,
           },
         });
       } else {
-        // create skill collection for student
         skillCollection = await this.prisma.skill_collection.create({
           data: {
-            studentId: student.id, // FK เชื่อมกับ student
-            courseId: course.id, // FK เชื่อมกับ course
-            cloId: clo.id, // FK เชื่อมกับ clo
-            gainedLevel: studentScore.gainedLevel, // ค่าที่ได้จาก studentScore
-            // check if score more than clo expect skill level
-            passed:
-              studentScore.gainedLevel >= clo.expectSkillLevel ? true : false,
+            studentId: student.id,
+            courseId: course.id,
+            cloId: clo.id,
+            gainedLevel: studentScore.gainedLevel,
+            passed: studentScore.gainedLevel >= clo.expectSkillLevel,
           },
         });
       }
 
+      // 3. คำนวณ root skill assessment จาก leaf skill ของ student
+      await this.skillCollectionsHelper.updateSkillAssessments(student);
+
       skillCollections.push(skillCollection);
     }
+
     return skillCollections;
   }
 
-  // async searchSkillCollection(
-  //   skillName: string,
-  //   curriculumId: number,
-  // ): Promise<any[]> {
-  //   return this.prisma.skill_collection.findMany({
-  //     where: {
-  //       clo: {
-  //         skill: {
-  //           // engName or thaiName
-  //           OR: [
-  //             { engName: { contains: skillName } },
-  //             { thaiName: { contains: skillName } },
-  //           ],
-  //         },
-  //       },
-  //     },
-  //   });
-  // }
-
-  /**
-   * Generate comprehensive test data for curriculum with branchId = 2
-   * Creates curriculum, coordinators, 100 students, PLOs, 3-level skills hierarchy,
-   * subjects, CLOs, and skill collections
-   */
   async generateTestData() {
     try {
       return await this.prisma.$transaction(
@@ -366,64 +340,64 @@ export class SkillCollectionsService {
 
           // 3. Generate 100 students
           const thaiFirstNames = [
-            'สมชาย',
-            'สุดา',
-            'วิชัย',
-            'นิรันดร์',
-            'ปรีชา',
-            'สุภาพ',
-            'วิไล',
-            'มาลี',
-            'สมศรี',
-            'ประยุทธ์',
-            'อนุชา',
-            'สุรชัย',
-            'วิทยา',
-            'ชัยวัฒน์',
-            'สมพงษ์',
-            'นิตยา',
-            'สุมาลี',
-            'วิมล',
-            'ชนิดา',
-            'สุกัญญา',
-            'ธนาคาร',
-            'ปิยะ',
-            'สุรศักดิ์',
-            'วีระ',
-            'ชาติชาย',
-            'สุนีย์',
-            'วรรณา',
-            'ชลิดา',
-            'สุภัทรา',
+            'กิตติพงษ์',
+            'นรินทร์',
+            'ศิริพร',
+            'ปิยะพงษ์',
+            'สุชาดา',
+            'อัญชลี',
+            'ธนพล',
             'วิภาวี',
+            'จิราพร',
+            'สมชาย',
+            'อนุวัฒน์',
+            'พัชรินทร์',
+            'วรพล',
+            'สุภาพร',
+            'นฤมล',
+            'พรชัย',
+            'สุวรรณา',
+            'ศักดิ์ชัย',
+            'จิตรลดา',
+            'พีรพล',
+            'ณัฐวุฒิ',
+            'วราภรณ์',
+            'สุกฤษณ์',
+            'สุพัตรา',
+            'อรพินท์',
+            'นพรัตน์',
+            'ศราวุธ',
+            'ดวงกมล',
+            'ปรีชา',
+            'ชลธิชา',
           ];
 
           const thaiLastNames = [
-            'วิทยาการ',
-            'เทคโนโลยี',
-            'คอมพิวเตอร์',
-            'สารสนเทศ',
-            'วิศวกรรม',
-            'วิทยาศาสตร์',
-            'คณิตศาสตร์',
-            'ฟิสิกส์',
-            'เคมี',
-            'ชีววิทยา',
-            'ธุรกิจ',
-            'การจัดการ',
-            'เศรษฐศาสตร์',
-            'การเงิน',
-            'การตลาด',
-            'ภาษาไทย',
-            'ภาษาอังกฤษ',
-            'ประวัติศาสตร์',
-            'ภูมิศาสตร์',
-            'รัฐศาสตร์',
-            'สังคมศาสตร์',
-            'จิตวิทยา',
-            'ปรัชญา',
-            'ศิลปกรรม',
-            'ดนตรี',
+            'ทองสุข',
+            'ใจดี',
+            'กิตติวัฒน์',
+            'บุญมี',
+            'วัฒนกูล',
+            'อินทรัตน์',
+            'เจริญสุข',
+            'สุนทร',
+            'รัตนสกุล',
+            'จิตติเดช',
+            'เพชรดี',
+            'ปัญญาไว',
+            'วงศ์สุวรรณ',
+            'โสภณ',
+            'ชนะชัย',
+            'ธีรพงศ์',
+            'ศรีสวัสดิ์',
+            'พงษ์ศักดิ์',
+            'บวรสุข',
+            'มหาพรหม',
+            'ชาญณรงค์',
+            'มงคลชัย',
+            'สุขเกษม',
+            'กุลบุตร',
+            'วิเศษศรี',
           ];
 
           const engFirstNames = [
@@ -495,7 +469,7 @@ export class SkillCollectionsService {
           // Prepare student data for bulk creation
           const studentsData = [];
           for (let i = 1; i <= 100; i++) {
-            const studentCode = `67130500${i.toString().padStart(3, '0')}`;
+            const studentCode = `6716${i.toString().padStart(4, '0')}`; // example: 67160001, 67160002, ... 67160100
             const thaiFirstName =
               thaiFirstNames[Math.floor(Math.random() * thaiFirstNames.length)];
             const thaiLastName =
@@ -510,10 +484,10 @@ export class SkillCollectionsService {
               thaiName: `${thaiFirstName} ${thaiLastName}`,
               engName: `${engFirstName} ${engLastName}`,
               curriculumId: curriculum.id,
+              branchId: 2,
               enrollmentDate: new Date('2024-06-01'),
               socials: {
-                facebook: `${engFirstName.toLowerCase()}.${engLastName.toLowerCase()}`,
-                email: `${studentCode}@student.university.ac.th`,
+                email: `${studentCode}@go.buu.ac.th`,
               },
             });
           }
@@ -528,7 +502,7 @@ export class SkillCollectionsService {
             where: {
               curriculumId: curriculum.id,
               code: {
-                startsWith: '67130500',
+                startsWith: '6716',
               },
             },
           });

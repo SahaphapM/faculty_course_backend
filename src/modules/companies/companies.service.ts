@@ -15,6 +15,7 @@ export class CompaniesService {
     const company = this.prisma.company.create({
       data: {
         name: rest.name,
+        description: rest.description,
         address: rest.address,
         tel: rest.tel,
         email: rest.email,
@@ -49,9 +50,9 @@ export class CompaniesService {
       include: {
         company_job_positions: {
           include: {
-            jobPosition: true
-          }
-        }
+            jobPosition: true,
+          },
+        },
       },
     });
 
@@ -74,9 +75,9 @@ export class CompaniesService {
       include: {
         company_job_positions: {
           include: {
-            jobPosition: true
-          }
-        }
+            jobPosition: true,
+          },
+        },
       },
     });
   }
@@ -130,6 +131,7 @@ export class CompaniesService {
         where: { id },
         data: {
           name: rest.name,
+          description: rest.description,
           address: rest.address,
           tel: rest.tel,
           email: rest.email,

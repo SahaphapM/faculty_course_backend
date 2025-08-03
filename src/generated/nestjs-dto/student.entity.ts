@@ -3,6 +3,7 @@ import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
 import {SkillCollection} from './skillCollection.entity'
 import {StudentInternship} from './studentInternship.entity'
+import {SkillAssessment} from './skillAssessment.entity'
 import {Curriculum} from './curriculum.entity'
 import {Branch} from './branch.entity'
 import {User} from './user.entity'
@@ -51,6 +52,12 @@ skill_collections?: SkillCollection[] ;
   required: false,
 })
 student_internships?: StudentInternship[] ;
+@ApiProperty({
+  type: () => SkillAssessment,
+  isArray: true,
+  required: false,
+})
+skill_assessments?: SkillAssessment[] ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
