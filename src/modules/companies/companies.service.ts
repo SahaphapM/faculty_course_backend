@@ -42,9 +42,9 @@ export class CompaniesService {
         : { id: 'asc' },
       where: {
         OR: [
-          { name: { contains: search ? search : '' } },
-          { tel: { contains: search ? search : '' } },
-          { email: { contains: search ? search : '' } },
+          { name: { contains: search || '' } },
+          { tel: { contains: search || '' } },
+          { email: { contains: search || '' } },
         ],
       },
       include: {
