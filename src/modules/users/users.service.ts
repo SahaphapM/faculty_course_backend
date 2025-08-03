@@ -91,9 +91,14 @@ export class UsersService {
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
+    let hashedPassword = undefined;
+    if (dto.password) {
+      hashedPassword = await bycrpt.hash(dto.password, 10);
+    }
 
     const data: Prisma.userUpdateInput = {
       ...dto,
+      password: hashedPassword,
       ...(dto.studentId && {
         student: { connect: { id: dto.studentId } },
       }),

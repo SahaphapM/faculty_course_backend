@@ -93,7 +93,7 @@ export class AuthService {
 
   async validateRefreshToken(userId: number, refreshToken: string) {
     const user = await this.usersService.findOne(userId);
-    if (!user || !user.hashedRefreshToken)
+    if (!user?.hashedRefreshToken)
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
 
     const refreshTokenMatches = await argon2.verify(
