@@ -230,7 +230,7 @@ export class SkillCollectionsService {
       throw new NotFoundException(`CLO with ID ${cloId} not found`);
     }
 
-    const allRootSkills = await this.prisma.skill.findMany({
+    const rootSkills = await this.prisma.skill.findMany({
       where: { parent: null, curriculumId: course.subject.curriculum.id },
     });
 
@@ -279,8 +279,8 @@ export class SkillCollectionsService {
 
       // 3. คำนวณ root skill assessment จาก leaf skill ของ student
       await this.skillCollectionsHelper.updateSkillAssessments(
-        student,
-        allRootSkills,
+        student.id,
+        rootSkills,
       );
 
       skillCollections.push(skillCollection);
