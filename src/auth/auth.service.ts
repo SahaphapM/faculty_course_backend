@@ -29,8 +29,22 @@ export class AuthService {
   ) {}
 
   async validateUserCredentials(dto: LoginDto) {
-    const user = await this.usersService.findByEmail(dto.email);
+    const user = await this.usersService.findByEmail(dto.email, {
+      id: true,
+      email: true,
+      password: true,
+      role: true,
+    });
+
     if (!user) throw new UnauthorizedException(USER_NOT_FOUND_MESSAGE);
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+
+    if (!user.password) {
+      throw new Error('User password not found in database');
+    }
 
     const isPasswordMatch = await compare(dto.password, user.password);
     if (!isPasswordMatch)
