@@ -97,15 +97,31 @@ export class InternshipsService {
     id: number,
     updateInternshipDto: CreateInternshipWithStudentDto,
   ) {
-    const { studentInternships = [], companyId, ...rest } = updateInternshipDto;
+    const { studentInternships, companyId, ...rest } = updateInternshipDto;
 
     await this.prisma.internship.update({
       where: { id },
       data: {
         ...rest,
-        ...(companyId && { company: { connect: { id: companyId } } }),
+        ...(companyId ? { company: { connect: { id: companyId } } } : {}),
       },
     });
+
+    // Handle studentInternships updates only if provided
+    if (!studentInternships || studentInternships.length === 0) {
+      return this.prisma.internship.findUnique({
+        where: { id },
+        include: {
+          studentInternships: {
+            include: {
+              student: true,
+              jobPosition: true,
+            },
+          },
+          company: true,
+        },
+      });
+    }
 
     const currentStudentInternships =
       await this.prisma.student_internship.findMany({
@@ -158,21 +174,19 @@ export class InternshipsService {
 
     return this.prisma.internship.findUnique({
       where: { id },
-      include: { studentInternships: true, company: true },
+      include: {
+        studentInternships: {
+          include: {
+            student: true,
+            jobPosition: true,
+          },
+        },
+        company: true,
+      },
     });
   }
 
   async remove(id: number) {
-    // delete student_internship
-    // delete skill_assessment
-    // delete internship
-
-    // await this.prisma.student_internship.deleteMany({
-    //   where: { internshipId: id },
-    // });
-    // await this.prisma.skill_assessment.deleteMany({
-    //   where: { studentInternshipId: { in: toDelete.map((si) => si.id) } },
-    // });
     await this.prisma.internship.delete({
       where: { id },
     });
