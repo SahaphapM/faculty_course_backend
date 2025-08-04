@@ -64,8 +64,6 @@ export class SkillCollectionsService {
       },
     });
 
-    console.log('Assessments:', assessments);
-
     if (!assessments.length) return { specific: [], soft: [] };
 
     // 2. ดึง skill_collection ของ student (สำหรับ subskills)
@@ -73,8 +71,6 @@ export class SkillCollectionsService {
       where: { studentId: student.id },
       include: { clo: { include: { skill: true } } },
     });
-
-    console.log('Skill Collections:', skillCollections);
 
     // เอา skillId ทั้งหมดจาก skill_collection
     const collectionSkillIds = skillCollections
@@ -92,12 +88,21 @@ export class SkillCollectionsService {
     );
 
     const allSkills = await this.getSkillsWithParents(allSkillIds);
-    console.log('All Skills:', allSkills);
 
     // 4. สร้าง map สำหรับ lookup skill
     const skillMap = new Map(
       allSkills.map((s) => [s.id, { ...s, subskills: [], gained: 0 }]),
     );
+
+    // 5. ใส่ gained จาก skill_collection ให้กับ leaf skill ก่อน
+    for (const sc of skillCollections) {
+      const skillId = sc.clo?.skill?.id;
+      if (skillId && skillMap.has(skillId)) {
+        const skillNode = skillMap.get(skillId)!;
+        // ใช้ Max กรณีมีหลาย course/clo ที่ skill เดียวกัน
+        skillNode.gained = Math.max(skillNode.gained, sc.gainedLevel || 0);
+      }
+    }
 
     // 5. ใส่ finalLevel ให้ skill จาก assessment
     for (const assessment of assessments) {
@@ -112,40 +117,65 @@ export class SkillCollectionsService {
     for (const skill of skillMap.values()) {
       if (skill.parentId) {
         const parent = skillMap.get(skill.parentId);
-        if (parent) parent.subskills.push(skill);
+        if (parent) {
+          // ถ้าเป็น leaf skill ให้gained level ด้วย gained level จาก skill collection ด้วยการ map
+          // const collectionItem = skillCollections.find(
+          //   (sc) => sc.clo?.skill?.id === skill.id,
+          // );
+
+          // if (collectionItem) {
+          //   skill.gained = collectionItem.gainedLevel || 0;
+          // }
+
+          parent.subskills.push(skill);
+        }
       } else {
         // root skill
         roots.push(skill);
       }
     }
-    console.log('Roots:', roots);
 
-    // 7. คำนวณ gained level (ใช้ค่าที่ map ไว้)
-    const calculateGained = (node: any): number => {
-      if (!node.subskills.length) return node.gained || 0;
+    // 9️⃣ ฟังก์ชันคำนวณ Mode
+    function calculateMode(arr: number[]): number {
+      const count = new Map<number, number>();
+      arr.forEach((n) => count.set(n, (count.get(n) || 0) + 1));
+      const max = Math.max(...count.values());
+      const modes = [...count.entries()]
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        .filter(([_, c]) => c === max)
+        .map(([n]) => n);
+      return Math.max(...modes);
+    }
 
-      const childLevels = node.subskills.map(calculateGained);
-      const modeMap = new Map<number, number>();
-
-      for (const lvl of childLevels) {
-        modeMap.set(lvl, (modeMap.get(lvl) || 0) + 1);
-      }
-
-      // หาค่า mode (ถ้า tie ใช้ค่ามากสุด)
-      let maxFreq = 0;
-      let result = 0;
-      for (const [level, freq] of modeMap.entries()) {
-        if (freq > maxFreq || (freq === maxFreq && level > result)) {
-          maxFreq = freq;
-          result = level;
-        }
-      }
-
-      node.gained = node.gained > 0 ? node.gained : result; // ถ้า root มี gained (finalLevel) ใช้อันนั้น
+    // 🔟 ฟังก์ชัน recursive fill gained level
+    function fillGained(node: any): number | undefined {
+      if (!node.subskills.length) return node.gained;
+      const childGained = node.subskills
+        .map(fillGained)
+        .filter((x) => x !== undefined) as number[];
+      if (childGained.length > 0) node.gained = calculateMode(childGained);
       return node.gained;
-    };
+    }
 
-    roots.forEach(calculateGained);
+    // 11️⃣ Debug Tree
+    function printTree(node: any, indent = '') {
+      console.log(`${indent}- Skill ${node.id} (level ${node.gained || 0})`);
+      for (const child of node.subskills) {
+        printTree(child, indent + '  ');
+      }
+    }
+
+    // 12️⃣ คำนวณ root gained level และ debug
+    console.log('\n[DEBUG] Skill Tree Calculation:');
+    roots.forEach((root) => {
+      const rootNode = skillMap.get(root.id);
+      if (rootNode) {
+        fillGained(rootNode);
+        printTree(rootNode);
+      }
+    });
+
+    console.log('Roots:', roots);
 
     // 8. แยก specific (hard) และ soft skill
     const specific = roots.filter(
@@ -153,6 +183,7 @@ export class SkillCollectionsService {
         r.domain === LearningDomain.Cognitive ||
         r.domain === LearningDomain.Psychomotor,
     );
+
     const soft = roots.filter(
       (r) =>
         r.domain === LearningDomain.Affective ||
@@ -1100,5 +1131,10 @@ export class SkillCollectionsService {
         `Failed to generate test data: ${error.message}`,
       );
     }
+  }
+
+  generateTestSkillCollections() {
+    
+    
   }
 }
