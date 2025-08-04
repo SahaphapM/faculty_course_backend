@@ -11,8 +11,7 @@ import {
 import { InternshipsService } from './internships.service';
 import { CreateInternshipWithStudentDto } from './dto/create.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
-import { ApiParam, ApiQuery } from '@nestjs/swagger';
-import { UpdateSkillAssessmentDto } from 'src/generated/nestjs-dto/update-skillAssessment.dto';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('internships')
 export class InternshipsController {
@@ -45,52 +44,5 @@ export class InternshipsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.internshipsService.remove(+id);
-  }
-
-  @Patch('skill-assessments/:skillAssessmentId/:studentInternshipId')
-  updateSkillAssessment(
-    @Param('skillAssessmentId') skillAssessmentId: string,
-    @Param('studentInternshipId') studentInternshipId: string,
-    @Body() updateSkillAssessmentDto: UpdateSkillAssessmentDto,
-  ) {
-    return this.internshipsService.companyAssessment(
-      +skillAssessmentId,
-      +studentInternshipId,
-      updateSkillAssessmentDto,
-    );
-  }
-
-  @Patch('company-submit-assessment/:studentInternshipId')
-  companySubmitAssessment(
-    @Param('studentInternshipId') studentInternshipId: string,
-  ) {
-    return this.internshipsService.companySubmitAssessment(
-      +studentInternshipId,
-    );
-  }
-
-  @Patch('curriculum-final-assessment/:skillAssessmentId')
-  curriculumFinalAssessment(
-    @Param('skillAssessmentId') skillAssessmentId: string,
-    @Body() updateSkillAssessmentDto: UpdateSkillAssessmentDto,
-  ) {
-    return this.internshipsService.curriculumFinalAssessment(
-      +skillAssessmentId,
-      updateSkillAssessmentDto,
-    );
-  }
-
-  @Get(':id/skill-assessment')
-  getSkillAssessment(@Param('id') id: string) {
-    return this.internshipsService.skillAssessment(+id);
-  }
-
-  @Get(':id/students/:studentId/assessment')
-  @ApiParam({ name: 'studentId', type: String, description: 'Student ID' })
-  getStudentAssessment(
-    @Param('id') id: string,
-    @Param('studentId') studentId: string,
-  ) {
-    return this.internshipsService.getStudentAssessment(+id, +studentId);
   }
 }
