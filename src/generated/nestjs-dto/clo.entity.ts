@@ -1,8 +1,8 @@
 
 import {ApiProperty} from '@nestjs/swagger'
 import {Plo} from './plo.entity'
-import {Subject} from './subject.entity'
 import {Skill} from './skill.entity'
+import {Subject} from './subject.entity'
 import {SkillCollection} from './skillCollection.entity'
 
 
@@ -58,17 +58,17 @@ expectSkillLevel: number  | null;
 })
 plo?: Plo  | null;
 @ApiProperty({
-  type: () => Subject,
-  required: false,
-  nullable: true,
-})
-subject?: Subject  | null;
-@ApiProperty({
   type: () => Skill,
   required: false,
   nullable: true,
 })
 skill?: Skill  | null;
+@ApiProperty({
+  type: () => Subject,
+  required: false,
+  nullable: true,
+})
+subject?: Subject  | null;
 @ApiProperty({
   type: () => SkillCollection,
   isArray: true,

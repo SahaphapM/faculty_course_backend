@@ -1,9 +1,9 @@
 
 import {ApiProperty} from '@nestjs/swagger'
 import {Clo} from './clo.entity'
+import {Course} from './course.entity'
 import {Lesson} from './lesson.entity'
 import {Curriculum} from './curriculum.entity'
-import {Course} from './course.entity'
 
 
 export class Subject {
@@ -62,6 +62,12 @@ isRoot: boolean  | null;
 })
 clos?: Clo[] ;
 @ApiProperty({
+  type: () => Course,
+  isArray: true,
+  required: false,
+})
+courses?: Course[] ;
+@ApiProperty({
   type: () => Lesson,
   required: false,
   nullable: true,
@@ -72,10 +78,4 @@ lesson?: Lesson  | null;
   required: false,
 })
 curriculum?: Curriculum ;
-@ApiProperty({
-  type: () => Course,
-  isArray: true,
-  required: false,
-})
-courses?: Course[] ;
 }

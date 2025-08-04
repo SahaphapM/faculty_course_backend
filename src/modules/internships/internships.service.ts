@@ -1,8 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInternshipWithStudentDto } from './dto/create.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { UpdateSkillAssessmentDto } from 'src/generated/nestjs-dto/update-skillAssessment.dto';
+import { randomBytes } from 'crypto';
 
 @Injectable()
 export class InternshipsService {
@@ -11,9 +12,12 @@ export class InternshipsService {
   async create(createInternshipDto: CreateInternshipWithStudentDto) {
     const { studentInternships, companyId, ...rest } = createInternshipDto;
 
+    const token = randomBytes(16).toString('hex');
+
     const internship = await this.prisma.internship.create({
       data: {
         ...rest,
+        token: token,
         company: { connect: { id: companyId } },
       },
     });
@@ -84,6 +88,7 @@ export class InternshipsService {
   }
 
   findOne(id: number) {
+    // หา internship ด้วย id สําหรับ หลักสูตร
     return this.prisma.internship.findUnique({
       where: { id },
       include: {
@@ -192,6 +197,36 @@ export class InternshipsService {
     });
   }
 
+  /////////////////////////////////// Assessment ///////////////////////////////////
+
+  // หา internship ด้วย token สำหรับ company
+  findOneByToken(token: string) {
+    return this.prisma.internship.findUnique({
+      where: { token: token },
+      select: {
+        year: true,
+        studentInternships: {
+          select: {
+            id: true,
+            student: {
+              select: {
+                code: true,
+                thaiName: true,
+                branch: { select: { thaiName: true } },
+              },
+            },
+            jobPosition: { select: { name: true } },
+          },
+        },
+        company: {
+          select: {
+            name: true,
+          },
+        },
+      },
+    });
+  }
+
   skillAssessment(internshipId: number) {
     return this.prisma.internship.findUnique({
       where: { id: internshipId },
@@ -248,13 +283,48 @@ export class InternshipsService {
     });
   }
 
-  updateSkillAssessment(
+  async companyAssessment(
+    skillAssessmentId: number,
+    studentInternshipId: number,
+    updateSkillAssessmentDto: UpdateSkillAssessmentDto,
+  ) {
+    const { companyLevel, companyComment } = updateSkillAssessmentDto;
+
+    const studentInternship = await this.prisma.student_internship.findUnique({
+      where: { id: studentInternshipId },
+      select: {
+        isAssessed: true,
+      },
+    });
+
+    if (studentInternship.isAssessed) {
+      throw new BadRequestException('Student is already assessed');
+    }
+
+    return this.prisma.skill_assessment.update({
+      where: { id: skillAssessmentId },
+      data: { companyLevel, companyComment },
+    });
+  }
+
+  companySubmitAssessment(internshipId: number) {
+    // ทำการเปลี่ยนสถานะ isAssessed เป็น true เมื่อประเมินเสร็จสิ้น ป้องกัน company ประเมินซ้ำ
+    return this.prisma.student_internship.updateMany({
+      where: { internshipId },
+      data: { isAssessed: true },
+    });
+  }
+
+  curriculumFinalAssessment(
+    // ประเมินจากหลักสูตร
     skillAssessmentId: number,
     updateSkillAssessmentDto: UpdateSkillAssessmentDto,
   ) {
+    const { finalLevel, curriculumComment } = updateSkillAssessmentDto;
+
     return this.prisma.skill_assessment.update({
       where: { id: skillAssessmentId },
-      data: { ...updateSkillAssessmentDto },
+      data: { finalLevel, curriculumComment },
     });
   }
 }

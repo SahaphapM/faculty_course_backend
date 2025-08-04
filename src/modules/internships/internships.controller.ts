@@ -47,14 +47,34 @@ export class InternshipsController {
     return this.internshipsService.remove(+id);
   }
 
-  
-
-  @Patch('skill-assessments/:skillAssessmentId')
+  @Patch('skill-assessments/:skillAssessmentId/:studentInternshipId')
   updateSkillAssessment(
+    @Param('skillAssessmentId') skillAssessmentId: string,
+    @Param('studentInternshipId') studentInternshipId: string,
+    @Body() updateSkillAssessmentDto: UpdateSkillAssessmentDto,
+  ) {
+    return this.internshipsService.companyAssessment(
+      +skillAssessmentId,
+      +studentInternshipId,
+      updateSkillAssessmentDto,
+    );
+  }
+
+  @Patch('company-submit-assessment/:studentInternshipId')
+  companySubmitAssessment(
+    @Param('studentInternshipId') studentInternshipId: string,
+  ) {
+    return this.internshipsService.companySubmitAssessment(
+      +studentInternshipId,
+    );
+  }
+
+  @Patch('curriculum-final-assessment/:skillAssessmentId')
+  curriculumFinalAssessment(
     @Param('skillAssessmentId') skillAssessmentId: string,
     @Body() updateSkillAssessmentDto: UpdateSkillAssessmentDto,
   ) {
-    return this.internshipsService.updateSkillAssessment(
+    return this.internshipsService.curriculumFinalAssessment(
       +skillAssessmentId,
       updateSkillAssessmentDto,
     );

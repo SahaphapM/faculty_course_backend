@@ -1,11 +1,10 @@
 
-import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
-import {SkillCollection} from './skillCollection.entity'
-import {StudentInternship} from './studentInternship.entity'
 import {SkillAssessment} from './skillAssessment.entity'
-import {Curriculum} from './curriculum.entity'
+import {SkillCollection} from './skillCollection.entity'
 import {Branch} from './branch.entity'
+import {Curriculum} from './curriculum.entity'
+import {StudentInternship} from './studentInternship.entity'
 import {User} from './user.entity'
 
 
@@ -31,33 +30,15 @@ engName: string  | null;
 })
 enrollmentDate: Date  | null;
 @ApiProperty({
-  type: () => Object,
+  type: 'string',
   nullable: true,
 })
-socials: Prisma.JsonValue  | null;
+socials: string  | null;
 @ApiProperty({
   type: 'string',
   nullable: true,
 })
 thaiName: string  | null;
-@ApiProperty({
-  type: () => SkillCollection,
-  isArray: true,
-  required: false,
-})
-skill_collections?: SkillCollection[] ;
-@ApiProperty({
-  type: () => StudentInternship,
-  isArray: true,
-  required: false,
-})
-student_internships?: StudentInternship[] ;
-@ApiProperty({
-  type: () => SkillAssessment,
-  isArray: true,
-  required: false,
-})
-skill_assessments?: SkillAssessment[] ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
@@ -65,17 +46,29 @@ skill_assessments?: SkillAssessment[] ;
 })
 curriculumId: number  | null;
 @ApiProperty({
-  type: () => Curriculum,
-  required: false,
-  nullable: true,
-})
-curriculum?: Curriculum  | null;
-@ApiProperty({
   type: 'integer',
   format: 'int32',
   nullable: true,
 })
 branchId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+userId: number  | null;
+@ApiProperty({
+  type: () => SkillAssessment,
+  isArray: true,
+  required: false,
+})
+skill_assessments?: SkillAssessment[] ;
+@ApiProperty({
+  type: () => SkillCollection,
+  isArray: true,
+  required: false,
+})
+skill_collections?: SkillCollection[] ;
 @ApiProperty({
   type: () => Branch,
   required: false,
@@ -83,11 +76,17 @@ branchId: number  | null;
 })
 branch?: Branch  | null;
 @ApiProperty({
-  type: 'integer',
-  format: 'int32',
+  type: () => Curriculum,
+  required: false,
   nullable: true,
 })
-userId: number  | null;
+curriculum?: Curriculum  | null;
+@ApiProperty({
+  type: () => StudentInternship,
+  isArray: true,
+  required: false,
+})
+student_internships?: StudentInternship[] ;
 @ApiProperty({
   type: () => User,
   required: false,

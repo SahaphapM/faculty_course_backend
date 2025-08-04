@@ -1,7 +1,7 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {Student} from './student.entity'
 import {Instructor} from './instructor.entity'
+import {Student} from './student.entity'
 
 
 export class User {
@@ -40,12 +40,6 @@ hashedRefreshToken: string  | null;
 })
 studentId: number  | null;
 @ApiProperty({
-  type: () => Student,
-  required: false,
-  nullable: true,
-})
-student?: Student  | null;
-@ApiProperty({
   type: 'integer',
   format: 'int32',
   nullable: true,
@@ -57,4 +51,10 @@ instructorId: number  | null;
   nullable: true,
 })
 instructor?: Instructor  | null;
+@ApiProperty({
+  type: () => Student,
+  required: false,
+  nullable: true,
+})
+student?: Student  | null;
 }

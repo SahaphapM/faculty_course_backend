@@ -1,7 +1,7 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {Instructor} from './instructor.entity'
 import {Curriculum} from './curriculum.entity'
+import {Instructor} from './instructor.entity'
 
 
 export class CurriculumCoordinators {
@@ -16,13 +16,13 @@ instructorId: number ;
 })
 curriculumId: number ;
 @ApiProperty({
-  type: () => Instructor,
-  required: false,
-})
-instructor?: Instructor ;
-@ApiProperty({
   type: () => Curriculum,
   required: false,
 })
 curriculum?: Curriculum ;
+@ApiProperty({
+  type: () => Instructor,
+  required: false,
+})
+instructor?: Instructor ;
 }
