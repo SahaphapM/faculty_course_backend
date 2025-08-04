@@ -54,10 +54,7 @@ export class SkillCollectionsService {
           select: {
             id: true,
             parentId: true,
-            thaiName: true,
             engName: true,
-            thaiDescription: true,
-            engDescription: true,
             domain: true,
           },
         },
@@ -89,9 +86,19 @@ export class SkillCollectionsService {
 
     const allSkills = await this.getSkillsWithParents(allSkillIds);
 
-    // 4. สร้าง map สำหรับ lookup skill
+    // 4. สร้าง map สำหรับ lookup skill (custom field)
     const skillMap = new Map(
-      allSkills.map((s) => [s.id, { ...s, subskills: [], gained: 0 }]),
+      allSkills.map((s) => [
+        s.id,
+        {
+          id: s.id,
+          name: s.engName,
+          domain: s.domain,
+          parentId: s.parentId || null,
+          gained: 0,
+          subskills: [],
+        },
+      ]),
     );
 
     // 5. ใส่ gained จาก skill_collection ให้กับ leaf skill ก่อน
@@ -104,14 +111,17 @@ export class SkillCollectionsService {
       }
     }
 
-    // 5. ใส่ finalLevel ให้ skill จาก assessment
+    // 6. ใส่ finalLevel ให้ skill จาก assessment
     for (const assessment of assessments) {
       if (assessment.skillId && skillMap.has(assessment.skillId)) {
-        skillMap.get(assessment.skillId)!.gained = assessment.finalLevel;
+        skillMap.get(assessment.skillId)!.gained =
+          assessment.finalLevel !== 0
+            ? assessment.finalLevel // ใช้ finalLevel ถ้ามี
+            : assessment.companyLevel; // ใช้ companyLevel ถ้าไม่มี finalLevel
       }
     }
 
-    // 6. ประกอบ tree จาก skillMap
+    // 7. ประกอบ tree จาก skillMap
     const roots: any[] = [];
 
     for (const skill of skillMap.values()) {
@@ -135,7 +145,7 @@ export class SkillCollectionsService {
       }
     }
 
-    // 9️⃣ ฟังก์ชันคำนวณ Mode
+    // 8. ฟังก์ชันคำนวณ Mode
     function calculateMode(arr: number[]): number {
       const count = new Map<number, number>();
       arr.forEach((n) => count.set(n, (count.get(n) || 0) + 1));
@@ -147,7 +157,7 @@ export class SkillCollectionsService {
       return Math.max(...modes);
     }
 
-    // 🔟 ฟังก์ชัน recursive fill gained level
+    // 9. ฟังก์ชัน recursive fill gained level
     function fillGained(node: any): number | undefined {
       if (!node.subskills.length) return node.gained;
       const childGained = node.subskills
@@ -157,7 +167,7 @@ export class SkillCollectionsService {
       return node.gained;
     }
 
-    // 11️⃣ Debug Tree
+    // 10. Debug Tree
     function printTree(node: any, indent = '') {
       console.log(`${indent}- Skill ${node.id} (level ${node.gained || 0})`);
       for (const child of node.subskills) {
@@ -165,7 +175,7 @@ export class SkillCollectionsService {
       }
     }
 
-    // 12️⃣ คำนวณ root gained level และ debug
+    // 11. คำนวณ root gained level และ debug
     console.log('\n[DEBUG] Skill Tree Calculation:');
     roots.forEach((root) => {
       const rootNode = skillMap.get(root.id);
@@ -177,7 +187,7 @@ export class SkillCollectionsService {
 
     console.log('Roots:', roots);
 
-    // 8. แยก specific (hard) และ soft skill
+    // 12. แยก specific (hard) และ soft skill
     const specific = roots.filter(
       (r) =>
         r.domain === LearningDomain.Cognitive ||
@@ -1133,8 +1143,5 @@ export class SkillCollectionsService {
     }
   }
 
-  generateTestSkillCollections() {
-    
-    
-  }
+  generateTestSkillCollections() {}
 }
