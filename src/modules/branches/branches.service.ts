@@ -11,7 +11,7 @@ import { BranchFilterDto } from 'src/dto/filters/filter.branch.dto';
 
 @Injectable()
 export class BranchesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(dto: CreateBranchDto) {
     try {
@@ -109,6 +109,7 @@ export class BranchesService {
 
       return branch;
     } catch (error) {
+      console.error(error);
       throw new Error('Failed to fetch branch');
     }
   }
@@ -122,6 +123,7 @@ export class BranchesService {
 
       return branch;
     } catch (error) {
+      console.error(error);
       throw new Error('Failed to update branch');
     }
   }
@@ -132,6 +134,7 @@ export class BranchesService {
         where: { id },
       });
     } catch (error) {
+      console.error(error);
       throw new Error('Failed to remove branch');
     }
   }
