@@ -4,13 +4,39 @@ import {
   ArgumentsHost,
   HttpException,
   Logger,
+  Injectable,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { Prisma } from '@prisma/client';
+import { GraylogService } from './logging/graylog.service';
+
+function redact(obj: any, fields: string[]): any {
+  if (!obj || typeof obj !== 'object') return obj;
+  if (Array.isArray(obj)) return obj.map((i) => redact(i, fields));
+  const out: any = {};
+  for (const [k, v] of Object.entries(obj)) {
+    if (fields.includes(k.toLowerCase())) {
+      out[k] = '***redacted***';
+    } else if (v && typeof v === 'object') {
+      out[k] = redact(v, fields);
+    } else out[k] = v;
+  }
+  return out;
+}
 
 @Catch()
+@Injectable()
 export class AllExceptionsFilter implements ExceptionFilter {
   private readonly logger = new Logger(AllExceptionsFilter.name);
+  private readonly redactFields: string[];
+
+  constructor(private readonly graylog: GraylogService) {
+    const conf = process.env.LOG_REDACT_FIELDS || 'password,token,authorization';
+    this.redactFields = conf
+      .split(',')
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean);
+  }
 
   catch(exception: unknown, host: ArgumentsHost) {
     const ctx = host.switchToHttp();
@@ -73,11 +99,29 @@ export class AllExceptionsFilter implements ExceptionFilter {
       details = exception.stack;
     }
 
-    // Log the error with more details
+    // Log the error with more details locally
     this.logger.error(
       `[${request.method}] ${request.url} - ${message}`,
       JSON.stringify(details, null, 2),
     );
+
+    // Emit to Graylog with request context and stack
+    const safeHeaders = redact(request.headers, this.redactFields);
+    const safeBody = redact(request.body, this.redactFields);
+    const safeQuery = redact(request.query, this.redactFields);
+    const safeParams = redact(request.params, this.redactFields);
+
+    this.graylog.error('Unhandled exception', exception instanceof Error ? exception : new Error(message), {
+      method: request.method,
+      url: request.originalUrl || request.url,
+      ip: request.ip,
+      statusCode: status,
+      message,
+      headers: safeHeaders,
+      body: safeBody,
+      query: safeQuery,
+      params: safeParams,
+    });
 
     // Return structured error response
     response.status(status).json({

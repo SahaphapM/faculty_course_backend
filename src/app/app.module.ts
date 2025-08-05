@@ -23,6 +23,7 @@ import { AuthModule } from 'src/auth/auth.module';
 import { CompaniesModule } from 'src/modules/companies/companies.module';
 import { InternshipsModule } from 'src/modules/internships/internships.module';
 import { JobPositionsModule } from 'src/modules/job-positions/job-positions.module';
+import { LoggingModule } from 'src/logging/logging.module';
 
 @Module({
   imports: [
@@ -34,6 +35,7 @@ import { JobPositionsModule } from 'src/modules/job-positions/job-positions.modu
       isGlobal: true,
       envFilePath: '.env',
     }),
+    LoggingModule,
     UsersModule,
     CurriculumsModule,
     BranchesModule,
