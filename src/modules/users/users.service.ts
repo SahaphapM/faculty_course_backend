@@ -8,7 +8,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
 import { Prisma } from '@prisma/client';
-import * as bycrpt from 'bcrypt';
+import * as bcrypt from '@node-rs/bcrypt';
 import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
 
 @Injectable()
@@ -26,7 +26,7 @@ export class UsersService {
       );
     }
 
-    const hashedPassword = await bycrpt.hash(createUserDto.password, 10);
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
     return await this.prisma.user.create({
       data: { ...createUserDto, password: hashedPassword },
@@ -96,7 +96,7 @@ export class UsersService {
     }
     let hashedPassword = undefined;
     if (dto.password) {
-      hashedPassword = await bycrpt.hash(dto.password, 10);
+      hashedPassword = await bcrypt.hash(dto.password, 10);
     }
 
     const data: Prisma.userUpdateInput = {

@@ -1,5 +1,5 @@
 import { PrismaClient } from '@prisma/client';
-import * as bcrypt from 'bcrypt';
+import * as bcrypt from '@node-rs/bcrypt';
 import * as path from 'path';
 import * as fs from 'fs/promises';
 import { UserRole } from 'src/enums/role.enum';
