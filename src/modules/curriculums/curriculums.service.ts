@@ -125,11 +125,7 @@ export class CurriculumsService {
     });
 
     if (!curriculum) {
-      // throw new NotFoundException(`Curriculum with code ${code} not found`);
-      return {
-        statusCode: HttpStatus.NOT_FOUND,
-        message: `Curriculum with code ${code} not found`,
-      };
+      throw new NotFoundException(`Curriculum with code ${code} not found`);
     }
 
     return curriculum;
