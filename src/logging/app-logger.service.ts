@@ -3,8 +3,8 @@ import { GraylogService } from './graylog.service';
 
 /**
  * Custom application logger that writes directly to console.* methods to avoid
- * Nest's Logger recursion when set via app.useLogger(). It also forwards logs
- * once to GraylogService.
+ * Nest's Logger recursion when set via app.useLogger(). It forwards logs
+ * to GraylogService for centralized logging.
  */
 @Injectable()
 export class AppLoggerService implements NestLoggerService {
@@ -45,22 +45,15 @@ export class AppLoggerService implements NestLoggerService {
     this.graylog.warn(String(message), { context }).catch(() => void 0);
   }
 
-  debug?(message: any, context?: string) {
-    // Use console.debug for dev visibility
+  debug(message: any, context?: string) {
     console.debug(this.format(context, message));
     this.graylog.debug(String(message), { context }).catch(() => void 0);
   }
 
-  verbose?(message: any, context?: string) {
-    // Map verbose -> debug
-    console.debug(this.format(context, message));
+  verbose(message: any, context?: string) {
+    console.log(this.format(context, `[VERBOSE] ${message}`));
     this.graylog
-      .debug(String(message), { context, verbose: true })
+      .debug(String(message), { level: 'debug', context })
       .catch(() => void 0);
   }
-
-  // Optional: override setLogLevels if Nest calls it; no-op to avoid recursion
-  /* eslint-disable @typescript-eslint/no-empty-function */
-  setLogLevels?(): void {}
-  /* eslint-enable @typescript-eslint/no-empty-function */
 }

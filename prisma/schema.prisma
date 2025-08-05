@@ -281,6 +281,7 @@ model user {
   student            student?    @relation(fields: [studentId], references: [id], onUpdate: NoAction)
 
   @@unique([instructorId, studentId])
+  audit_logs audit_log[]
 }
 
 model company {
@@ -361,4 +362,20 @@ model skill_assessment {
   @@unique([skillId, studentId])
   @@index([skillId, studentId])
   @@index([studentId], map: "skill_assessment_studentId_fkey")
+}
+
+model audit_log {
+  id        Int      @id @default(autoincrement())
+  userId    Int?
+  user      user?    @relation(fields: [userId], references: [id])
+  action    String   @db.VarChar(100)
+  resource  String   @db.VarChar(100)
+  resourceId String? @db.VarChar(255)
+  timestamp DateTime @default(now()) @db.DateTime(0)
+  metadata  String?  @db.Text
+
+  @@index([userId])
+  @@index([action])
+  @@index([resource])
+  @@index([timestamp])
 }

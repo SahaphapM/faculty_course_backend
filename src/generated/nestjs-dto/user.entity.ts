@@ -2,6 +2,7 @@
 import {ApiProperty} from '@nestjs/swagger'
 import {Instructor} from './instructor.entity'
 import {Student} from './student.entity'
+import {AuditLog} from './auditLog.entity'
 
 
 export class User {
@@ -57,4 +58,10 @@ instructor?: Instructor  | null;
   nullable: true,
 })
 student?: Student  | null;
+@ApiProperty({
+  type: () => AuditLog,
+  isArray: true,
+  required: false,
+})
+audit_logs?: AuditLog[] ;
 }

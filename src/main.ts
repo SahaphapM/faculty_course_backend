@@ -6,6 +6,8 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { PrismaClientExceptionFilter } from 'nestjs-prisma';
 import { LoggingInterceptor } from './logging/logging.interceptor';
 import { AppLoggerService } from './logging/app-logger.service';
+import { AuditLogInterceptor } from './logging/audit-log.interceptor';
+import { AuditLogDecoratorInterceptor } from './logging/audit-log-decorator.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -33,7 +35,11 @@ async function bootstrap() {
   app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
 
   // Global HTTP logging interceptor
-  app.useGlobalInterceptors(app.get(LoggingInterceptor));
+  app.useGlobalInterceptors(
+    app.get(LoggingInterceptor),
+    app.get(AuditLogInterceptor),
+    app.get(AuditLogDecoratorInterceptor)
+  );
 
   const config = new DocumentBuilder()
     .setTitle('BUU APIs')
