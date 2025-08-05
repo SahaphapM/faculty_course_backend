@@ -23,65 +23,81 @@ This is the backend service for a skill mapping application built with NestJS, P
 
 ## 📋 Prerequisites
 
-- Node.js 18+ (for compatibility)
-- Bun runtime (recommended for better performance)
-- PostgreSQL database
-- Prisma CLI
+- **Node.js 18+** (recommended: Node.js 22+)
+- **Package Manager**: npm 8+ OR yarn 1.22+ (developer's choice - see [Package Manager Guide](./PACKAGE_MANAGER_GUIDE.md))
+- **MySQL database** (as configured in your environment)
+- **Git** for version control
 
-## 🛠️ Installation
+For detailed cross-platform setup, see [CROSS_PLATFORM_SETUP.md](./CROSS_PLATFORM_SETUP.md)
 
-### Option 1: Using Bun (Recommended)
+## 🛠️ Quick Setup
 
+### 1. Install Dependencies
 ```bash
-# Install dependencies with Bun
-$ bun install
+# Clone the repository
+git clone <repository-url>
+cd skill-mapping-backend
 
-# Generate Prisma client
-$ bunx prisma generate
+# Install dependencies (choose your preferred package manager)
+npm install
+# OR
+yarn install
 ```
 
-### Option 2: Using npm (Fallback)
-
+### 2. Environment Configuration
 ```bash
-# Install dependencies with npm
-$ npm install
+# Copy environment template
+cp .env.example .env
 
-# Generate Prisma client
-$ npx prisma generate
+# Edit .env file with your database credentials
+# DATABASE_URL="mysql://user:password@localhost:3306/skill_mapping_db"
 ```
 
-## 🗄️ Database Setup
-
-### Initial Database Migration
-
+### 3. Database Setup
 ```bash
-# Run initial migration with Bun (recommended)
-$ bunx prisma migrate dev --name init
+# Quick database setup (migrations + seed data)
+npm run db:setup
+# OR
+yarn db:setup
 
-# Or with npm
-$ npx prisma migrate dev --name init
+# OR manual step-by-step:
+npm run prisma:migrate:dev && npm run prisma:seed
+# OR
+yarn prisma:migrate:dev && yarn prisma:seed
 ```
 
-### Seeding Initial Data
-
+### 4. Start Development
 ```bash
-# Run database seed with Bun
-$ bunx prisma db seed
-
-# Or with npm
-$ npx prisma db seed
+# Start development server
+npm run start:dev
+# OR
+yarn start:dev
 ```
 
-### Updating Database Schema
+## 🗄️ Database Management
 
-When you need to update your database schema:
+For comprehensive database operations and team collaboration workflows, see the detailed [DATABASE_SETUP.md](./DATABASE_SETUP.md) guide.
 
+For package manager choice and usage instructions, see the [Package Manager Guide](./PACKAGE_MANAGER_GUIDE.md).
+
+### Quick Database Commands
 ```bash
-# Create and apply new migration with Bun
-$ bunx prisma migrate dev --name <migration-name>
+# Development workflow (choose npm or yarn)
+npm run start:dev              # Start with auto-reload
+npm run prisma:migrate:dev     # Create/apply migrations  
+npm run prisma:studio          # Open database GUI
+npm run db:reset               # Reset database completely
 
-# Or with npm
-$ npx prisma migrate dev --name <migration-name>
+# OR with yarn
+yarn start:dev              # Start with auto-reload
+yarn prisma:migrate:dev     # Create/apply migrations  
+yarn prisma:studio          # Open database GUI
+yarn db:reset               # Reset database completely
+
+# Schema management (works with both npm and yarn)
+prisma db pull             # Pull from database
+prisma db push             # Push to database (dev only)
+prisma generate            # Regenerate client
 ```
 
 ## 🏃 Running the App

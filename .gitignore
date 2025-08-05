@@ -65,3 +65,4 @@ prisma/ERD.svg
 /src/generated/*
 
 
+.yarn/install-state.gz
