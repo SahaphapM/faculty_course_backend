@@ -1,0 +1,26 @@
+[
+  {
+    "type": "ความรู้",
+    "name": "PLO1",
+    "thaiDescription": "มีความรู้และความเข้าใจในหลักการและทฤษฎีที่สำคัญในสาขาวิชาวิศวกรรมคอมพิวเตอร์",
+    "engDescription": "Have knowledge and understanding of important principles and theories in computer engineering"
+  },
+  {
+    "type": "ทักษะ",
+    "name": "PLO2",
+    "thaiDescription": "มีความสามารถในการวิเคราะห์ปัญหาและออกแบบระบบคอมพิวเตอร์",
+    "engDescription": "Have ability to analyze problems and design computer systems"
+  },
+  {
+    "type": "คุณลักษณะบุคคล",
+    "name": "PLO3",
+    "thaiDescription": "มีความรับผิดชอบต่อสังคมและสิ่งแวดล้อม",
+    "engDescription": "Have responsibility to society and environment"
+  },
+  {
+    "type": "จริยธรรม",
+    "name": "PLO4",
+    "thaiDescription": "มีจริยธรรมในการใช้และพัฒนาเทคโนโลยี",
+    "engDescription": "Have ethics in using and developing technology"
+  }
+]

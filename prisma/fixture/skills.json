@@ -1,0 +1,240 @@
+[
+  {
+    "thaiName": "การเขียนโปรแกรมคอมพิวเตอร์",
+    "engName": "Computer Programming",
+    "thaiDescription": "ความสามารถในการเขียนโปรแกรมคอมพิวเตอร์ในภาษาต่างๆ",
+    "engDescription": "Ability to write computer programs in various programming languages",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การออกแบบฐานข้อมูล",
+    "engName": "Database Design",
+    "thaiDescription": "ความสามารถในการออกแบบและจัดการระบบฐานข้อมูล",
+    "engDescription": "Ability to design and manage database systems",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การพัฒนาเว็บแอปพลิเคชัน",
+    "engName": "Web Application Development",
+    "thaiDescription": "ความสามารถในการพัฒนาเว็บแอปพลิเคชันสมัยใหม่",
+    "engDescription": "Ability to develop modern web applications",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การวิเคราะห์และออกแบบระบบ",
+    "engName": "System Analysis and Design",
+    "thaiDescription": "ความสามารถในการวิเคราะห์และออกแบบระบบสารสนเทศ",
+    "engDescription": "Ability to analyze and design information systems",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การทดสอบซอฟต์แวร์",
+    "engName": "Software Testing",
+    "thaiDescription": "ความสามารถในการทดสอบและประกันคุณภาพซอฟต์แวร์",
+    "engDescription": "Ability to test and ensure software quality",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การจัดการเครือข่าย",
+    "engName": "Network Management",
+    "thaiDescription": "ความสามารถในการจัดการและดูแลระบบเครือข่าย",
+    "engDescription": "Ability to manage and maintain network systems",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การพัฒนาแอปพลิเคชันมือถือ",
+    "engName": "Mobile Application Development",
+    "thaiDescription": "ความสามารถในการพัฒนาแอปพลิเคชันสำหรับอุปกรณ์มือถือ",
+    "engDescription": "Ability to develop mobile applications",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การรักษาความปลอดภัยไซเบอร์",
+    "engName": "Cybersecurity",
+    "thaiDescription": "ความสามารถในการรักษาความปลอดภัยของระบบคอมพิวเตอร์",
+    "engDescription": "Ability to secure computer systems",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การใช้ระบบคลาวด์",
+    "engName": "Cloud Computing",
+    "thaiDescription": "ความสามารถในการใช้และจัดการบริการคลาวด์",
+    "engDescription": "Ability to use and manage cloud services",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การวิเคราะห์ข้อมูล",
+    "engName": "Data Analysis",
+    "thaiDescription": "ความสามารถในการวิเคราะห์และตีความข้อมูล",
+    "engDescription": "Ability to analyze and interpret data",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การใช้ปัญญาประดิษฐ์",
+    "engName": "Artificial Intelligence",
+    "thaiDescription": "ความสามารถในการประยุกต์ใช้เทคโนโลยี AI",
+    "engDescription": "Ability to apply AI technology",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การพัฒนา API",
+    "engName": "API Development",
+    "thaiDescription": "ความสามารถในการพัฒนาและจัดการ API",
+    "engDescription": "Ability to develop and manage APIs",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การใช้ระบบควบคุมเวอร์ชัน",
+    "engName": "Version Control Systems",
+    "thaiDescription": "ความสามารถในการใช้ Git และระบบควบคุมเวอร์ชัน",
+    "engDescription": "Ability to use Git and version control systems",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การพัฒนาระบบ DevOps",
+    "engName": "DevOps Development",
+    "thaiDescription": "ความสามารถในการใช้เครื่องมือและกระบวนการ DevOps",
+    "engDescription": "Ability to use DevOps tools and processes",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การพัฒนาเกม",
+    "engName": "Game Development",
+    "thaiDescription": "ความสามารถในการพัฒนาเกมคอมพิวเตอร์",
+    "engDescription": "Ability to develop computer games",
+    "domain": "ทักษะ"
+  },
+  {
+    "thaiName": "การสื่อสารอย่างมีประสิทธิภาพ",
+    "engName": "Effective Communication",
+    "thaiDescription": "ความสามารถในการสื่อสารอย่างชัดเจนและมีประสิทธิภาพ",
+    "engDescription": "Ability to communicate clearly and effectively",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การทำงานเป็นทีม",
+    "engName": "Teamwork",
+    "thaiDescription": "ความสามารถในการทำงานร่วมกับผู้อื่นอย่างมีประสิทธิภาพ",
+    "engDescription": "Ability to work effectively with others",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "ภาวะผู้นำ",
+    "engName": "Leadership",
+    "thaiDescription": "ความสามารถในการเป็นผู้นำและจูงใจทีมงาน",
+    "engDescription": "Ability to lead and motivate teams",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การแก้ปัญหาอย่างสร้างสรรค์",
+    "engName": "Creative Problem Solving",
+    "thaiDescription": "ความสามารถในการแก้ปัญหาด้วยวิธีการสร้างสรรค์",
+    "engDescription": "Ability to solve problems creatively",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การจัดการเวลา",
+    "engName": "Time Management",
+    "thaiDescription": "ความสามารถในการจัดการเวลาอย่างมีประสิทธิภาพ",
+    "engDescription": "Ability to manage time effectively",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การปรับตัวและยืดหยุ่น",
+    "engName": "Adaptability and Flexibility",
+    "thaiDescription": "ความสามารถในการปรับตัวต่อการเปลี่ยนแปลง",
+    "engDescription": "Ability to adapt to changes",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การคิดวิเคราะห์",
+    "engName": "Critical Thinking",
+    "thaiDescription": "ความสามารถในการคิดวิเคราะห์และประเมินสถานการณ์",
+    "engDescription": "Ability to think critically and evaluate situations",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "ความคิดสร้างสรรค์",
+    "engName": "Creativity",
+    "thaiDescription": "ความสามารถในการคิดนอกกรอบและสร้างสรรค์",
+    "engDescription": "Ability to think outside the box and be creative",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การจัดการความเครียด",
+    "engName": "Stress Management",
+    "thaiDescription": "ความสามารถในการจัดการความเครียดอย่างมีประสิทธิภาพ",
+    "engDescription": "Ability to manage stress effectively",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "ความรับผิดชอบ",
+    "engName": "Responsibility",
+    "thaiDescription": "ความรับผิดชอบต่อตนเองและงานที่ได้รับมอบหมาย",
+    "engDescription": "Responsibility for oneself and assigned tasks",
+    "domain": "จริยธรรม"
+  },
+  {
+    "thaiName": "การเรียนรู้ตลอดชีวิต",
+    "engName": "Lifelong Learning",
+    "thaiDescription": "ความสามารถและความตั้งใจในการเรียนรู้อย่างต่อเนื่อง",
+    "engDescription": "Ability and willingness to learn continuously",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "ความเชี่ยวชาญในการนำเสนอ",
+    "engName": "Presentation Skills",
+    "thaiDescription": "ความสามารถในการนำเสนอข้อมูลอย่างมีประสิทธิภาพ",
+    "engDescription": "Ability to present information effectively",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การทำงานภายใต้ความกดดัน",
+    "engName": "Working Under Pressure",
+    "thaiDescription": "ความสามารถในการทำงานได้ดีภายใต้ความกดดัน",
+    "engDescription": "Ability to work well under pressure",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "ความเข้าใจทางวัฒนธรรม",
+    "engName": "Cultural Awareness",
+    "thaiDescription": "ความเข้าใจและเคารพความแตกต่างทางวัฒนธรรม",
+    "engDescription": "Understanding and respect for cultural differences",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การตัดสินใจ",
+    "engName": "Decision Making",
+    "thaiDescription": "ความสามารถในการตัดสินใจอย่างมีเหตุผลและทันเวลา",
+    "engDescription": "Ability to make reasoned and timely decisions",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "ความเป็นผู้นำ",
+    "engName": "Leadership",
+    "thaiDescription": "ความสามารถในการเป็นผู้นำและสร้างแรงบันดาลใจให้กับผู้อื่น",
+    "engDescription": "Ability to lead and inspire others",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การแก้ปัญหาอย่างเป็นระบบ",
+    "engName": "Systematic Problem Solving",
+    "thaiDescription": "ความสามารถในการแก้ปัญหาอย่างเป็นระบบและมีขั้นตอน",
+    "engDescription": "Ability to solve problems systematically and methodically",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การปรับตัว",
+    "engName": "Adaptability",
+    "thaiDescription": "ความสามารถในการปรับตัวเข้ากับสถานการณ์และสภาพแวดล้อมใหม่",
+    "engDescription": "Ability to adapt to new situations and environments",
+    "domain": "คุณลักษณะบุคคล"
+  },
+  {
+    "thaiName": "การคิดเชิงวิเคราะห์",
+    "engName": "Analytical Thinking",
+    "thaiDescription": "ความสามารถในการคิดวิเคราะห์และประเมินข้อมูลอย่างลึกซึ้ง",
+    "engDescription": "Ability to think analytically and evaluate information deeply",
+    "domain": "คุณลักษณะบุคคล"
+  }
+]

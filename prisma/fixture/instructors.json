@@ -1,0 +1,26 @@
+[
+  {
+    "code": "INS001",
+    "thaiName": "ดร.สมชาย ใจดี",
+    "engName": "Dr. Somchai Jaidee",
+    "tel": "038-123-4567",
+    "position": "อาจารย์",
+    "email": "somchai@buu.ac.th"
+  },
+  {
+    "code": "INS002",
+    "thaiName": "ดร.สมหญิง รักดี",
+    "engName": "Dr. Somying Rakdee",
+    "tel": "038-123-4568",
+    "position": "อาจารย์",
+    "email": "somying@buu.ac.th"
+  },
+  {
+    "code": "INS003",
+    "thaiName": "ดร.สมศักดิ์ เก่งดี",
+    "engName": "Dr. Somsak Kengdee",
+    "tel": "038-123-4569",
+    "position": "อาจารย์",
+    "email": "somsak@buu.ac.th"
+  }
+]

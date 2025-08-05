@@ -1,0 +1,209 @@
+[
+  {
+    "studentCode": "65000001",
+    "skillThaiName": "การเขียนโปรแกรมคอมพิวเตอร์",
+    "curriculumLevel": 4,
+    "companyLevel": 3,
+    "finalLevel": 4,
+    "curriculumComment": "นักศึกษามีความสามารถในการเขียนโปรแกรมในระดับดี",
+    "companyComment": "มีความสามารถพื้นฐานที่ดี แต่ยังต้องฝึกฝนเพิ่มเติม"
+  },
+  {
+    "studentCode": "65000001",
+    "skillThaiName": "การออกแบบฐานข้อมูล",
+    "curriculumLevel": 3,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "เข้าใจหลักการออกแบบฐานข้อมูลเป็นอย่างดี",
+    "companyComment": "สามารถประยุกต์ใช้ในงานจริงได้อย่างมีประสิทธิภาพ"
+  },
+  {
+    "studentCode": "65000001",
+    "skillThaiName": "การพัฒนาเว็บแอปพลิเคชัน",
+    "curriculumLevel": 4,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "มีความเชี่ยวชาญในการพัฒนาเว็บแอปพลิเคชัน",
+    "companyComment": "สามารถพัฒนาเว็บแอปพลิเคชันได้อย่างเป็นระบบ"
+  },
+  {
+    "studentCode": "65000001",
+    "skillThaiName": "การวิเคราะห์และออกแบบระบบ",
+    "curriculumLevel": 3,
+    "companyLevel": 3,
+    "finalLevel": 3,
+    "curriculumComment": "สามารถวิเคราะห์และออกแบบระบบได้ในระดับดี",
+    "companyComment": "มีความคิดเชิงระบบที่ดี"
+  },
+  {
+    "studentCode": "65000001",
+    "skillThaiName": "การทดสอบซอฟต์แวร์",
+    "curriculumLevel": 3,
+    "companyLevel": 2,
+    "finalLevel": 3,
+    "curriculumComment": "เข้าใจหลักการทดสอบซอฟต์แวร์",
+    "companyComment": "ยังต้องพัฒนาทักษะการทดสอบในงานจริง"
+  },
+  {
+    "studentCode": "65000002",
+    "skillThaiName": "การเขียนโปรแกรมคอมพิวเตอร์",
+    "curriculumLevel": 3,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "มีพื้นฐานการเขียนโปรแกรมที่ดี",
+    "companyComment": "สามารถเขียนโปรแกรมได้อย่างมีประสิทธิภาพ"
+  },
+  {
+    "studentCode": "65000002",
+    "skillThaiName": "การจัดการเครือข่าย",
+    "curriculumLevel": 4,
+    "companyLevel": 5,
+    "finalLevel": 5,
+    "curriculumComment": "มีความเชี่ยวชาญในการจัดการเครือข่าย",
+    "companyComment": "ความสามารถโดดเด่นในการจัดการระบบเครือข่าย"
+  },
+  {
+    "studentCode": "65000002",
+    "skillThaiName": "การพัฒนาแอปพลิเคชันมือถือ",
+    "curriculumLevel": 3,
+    "companyLevel": 3,
+    "finalLevel": 3,
+    "curriculumComment": "สามารถพัฒนาแอปพลิเคชันมือถือได้",
+    "companyComment": "มีทักษะการพัฒนาแอปมือถือในระดับดี"
+  },
+  {
+    "studentCode": "65000002",
+    "skillThaiName": "การรักษาความปลอดภัยไซเบอร์",
+    "curriculumLevel": 4,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "เข้าใจหลักการรักษาความปลอดภัยไซเบอร์เป็นอย่างดี",
+    "companyComment": "สามารถประยุกต์ใช้ในการรักษาความปลอดภัยระบบ"
+  },
+  {
+    "studentCode": "65000002",
+    "skillThaiName": "การใช้ระบบคลาวด์",
+    "curriculumLevel": 3,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "มีความรู้เกี่ยวกับระบบคลาวด์",
+    "companyComment": "สามารถใช้บริการคลาวด์ได้อย่างมีประสิทธิภาพ"
+  },
+  {
+    "studentCode": "65000003",
+    "skillThaiName": "การวิเคราะห์ข้อมูล",
+    "curriculumLevel": 5,
+    "companyLevel": 4,
+    "finalLevel": 5,
+    "curriculumComment": "มีความเชี่ยวชาญในการวิเคราะห์ข้อมูล",
+    "companyComment": "สามารถวิเคราะห์ข้อมูลเพื่อการตัดสินใจ"
+  },
+  {
+    "studentCode": "65000003",
+    "skillThaiName": "การใช้ปัญญาประดิษฐ์",
+    "curriculumLevel": 4,
+    "companyLevel": 5,
+    "finalLevel": 5,
+    "curriculumComment": "เข้าใจและสามารถประยุกต์ใช้ AI",
+    "companyComment": "มีความสามารถโดดเด่นในการใช้เทคโนโลยี AI"
+  },
+  {
+    "studentCode": "65000003",
+    "skillThaiName": "การพัฒนา API",
+    "curriculumLevel": 4,
+    "companyLevel": 3,
+    "finalLevel": 4,
+    "curriculumComment": "สามารถพัฒนา API ได้อย่างมีประสิทธิภาพ",
+    "companyComment": "มีทักษะการพัฒนา API ที่ดี"
+  },
+  {
+    "studentCode": "65000003",
+    "skillThaiName": "การใช้ระบบควบคุมเวอร์ชัน",
+    "curriculumLevel": 4,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "เชี่ยวชาญในการใช้ Git และระบบควบคุมเวอร์ชัน",
+    "companyComment": "สามารถจัดการโค้ดและทำงานร่วมกันได้ดี"
+  },
+  {
+    "studentCode": "65000003",
+    "skillThaiName": "การพัฒนาระบบ DevOps",
+    "curriculumLevel": 3,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "เข้าใจหลักการ DevOps",
+    "companyComment": "สามารถประยุกต์ใช้เครื่องมือ DevOps ในงานจริง"
+  },
+  {
+    "studentCode": "65000001",
+    "skillThaiName": "การสื่อสารอย่างมีประสิทธิภาพ",
+    "curriculumLevel": 4,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "สามารถสื่อสารได้อย่างชัดเจนและมีประสิทธิภาพ",
+    "companyComment": "มีทักษะการสื่อสารที่ดีเยี่ยม"
+  },
+  {
+    "studentCode": "65000001",
+    "skillThaiName": "การทำงานเป็นทีม",
+    "curriculumLevel": 4,
+    "companyLevel": 5,
+    "finalLevel": 5,
+    "curriculumComment": "สามารถทำงานเป็นทีมได้อย่างมีประสิทธิภาพ",
+    "companyComment": "เป็นทีมเพลเยอร์ที่ดีเยี่ยม"
+  },
+  {
+    "studentCode": "65000001",
+    "skillThaiName": "ความคิดสร้างสรรค์",
+    "curriculumLevel": 3,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "มีความคิดสร้างสรรค์ในการแก้ปัญหา",
+    "companyComment": "สามารถคิดหาวิธีแก้ปัญหาได้อย่างสร้างสรรค์"
+  },
+  {
+    "studentCode": "65000002",
+    "skillThaiName": "ความเป็นผู้นำ",
+    "curriculumLevel": 3,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "แสดงคุณลักษณะผู้นำได้ดี",
+    "companyComment": "มีศักยภาพในการเป็นผู้นำทีม"
+  },
+  {
+    "studentCode": "65000002",
+    "skillThaiName": "การจัดการเวลา",
+    "curriculumLevel": 4,
+    "companyLevel": 3,
+    "finalLevel": 4,
+    "curriculumComment": "สามารถจัดการเวลาได้อย่างมีประสิทธิภาพ",
+    "companyComment": "ยังต้องปรับปรุงการจัดการเวลาในสภาพแวดล้อมงาน"
+  },
+  {
+    "studentCode": "65000003",
+    "skillThaiName": "การแก้ปัญหาอย่างเป็นระบบ",
+    "curriculumLevel": 5,
+    "companyLevel": 5,
+    "finalLevel": 5,
+    "curriculumComment": "มีความสามารถในการแก้ปัญหาอย่างเป็นระบบ",
+    "companyComment": "สามารถแก้ปัญหาซับซ้อนได้อย่างมีประสิทธิภาพ"
+  },
+  {
+    "studentCode": "65000003",
+    "skillThaiName": "การปรับตัว",
+    "curriculumLevel": 4,
+    "companyLevel": 4,
+    "finalLevel": 4,
+    "curriculumComment": "สามารถปรับตัวเข้ากับสถานการณ์ใหม่ได้ดี",
+    "companyComment": "มีความยืดหยุ่นในการทำงาน"
+  },
+  {
+    "studentCode": "65000003",
+    "skillThaiName": "การคิดเชิงวิเคราะห์",
+    "curriculumLevel": 5,
+    "companyLevel": 4,
+    "finalLevel": 5,
+    "curriculumComment": "มีความสามารถในการคิดเชิงวิเคราะห์สูง",
+    "companyComment": "สามารถวิเคราะห์ปัญหาได้อย่างลึกซึ้ง"
+  }
+]

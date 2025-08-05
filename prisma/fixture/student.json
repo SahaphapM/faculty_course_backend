@@ -1,0 +1,26 @@
+[
+  {
+    "code": "65000001",
+    "thaiName": "นายสมชาย ใจดี",
+    "engName": "Mr. Somchai Jaidee",
+    "email": "65000001@example.com",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65000002", 
+    "thaiName": "นางสาววิชิดา รักเรียน",
+    "engName": "Ms. Wichida Rakrian",
+    "email": "65000002@example.com",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65000003",
+    "thaiName": "นายประสิทธิ์ เก่งมาก",
+    "engName": "Mr. Prasit Kengmak",
+    "email": "65000003@example.com",
+    "enrollmentDate": "2025-08-01", 
+    "curriculumCode": "CS2025"
+  }
+]

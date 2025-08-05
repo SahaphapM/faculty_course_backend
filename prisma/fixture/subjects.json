@@ -1,0 +1,56 @@
+[
+  {
+    "code": "CPE101",
+    "thaiName": "การเขียนโปรแกรมคอมพิวเตอร์ 1",
+    "engName": "Computer Programming I",
+    "credit": "3(2-2-5)",
+    "type": "บังคับ",
+    "thaiDescription": "พื้นฐานการเขียนโปรแกรมคอมพิวเตอร์",
+    "engDescription": "Fundamentals of computer programming"
+  },
+  {
+    "code": "CPE102",
+    "thaiName": "การเขียนโปรแกรมคอมพิวเตอร์ 2",
+    "engName": "Computer Programming II",
+    "credit": "3(2-2-5)",
+    "type": "บังคับ",
+    "thaiDescription": "การเขียนโปรแกรมเชิงวัตถุ",
+    "engDescription": "Object-oriented programming"
+  },
+  {
+    "code": "CPE201",
+    "thaiName": "โครงสร้างข้อมูลและอัลกอริทึม",
+    "engName": "Data Structures and Algorithms",
+    "credit": "3(2-2-5)",
+    "type": "บังคับ",
+    "thaiDescription": "โครงสร้างข้อมูลและอัลกอริทึมพื้นฐาน",
+    "engDescription": "Basic data structures and algorithms"
+  },
+  {
+    "code": "CPE202",
+    "thaiName": "การวิเคราะห์และออกแบบระบบ",
+    "engName": "System Analysis and Design",
+    "credit": "3(2-2-5)",
+    "type": "บังคับ",
+    "thaiDescription": "การวิเคราะห์และออกแบบระบบสารสนเทศ",
+    "engDescription": "Information system analysis and design"
+  },
+  {
+    "code": "CPE203",
+    "thaiName": "การทดสอบซอฟต์แวร์",
+    "engName": "Software Testing",
+    "credit": "3(2-2-5)",
+    "type": "บังคับ",
+    "thaiDescription": "หลักการและเทคนิคการทดสอบซอฟต์แวร์",
+    "engDescription": "Principles and techniques of software testing"
+  },
+  {
+    "code": "CPE301",
+    "thaiName": "การพัฒนาเว็บแอปพลิเคชัน",
+    "engName": "Web Application Development",
+    "credit": "3(2-2-5)",
+    "type": "บังคับ",
+    "thaiDescription": "การพัฒนาเว็บแอปพลิเคชันสมัยใหม่",
+    "engDescription": "Modern web application development"
+  }
+]
