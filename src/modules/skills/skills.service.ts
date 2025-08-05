@@ -39,7 +39,8 @@ export class SkillsService {
       });
       return skill;
     } catch (error) {
-      throw new BadRequestException(`Failed to create skill: ${error.message}`);
+      console.error('🚀 ~ SkillsService ~ create ~ error:', error);
+      throw new BadRequestException(`Failed to create skill: ${error}`);
     }
   }
 
@@ -91,13 +92,13 @@ export class SkillsService {
       this.prisma.skill.findMany(options),
       this.prisma.skill.count({ where: options.where }),
     ]);
-    
+
     return pag ? { data: skills, total } : skills;
   }
 
   // Find skills by curriculum with pagination
   async findByCurriculum(curriculumId: number, pag?: SkillFilterDto) {
-    const defaultLimit = 10;
+    const defaultLimit = 15;
     const defaultPage = 1;
 
     const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
@@ -126,7 +127,7 @@ export class SkillsService {
       this.prisma.skill.findMany(options),
       this.prisma.skill.count({ where: options.where }),
     ]);
-    
+
     return pag ? { data: skills, total } : skills;
   }
 
@@ -189,7 +190,7 @@ export class SkillsService {
       this.prisma.skill.findMany(options),
       this.prisma.skill.count({ where: options.where }),
     ]);
-    
+
     return pag ? { data: skills, total } : skills;
   }
 
@@ -258,7 +259,7 @@ export class SkillsService {
       this.prisma.skill.findMany(options),
       this.prisma.skill.count({ where: options.where }),
     ]);
-    
+
     return pag ? { data: skills, total } : skills;
   }
 
@@ -328,7 +329,7 @@ export class SkillsService {
       this.prisma.skill.findMany(options),
       this.prisma.skill.count({ where: options.where }),
     ]);
-    
+
     return pag ? { data: skills, total } : skills;
   }
 
@@ -338,24 +339,28 @@ export class SkillsService {
       subs: {
         // level 2
         select: {
+          parentId: true,
           id: true,
           thaiName: true,
           engName: true,
           subs: {
             // level 3
             select: {
+              parentId: true,
               id: true,
               thaiName: true,
               engName: true,
               subs: {
                 // level 4
                 select: {
+                  parentId: true,
                   id: true,
                   thaiName: true,
                   engName: true,
                   subs: {
                     // level 5
                     select: {
+                      parentId: true,
                       id: true,
                       thaiName: true,
                       engName: true,
@@ -414,7 +419,8 @@ export class SkillsService {
       if (error.code === 'P2025') {
         throw new NotFoundException(`Skill with ID ${id} not found`);
       }
-      throw new BadRequestException(`Failed to update skill: ${error.message}`);
+      console.error('🚀 ~ SkillsService ~ update ~ error:', error);
+      throw new BadRequestException(`Failed to update skill`);
     }
   }
 
