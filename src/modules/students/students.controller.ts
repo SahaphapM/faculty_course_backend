@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   Query,
+  Res,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
@@ -15,6 +16,9 @@ import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { StudentFilterDto } from 'src/dto/filters/filter.student.dto';
+import { Response } from 'express';
+import axios from 'axios';
+import { Public } from 'src/decorators/public.decorator';
 
 @ApiBearerAuth()
 @Controller('students')
@@ -67,6 +71,39 @@ export class StudentsController {
     return this.studentsService.findAll(pag);
   }
 
+  @Public()
+  @Get('student-image/:id')
+  async getStudentImage(@Param('id') id: string, @Res() res: Response) {
+    try {
+      const response = await axios.get(
+        `https://reg.buu.ac.th/registrar/getstudentimage.asp?id=${id}`,
+        { responseType: 'arraybuffer' },
+      );
+
+      res.set({
+        'Content-Type': 'image/jpeg',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET,OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+        'Cache-Control': 'no-cache',
+      });
+
+      res.send(response.data);
+    } catch (error) {
+      res.status(404).send('Image not found');
+    }
+  }
+  @Public()
+  @Get('student-image')
+  optionsStudentImage(@Res() res: Response) {
+    res.set({
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET,OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    });
+    res.send();
+  }
+
   @Roles(
     UserRole.Admin,
     UserRole.Coordinator,
@@ -77,11 +114,6 @@ export class StudentsController {
   findOne(@Param('code') code: string) {
     return this.studentsService.findOne(code);
   }
-
-  // @Get('skill-tree/:id')
-  // findProfile(@Param('id') id: string) {
-  //   return this.studentsService.buildSkillCollectionTree(+id);
-  // }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Patch(':id')
