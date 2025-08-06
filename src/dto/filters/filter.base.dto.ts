@@ -1,5 +1,13 @@
+import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Type, Transform } from 'class-transformer';
-import { IsOptional, IsPositive, IsInt, IsString, IsNumber } from 'class-validator';
+import {
+  IsOptional,
+  IsPositive,
+  IsInt,
+  IsString,
+  IsNumber,
+  IsEnum,
+} from 'class-validator';
 
 export type PaginatedResult<T> = {
   data: T[];
@@ -32,8 +40,16 @@ export class BaseFilterParams {
   @IsString()
   sort?: string;
 
+  @ApiPropertyOptional({
+    description: 'ลำดับการเรียง',
+    enum: ['asc', 'desc'],
+    example: 'asc',
+  })
   @IsOptional()
   @IsString()
+  @IsEnum(['asc', 'desc'], {
+    message: 'orderBy must be either "asc" or "desc"',
+  })
   orderBy?: 'asc' | 'desc' = 'asc';
 }
 

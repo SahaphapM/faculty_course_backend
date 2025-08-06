@@ -31,7 +31,9 @@ export class AuditLogService {
           // In current Prisma types, metadata expects string in some generated client versions.
           // But our schema uses Json?. To satisfy both, serialize complex values; pass through strings.
           metadata:
-            entry.before == null && entry.after == null && entry.metadata == null
+            entry.before == null &&
+            entry.after == null &&
+            entry.metadata == null
               ? undefined
               : JSON.stringify({
                   before: entry.before ?? null,
@@ -53,8 +55,8 @@ export class AuditLogService {
     const {
       page = 1,
       limit = 10,
-      sort = 'desc',
-      orderBy = 'timestamp',
+      sort = 'id',
+      orderBy = 'desc',
       ...filters
     } = query;
 
@@ -66,17 +68,19 @@ export class AuditLogService {
       }
 
       if (filters?.action) {
-        where.action = {
-          contains: filters.action,
-          mode: 'insensitive',
-        };
+        where.OR = [
+          // { action: { contains: filters.action.toLowerCase() } },
+          // { action: { contains: filters.action.toUpperCase() } },
+          { action: { contains: filters.action } },
+        ];
       }
 
       if (filters?.resource) {
-        where.resource = {
-          contains: filters.resource,
-          mode: 'insensitive',
-        };
+        where.OR = [
+          //   { resource: { contains: filters.resource.toLowerCase() } },
+          //   { resource: { contains: filters.resource.toUpperCase() } },
+          { resource: { contains: filters.resource } },
+        ];
       }
 
       if (filters?.startDate || filters?.endDate) {
@@ -94,9 +98,11 @@ export class AuditLogService {
           where,
           skip: (page - 1) * limit,
           take: limit,
-          orderBy: {
-            [orderBy]: sort,
-          },
+          orderBy: [
+            {
+              [sort]: orderBy.toLowerCase(),
+            },
+          ],
           include: {
             user: {
               select: {
