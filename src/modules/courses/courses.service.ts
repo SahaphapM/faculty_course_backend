@@ -12,6 +12,23 @@ import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
 
 @Injectable()
 export class CourseService {
+  // Find all distinct years from registered courses
+  async findAllOptions() {
+    try {
+      const years = await this.prisma.course.groupBy({
+        by: ['year'],
+        orderBy: {
+          year: 'asc',
+        },
+      });
+      
+      // Extract just the year values and return as an array
+      return years.map(item => item.year);
+    } catch (error) {
+      console.error('Error fetching course years:', error);
+      throw new InternalServerErrorException('Failed to fetch course years');
+    }
+  }
   constructor(private readonly prisma: PrismaService) {}
 
   // Create a new course(s)

@@ -32,6 +32,11 @@ export class CoursesController {
     return this.coursesService.findAll(pag);
   }
 
+  @Get('options')
+  findAllOptions() {
+    return this.coursesService.findAllOptions();
+  }
+
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.coursesService.findOne(+id);
