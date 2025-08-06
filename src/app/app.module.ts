@@ -51,6 +51,7 @@ import { SkillAssessmentsModule } from 'src/modules/skill-assessments/skill-asse
     SubjectModule,
     InstructorsModule,
     SkillCollectionsModule,
+    SkillAssessmentsModule,
     CompaniesModule,
     InternshipsModule,
     JobPositionsModule,

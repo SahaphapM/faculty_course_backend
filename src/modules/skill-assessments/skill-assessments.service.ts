@@ -5,7 +5,7 @@ import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class SkillAssessmentsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService) {}
 
   async getAssessmentByStudent(internshipId: number, studentCode: string) {
     const student = await this.prisma.student.findUnique({
@@ -96,17 +96,18 @@ export class SkillAssessmentsService {
     });
   }
 
-  async getStudentSkillAssessments(studentCode: string) {
-    const student = await this.prisma.student.findUnique({
-      where: { code: studentCode },
-    });
+  async getStudentSkillAssessments(studentId: number) {
+    // const student = await this.prisma.student.findUnique({
+    //   where: { id: studentId },
+    // });
+    // console.log(student);
 
-    if (!student) {
-      throw new BadRequestException('Student not found');
-    }
+    // if (!student) {
+    //   throw new BadRequestException('Student not found');
+    // }
 
     const skillAssessments = await this.prisma.skill_assessment.findMany({
-      where: { studentId: student.id },
+      where: { studentId: studentId },
       include: {
         skill: {
           select: {

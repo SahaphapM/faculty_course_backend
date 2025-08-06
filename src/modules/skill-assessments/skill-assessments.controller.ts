@@ -9,10 +9,10 @@ export class SkillAssessmentsController {
     private readonly skillAssessmentsService: SkillAssessmentsService,
   ) { }
 
-  @Get('student/:studentCode')
-  @ApiParam({ name: 'studentCode', type: String, description: 'Student Code' })
-  getStudentSkillAssessments(@Param('studentCode') studentCode: string) {
-    return this.skillAssessmentsService.getStudentSkillAssessments(studentCode);
+  @Get('student/:studentId')
+  @ApiParam({ name: 'studentId', type: String, description: 'Student Code' })
+  getStudentSkillAssessments(@Param('studentId') studentId: number) {
+    return this.skillAssessmentsService.getStudentSkillAssessments(studentId);
   }
 
   // change param name to easy to understand
