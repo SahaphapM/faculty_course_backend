@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AppLoggerService } from './app-logger.service';
+import { AuditLogQueryDto } from 'src/dto/filters/filter.audit-log.dto';
 
 export interface AuditLogEntry {
   userId?: number;
@@ -48,17 +49,15 @@ export class AuditLogService {
     }
   }
 
-  async getLogs(
-    page: number = 1,
-    limit: number = 50,
-    filters?: {
-      userId?: number;
-      action?: string;
-      resource?: string;
-      startDate?: Date;
-      endDate?: Date;
-    },
-  ) {
+  async getLogs(query?: AuditLogQueryDto) {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'desc',
+      orderBy = 'timestamp',
+      ...filters
+    } = query;
+
     try {
       const where: any = {};
 
@@ -96,7 +95,7 @@ export class AuditLogService {
           skip: (page - 1) * limit,
           take: limit,
           orderBy: {
-            timestamp: 'desc',
+            [orderBy]: sort,
           },
           include: {
             user: {

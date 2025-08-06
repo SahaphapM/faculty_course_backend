@@ -43,8 +43,6 @@ export class AuditLogInterceptor implements NestInterceptor {
             beforeData = await (this.prisma as any)[resource]?.findUnique?.({
               where: { id: Number(resourceId) },
             });
-
-            console.log('beforeData', beforeData);
           } catch (e) {
             // ไม่ต้อง throw เพื่อไม่ให้กระทบ flow หลัก
           }
@@ -63,10 +61,6 @@ export class AuditLogInterceptor implements NestInterceptor {
             } else if (method === 'DELETE') {
               diff = beforeData;
             }
-
-            console.log('diff', diff);
-            console.log('beforeData', beforeData);
-            console.log('afterData', afterData);
 
             await this.auditLogService.log({
               userId: user?.id,

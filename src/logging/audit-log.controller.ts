@@ -11,6 +11,7 @@ import { UserRole as Role } from 'src/enums/role.enum';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { AuditLogDecoratorInterceptor } from './audit-log-decorator.interceptor';
 import { AuditLog } from './audit-log.decorator';
+import { AuditLogQueryDto } from 'src/dto/filters/filter.audit-log.dto';
 
 @Controller('audit-logs')
 @UseGuards(RolesGuard)
@@ -21,23 +22,9 @@ export class AuditLogController {
   @Get()
   @UseInterceptors(AuditLogDecoratorInterceptor)
   @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
-  async getAuditLogs(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 50,
-    @Query('userId') userId?: number,
-    @Query('action') action?: string,
-    @Query('resource') resource?: string,
-    @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
-  ) {
-    const filters: any = {};
+  async getAuditLogs(@Query() query: AuditLogQueryDto) {
 
-    if (userId) filters.userId = Number(userId);
-    if (action) filters.action = action;
-    if (resource) filters.resource = resource;
-    if (startDate) filters.startDate = new Date(startDate);
-    if (endDate) filters.endDate = new Date(endDate);
 
-    return this.auditLogService.getLogs(Number(page), Number(limit), filters);
+    return this.auditLogService.getLogs(query);
   }
 }
