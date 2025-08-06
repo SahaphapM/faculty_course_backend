@@ -6,9 +6,14 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class SkillCollectionsHelper {
   constructor(private prisma: PrismaService) {}
 
-  async updateSkillAssessments(studentId: number, rootSkills: Skill[]) {
+  /**
+   * Syncs skill_assessment records for a student and root skills.
+   * - Creates missing skill_assessment records for all rootSkills.
+   * - Updates curriculumLevel/finalLevel for all rootSkills.
+   */
+  async syncStudentSkillAssessments(studentId: number, rootSkills: Skill[]) {
     console.log(
-      `=== [DEBUG] Start Skill Assessment for student ${studentId} ===`,
+      `=== [DEBUG] Start Skill Assessment Sync for student ${studentId} ===`,
     );
 
     // 1️⃣ ดึงข้อมูล Student
@@ -143,29 +148,48 @@ export class SkillCollectionsHelper {
       }
     });
 
-    // 13️⃣ อัปเดต skill_assessment
+
+    // 3️⃣ Ensure all rootSkills have a skill_assessment record
+    const existingAssessments = await this.prisma.skill_assessment.findMany({
+      where: {
+        studentId,
+        skillId: { in: rootSkills.map((r) => r.id) },
+      },
+      select: { skillId: true },
+    });
+    const existingSkillIds = new Set(existingAssessments.map((a) => a.skillId));
+
+    // Create missing skill_assessment records
+    const missingSkills = rootSkills.filter((r) => !existingSkillIds.has(r.id));
+    if (missingSkills.length > 0) {
+      await this.prisma.skill_assessment.createMany({
+        data: missingSkills.map((root) => ({
+          studentId,
+          skillId: root.id,
+          curriculumLevel: 0,
+          companyLevel: 0,
+          finalLevel: 0,
+        })),
+        skipDuplicates: true,
+      });
+    }
+
+    // Update curriculumLevel/finalLevel for all rootSkills
     for (const rootSkill of rootSkills) {
       const rootNode = skillMap.get(rootSkill.id);
       const curriculumLevel = rootNode?.gained || 0;
-
-      await this.prisma.skill_assessment.upsert({
+      await this.prisma.skill_assessment.updateMany({
         where: {
-          skillId_studentId: { skillId: rootSkill.id, studentId },
-        },
-        update: {
-          curriculumLevel,
-          finalLevel: curriculumLevel,
-        },
-        create: {
           studentId,
           skillId: rootSkill.id,
+        },
+        data: {
           curriculumLevel,
-          companyLevel: 0,
           finalLevel: curriculumLevel,
         },
       });
     }
 
-    console.log('=== [DEBUG] Skill Assessment Calculation Complete ===');
+    console.log('=== [DEBUG] Skill Assessment Sync Complete ===');
   }
 }
