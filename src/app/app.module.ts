@@ -1,4 +1,4 @@
-import {HttpStatus, Module } from '@nestjs/common';
+import { HttpStatus, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from '../modules/users/users.module';
@@ -24,6 +24,7 @@ import { CompaniesModule } from 'src/modules/companies/companies.module';
 import { InternshipsModule } from 'src/modules/internships/internships.module';
 import { JobPositionsModule } from 'src/modules/job-positions/job-positions.module';
 import { LoggingModule } from 'src/logging/logging.module';
+import { SkillAssessmentsModule } from 'src/modules/skill-assessments/skill-assessments.module';
 
 @Module({
   imports: [
@@ -53,6 +54,7 @@ import { LoggingModule } from 'src/logging/logging.module';
     CompaniesModule,
     InternshipsModule,
     JobPositionsModule,
+    SkillAssessmentsModule,
   ],
   controllers: [AppController],
   providers: [

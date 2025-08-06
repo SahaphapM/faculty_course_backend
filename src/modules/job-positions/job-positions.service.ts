@@ -1,4 +1,8 @@
-import { Injectable, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { CreateJobPositionDto } from 'src/generated/nestjs-dto/create-jobPosition.dto';
 import { UpdateJobPositionDto } from 'src/generated/nestjs-dto/update-jobPosition.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -15,11 +19,13 @@ export class JobPositionsService {
   async create(createJobPositionDto: CreateJobPositionDto) {
     // Check if job position with the same name already exists
     const existingJobPosition = await this.prisma.job_position.findFirst({
-      where: { name: createJobPositionDto.name }
+      where: { name: createJobPositionDto.name },
     });
 
     if (existingJobPosition) {
-      throw new ConflictException(`Job position with name '${createJobPositionDto.name}' already exists`);
+      throw new ConflictException(
+        `Job position with name '${createJobPositionDto.name}' already exists`,
+      );
     }
 
     const jobPosition = await this.prisma.job_position.create({
@@ -71,12 +77,14 @@ export class JobPositionsService {
       const existingJobPosition = await this.prisma.job_position.findFirst({
         where: {
           name: updateJobPositionDto.name,
-          NOT: { id: id }
-        }
+          NOT: { id: id },
+        },
       });
 
       if (existingJobPosition) {
-        throw new ConflictException(`Job position with name '${updateJobPositionDto.name}' already exists`);
+        throw new ConflictException(
+          `Job position with name '${updateJobPositionDto.name}' already exists`,
+        );
       }
     }
 

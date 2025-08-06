@@ -26,10 +26,7 @@ export class JobPositionsController {
       return await this.jobPositionsService.create(createJobPositionDto);
     } catch (error) {
       if (error instanceof ConflictException) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.CONFLICT
-        );
+        throw new HttpException(error.message, HttpStatus.CONFLICT);
       }
       throw error;
     }
@@ -54,10 +51,7 @@ export class JobPositionsController {
       return await this.jobPositionsService.update(+id, updateJobPositionDto);
     } catch (error) {
       if (error instanceof ConflictException) {
-        throw new HttpException(
-          error.message,
-          HttpStatus.CONFLICT
-        );
+        throw new HttpException(error.message, HttpStatus.CONFLICT);
       }
       throw error;
     }
