@@ -7,7 +7,13 @@ import { ApiParam } from '@nestjs/swagger';
 export class SkillAssessmentsController {
   constructor(
     private readonly skillAssessmentsService: SkillAssessmentsService,
-  ) {}
+  ) { }
+
+  @Get('student/:studentCode')
+  @ApiParam({ name: 'studentCode', type: String, description: 'Student Code' })
+  getStudentSkillAssessments(@Param('studentCode') studentCode: string) {
+    return this.skillAssessmentsService.getStudentSkillAssessments(studentCode);
+  }
 
   @Get(':id/students/:studentCode/assessment')
   @ApiParam({ name: 'studentCode', type: String, description: 'Student Code' })
