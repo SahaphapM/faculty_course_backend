@@ -5,7 +5,7 @@ import { BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class SkillAssessmentsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly prisma: PrismaService) { }
 
   async getAssessmentByStudent(internshipId: number, studentCode: string) {
     const student = await this.prisma.student.findUnique({
@@ -90,6 +90,13 @@ export class SkillAssessmentsService {
   ) {
     const { finalLevel, curriculumComment } = updateSkillAssessmentDto;
 
+    console.log('Backend received update:', {
+      skillAssessmentId,
+      finalLevel,
+      curriculumComment,
+      fullDto: updateSkillAssessmentDto
+    });
+
     return this.prisma.skill_assessment.update({
       where: { id: skillAssessmentId },
       data: { finalLevel, curriculumComment },
@@ -119,7 +126,7 @@ export class SkillAssessmentsService {
     });
 
     return skillAssessments.map((assessment) => ({
-      skillAssessmentId: assessment.id,
+      id: assessment.id,
       skillId: assessment.skillId,
       skillName: assessment.skill?.thaiName || '',
       curriculumLevel: assessment.curriculumLevel || 0,
