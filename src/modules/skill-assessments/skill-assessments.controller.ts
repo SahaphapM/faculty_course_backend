@@ -7,7 +7,7 @@ import { ApiParam, ApiOperation } from '@nestjs/swagger';
 export class SkillAssessmentsController {
   constructor(
     private readonly skillAssessmentsService: SkillAssessmentsService,
-  ) { }
+  ) {}
 
   @Get('student/:studentId')
   @ApiParam({ name: 'studentId', type: String, description: 'Student Code' })
@@ -38,7 +38,7 @@ export class SkillAssessmentsController {
     );
   }
 
-  @Patch(':skillAssessmentId/:studentInternshipId')
+  @Patch('company/:skillAssessmentId/:studentInternshipId')
   // set name for this api swagger
   @ApiOperation({
     summary:
@@ -56,7 +56,7 @@ export class SkillAssessmentsController {
     );
   }
 
-  @Patch('submit/:studentInternshipId')
+  @Patch('company-submit/:studentInternshipId')
   // set name for this api swagger
   @ApiOperation({
     summary:
