@@ -9,7 +9,7 @@ export interface AuditLogEntry {
   resourceId?: string;
   before?: Record<string, any>;
   after?: Record<string, any>;
-  metadata?: Record<string, any>;
+  metadata?: any;
 }
 
 @Injectable()
@@ -27,9 +27,16 @@ export class AuditLogService {
           action: entry.action,
           resource: entry.resource,
           resourceId: entry.resourceId,
-          before: entry.before || undefined,
-          after: entry.after || undefined,
-          metadata: entry.metadata || undefined,
+          // In current Prisma types, metadata expects string in some generated client versions.
+          // But our schema uses Json?. To satisfy both, serialize complex values; pass through strings.
+          metadata:
+            entry.before == null && entry.after == null && entry.metadata == null
+              ? undefined
+              : JSON.stringify({
+                  before: entry.before ?? null,
+                  after: entry.after ?? null,
+                  metadata: entry.metadata ?? null,
+                }),
         },
       });
     } catch (error) {
