@@ -5,13 +5,16 @@ import {
   NestInterceptor,
 } from '@nestjs/common';
 import { Observable } from 'rxjs';
-import { tap } from 'rxjs/operators';
 import { AuditLogService } from './audit-log.service';
 import { Request } from 'express';
+import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuditLogInterceptor implements NestInterceptor {
-  constructor(private readonly auditLogService: AuditLogService) {}
+  constructor(
+    private readonly auditLogService: AuditLogService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const httpContext = context.switchToHttp();
@@ -20,79 +23,105 @@ export class AuditLogInterceptor implements NestInterceptor {
     const url = request.originalUrl || request.url;
     const user = (request as any).user;
 
-    // Only log mutating operations
+    // Log เฉพาะการเปลี่ยนแปลงข้อมูล
     if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
       return next.handle();
     }
 
+    const resource = this.extractResource(url);
+    const resourceId = this.extractResourceId(url);
     const startTime = Date.now();
 
-    return next.handle().pipe(
-      tap(() => {
-        try {
-          // Extract resource and action from URL and method
-          const resource = this.extractResource(url);
-          const action = this.mapMethodToAction(method);
-          
-          // Extract resource ID if present in URL
-          const resourceId = this.extractResourceId(url);
+    let beforeData: any = null;
 
-          // Prepare metadata
-          const metadata = {
-            method,
-            url,
-            duration: Date.now() - startTime,
-            userAgent: request.headers['user-agent'],
-            ip: request.ip,
-            statusCode: httpContext.getResponse().statusCode,
-          };
+    return new Observable((observer) => {
+      (async () => {
+        console.log('Resource:', resource, 'Resource ID:', resourceId);
 
-          // Log the audit entry
-          this.auditLogService.log({
-            userId: user?.id,
-            action,
-            resource,
-            resourceId,
-            metadata,
-          }).catch(() => {
-            // Silently fail to avoid disrupting the main flow
-          });
-        } catch (error) {
-          // Silently fail to avoid disrupting the main flow
-          console.error('Failed to log audit entry:', error);
+        if (['PUT', 'PATCH', 'DELETE'].includes(method) && resourceId) {
+          try {
+            beforeData = await (this.prisma as any)[resource]?.findUnique?.({
+              where: { id: Number(resourceId) },
+            });
+
+            console.log('beforeData', beforeData);
+          } catch (e) {
+            // ไม่ต้อง throw เพื่อไม่ให้กระทบ flow หลัก
+          }
         }
-      }),
-    );
+
+        next.handle().subscribe({
+          next: async (result) => {
+            let afterData: any = null;
+            let diff: any = null;
+
+            if (method === 'POST') {
+              afterData = result;
+            } else if (method === 'PUT' || method === 'PATCH') {
+              afterData = result;
+              diff = this.getDiff(beforeData, afterData);
+            } else if (method === 'DELETE') {
+              diff = beforeData;
+            }
+
+            console.log('diff', diff);
+            console.log('beforeData', beforeData);
+            console.log('afterData', afterData);
+
+            await this.auditLogService.log({
+              userId: user?.id,
+              action: this.mapMethodToAction(method),
+              resource,
+              resourceId,
+              before: diff || beforeData,
+              after: afterData,
+              metadata: {
+                method,
+                url,
+                duration: Date.now() - startTime,
+                ip: request.ip,
+                statusCode: httpContext.getResponse().statusCode,
+              },
+            });
+
+            observer.next(result);
+            observer.complete();
+          },
+          error: (err) => observer.error(err),
+        });
+      })();
+    });
+  }
+
+  private getDiff(before: Record<string, any>, after: Record<string, any>) {
+    if (!before || !after) return null;
+    const diff: Record<string, { old: any; new: any }> = {};
+    for (const key of Object.keys(after)) {
+      if (before[key] !== after[key]) {
+        diff[key] = { old: before[key], new: after[key] };
+      }
+    }
+    return diff;
   }
 
   private extractResource(url: string): string {
-    // Extract resource name from URL
-    // Example: /api/users/123 -> users
-    const parts = url.split('/').filter(part => part.length > 0);
-    if (parts.length > 0) {
-      // Return the first part that looks like a resource name
-      for (const part of parts) {
-        if (!['api', 'v1'].includes(part) && !/^\d+$/.test(part)) {
-          return part;
+    const parts = url.split('/').filter((p) => p.length > 0);
+    for (const part of parts) {
+      if (!['api', 'v1'].includes(part) && !/^\d+$/.test(part)) {
+        // Convert to singular form if needed
+        if (part.endsWith('s')) {
+          return part.slice(0, -1).toLowerCase();
         }
+        return part.toLowerCase();
       }
     }
     return 'unknown';
   }
 
   private extractResourceId(url: string): string | undefined {
-    // Extract resource ID from URL
-    // Example: /api/users/123 -> 123
-    const parts = url.split('/').filter(part => part.length > 0);
-    if (parts.length > 0) {
-      // Return the first part that looks like an ID
-      for (let i = parts.length - 1; i >= 0; i--) {
-        if (/^\d+$/.test(parts[i])) {
-          return parts[i];
-        }
-      }
-    }
-    return undefined;
+    const parts = url.split('/').filter((p) => p.length > 0);
+    const idPart = parts.find((p) => /^\d+$/.test(p));
+    return idPart;
   }
 
   private mapMethodToAction(method: string): string {

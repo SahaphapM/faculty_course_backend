@@ -38,7 +38,7 @@ async function bootstrap() {
   app.useGlobalInterceptors(
     app.get(LoggingInterceptor),
     app.get(AuditLogInterceptor),
-    app.get(AuditLogDecoratorInterceptor)
+    app.get(AuditLogDecoratorInterceptor),
   );
 
   const config = new DocumentBuilder()

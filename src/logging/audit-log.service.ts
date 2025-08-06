@@ -7,6 +7,8 @@ export interface AuditLogEntry {
   action: string;
   resource: string;
   resourceId?: string;
+  before?: Record<string, any>;
+  after?: Record<string, any>;
   metadata?: Record<string, any>;
 }
 
@@ -25,12 +27,17 @@ export class AuditLogService {
           action: entry.action,
           resource: entry.resource,
           resourceId: entry.resourceId,
-          metadata: entry.metadata ? JSON.stringify(entry.metadata) : null,
+          before: entry.before || undefined,
+          after: entry.after || undefined,
+          metadata: entry.metadata || undefined,
         },
       });
     } catch (error) {
       // Log the error but don't throw it to avoid disrupting the main flow
-      this.logger.error('Failed to log audit entry: ' + JSON.stringify(error), JSON.stringify({ entry }));
+      this.logger.error(
+        'Failed to log audit entry: ' + JSON.stringify(error),
+        JSON.stringify({ entry }),
+      );
     }
   }
 

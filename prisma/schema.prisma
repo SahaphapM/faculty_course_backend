@@ -279,9 +279,9 @@ model user {
   instructorId       Int?        @unique
   instructor         instructor? @relation(fields: [instructorId], references: [id], onUpdate: NoAction)
   student            student?    @relation(fields: [studentId], references: [id], onUpdate: NoAction)
+  audit_logs         audit_log[]
 
   @@unique([instructorId, studentId])
-  audit_logs audit_log[]
 }
 
 model company {
@@ -365,14 +365,16 @@ model skill_assessment {
 }
 
 model audit_log {
-  id        Int      @id @default(autoincrement())
-  userId    Int?
-  user      user?    @relation(fields: [userId], references: [id])
-  action    String   @db.VarChar(100)
-  resource  String   @db.VarChar(100)
-  resourceId String? @db.VarChar(255)
-  timestamp DateTime @default(now()) @db.DateTime(0)
-  metadata  String?  @db.Text
+  id         Int      @id @default(autoincrement())
+  userId     Int?
+  user       user?    @relation(fields: [userId], references: [id])
+  action     String   @db.VarChar(100)
+  resource   String   @db.VarChar(100) // resource คือ ชื่อทรัพยากร หรือชื่อโมดูลที่ถูกดำเนินการ
+  resourceId String?  @db.VarChar(255) // resourceId คือ รหัสทรัพยากรที่ถูกดำเนินการ
+  before     Json? // 🔥 สภาพข้อมูลก่อนเปลี่ยน
+  after      Json? // 🔥 สภาพข้อมูลหลังเปลี่ยน
+  metadata   Json?
+  timestamp  DateTime @default(now()) @db.DateTime(0)
 
   @@index([userId])
   @@index([action])
