@@ -119,6 +119,7 @@ export class SkillAssessmentsService {
     });
 
     return skillAssessments.map((assessment) => ({
+      skillAssessmentId: assessment.id,
       skillId: assessment.skillId,
       skillName: assessment.skill?.thaiName || '',
       curriculumLevel: assessment.curriculumLevel || 0,
