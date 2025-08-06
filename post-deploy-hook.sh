@@ -1,15 +1,18 @@
 #!/bin/bash
 
-# Simple Post-Deploy Hook for Skill Mapping Backend
-# This is a simplified version for server post-deploy hooks
+# Post-Deploy Hook for Skill Mapping Backend using PM2 to prevent port conflicts
 
-set -e # Exit on any error
+set -euo pipefail
 
 echo "🚀 Starting post-deploy process..."
 
 # Step 1: Install production dependencies
 echo "📦 Installing dependencies..."
-npm ci --only=production
+if [ -f "package-lock.json" ]; then
+  npm ci --only=production
+else
+  npm install --only=production
+fi
 
 # Step 2: Build the application
 echo "🔨 Building application..."
@@ -23,14 +26,17 @@ npx prisma generate
 echo "🔄 Running database migrations..."
 npx prisma migrate deploy
 
-# Step 5: Start the application
-echo "🚀 Starting application..."
-NODE_ENV=production node dist/src/main.js &
-
-# Step 6: Save PM2 configuration (if PM2 is used)
+# Step 5: Reload/Start with PM2 to avoid EADDRINUSE
+echo "🚀 Starting application with PM2..."
 if command -v pm2 >/dev/null 2>&1; then
-    echo "💾 Saving PM2 configuration..."
-    pm2 save
+  # Try reload, fallback to start if not online yet
+  pm2 reload ecosystem.config.js --env production || pm2 start ecosystem.config.js --env production
+  pm2 save || true
+  echo "📋 PM2 status:"
+  pm2 list
+else
+  echo "⚠️ PM2 not found, starting node directly (may cause port conflicts)"
+  NODE_ENV=production node dist/src/main.js &
 fi
 
 echo "✅ Post-deploy process completed successfully!"
