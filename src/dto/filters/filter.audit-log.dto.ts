@@ -42,4 +42,12 @@ export class AuditLogQueryDto extends BaseFilterParams {
   @IsDateString()
   @IsOptional()
   endDate?: string;
+
+  @ApiPropertyOptional({
+    description: 'Keyword to filter',
+    example: 'faculty name or email',
+  })
+  @IsString()
+  @IsOptional()
+  keyword?: string;
 }

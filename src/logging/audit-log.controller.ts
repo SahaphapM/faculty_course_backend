@@ -23,8 +23,13 @@ export class AuditLogController {
   @UseInterceptors(AuditLogDecoratorInterceptor)
   @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
   async getAuditLogs(@Query() query: AuditLogQueryDto) {
-
-
     return this.auditLogService.getLogs(query);
+  }
+
+  @Get('resources')
+  @UseInterceptors(AuditLogDecoratorInterceptor)
+  @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
+  async getResources() {
+    return this.auditLogService.getTables();
   }
 }

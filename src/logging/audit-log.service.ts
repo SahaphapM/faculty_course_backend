@@ -57,30 +57,23 @@ export class AuditLogService {
       limit = 10,
       sort = 'id',
       orderBy = 'desc',
+      keyword,
       ...filters
     } = query;
 
     try {
       const where: any = {};
 
-      if (filters?.userId) {
-        where.userId = filters.userId;
+      if (filters?.search) {
+        where.OR = [{ user: { email: { contains: filters.search } } }];
       }
 
       if (filters?.action) {
-        where.OR = [
-          // { action: { contains: filters.action.toLowerCase() } },
-          // { action: { contains: filters.action.toUpperCase() } },
-          { action: { contains: filters.action } },
-        ];
+        where.OR = [{ action: { contains: filters.action } }];
       }
 
       if (filters?.resource) {
-        where.OR = [
-          //   { resource: { contains: filters.resource.toLowerCase() } },
-          //   { resource: { contains: filters.resource.toUpperCase() } },
-          { resource: { contains: filters.resource } },
-        ];
+        where.OR = [{ resource: { contains: filters.resource } }];
       }
 
       if (filters?.startDate || filters?.endDate) {
@@ -91,6 +84,14 @@ export class AuditLogService {
         if (filters.endDate) {
           where.timestamp.lte = filters.endDate;
         }
+      }
+
+      if (keyword) {
+        where.OR = [
+          { metadata: { contains: `"${keyword}"` } }, // Search for values
+          { before: { contains: `"${keyword}"` } },
+          { after: { contains: `"${keyword}"` } },
+        ];
       }
 
       const [logs, total] = await Promise.all([
@@ -124,6 +125,20 @@ export class AuditLogService {
       };
     } catch (error) {
       this.logger.error('Failed to retrieve audit logs', JSON.stringify(error));
+      throw error;
+    }
+  }
+
+  async getTables() {
+    try {
+      const tables = await this.prisma.$queryRaw<{ table_name: string }[]>`
+        SELECT table_name 
+        FROM information_schema.tables 
+        WHERE table_schema = 'fac_db'
+      `;
+      return tables;
+    } catch (error) {
+      this.logger.error('Failed to retrieve tables', JSON.stringify(error));
       throw error;
     }
   }
