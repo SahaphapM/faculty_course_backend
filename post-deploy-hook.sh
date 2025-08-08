@@ -8,11 +8,12 @@ echo "🚀 Starting post-deploy process..."
 
 # Step 1: Install production dependencies
 echo "📦 Installing dependencies..."
-if [ -f "package-lock.json" ]; then
-  npm ci --only=production
-else
-  npm install --only=production
-fi
+# if [ -f "package-lock.json" ]; then
+#   npm ci --only=production
+# else
+#   npm install --only=production
+# fi
+npm install
 
 # Step 2: Build the application
 echo "🔨 Building application..."
