@@ -3,6 +3,19 @@
 /node_modules
 /build
 
+# Package manager files
+package-lock.json
+yarn.lock
+bun.lockb
+bun.lock
+.pnpm-lock.yaml
+.yarn/
+.pnp.*
+
+# Dependency directories
+node_modules/
+jspm_packages/
+
 # Logs
 logs
 *.log
@@ -14,10 +27,12 @@ lerna-debug.log*
 
 # OS
 .DS_Store
+Thumbs.db
 
 # Tests
 /coverage
 /.nyc_output
+/junit.xml
 
 # IDEs and editors
 /.idea
@@ -27,6 +42,7 @@ lerna-debug.log*
 *.launch
 .settings/
 *.sublime-workspace
+*.sublime-project
 
 # IDE - VSCode
 .vscode/*
@@ -38,10 +54,13 @@ lerna-debug.log*
 # dotenv environment variable files
 .env
 .env.*
+!.env.example
 
 # temp directory
 .temp
 .tmp
+*.tmp
+*.temp
 
 # Runtime data
 pids
@@ -49,20 +68,73 @@ pids
 *.seed
 *.pid.lock
 
+# Cache directories
+.cache/
+.parcel-cache/
+.next/
+.nuxt/
+.gatsby/
+
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
-#Database file
+# Database files
 *.sqlite
+*.db
 
-#db docker
-db
+# Database docker directory
+db/
 
+# Docker compose override
 docker-compose.yml
+docker-compose.override.yml
 
+# IDE configurations
 .vscode
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# Prisma generated files
 prisma/ERD.svg
 /src/generated/*
 
-
+# Yarn v3+
 .yarn/install-state.gz
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+
+# Package manager caches
+.npm
+.eslintcache
+
+# Optional npm cache directory
+.npm
+
+# Optional REPL history
+.node_repl_history
+
+# Output of 'npm pack'
+*.tgz
+
+# Yarn Integrity file
+.yarn-integrity
+
+# Archives and compressed files
+*.tar.gz
+*.zip
+*.rar
+*.7z
+
+# Deployment archives
+skill-mapping-backend-*.tar.gz
+
+# PM2 logs
+.pm2/
+
+# Public uploads (user-generated content)
+public/uploads/
+public/temp/
