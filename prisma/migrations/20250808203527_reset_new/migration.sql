@@ -108,6 +108,7 @@ CREATE TABLE `instructor` (
     UNIQUE INDEX `instructor_thaiName_key`(`thaiName`),
     UNIQUE INDEX `instructor_engName_key`(`engName`),
     UNIQUE INDEX `instructor_email_key`(`email`),
+    INDEX `instructor_branchId_fkey`(`branchId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -152,6 +153,8 @@ CREATE TABLE `skill` (
     `parentId` INTEGER NULL,
     `curriculumId` INTEGER NOT NULL,
 
+    INDEX `skill_curriculumId_fkey`(`curriculumId`),
+    INDEX `skill_parentId_fkey`(`parentId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -165,6 +168,8 @@ CREATE TABLE `skill_collection` (
     `courseId` INTEGER NULL,
 
     INDEX `skill_collection_studentId_cloId_courseId_idx`(`studentId`, `cloId`, `courseId`),
+    INDEX `skill_collection_cloId_fkey`(`cloId`),
+    INDEX `skill_collection_courseId_fkey`(`courseId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -174,7 +179,7 @@ CREATE TABLE `student` (
     `code` VARCHAR(255) NOT NULL,
     `engName` VARCHAR(255) NULL,
     `enrollmentDate` DATETIME(0) NULL,
-    `socials` JSON NULL,
+    `socials` LONGTEXT NULL,
     `thaiName` VARCHAR(255) NULL,
     `curriculumId` INTEGER NULL,
     `branchId` INTEGER NULL,
@@ -182,6 +187,8 @@ CREATE TABLE `student` (
 
     UNIQUE INDEX `student_code_key`(`code`),
     INDEX `student_code_idx`(`code`),
+    INDEX `student_branchId_fkey`(`branchId`),
+    INDEX `student_curriculumId_fkey`(`curriculumId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -241,6 +248,8 @@ CREATE TABLE `company_job_position` (
     `companyId` INTEGER NULL,
     `jobPositionId` INTEGER NULL,
 
+    INDEX `company_job_position_companyId_fkey`(`companyId`),
+    INDEX `company_job_position_jobPositionId_fkey`(`jobPositionId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -248,36 +257,61 @@ CREATE TABLE `company_job_position` (
 CREATE TABLE `internship` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `year` INTEGER NULL,
+    `token` VARCHAR(32) NULL,
     `companyId` INTEGER NULL,
 
+    UNIQUE INDEX `internship_token_key`(`token`),
+    INDEX `internship_companyId_fkey`(`companyId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `student_internship` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `isAssessed` BOOLEAN NOT NULL DEFAULT false,
     `studentId` INTEGER NULL,
     `jobPositionId` INTEGER NULL,
     `internshipId` INTEGER NULL,
 
     INDEX `student_internship_internshipId_idx`(`internshipId`),
     INDEX `student_internship_jobPositionId_idx`(`jobPositionId`),
+    INDEX `student_internship_studentId_fkey`(`studentId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 -- CreateTable
 CREATE TABLE `skill_assessment` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
-    `curriculumLevel` INTEGER NOT NULL DEFAULT 0,
-    `companyLevel` INTEGER NOT NULL DEFAULT 0,
-    `finalLevel` INTEGER NOT NULL DEFAULT 0,
+    `curriculumLevel` INTEGER NULL DEFAULT 0,
+    `companyLevel` INTEGER NULL DEFAULT 0,
+    `finalLevel` INTEGER NULL DEFAULT 0,
     `curriculumComment` TEXT NULL,
     `companyComment` TEXT NULL,
     `skillId` INTEGER NULL,
     `studentId` INTEGER NULL,
 
     INDEX `skill_assessment_skillId_studentId_idx`(`skillId`, `studentId`),
+    INDEX `skill_assessment_studentId_fkey`(`studentId`),
     UNIQUE INDEX `skill_assessment_skillId_studentId_key`(`skillId`, `studentId`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- CreateTable
+CREATE TABLE `audit_log` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `userId` INTEGER NULL,
+    `action` VARCHAR(100) NOT NULL,
+    `resource` VARCHAR(100) NOT NULL,
+    `resourceId` VARCHAR(255) NULL,
+    `before` JSON NULL,
+    `after` JSON NULL,
+    `metadata` JSON NULL,
+    `timestamp` DATETIME(0) NOT NULL DEFAULT CURRENT_TIMESTAMP(0),
+
+    INDEX `audit_log_userId_idx`(`userId`),
+    INDEX `audit_log_action_idx`(`action`),
+    INDEX `audit_log_resource_idx`(`resource`),
+    INDEX `audit_log_timestamp_idx`(`timestamp`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -288,10 +322,10 @@ ALTER TABLE `branch` ADD CONSTRAINT `branch_facultyId_fkey` FOREIGN KEY (`facult
 ALTER TABLE `course` ADD CONSTRAINT `course_subjectId_fkey` FOREIGN KEY (`subjectId`) REFERENCES `subject`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `course_instructor` ADD CONSTRAINT `course_instructor_instructorId_fkey` FOREIGN KEY (`instructorId`) REFERENCES `instructor`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
+ALTER TABLE `course_instructor` ADD CONSTRAINT `course_instructor_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `course_instructor` ADD CONSTRAINT `course_instructor_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `course_instructor` ADD CONSTRAINT `course_instructor_instructorId_fkey` FOREIGN KEY (`instructorId`) REFERENCES `instructor`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `subject` ADD CONSTRAINT `subject_curriculumId_fkey` FOREIGN KEY (`curriculumId`) REFERENCES `curriculum`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -300,10 +334,10 @@ ALTER TABLE `subject` ADD CONSTRAINT `subject_curriculumId_fkey` FOREIGN KEY (`c
 ALTER TABLE `curriculum` ADD CONSTRAINT `curriculum_branchId_fkey` FOREIGN KEY (`branchId`) REFERENCES `branch`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `curriculum_coordinators` ADD CONSTRAINT `curriculum_coordinators_instructorId_fkey` FOREIGN KEY (`instructorId`) REFERENCES `instructor`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `curriculum_coordinators` ADD CONSTRAINT `curriculum_coordinators_curriculumId_fkey` FOREIGN KEY (`curriculumId`) REFERENCES `curriculum`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `curriculum_coordinators` ADD CONSTRAINT `curriculum_coordinators_curriculumId_fkey` FOREIGN KEY (`curriculumId`) REFERENCES `curriculum`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `curriculum_coordinators` ADD CONSTRAINT `curriculum_coordinators_instructorId_fkey` FOREIGN KEY (`instructorId`) REFERENCES `instructor`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `instructor` ADD CONSTRAINT `instructor_branchId_fkey` FOREIGN KEY (`branchId`) REFERENCES `branch`(`id`) ON DELETE NO ACTION ON UPDATE NO ACTION;
@@ -315,40 +349,40 @@ ALTER TABLE `plo` ADD CONSTRAINT `plo_curriculumId_fkey` FOREIGN KEY (`curriculu
 ALTER TABLE `clo` ADD CONSTRAINT `clo_ploId_fkey` FOREIGN KEY (`ploId`) REFERENCES `plo`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `clo` ADD CONSTRAINT `clo_subjectId_fkey` FOREIGN KEY (`subjectId`) REFERENCES `subject`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
 ALTER TABLE `clo` ADD CONSTRAINT `clo_skillId_fkey` FOREIGN KEY (`skillId`) REFERENCES `skill`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `skill` ADD CONSTRAINT `skill_parentId_fkey` FOREIGN KEY (`parentId`) REFERENCES `skill`(`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
+ALTER TABLE `clo` ADD CONSTRAINT `clo_subjectId_fkey` FOREIGN KEY (`subjectId`) REFERENCES `subject`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `skill` ADD CONSTRAINT `skill_curriculumId_fkey` FOREIGN KEY (`curriculumId`) REFERENCES `curriculum`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `skill_collection` ADD CONSTRAINT `skill_collection_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `skill` ADD CONSTRAINT `skill_parentId_fkey` FOREIGN KEY (`parentId`) REFERENCES `skill`(`id`) ON DELETE NO ACTION ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `skill_collection` ADD CONSTRAINT `skill_collection_cloId_fkey` FOREIGN KEY (`cloId`) REFERENCES `clo`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `skill_collection` ADD CONSTRAINT `skill_collection_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `student`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `skill_collection` ADD CONSTRAINT `skill_collection_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `student` ADD CONSTRAINT `student_curriculumId_fkey` FOREIGN KEY (`curriculumId`) REFERENCES `curriculum`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `skill_collection` ADD CONSTRAINT `skill_collection_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `student`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `student` ADD CONSTRAINT `student_branchId_fkey` FOREIGN KEY (`branchId`) REFERENCES `branch`(`id`) ON DELETE RESTRICT ON UPDATE NO ACTION;
 
 -- AddForeignKey
+ALTER TABLE `student` ADD CONSTRAINT `student_curriculumId_fkey` FOREIGN KEY (`curriculumId`) REFERENCES `curriculum`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+
+-- AddForeignKey
 ALTER TABLE `lesson` ADD CONSTRAINT `lesson_subjectId_fkey` FOREIGN KEY (`subjectId`) REFERENCES `subject`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `user` ADD CONSTRAINT `user_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `student`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `user` ADD CONSTRAINT `user_instructorId_fkey` FOREIGN KEY (`instructorId`) REFERENCES `instructor`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
-ALTER TABLE `user` ADD CONSTRAINT `user_instructorId_fkey` FOREIGN KEY (`instructorId`) REFERENCES `instructor`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+ALTER TABLE `user` ADD CONSTRAINT `user_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `student`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
 
 -- AddForeignKey
 ALTER TABLE `company_job_position` ADD CONSTRAINT `company_job_position_companyId_fkey` FOREIGN KEY (`companyId`) REFERENCES `company`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
@@ -360,16 +394,19 @@ ALTER TABLE `company_job_position` ADD CONSTRAINT `company_job_position_jobPosit
 ALTER TABLE `internship` ADD CONSTRAINT `internship_companyId_fkey` FOREIGN KEY (`companyId`) REFERENCES `company`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `student_internship` ADD CONSTRAINT `student_internship_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `student`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `student_internship` ADD CONSTRAINT `student_internship_internshipId_fkey` FOREIGN KEY (`internshipId`) REFERENCES `internship`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `student_internship` ADD CONSTRAINT `student_internship_jobPositionId_fkey` FOREIGN KEY (`jobPositionId`) REFERENCES `job_position`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `student_internship` ADD CONSTRAINT `student_internship_internshipId_fkey` FOREIGN KEY (`internshipId`) REFERENCES `internship`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE `student_internship` ADD CONSTRAINT `student_internship_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `student`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `skill_assessment` ADD CONSTRAINT `skill_assessment_skillId_fkey` FOREIGN KEY (`skillId`) REFERENCES `skill`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `skill_assessment` ADD CONSTRAINT `skill_assessment_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `student`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `audit_log` ADD CONSTRAINT `audit_log_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `user`(`id`) ON DELETE SET NULL ON UPDATE CASCADE;
