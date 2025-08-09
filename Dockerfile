@@ -1,34 +1,19 @@
-# ---- Builder Stage ----
-FROM node:22-alpine AS builder
+FROM ubuntu:24.04
+
+# Install Node.js 22
+RUN apt-get update && apt-get install -y curl python3 make g++ \
+ && curl -fsSL https://deb.nodesource.com/setup_22.x | bash - \
+ && apt-get install -y nodejs
 
 WORKDIR /usr/src/app
 
-# Enable corepack & activate yarn 4.9.2
-RUN corepack enable && corepack prepare yarn@4.9.2 --activate
+# Copy package files first for caching
+# COPY package.json yarn.lock ./
+COPY package.json ./
+# RUN corepack enable && yarn install
+RUN npm install
 
-COPY package.json yarn.lock .yarnrc.yml ./
-COPY .yarn .yarn
-RUN yarn install
-
+# Copy the rest of the source
 COPY . .
 
-RUN yarn prisma generate
-RUN yarn build
-
-# ---- Runtime Stage ----
-FROM node:22-alpine
-
-WORKDIR /usr/src/app
-
-# Enable corepack & activate yarn 4.9.2
-RUN corepack enable && corepack prepare yarn@4.9.2 --activate
-
-COPY package.json yarn.lock ./
-RUN yarn workspaces focus
-
-COPY --from=builder /usr/src/app/dist ./dist
-COPY --from=builder /usr/src/app/node_modules/.prisma ./node_modules/.prisma
-
-EXPOSE 3000
-
-CMD ["node", "dist/src/main.js"]
+RUN npx prisma generate && npm run build

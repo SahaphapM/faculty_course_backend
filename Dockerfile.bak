@@ -1,0 +1,42 @@
+# ---- Builder Stage ----
+FROM node:22 AS builder
+
+WORKDIR /usr/src/app
+
+# Enable corepack & activate Yarn 4.9.2
+RUN corepack enable && corepack prepare yarn@4.9.2 --activate
+
+# Copy dependency files first (better layer caching)
+COPY package.json yarn.lock .yarnrc.yml ./
+COPY .yarn .yarn
+
+# Install all dependencies (including dev) for build
+RUN yarn install --frozen-lockfile
+
+# Copy all source code
+COPY . .
+
+# Generate Prisma client
+RUN yarn prisma generate
+
+# Build application
+RUN yarn build
+
+# Remove devDependencies to reduce runtime size
+RUN yarn workspaces focus --production || yarn install --production --frozen-lockfile && yarn cache clean
+
+# ---- Runtime Stage ----
+FROM node:22-alpine
+
+WORKDIR /usr/src/app
+
+# Enable corepack & activate Yarn 4.9.2
+RUN corepack enable && corepack prepare yarn@4.9.2 --activate
+
+# Copy production dependencies + built code
+COPY --from=builder /usr/src/app/node_modules ./node_modules
+COPY --from=builder /usr/src/app/dist ./dist
+COPY package.json yarn.lock ./
+
+EXPOSE 3000
+CMD ["node", "dist/src/main.js"]
