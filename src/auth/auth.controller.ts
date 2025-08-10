@@ -1,13 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Post,
-  Req,
-  Res,
-  UseGuards,
-} from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { Request, Response } from 'express';
 
 import { AuthService } from './auth.service';
@@ -18,10 +9,14 @@ import { Public } from '../decorators/public.decorator';
 import { LoginDto } from 'src/dto/login.dto';
 import type { ProfilePayload } from './types/current-user.d.ts';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
+import { UserService } from 'src/modules/users/users.service';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+    private readonly userService: UserService, // Injected directly from UsersModule
+  ) {}
 
   @Public()
   @Post('/login')
@@ -37,7 +32,7 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   @Get('/profile')
   async getProfile(@Req() req) {
-    return req.user;
+  return await this.userService.findOneById(req.user.id);
   }
 
   @Public()
@@ -84,7 +79,7 @@ export class AuthController {
   @UseGuards(RefreshAuthGuard)
   @Post('refresh')
   async refreshToken(@Req() req) {
-    return this.authService.refreshToken(req.user.id, req.user.role);
+    return this.authService.refreshToken(req.user.id);
   }
 
   @UseGuards(JwtAuthGuard)

@@ -13,7 +13,6 @@ import { RolesGuard } from './guard/roles.guard';
 import googleOauthConfig from './config/google-oauth.config';
 import refreshJwtConfig from './config/refresh-jwt.config';
 import jwtConfig from './config/jwt.config';
-import { UsersService } from 'src/modules/users/users.service';
 import { RefreshJwtStrategy } from './strategies/refresh.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from 'src/prisma/prisma.module';
@@ -34,7 +33,6 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     LocalStrategy,
     JwtStrategy,
     GoogleStrategy,
-    UsersService,
     RefreshJwtStrategy,
     {
       provide: APP_GUARD,

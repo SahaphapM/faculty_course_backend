@@ -10,7 +10,7 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
-import { UsersService } from './users.service';
+import { UserService } from './users.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
@@ -22,7 +22,7 @@ import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
 @UseInterceptors(ClassSerializerInterceptor)
 @Controller('users')
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly usersService: UserService) {}
   @Roles(UserRole.Admin)
   @Post()
   create(@Body() createUserDto: CreateUserDto) {
@@ -37,7 +37,7 @@ export class UsersController {
   @Roles(UserRole.Admin)
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.usersService.findOne(+id);
+    return this.usersService.findOneById(+id);
   }
 
   @Roles(UserRole.Admin)

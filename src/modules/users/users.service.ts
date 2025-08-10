@@ -12,7 +12,7 @@ import * as bcrypt from '@node-rs/bcrypt';
 import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
 
 @Injectable()
-export class UsersService {
+export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createUserDto: CreateUserDto) {
@@ -70,7 +70,7 @@ export class UsersService {
     }
   }
 
-  async findOne(id: number) {
+  async findOneById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
       include: { student: true, instructor: true },
@@ -90,7 +90,7 @@ export class UsersService {
   }
 
   async update(id: number, dto: UpdateUserDto) {
-    const user = await this.findOne(id);
+    const user = await this.findOneById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
@@ -122,7 +122,7 @@ export class UsersService {
   }
 
   async remove(id: number) {
-    await this.findOne(id);
+    await this.findOneById(id);
     try {
       await this.prisma.user.delete({ where: { id } });
       return `Success Delete ID ${id}`;
