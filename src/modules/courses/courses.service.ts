@@ -21,9 +21,9 @@ export class CourseService {
           year: 'asc',
         },
       });
-      
+
       // Extract just the year values and return as an array
-      return years.map(item => item.year);
+      return years.map((item) => item.year);
     } catch (error) {
       console.error('Error fetching course years:', error);
       throw new InternalServerErrorException('Failed to fetch course years');
@@ -150,12 +150,13 @@ export class CourseService {
             include: {
               clos: {
                 include: {
-                  skill: true,
+                  skill: {
+                    select: { id: true, engName: true, thaiName: true },
+                  },
                 },
               },
             },
           },
-          course_instructors: true,
         },
       });
 
@@ -163,7 +164,16 @@ export class CourseService {
         throw new NotFoundException(`Course with ID ${id} not found`);
       }
 
-      return course;
+      const studentCount = await this.prisma.student.count({
+        where: {
+          skill_collections: {
+            some: {
+              courseId: id,
+            },
+          },
+        },
+      });
+      return { ...course, studentCount };
     } catch (error) {
       throw new InternalServerErrorException(
         'Failed to fetch course',
@@ -174,7 +184,6 @@ export class CourseService {
 
   // Update an existing course
   async update(id: number, updateCourseDto: UpdateCourseDto) {
-    console.log('Update Path 2');
     try {
       const course = await this.prisma.course.update({
         where: { id },

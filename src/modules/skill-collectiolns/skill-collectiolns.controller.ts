@@ -31,13 +31,10 @@ export class SkillCollectionsController {
     @Query('courseId', ParseIntPipe) courseId: number,
     @Query('cloId', ParseIntPipe) cloId: number,
   ): Promise<Partial<SkillCollection>[]> {
-    // ✅ รับค่าจาก Query Params
     return this.skillCollectionsService.getByCloId(courseId, cloId);
   }
 
-  /////// import skill collections
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
-  // Swagger API
   @ApiBody({ type: StudentScoreList, isArray: true })
   @Post('import')
   importSkill(
@@ -45,7 +42,6 @@ export class SkillCollectionsController {
     @Query('cloId', ParseIntPipe) cloId: number, // ✅ รับค่าจาก Query Params
     @Body() studentScoreList: StudentScoreList[], // ✅ ใช้ DTO
   ) {
-    console.log('Import Path');
     return this.skillCollectionsService.importSkillCollections(
       courseId,
       cloId,
