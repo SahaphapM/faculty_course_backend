@@ -212,7 +212,8 @@ export class InternshipsService {
               select: {
                 code: true,
                 thaiName: true,
-                branch: { select: { thaiName: true } },
+                engName: true,
+                branch: { select: { thaiName: true, engName: true, faculty: { select: { thaiName: true, engName: true } } } },
               },
             },
             jobPosition: { select: { name: true } },
@@ -250,13 +251,14 @@ export class InternshipsService {
             branch: {
               select: {
                 thaiName: true,
-                faculty: { select: { thaiName: true } },
+                engName: true,
+                faculty: { select: { thaiName: true, engName: true } },
               },
             },
-            curriculum: { select: { thaiName: true } },
+            curriculum: { select: { thaiName: true, engName: true , level_descriptions: true} },
             skill_assessments: {
               include: {
-                skill: { select: { thaiName: true, thaiDescription: true } },
+                skill: { select: { thaiName: true, engName: true, domain: true } },
               },
             },
           },
