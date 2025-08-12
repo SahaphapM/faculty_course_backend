@@ -22,13 +22,14 @@ export class CurriculumsService {
   constructor(private prisma: PrismaService) {}
 
   // Create a new curriculum
-  async create(dto: CreateCurriculumDto) {
+  async create(dto: CreateCurriculumDto, coordinatorId?: number) {
     const { branchId, ...rest } = dto;
 
     const curriculum = await this.prisma.curriculum.create({
       data: {
         ...rest,
         branch: branchId ? { connect: { id: branchId } } : undefined,
+        ...(coordinatorId ? { coordinatorId } : {}),
       },
     });
 
@@ -97,7 +98,7 @@ export class CurriculumsService {
   }
 
   // Find all curriculums with pagination and search
-  async findAll(pag?: CurriculumFilterDto) {
+  async findAll(pag?: CurriculumFilterDto, coordinatorId?: number) {
     const defaultLimit = 15;
     const defaultPage = 1;
 
@@ -134,9 +135,9 @@ export class CurriculumsService {
       }),
       ...(branchId && { branchId }),
       ...(facultyId && { branch: { facultyId } }),
+      ...(coordinatorId && { coordinatorId }),
     };
 
-    // With pagination
     const options: Prisma.curriculumFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
@@ -191,13 +192,12 @@ export class CurriculumsService {
 
   async update(id: number, dto: UpdateCurriculumDto) {
     try {
-      // ดึงของเก่ามา
+
       const old = await this.prisma.curriculum.findUnique({ where: { id } });
       if (!old) {
         throw new NotFoundException(`Curriculum with ID ${id} not found`);
       }
 
-      // ถ้า code เปลี่ยน → ตรวจสอบว่าไม่ชน
       if (dto.code && dto.code !== old.code) {
         const codeExists = await this.prisma.curriculum.findFirst({
           where: {
@@ -212,7 +212,6 @@ export class CurriculumsService {
         }
       }
 
-      // ทำการอัปเดต
       const curriculum = await this.prisma.curriculum.update({
         where: { id },
         data: dto,
@@ -245,10 +244,8 @@ export class CurriculumsService {
     yearCode: string,
     skillType: string,
   ) {
-    // 1. Determine domains based on skill type
     const domains = getSkillDomains(skillType);
 
-    // 2. Get student IDs for the given curriculum and year
     const studentIds = await getStudentIds(curriculumId, yearCode);
     console.log('totalStudent', studentIds.length);
 

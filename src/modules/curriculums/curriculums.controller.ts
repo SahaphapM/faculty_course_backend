@@ -23,13 +23,15 @@ export class CurriculumsController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Post()
-  create(@Body() createCurriculumDto: CreateCurriculumDto) {
-    return this.curriculumsService.create(createCurriculumDto);
+  @ApiQuery({ name: 'coordinatorId', required: false })
+  create(@Body() createCurriculumDto: CreateCurriculumDto, @Query('coordinatorId') coordinatorId?: number) {
+    return this.curriculumsService.create(createCurriculumDto, coordinatorId);
   }
 
   @Get()
-  findAll(@Query() pag?: CurriculumFilterDto) {
-    return this.curriculumsService.findAll(pag);
+  @ApiQuery({ name: 'coordinatorId', required: false })
+  findAll(@Query() pag?: CurriculumFilterDto, @Query('coordinatorId') coordinatorId?: number) {
+    return this.curriculumsService.findAll(pag, coordinatorId);
   }
 
   @Get('summary:curriculumId')
