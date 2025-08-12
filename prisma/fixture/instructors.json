@@ -22,5 +22,61 @@
     "tel": "038-123-4569",
     "position": "อาจารย์",
     "email": "somsak@buu.ac.th"
+  },
+  {
+    "code": "INS004",
+    "thaiName": "ดร.สุชาติ มีทรัพย์",
+    "engName": "Dr. Suchart Meesup",
+    "tel": "038-123-4570",
+    "position": "อาจารย์",
+    "email": "suchart@buu.ac.th"
+  },
+  {
+    "code": "INS005",
+    "thaiName": "ดร.นพดล สุขใจ",
+    "engName": "Dr. Nopadol Suksai",
+    "tel": "038-123-4571",
+    "position": "อาจารย์",
+    "email": "nopadol@buu.ac.th"
+  },
+  {
+    "code": "INS006",
+    "thaiName": "ดร.วิไลวรรณ ใจกว้าง",
+    "engName": "Dr. Wilaiwan Jaikwang",
+    "tel": "038-123-4572",
+    "position": "อาจารย์",
+    "email": "wilaiwan@buu.ac.th"
+  },
+  {
+    "code": "INS007",
+    "thaiName": "ดร.ธนวัฒน์ เก่งการ",
+    "engName": "Dr. Thanawat Kengkan",
+    "tel": "038-123-4573",
+    "position": "อาจารย์",
+    "email": "thanawat@buu.ac.th"
+  },
+  {
+    "code": "INS008",
+    "thaiName": "ดร.กนกวรรณ ใจเย็น",
+    "engName": "Dr. Kanokwan Jaiyen",
+    "tel": "038-123-4574",
+    "position": "อาจารย์",
+    "email": "kanokwan@buu.ac.th"
+  },
+  {
+    "code": "INS009",
+    "thaiName": "ดร.วีรศักดิ์ สุขสันต์",
+    "engName": "Dr. Weerasak Suksan",
+    "tel": "038-123-4575",
+    "position": "อาจารย์",
+    "email": "weerasak@buu.ac.th"
+  },
+  {
+    "code": "INS010",
+    "thaiName": "ดร.สุธีรา ใจงาม",
+    "engName": "Dr. Sutheera Jai-ngam",
+    "tel": "038-123-4576",
+    "position": "อาจารย์",
+    "email": "sutheera@buu.ac.th"
   }
 ]

@@ -15,6 +15,7 @@ import {
   getSkillDomains,
   getStudentIds,
 } from './curriculums.helper';
+import { CreateLevelDescriptionDto } from 'src/generated/nestjs-dto/create-levelDescription.dto';
 
 @Injectable()
 export class CurriculumsService {
@@ -29,6 +30,63 @@ export class CurriculumsService {
         ...rest,
         branch: branchId ? { connect: { id: branchId } } : undefined,
       },
+    });
+
+    // defult level description
+    const levels : CreateLevelDescriptionDto[] = [
+      {
+          level: 1,
+          description: "สามารถอธิบายหลักการหรือแนวคิดพื้นฐานได้ ยังไม่สามารถนำไปปฏิบัติได้ด้วยตนเอง",
+          isHardSkill: true,
+          curriculumId: curriculum.id
+        },
+        {
+          level: 2,
+          description: "สามารถปฏิบัติงานได้เมื่อมีคนชี้แนะหรือติดตามใกล้ชิด",
+          isHardSkill: true,
+          curriculumId: curriculum.id
+        },
+        {
+          level: 3,
+          description: "สามารถทำงานได้สำเร็จโดยไม่ต้องมีคนคอยกำกับ",
+          isHardSkill: true,
+          curriculumId: curriculum.id
+        },
+        {
+          level: 4,
+          description: "ทำได้คล่องและปรับวิธีให้เหมาะสมกับสถานการณ์",
+          isHardSkill: true,
+          curriculumId: curriculum.id
+        },
+        {
+          level: 5,
+          description: "เป็นผู้เชี่ยวชาญ ให้คำปรึกษาหรือพัฒนาวิธีใหม่ได้",
+          isHardSkill: true,
+          curriculumId: curriculum.id
+        },
+        {
+          level: 1,
+          description: "เข้าใจหลักการสื่อสารที่ดี",
+          isHardSkill: false,
+          curriculumId: curriculum.id
+        },
+        {
+          level: 2,
+          description: "สามารถสื่อสารได้ชัดเจนเมื่อมีคำแนะนำหรือโครงสร้างช่วย",
+          isHardSkill: false,
+          curriculumId: curriculum.id
+        },
+        {
+          level: 3,
+          description: "จัดการความขัดแย้งหรือสถานการณ์ที่ซับซ้อนได้ด้วยตนเอง",
+          isHardSkill: false,
+          curriculumId: curriculum.id
+        }
+  ];
+
+    // for each curriculum
+    await this.prisma.level_description.createMany({
+      data: levels,
     });
 
     return {

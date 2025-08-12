@@ -1,0 +1,42 @@
+[
+    {
+        "level": 1,
+        "description": "สามารถอธิบายหลักการหรือแนวคิดพื้นฐานได้ ยังไม่สามารถนำไปปฏิบัติได้ด้วยตนเอง",
+        "isHardSkill": true
+      },
+      {
+        "level": 2,
+        "description": "สามารถปฏิบัติงานได้เมื่อมีคนชี้แนะหรือติดตามใกล้ชิด",
+        "isHardSkill": true
+      },
+      {
+        "level": 3,
+        "description": "สามารถทำงานได้สำเร็จโดยไม่ต้องมีคนคอยกำกับ",
+        "isHardSkill": true
+      },
+      {
+        "level": 4,
+        "description": "ทำได้คล่องและปรับวิธีให้เหมาะสมกับสถานการณ์",
+        "isHardSkill": true
+      },
+      {
+        "level": 5,
+        "description": "เป็นผู้เชี่ยวชาญ ให้คำปรึกษาหรือพัฒนาวิธีใหม่ได้",
+        "isHardSkill": true
+      },
+      {
+        "level": 1,
+        "description": "เข้าใจหลักการสื่อสารที่ดี",
+        "isHardSkill": false
+      },
+      {
+        "level": 2,
+        "description": "สามารถสื่อสารได้ชัดเจนเมื่อมีคำแนะนำหรือโครงสร้างช่วย",
+        "isHardSkill": false
+      },
+      {
+        "level": 3,
+        "description": "จัดการความขัดแย้งหรือสถานการณ์ที่ซับซ้อนได้ด้วยตนเอง",
+        "isHardSkill": false
+      }
+]

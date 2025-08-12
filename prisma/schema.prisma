@@ -112,6 +112,7 @@ model curriculum {
   skills          skill[]
   students        student[]
   subjects        subject[]
+  level_descriptions level_description[]
 
   @@index([branchId])
 }
@@ -380,4 +381,16 @@ model audit_log {
   @@index([action])
   @@index([resource])
   @@index([timestamp])
+}
+
+model level_description {
+  id Int @id @default(autoincrement())
+  level Int
+  description String
+  isHardSkill Boolean
+  
+  /// @DtoRelationIncludeId
+  curriculumId Int
+  curriculum curriculum @relation(fields: [curriculumId], references: [id])
+  @@index([curriculumId])
 }

@@ -1,26 +1,802 @@
 [
   {
-    "code": "65000001",
+    "code": "65160201",
     "thaiName": "นายสมชาย ใจดี",
     "engName": "Mr. Somchai Jaidee",
-    "email": "65000001@example.com",
+    "email": "65160201@go.buu.ac.th",
     "enrollmentDate": "2025-08-01",
     "curriculumCode": "CS2025"
   },
   {
-    "code": "65000002", 
+    "code": "65160202",
     "thaiName": "นางสาววิชิดา รักเรียน",
     "engName": "Ms. Wichida Rakrian",
-    "email": "65000002@example.com",
+    "email": "65160202@go.buu.ac.th",
     "enrollmentDate": "2025-08-01",
     "curriculumCode": "CS2025"
   },
   {
-    "code": "65000003",
+    "code": "65160203",
     "thaiName": "นายประสิทธิ์ เก่งมาก",
     "engName": "Mr. Prasit Kengmak",
-    "email": "65000003@example.com",
-    "enrollmentDate": "2025-08-01", 
+    "email": "65160203@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160204",
+    "thaiName": "นางสาวกนกวรรณ ใจดี",
+    "engName": "Ms. Kanokwan Jaidee",
+    "email": "65160204@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160205",
+    "thaiName": "นายธนวัฒน์ มีทรัพย์",
+    "engName": "Mr. Thanawat Meesup",
+    "email": "65160205@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160206",
+    "thaiName": "นางสาวสุพัตรา สุขสวัสดิ์",
+    "engName": "Ms. Supattra Suksawat",
+    "email": "65160206@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160207",
+    "thaiName": "นายวีรศักดิ์ ใจกล้า",
+    "engName": "Mr. Weerasak Jaikla",
+    "email": "65160207@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160208",
+    "thaiName": "นางสาวณัฐริกา เก่งดี",
+    "engName": "Ms. Nattarika Kengdee",
+    "email": "65160208@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160209",
+    "thaiName": "นายธนกฤต มีมงคล",
+    "engName": "Mr. Thanakrit Meemongkol",
+    "email": "65160209@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160210",
+    "thaiName": "นางสาวสุธาสินี ใจงาม",
+    "engName": "Ms. Suthasinee Jai-ngam",
+    "email": "65160210@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160211",
+    "thaiName": "นายอภิชาติ มีสุข",
+    "engName": "Mr. Apichat Mee-suk",
+    "email": "65160211@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160212",
+    "thaiName": "นางสาวปิยธิดา ใจเย็น",
+    "engName": "Ms. Piyathida Jaiyen",
+    "email": "65160212@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160213",
+    "thaiName": "นายกิตติพงษ์ เก่งการ",
+    "engName": "Mr. Kittipong Kengkan",
+    "email": "65160213@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160214",
+    "thaiName": "นางสาววิไลวรรณ ใจกว้าง",
+    "engName": "Ms. Wilaiwan Jaikwang",
+    "email": "65160214@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160215",
+    "thaiName": "นายธนภัทร มีมงคล",
+    "engName": "Mr. Thanapat Meemongkol",
+    "email": "65160215@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160216",
+    "thaiName": "นางสาวสุชาดา สุขใจ",
+    "engName": "Ms. Suchada Suksai",
+    "email": "65160216@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160217",
+    "thaiName": "นายนพดล ใจกว้าง",
+    "engName": "Mr. Nopadol Jaikwang",
+    "email": "65160217@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160218",
+    "thaiName": "นางสาวกาญจนา ใจดี",
+    "engName": "Ms. Kanjana Jaidee",
+    "email": "65160218@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160219",
+    "thaiName": "นายธีรพงศ์ มีทรัพย์",
+    "engName": "Mr. Teerapong Meesup",
+    "email": "65160219@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160220",
+    "thaiName": "นางสาวสุพรรณี สุขสวัสดิ์",
+    "engName": "Ms. Suphannee Suksawat",
+    "email": "65160220@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160221",
+    "thaiName": "นายวุฒิชัย ใจกล้า",
+    "engName": "Mr. Wuttichai Jaikla",
+    "email": "65160221@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160222",
+    "thaiName": "นางสาวธัญลักษณ์ เก่งดี",
+    "engName": "Ms. Thanyalak Kengdee",
+    "email": "65160222@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160223",
+    "thaiName": "นายธนกฤต มีมงคล",
+    "engName": "Mr. Thanakrit Meemongkol",
+    "email": "65160223@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160224",
+    "thaiName": "นางสาวสุธาสินี ใจงาม",
+    "engName": "Ms. Suthasinee Jai-ngam",
+    "email": "65160224@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160225",
+    "thaiName": "นายอภิชาติ มีสุข",
+    "engName": "Mr. Apichat Mee-suk",
+    "email": "65160225@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160226",
+    "thaiName": "นางสาวปิยธิดา ใจเย็น",
+    "engName": "Ms. Piyathida Jaiyen",
+    "email": "65160226@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160227",
+    "thaiName": "นายกิตติพงษ์ เก่งการ",
+    "engName": "Mr. Kittipong Kengkan",
+    "email": "65160227@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160228",
+    "thaiName": "นางสาววิไลวรรณ ใจกว้าง",
+    "engName": "Ms. Wilaiwan Jaikwang",
+    "email": "65160228@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160229",
+    "thaiName": "นายธนภัทร มีมงคล",
+    "engName": "Mr. Thanapat Meemongkol",
+    "email": "65160229@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160230",
+    "thaiName": "นางสาวสุชาดา สุขใจ",
+    "engName": "Ms. Suchada Suksai",
+    "email": "65160230@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160231",
+    "thaiName": "นายนพดล ใจกว้าง",
+    "engName": "Mr. Nopadol Jaikwang",
+    "email": "65160231@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160232",
+    "thaiName": "นางสาวกาญจนา ใจดี",
+    "engName": "Ms. Kanjana Jaidee",
+    "email": "65160232@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160233",
+    "thaiName": "นายธีรพงศ์ มีทรัพย์",
+    "engName": "Mr. Teerapong Meesup",
+    "email": "65160233@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160234",
+    "thaiName": "นางสาวสุพรรณี สุขสวัสดิ์",
+    "engName": "Ms. Suphannee Suksawat",
+    "email": "65160234@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160235",
+    "thaiName": "นายวุฒิชัย ใจกล้า",
+    "engName": "Mr. Wuttichai Jaikla",
+    "email": "65160235@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160236",
+    "thaiName": "นางสาวธัญลักษณ์ เก่งดี",
+    "engName": "Ms. Thanyalak Kengdee",
+    "email": "65160236@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160237",
+    "thaiName": "นายธนกฤต มีมงคล",
+    "engName": "Mr. Thanakrit Meemongkol",
+    "email": "65160237@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160238",
+    "thaiName": "นางสาวสุธาสินี ใจงาม",
+    "engName": "Ms. Suthasinee Jai-ngam",
+    "email": "65160238@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160239",
+    "thaiName": "นายอภิชาติ มีสุข",
+    "engName": "Mr. Apichat Mee-suk",
+    "email": "65160239@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160240",
+    "thaiName": "นางสาวปิยธิดา ใจเย็น",
+    "engName": "Ms. Piyathida Jaiyen",
+    "email": "65160240@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160241",
+    "thaiName": "นายกิตติพงษ์ เก่งการ",
+    "engName": "Mr. Kittipong Kengkan",
+    "email": "65160241@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160242",
+    "thaiName": "นางสาววิไลวรรณ ใจกว้าง",
+    "engName": "Ms. Wilaiwan Jaikwang",
+    "email": "65160242@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160243",
+    "thaiName": "นายธนภัทร มีมงคล",
+    "engName": "Mr. Thanapat Meemongkol",
+    "email": "65160243@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160244",
+    "thaiName": "นางสาวสุชาดา สุขใจ",
+    "engName": "Ms. Suchada Suksai",
+    "email": "65160244@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160245",
+    "thaiName": "นายนพดล ใจกว้าง",
+    "engName": "Mr. Nopadol Jaikwang",
+    "email": "65160245@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160246",
+    "thaiName": "นางสาวกาญจนา ใจดี",
+    "engName": "Ms. Kanjana Jaidee",
+    "email": "65160246@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160247",
+    "thaiName": "นายธีรพงศ์ มีทรัพย์",
+    "engName": "Mr. Teerapong Meesup",
+    "email": "65160247@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160248",
+    "thaiName": "นางสาวสุพรรณี สุขสวัสดิ์",
+    "engName": "Ms. Suphannee Suksawat",
+    "email": "65160248@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160249",
+    "thaiName": "นายวุฒิชัย ใจกล้า",
+    "engName": "Mr. Wuttichai Jaikla",
+    "email": "65160249@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160250",
+    "thaiName": "นางสาวธัญลักษณ์ เก่งดี",
+    "engName": "Ms. Thanyalak Kengdee",
+    "email": "65160250@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160251",
+    "thaiName": "นายธนกฤต มีมงคล",
+    "engName": "Mr. Thanakrit Meemongkol",
+    "email": "65160251@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160252",
+    "thaiName": "นางสาวสุธาสินี ใจงาม",
+    "engName": "Ms. Suthasinee Jai-ngam",
+    "email": "65160252@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160253",
+    "thaiName": "นายอภิชาติ มีสุข",
+    "engName": "Mr. Apichat Mee-suk",
+    "email": "65160253@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160254",
+    "thaiName": "นางสาวปิยธิดา ใจเย็น",
+    "engName": "Ms. Piyathida Jaiyen",
+    "email": "65160254@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160255",
+    "thaiName": "นายกิตติพงษ์ เก่งการ",
+    "engName": "Mr. Kittipong Kengkan",
+    "email": "65160255@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160256",
+    "thaiName": "นางสาววิไลวรรณ ใจกว้าง",
+    "engName": "Ms. Wilaiwan Jaikwang",
+    "email": "65160256@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160257",
+    "thaiName": "นายธนภัทร มีมงคล",
+    "engName": "Mr. Thanapat Meemongkol",
+    "email": "65160257@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160258",
+    "thaiName": "นางสาวสุชาดา สุขใจ",
+    "engName": "Ms. Suchada Suksai",
+    "email": "65160258@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160259",
+    "thaiName": "นายนพดล ใจกว้าง",
+    "engName": "Mr. Nopadol Jaikwang",
+    "email": "65160259@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160260",
+    "thaiName": "นางสาวกาญจนา ใจดี",
+    "engName": "Ms. Kanjana Jaidee",
+    "email": "65160260@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160261",
+    "thaiName": "นายธีรพงศ์ มีทรัพย์",
+    "engName": "Mr. Teerapong Meesup",
+    "email": "65160261@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160262",
+    "thaiName": "นางสาวสุพรรณี สุขสวัสดิ์",
+    "engName": "Ms. Suphannee Suksawat",
+    "email": "65160262@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160263",
+    "thaiName": "นายวุฒิชัย ใจกล้า",
+    "engName": "Mr. Wuttichai Jaikla",
+    "email": "65160263@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160264",
+    "thaiName": "นางสาวธัญลักษณ์ เก่งดี",
+    "engName": "Ms. Thanyalak Kengdee",
+    "email": "65160264@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160265",
+    "thaiName": "นายธนกฤต มีมงคล",
+    "engName": "Mr. Thanakrit Meemongkol",
+    "email": "65160265@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160266",
+    "thaiName": "นางสาวสุธาสินี ใจงาม",
+    "engName": "Ms. Suthasinee Jai-ngam",
+    "email": "65160266@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160267",
+    "thaiName": "นายอภิชาติ มีสุข",
+    "engName": "Mr. Apichat Mee-suk",
+    "email": "65160267@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160268",
+    "thaiName": "นางสาวปิยธิดา ใจเย็น",
+    "engName": "Ms. Piyathida Jaiyen",
+    "email": "65160268@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160269",
+    "thaiName": "นายกิตติพงษ์ เก่งการ",
+    "engName": "Mr. Kittipong Kengkan",
+    "email": "65160269@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160270",
+    "thaiName": "นางสาววิไลวรรณ ใจกว้าง",
+    "engName": "Ms. Wilaiwan Jaikwang",
+    "email": "65160270@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160271",
+    "thaiName": "นายธนภัทร มีมงคล",
+    "engName": "Mr. Thanapat Meemongkol",
+    "email": "65160271@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160272",
+    "thaiName": "นางสาวสุชาดา สุขใจ",
+    "engName": "Ms. Suchada Suksai",
+    "email": "65160272@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160273",
+    "thaiName": "นายนพดล ใจกว้าง",
+    "engName": "Mr. Nopadol Jaikwang",
+    "email": "65160273@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160274",
+    "thaiName": "นางสาวกาญจนา ใจดี",
+    "engName": "Ms. Kanjana Jaidee",
+    "email": "65160274@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160275",
+    "thaiName": "นายธีรพงศ์ มีทรัพย์",
+    "engName": "Mr. Teerapong Meesup",
+    "email": "65160275@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160276",
+    "thaiName": "นางสาวสุพรรณี สุขสวัสดิ์",
+    "engName": "Ms. Suphannee Suksawat",
+    "email": "65160276@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160277",
+    "thaiName": "นายวุฒิชัย ใจกล้า",
+    "engName": "Mr. Wuttichai Jaikla",
+    "email": "65160277@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160278",
+    "thaiName": "นางสาวธัญลักษณ์ เก่งดี",
+    "engName": "Ms. Thanyalak Kengdee",
+    "email": "65160278@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160279",
+    "thaiName": "นายธนกฤต มีมงคล",
+    "engName": "Mr. Thanakrit Meemongkol",
+    "email": "65160279@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160280",
+    "thaiName": "นางสาวสุธาสินี ใจงาม",
+    "engName": "Ms. Suthasinee Jai-ngam",
+    "email": "65160280@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160281",
+    "thaiName": "นายอภิชาติ มีสุข",
+    "engName": "Mr. Apichat Mee-suk",
+    "email": "65160281@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160282",
+    "thaiName": "นางสาวปิยธิดา ใจเย็น",
+    "engName": "Ms. Piyathida Jaiyen",
+    "email": "65160282@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160283",
+    "thaiName": "นายกิตติพงษ์ เก่งการ",
+    "engName": "Mr. Kittipong Kengkan",
+    "email": "65160283@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160284",
+    "thaiName": "นางสาววิไลวรรณ ใจกว้าง",
+    "engName": "Ms. Wilaiwan Jaikwang",
+    "email": "65160284@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160285",
+    "thaiName": "นายธนภัทร มีมงคล",
+    "engName": "Mr. Thanapat Meemongkol",
+    "email": "65160285@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160286",
+    "thaiName": "นางสาวสุชาดา สุขใจ",
+    "engName": "Ms. Suchada Suksai",
+    "email": "65160286@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160287",
+    "thaiName": "นายนพดล ใจกว้าง",
+    "engName": "Mr. Nopadol Jaikwang",
+    "email": "65160287@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160288",
+    "thaiName": "นางสาวกาญจนา ใจดี",
+    "engName": "Ms. Kanjana Jaidee",
+    "email": "65160288@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160289",
+    "thaiName": "นายธีรพงศ์ มีทรัพย์",
+    "engName": "Mr. Teerapong Meesup",
+    "email": "65160289@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160290",
+    "thaiName": "นางสาวสุพรรณี สุขสวัสดิ์",
+    "engName": "Ms. Suphannee Suksawat",
+    "email": "65160290@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160291",
+    "thaiName": "นายวุฒิชัย ใจกล้า",
+    "engName": "Mr. Wuttichai Jaikla",
+    "email": "65160291@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160292",
+    "thaiName": "นางสาวธัญลักษณ์ เก่งดี",
+    "engName": "Ms. Thanyalak Kengdee",
+    "email": "65160292@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160293",
+    "thaiName": "นายธนกฤต มีมงคล",
+    "engName": "Mr. Thanakrit Meemongkol",
+    "email": "65160293@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160294",
+    "thaiName": "นางสาวสุธาสินี ใจงาม",
+    "engName": "Ms. Suthasinee Jai-ngam",
+    "email": "65160294@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160295",
+    "thaiName": "นายอภิชาติ มีสุข",
+    "engName": "Mr. Apichat Mee-suk",
+    "email": "65160295@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160296",
+    "thaiName": "นางสาวปิยธิดา ใจเย็น",
+    "engName": "Ms. Piyathida Jaiyen",
+    "email": "65160296@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160297",
+    "thaiName": "นายกิตติพงษ์ เก่งการ",
+    "engName": "Mr. Kittipong Kengkan",
+    "email": "65160297@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160298",
+    "thaiName": "นางสาววิไลวรรณ ใจกว้าง",
+    "engName": "Ms. Wilaiwan Jaikwang",
+    "email": "65160298@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160299",
+    "thaiName": "นายธนภัทร มีมงคล",
+    "engName": "Mr. Thanapat Meemongkol",
+    "email": "65160299@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
+    "curriculumCode": "CS2025"
+  },
+  {
+    "code": "65160300",
+    "thaiName": "นางสาวสุชาดา สุขใจ",
+    "engName": "Ms. Suchada Suksai",
+    "email": "65160300@go.buu.ac.th",
+    "enrollmentDate": "2025-08-01",
     "curriculumCode": "CS2025"
   }
 ]

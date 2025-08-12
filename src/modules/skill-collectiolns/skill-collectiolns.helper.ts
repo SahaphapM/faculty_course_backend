@@ -132,19 +132,19 @@ export class SkillCollectionsHelper {
 
     // 11️⃣ Debug Tree
     function printTree(node: any, indent = '') {
-      console.log(`${indent}- Skill ${node.id} (level ${node.gained || 0})`);
+      // console.log(`${indent}- Skill ${node.id} (level ${node.gained || 0})`);
       for (const child of node.subskills) {
         printTree(child, indent + '  ');
       }
     }
 
     // 12️⃣ คำนวณ root gained level และ debug
-    console.log('\n[DEBUG] Skill Tree Calculation:');
+    // console.log('\n[DEBUG] Skill Tree Calculation:');
     rootSkills.forEach((root) => {
       const rootNode = skillMap.get(root.id);
       if (rootNode) {
         fillGained(rootNode);
-        printTree(rootNode);
+        // printTree(rootNode);
       }
     });
 

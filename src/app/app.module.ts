@@ -25,6 +25,7 @@ import { InternshipsModule } from 'src/modules/internships/internships.module';
 import { JobPositionsModule } from 'src/modules/job-positions/job-positions.module';
 import { LoggingModule } from 'src/logging/logging.module';
 import { SkillAssessmentsModule } from 'src/modules/skill-assessments/skill-assessments.module';
+import { SeedModule } from 'src/seed/seed.module';
 
 @Module({
   imports: [
@@ -45,7 +46,7 @@ import { SkillAssessmentsModule } from 'src/modules/skill-assessments/skill-asse
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    AuthModule,
+    ...process.env.UNAUTH === 'true' ? [] : [AuthModule],
     StudentsModule,
     CoursesModule,
     SubjectModule,
@@ -56,6 +57,7 @@ import { SkillAssessmentsModule } from 'src/modules/skill-assessments/skill-asse
     InternshipsModule,
     JobPositionsModule,
     SkillAssessmentsModule,
+    SeedModule,
   ],
   controllers: [AppController],
   providers: [

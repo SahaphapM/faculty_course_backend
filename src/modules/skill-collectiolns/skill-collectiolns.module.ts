@@ -10,5 +10,6 @@ import { SkillCollectionsHelper } from './skill-collectiolns.helper';
   imports: [PrismaModule, StudentsModule, ClosModule],
   controllers: [SkillCollectionsController],
   providers: [SkillCollectionsService, SkillCollectionsHelper],
+  exports: [SkillCollectionsService],
 })
 export class SkillCollectionsModule {}

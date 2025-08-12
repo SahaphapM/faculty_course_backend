@@ -7,6 +7,7 @@ import {Plo} from './plo.entity'
 import {Skill} from './skill.entity'
 import {Student} from './student.entity'
 import {Subject} from './subject.entity'
+import {LevelDescription} from './levelDescription.entity'
 
 
 export class Curriculum {
@@ -99,4 +100,10 @@ students?: Student[] ;
   required: false,
 })
 subjects?: Subject[] ;
+@ApiProperty({
+  type: () => LevelDescription,
+  isArray: true,
+  required: false,
+})
+level_descriptions?: LevelDescription[] ;
 }
