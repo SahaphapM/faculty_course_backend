@@ -7,49 +7,7 @@ import { BadRequestException } from '@nestjs/common';
 export class SkillAssessmentsService {
   constructor(private readonly prisma: PrismaService) { }
 
-  async getAssessmentByStudent(internshipId: number, studentCode: string) {
-    const student = await this.prisma.student.findUnique({
-      where: { code: studentCode },
-    });
 
-    if (!student) {
-      throw new BadRequestException('Student not found');
-    }
-
-    /// get student assessment by internship id and student id
-    const studentInternship = await this.prisma.student_internship.findFirst({
-      where: { internshipId, studentId: student.id },
-      include: {
-        jobPosition: {
-          select: {
-            name: true,
-          },
-        },
-        student: {
-          include: {
-            branch: {
-              select: {
-                thaiName: true,
-                faculty: { select: { thaiName: true } },
-              },
-            },
-            curriculum: { select: { thaiName: true } },
-            skill_assessments: {
-              include: {
-                skill: { select: { thaiName: true, thaiDescription: true } },
-              },
-            },
-          },
-        },
-      },
-    });
-
-    if (!studentInternship) {
-      throw new BadRequestException('Student internship not found');
-    }
-
-    return studentInternship;
-  }
 
   async companyAssessment(
     skillAssessmentId: number,

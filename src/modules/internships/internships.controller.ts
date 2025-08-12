@@ -67,4 +67,13 @@ export class InternshipsController {
   findOneByToken(@Param('token') token: string) {
     return this.internshipsService.findOneByToken(token);
   }
+
+  @Get('company/:token/:studentCode')
+  @ApiOperation({
+    summary: 'สถานประกอบการใช้ในการดึง Skill Assessment ของนิสิตคนนั้นๆ',
+  })
+  getAssessmentByStudent(@Param('token') token: string, @Param('studentCode') studentCode: string) {
+    return this.internshipsService.getAssessmentByStudent(token, studentCode);
+  }
+
 }

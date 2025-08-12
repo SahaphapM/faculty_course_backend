@@ -15,31 +15,7 @@ export class SkillAssessmentsController {
     return this.skillAssessmentsService.getStudentSkillAssessments(studentId);
   }
 
-  // change param name to easy to understand
-
-  @Get(':internshipId/:studentCode')
-  // set name for this api swagger
-  @ApiOperation({
-    summary: 'สถานประกอบการใช้ในการดึง Skill Assessment ของนิสิตคนนั้นๆ',
-  })
-  @ApiParam({
-    name: 'internshipId',
-    type: String,
-    description: 'Internship Id',
-  })
-  @ApiParam({ name: 'studentCode', type: String, description: 'Student Code' })
-  getStudentAssessment(
-    @Param('internshipId') internshipId: string,
-    @Param('studentCode') studentCode: string,
-  ) {
-    return this.skillAssessmentsService.getAssessmentByStudent(
-      +internshipId,
-      studentCode,
-    );
-  }
-
   @Patch('company/:skillAssessmentId/:studentInternshipId')
-  // set name for this api swagger
   @ApiOperation({
     summary:
       'สถานประกอบประเมิน  Assessment 1 Skill ของนิสิตคนนั้นๆ | ใส่ได้แค่ companyLevel และ companyComment',
@@ -57,7 +33,6 @@ export class SkillAssessmentsController {
   }
 
   @Patch('company-submit/:studentInternshipId')
-  // set name for this api swagger
   @ApiOperation({
     summary:
       'สถานประกอบยืนยันการประเมินนิสิต และจะประเมินซ้ำไม่ได้ | ไม่ต้องส่ง body',
@@ -71,7 +46,6 @@ export class SkillAssessmentsController {
   }
 
   @Patch('curriculum/:skillAssessmentId')
-  // set name for this api swagger
   @ApiOperation({
     summary:
       'หลักสูตรประเมิน Final Assessment 1 Skill ของนิสิตคนนั้นๆ | ใส่ได้แค่ finalLevel และ curriculumComment',

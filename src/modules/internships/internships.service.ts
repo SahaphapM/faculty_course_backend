@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInternshipWithStudentDto } from './dto/create.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
@@ -204,6 +204,7 @@ export class InternshipsService {
       where: { token: token },
       select: {
         year: true,
+        token: true,
         studentInternships: {
           select: {
             id: true,
@@ -224,5 +225,59 @@ export class InternshipsService {
         },
       },
     });
+  }
+
+  async getAssessmentByStudent(token: string, studentCode: string) {
+    const student = await this.prisma.student.findUnique({
+      where: { code: studentCode },
+    });
+
+    if (!student) {
+      throw new BadRequestException('Student not found');
+    }
+
+    /// get student assessment by internship id and student id
+    const studentInternship = await this.prisma.student_internship.findFirst({
+      where: { internship: { token }, studentId: student.id },
+      include: {
+        jobPosition: {
+          select: {
+            name: true,
+          },
+        },
+        student: {
+          include: {
+            branch: {
+              select: {
+                thaiName: true,
+                faculty: { select: { thaiName: true } },
+              },
+            },
+            curriculum: { select: { thaiName: true } },
+            skill_assessments: {
+              include: {
+                skill: { select: { thaiName: true, thaiDescription: true } },
+              },
+            },
+          },
+        },
+        internship: {
+          select: {
+            year: true,
+            company: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!studentInternship) {
+      throw new BadRequestException('Student internship not found');
+    }
+
+    return studentInternship;
   }
 }
