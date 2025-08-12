@@ -32,7 +32,7 @@ export class CourseService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Create a new course(s)
-  async create(createCourseDtos: CreateCourseDto[]) {
+  async create(createCourseDtos: CreateCourseDto[], InstructorId?: number) {
     const createCoursePromises = createCourseDtos.map(
       async (createCourseDto) => {
         const { subjectId, ...rest } = createCourseDto;
@@ -51,9 +51,15 @@ export class CourseService {
             data: {
               ...rest,
               subject: { connect: { id: subjectId } },
+              ...(InstructorId ? { instructorId: InstructorId } : {}),
             },
             include: {
               subject: true,
+              course_instructors: {
+                include: {
+                  instructor: true,
+                },
+              },
             },
           });
 
@@ -78,7 +84,7 @@ export class CourseService {
   }
 
   // Find all courses with pagination and search
-  async findAll(pag?: CourseFilterDto) {
+  async findAll(pag?: CourseFilterDto, instructorId?: number) {
     const defaultLimit = 16;
     const defaultPage = 1;
 
@@ -115,6 +121,7 @@ export class CourseService {
       ...(curriculumId && { subject: { curriculumId } }),
       ...(branchId && { subject: { curriculum: { branchId } } }),
       ...(facultyId && { subject: { curriculum: { branch: { facultyId } } } }),
+      ...(instructorId && { course_instructors: { some: { instructorId } } }),
     };
 
     // Pagination mode

@@ -208,6 +208,7 @@ export class InternshipsService {
         studentInternships: {
           select: {
             id: true,
+            isAssessed: true,
             student: {
               select: {
                 code: true,

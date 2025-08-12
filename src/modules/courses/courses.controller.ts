@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CourseService } from './courses.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -22,14 +22,17 @@ export class CoursesController {
   constructor(private readonly coursesService: CourseService) {}
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @ApiQuery({ name: 'InstructorId', required: false })
   @Post()
-  create(@Body() createCourseDto: CreateCourseDto[]) {
-    return this.coursesService.create(createCourseDto);
+  create(@Body() createCourseDto: CreateCourseDto[], @Query('InstructorId') instructorId?: number) {
+    return this.coursesService.create(createCourseDto, instructorId);
   }
 
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @ApiQuery({ name: 'InstructorId', required: false })
   @Get()
-  findAll(@Query() pag?: CourseFilterDto) {
-    return this.coursesService.findAll(pag);
+  findAll(@Query() pag?: CourseFilterDto, @Query('InstructorId') instructorId?: number) {
+    return this.coursesService.findAll(pag, instructorId);
   }
 
   @Get('options')
