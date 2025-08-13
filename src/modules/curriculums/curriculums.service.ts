@@ -30,8 +30,15 @@ export class CurriculumsService {
       data: {
         ...rest,
         branch: branchId ? { connect: { id: branchId } } : undefined,
-        ...(coordinatorId ? { coordinatorId } : {}),
+        coordinators: coordinatorId ? {
+          create: [{
+            instructor: {
+              connect: { id: coordinatorId }
+            }
+          }]
+        } : undefined,
       },
+      
     });
 
     // defult level description
@@ -137,7 +144,7 @@ export class CurriculumsService {
       }),
       ...(branchId && { branchId }),
       ...(facultyId && { branch: { facultyId } }),
-      ...(coordinatorId && { coordinatorId }),
+      ...(coordinatorId && { coordinators: { some: { instructorId: coordinatorId } } }),
     };
 
     const options: Prisma.curriculumFindManyArgs = {

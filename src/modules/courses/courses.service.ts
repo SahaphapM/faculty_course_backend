@@ -52,15 +52,7 @@ export class CourseService {
             data: {
               ...rest,
               subject: { connect: { id: subjectId } },
-              ...(InstructorId ? { instructorId: InstructorId } : {}),
-            },
-            include: {
-              subject: true,
-              course_instructors: {
-                include: {
-                  instructor: true,
-                },
-              },
+              ...(InstructorId ? { course_instructors: { create: { instructorId: InstructorId } } } : {}),
             },
           });
 
@@ -86,7 +78,7 @@ export class CourseService {
 
   // Find all courses with pagination and search
   async findAll(pag?: CourseFilterDto, instructorId?: number) {
-    const defaultLimit = 16;
+    const defaultLimit = 15;
     const defaultPage = 1;
 
     const {
@@ -104,36 +96,39 @@ export class CourseService {
       facultyId,
     } = pag || {};
 
-    const whereCondition: Prisma.courseWhereInput = {
-      ...(nameCode && {
-        OR: [
-          { subject: { thaiName: { contains: nameCode } } },
-          { subject: { engName: { contains: nameCode } } },
-          { subject: { code: { contains: nameCode } } },
-        ],
-      }),
-
-      ...(active && { active }),
-      ...(years?.length && { OR: years.map((y) => ({ year: Number(y) })) }),
-      ...(semesters?.length && {
-        OR: semesters.map((s) => ({ semester: Number(s) })),
-      }),
-      ...(subjectId && { subjectId }),
-      ...(curriculumId && { subject: { curriculumId } }),
-      ...(branchId && { subject: { curriculum: { branchId } } }),
-      ...(facultyId && { subject: { curriculum: { branch: { facultyId } } } }),
-      ...(instructorId && { course_instructors: { some: { instructorId } } }),
-    };
-
-    // Pagination mode
+    const AND: Prisma.courseWhereInput[] = [];
+    const OR: Prisma.courseWhereInput[] = [];
+  
+    if (nameCode) {
+      OR.push(
+        { subject: { thaiName: { contains: nameCode } } },
+        { subject: { engName:  { contains: nameCode } } },
+        { subject: { code:     { contains: nameCode } } },
+      );
+    }
+    if (years?.length) {
+      OR.push(...years.map(y => ({ year: Number(y) })));
+    }
+    if (semesters?.length) {
+      OR.push(...semesters.map(s => ({ semester: Number(s) })));
+    }
+    if (OR.length) AND.push({ OR });
+  
+    if (active !== undefined) AND.push({ active });           // รองรับทั้ง true/false
+    if (subjectId) AND.push({ subjectId });
+    if (curriculumId) AND.push({ subject: { curriculumId } });
+    if (branchId) AND.push({ subject: { curriculum: { branchId } } });
+    if (facultyId) AND.push({ subject: { curriculum: { branch: { facultyId } } } });
+    if (instructorId) AND.push({ course_instructors: { some: { instructorId } } });
+  
+    const whereCondition: Prisma.courseWhereInput = AND.length ? { AND } : {};
+  
     const options: Prisma.courseFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { [sort ?? 'id']: orderBy ?? 'asc' },
+      orderBy: { [sort ?? 'id']: (orderBy ?? 'asc') as Prisma.SortOrder },
       where: whereCondition,
-      include: {
-        subject: true,
-      },
+      include: { subject: true },
     };
 
     try {
