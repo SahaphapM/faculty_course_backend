@@ -284,6 +284,10 @@ export class CurriculumsService {
     limit: number,
     search?: string,
   ) {
+
+    const take = Math.max(1, Number(limit) || 10);         // <-- แปลงเป็น number
+    const skip = Math.max(0, (Number(page) - 1) * take || 0);
+    
     const offset = (page - 1) * limit;
 
     // 1. Find all descendant skills (including the root skill itself)
@@ -329,7 +333,7 @@ export class CurriculumsService {
     // 4. Build the main query conditions
     const whereClause: any = {
       cloId: { in: cloIds },
-      student: studentWhere,
+      student: { is: studentWhere },   // <-- ถ้าเป็น relation แบบ to-one ควรใช้ is:
     };
 
     if (targetLevel !== 'all') {
@@ -383,8 +387,8 @@ export class CurriculumsService {
           // },
         },
       },
-      take: limit,
-      skip: offset,
+      take,
+      skip,
     });
 
     // map closData from first query to skill_collections
