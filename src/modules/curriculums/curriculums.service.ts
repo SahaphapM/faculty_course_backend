@@ -321,8 +321,8 @@ export class CurriculumsService {
     }
     if (search) {
       studentWhere.OR = [
-        { thaiName: { contains: search, mode: 'insensitive' } },
-        { engName: { contains: search, mode: 'insensitive' } },
+        { thaiName: { contains: search } },
+        { engName: { contains: search } },
         { code: { contains: search } },
       ];
     }

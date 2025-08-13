@@ -77,34 +77,29 @@ export class CurriculumsController {
   @ApiQuery({
     name: 'yearCode',
     required: false,
-    description: 'Optional year code filter',
   })
   @ApiQuery({
     name: 'targetLevel',
     required: true,
-    description: 'Required level filter',
   })
   @ApiQuery({
     name: 'page',
     required: false,
-    description: 'Optional page number',
   })
   @ApiQuery({
     name: 'limit',
     required: false,
-    description: 'Optional limit per page',
   })
   @ApiQuery({
     name: 'search',
     required: false,
-    description: 'Optional search query',
   })
   @Get('filters/skill/:skillId/students')
   @ApiParam({ name: 'skillId', type: String, description: 'Skill ID' })
   async getStudentsBySkillLevel(
     @Param('skillId') skillId: number,
     @Query('targetLevel') targetLevel: 'on' | 'above' | 'below' | 'all',
-    @Query('yearCode') yearCode: string,
+    @Query('year') year: string,
     @Query('page') page = 1,
     @Query('limit') limit = 10,
     @Query('search') search?: string, // optional
@@ -112,7 +107,7 @@ export class CurriculumsController {
     return await this.curriculumsService.findStudentsBySkillLevel(
       skillId,
       targetLevel,
-      yearCode,
+      year,
       page,
       limit,
       search,
