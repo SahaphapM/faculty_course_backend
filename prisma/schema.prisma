@@ -391,6 +391,6 @@ model level_description {
   
   /// @DtoRelationIncludeId
   curriculumId Int
-  curriculum curriculum @relation(fields: [curriculumId], references: [id])
+  curriculum curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
   @@index([curriculumId])
 }
