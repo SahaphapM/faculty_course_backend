@@ -2,7 +2,6 @@ import { HttpStatus, Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from '../modules/users/users.module';
-import { LessonModule } from '../modules/lessons/lessons.module';
 import { PlosModule } from '../modules/plos/plos.module';
 import { SkillsModule } from '../modules/skills/skills.module';
 import { FacultiesModule } from '../modules/faculties/faculties.module';
@@ -41,7 +40,6 @@ import { SeedModule } from 'src/seed/seed.module';
     UsersModule,
     CurriculumsModule,
     BranchesModule,
-    LessonModule,
     PlosModule,
     ClosModule,
     SkillsModule,

@@ -44,7 +44,6 @@ export function makeSubject(overrides: DeepPartial<Subject> = {}): Subject {
     isRoot: overrides.isRoot ?? false,
     clos: (overrides.clos as any) ?? [],
     courses: (overrides.courses as any) ?? [],
-    lesson: (overrides.lesson as any) ?? null,
     curriculum: (overrides.curriculum as any) ?? undefined!,
     ...overrides,
   };

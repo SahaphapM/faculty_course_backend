@@ -123,15 +123,6 @@ export class SubjectService {
       },
     });
 
-    // copy subject
-    await this.prisma.lesson.create({
-      data: {
-        thaiName: dto.thaiName,
-        engName: dto.engName,
-        subjectId: subject.id,
-      },
-    });
-
     return subject;
   }
 
