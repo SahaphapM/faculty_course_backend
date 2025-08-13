@@ -25,6 +25,7 @@ export class SkillCollectionsService {
       where: { code: studentCode },
       select: {
         id: true,
+        curriculumId: true,
       },
     });
 
@@ -38,11 +39,11 @@ export class SkillCollectionsService {
     const assessments = await this.prisma.skill_assessment.findMany({
       where: {
         studentId: student.id,
-        OR: [
-          { curriculumLevel: { gt: 0 } },
-          { companyLevel: { gt: 0 } },
-          { finalLevel: { gt: 0 } },
-        ],
+        // OR: [
+        //   { curriculumLevel: { gt: 0 } },
+        //   { companyLevel: { gt: 0 } },
+        //   { finalLevel: { gt: 0 } },
+        // ],
       },
       select: {
         id: true,
@@ -61,171 +62,36 @@ export class SkillCollectionsService {
       },
     });
 
-    if (!assessments.length) return { specific: [], soft: [] };
+    if (!assessments.length) return console.log('No assessments found');
 
     // 2. ดึง skill_collection ของ student (สำหรับ subskills)
     const skillCollections = await this.prisma.skill_collection.findMany({
       where: { studentId: student.id },
-      include: { clo: { include: { skill: true } } },
+      select: {
+        id: true,
+        gainedLevel: true,
+        clo: { select: { skill: { select: { id: true } } } },
+      },
     });
 
-    // เอา skillId ทั้งหมดจาก skill_collection
-    const collectionSkillIds = skillCollections
-      .map((sc) => sc.clo?.skill?.id)
-      .filter(Boolean) as number[];
-
-    // เอา skillId จาก assessment
-    const assessmentSkillIds = assessments
-      .map((a) => a.skillId)
-      .filter(Boolean) as number[];
-
-    // รวม skill ทั้งหมด
-    const allSkillIds = Array.from(
-      new Set([...collectionSkillIds, ...assessmentSkillIds]),
-    );
-
-    const allSkills = await this.getSkillsWithParents(allSkillIds);
-
-    // 4. สร้าง map สำหรับ lookup skill (custom field)
-    const skillMap = new Map(
-      allSkills.map((s) => [
-        s.id,
-        {
-          id: s.id,
-          name: s.engName,
-          domain: s.domain,
-          parentId: s.parentId || null,
-          gained: 0,
-          subskills: [],
-        },
-      ]),
-    );
-
-    // 5. ใส่ gained จาก skill_collection ให้กับ leaf skill ก่อน
-    for (const sc of skillCollections) {
-      const skillId = sc.clo?.skill?.id;
-      if (skillId && skillMap.has(skillId)) {
-        const skillNode = skillMap.get(skillId)!;
-        // ใช้ Max กรณีมีหลาย course/clo ที่ skill เดียวกัน
-        skillNode.gained = Math.max(skillNode.gained, sc.gainedLevel || 0);
-      }
-    }
-
-    // 6. ใส่ finalLevel ให้ skill จาก assessment
-    for (const assessment of assessments) {
-      if (assessment.skillId && skillMap.has(assessment.skillId)) {
-        skillMap.get(assessment.skillId)!.gained =
-          assessment.finalLevel !== 0
-            ? assessment.finalLevel // ใช้ finalLevel ถ้ามี
-            : assessment.companyLevel; // ใช้ companyLevel ถ้าไม่มี finalLevel
-      }
-    }
-
-    // 7. ประกอบ tree จาก skillMap
-    const roots: any[] = [];
-
-    for (const skill of skillMap.values()) {
-      if (skill.parentId) {
-        const parent = skillMap.get(skill.parentId);
-        if (parent) {
-          // ถ้าเป็น leaf skill ให้gained level ด้วย gained level จาก skill collection ด้วยการ map
-          // const collectionItem = skillCollections.find(
-          //   (sc) => sc.clo?.skill?.id === skill.id,
-          // );
-
-          // if (collectionItem) {
-          //   skill.gained = collectionItem.gainedLevel || 0;
-          // }
-
-          parent.subskills.push(skill);
-        }
-      } else {
-        // root skill
-        roots.push(skill);
-      }
-    }
-
-    // 8. ฟังก์ชันคำนวณ Mode
-    function calculateMode(arr: number[]): number {
-      const count = new Map<number, number>();
-      arr.forEach((n) => count.set(n, (count.get(n) || 0) + 1));
-      const max = Math.max(...count.values());
-      const modes = [...count.entries()]
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
-        .filter(([_, c]) => c === max)
-        .map(([n]) => n);
-      return Math.max(...modes);
-    }
-
-    // 9. ฟังก์ชัน recursive fill gained level
-    function fillGained(node: any): number | undefined {
-      if (!node.subskills.length) return node.gained;
-      const childGained = node.subskills
-        .map(fillGained)
-        .filter((x) => x !== undefined) as number[];
-      if (childGained.length > 0) node.gained = calculateMode(childGained);
-      return node.gained;
-    }
-
-    // 10. Debug Tree
-    function printTree(node: any, indent = '') {
-      console.log(`${indent}- Skill ${node.id} (level ${node.gained || 0})`);
-      for (const child of node.subskills) {
-        printTree(child, indent + '  ');
-      }
-    }
-
-    // 11. คำนวณ root gained level และ debug
-    console.log('\n[DEBUG] Skill Tree Calculation:');
-    roots.forEach((root) => {
-      const rootNode = skillMap.get(root.id);
-      if (rootNode) {
-        fillGained(rootNode);
-        printTree(rootNode);
-      }
+    const rootSkills = await this.prisma.skill.findMany({
+      where: { parent: null, curriculumId: student.curriculumId },
+      select: {
+        id: true,
+        parentId: true,
+      },
     });
 
-    console.log('Roots:', roots);
-
-    // 12. แยก specific (hard) และ soft skill
-    const specific = roots.filter(
-      (r) =>
-        r.domain === LearningDomain.Cognitive ||
-        r.domain === LearningDomain.Psychomotor,
+    // 3. คำนวณ root skill assessment จาก leaf skill ของ student
+    const skillAssessments = await this.skillCollectionsHelper.syncStudentSkillAssessments(
+      student,
+      rootSkills,
+      skillCollections,
     );
 
-    const soft = roots.filter(
-      (r) =>
-        r.domain === LearningDomain.Affective ||
-        r.domain === LearningDomain.Ethics,
-    );
+    
 
-    return { specific, soft };
-  }
-
-  // ใช้ฟังก์ชันดึง skill parent chain
-  private async getSkillsWithParents(skillIds: number[]): Promise<any[]> {
-    const skills: any[] = [];
-    const visited = new Set<number>();
-
-    const fetchSkill = async (id: number) => {
-      if (visited.has(id)) return;
-      visited.add(id);
-
-      const skill = await this.prisma.skill.findUnique({ where: { id } });
-      if (skill) {
-        skills.push(skill);
-        if (skill.parentId) {
-          await fetchSkill(skill.parentId);
-        }
-      }
-    };
-
-    for (const id of skillIds) {
-      await fetchSkill(id);
-    }
-
-    return skills;
+    return console.log('Skill Assessment Sync Complete');
   }
 
   async getByCloId(
@@ -289,10 +155,6 @@ export class SkillCollectionsService {
       throw new NotFoundException(`CLO with ID ${cloId} not found`);
     }
 
-    const rootSkills = await this.prisma.skill.findMany({
-      where: { parent: null, curriculumId: course.subject.curriculum.id },
-    });
-
     const skillCollections = [];
 
     for (const studentScore of studentScoreList) {
@@ -335,12 +197,6 @@ export class SkillCollectionsService {
           },
         });
       }
-
-      // 3. คำนวณ root skill assessment จาก leaf skill ของ student
-      await this.skillCollectionsHelper.syncStudentSkillAssessments(
-        student.id,
-        rootSkills,
-      );
 
       skillCollections.push(skillCollection);
     }
