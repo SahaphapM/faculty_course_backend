@@ -15,6 +15,7 @@ import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
+import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
 
 @ApiBearerAuth()
 @Controller('curriculums')
@@ -24,13 +25,19 @@ export class CurriculumsController {
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Post()
   @ApiQuery({ name: 'coordinatorId', required: false })
-  create(@Body() createCurriculumDto: CreateCurriculumDto, @Query('coordinatorId') coordinatorId?: number) {
+  create(
+    @Body() createCurriculumDto: CreateCurriculumDto,
+    @Query('coordinatorId') coordinatorId?: number,
+  ) {
     return this.curriculumsService.create(createCurriculumDto, coordinatorId);
   }
 
   @Get()
   @ApiQuery({ name: 'coordinatorId', required: false })
-  findAll(@Query() pag?: CurriculumFilterDto, @Query('coordinatorId') coordinatorId?: number) {
+  findAll(
+    @Query() pag?: CurriculumFilterDto,
+    @Query('coordinatorId') coordinatorId?: number,
+  ) {
     return this.curriculumsService.findAll(pag, coordinatorId);
   }
 
@@ -114,17 +121,13 @@ export class CurriculumsController {
 
   @Get('summary/skill-collection/:curriculumId')
   async getSkillCollectionSummaryByCurriculum(
-    @Param('curriculumId') curriculumId: number, // รับ curriculumId
-    @Query('studentName') studentName: string, // รับ studentName จาก query parameter
-    @Query('studentCode') studentCode: string, // รับ studentCode จาก query parameter
-    @Query('subjectName') subjectName: string, // รับ subjectName จาก query parameter
+     @Param('curriculumId') curriculumId: number,
+    @Query() q: SkillCollectionSummaryFilterDto,
   ) {
-    // ส่งข้อมูล curriculumId และ params ไปยัง service เพื่อกรองข้อมูล
-    return this.curriculumsService.getSkillCollectionSummaryByCurriculum(
+    // ส่ง DTO ก้อนเดียวไปที่ service (ที่เราเขียนแบบรองรับ pagination แล้ว)
+    return this.curriculumsService.getSkillCollectionSummaryByCurriculumPaginated(
       curriculumId,
-      studentName,
-      studentCode,
-      subjectName,
+      q,
     );
   }
 }

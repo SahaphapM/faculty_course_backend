@@ -17,6 +17,7 @@ import {
 } from './curriculums.helper';
 import { CreateLevelDescriptionDto } from 'src/generated/nestjs-dto/create-levelDescription.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
 
 @Injectable()
 export class CurriculumsService {
@@ -452,227 +453,172 @@ export class CurriculumsService {
     return result;
   }
 
-  async getSkillCollectionSummaryByCurriculum(
-    curriculumId: number,
-    studentName?: string,
-    studentCode?: string,
-    subjectName?: string,
-  ) {
-    // 1. ดึง student + skill_collections
-    const students = await this.prisma.student.findMany({
-      where: {
+  // สมมติว่ามี helper ชื่อ createPaginatedData แบบเดียวกับตัวอย่าง findAll()
+
+// curriculums.service.ts
+async getSkillCollectionSummaryByCurriculumPaginated(
+  curriculumId: number,
+  pag: SkillCollectionSummaryFilterDto
+) {
+  const defaultLimit = 10, defaultPage = 1;
+  const { studentName, studentCode, subjectName, page, limit, sort, orderBy, type } = pag;
+
+  const _limit = Number(limit ?? defaultLimit);
+  const _page  = Number(page ?? defaultPage);
+  const _skip  = (_page - 1) * _limit;
+
+  const codePrefix = studentCode ? studentCode.slice(0, 2) : undefined;
+  // Fetch curriculumId by curriculumCode
+
+  const studentWhere: Prisma.studentWhereInput = {
+    curriculumId: curriculumId,
+    thaiName: studentName ? { contains: studentName } : undefined,
+    code: codePrefix ? { startsWith: codePrefix } : undefined,
+  };
+
+  const subjectFilter = subjectName
+    ? {
         curriculumId,
-        thaiName: studentName ? { contains: studentName } : undefined,
-        code: studentCode ? { startsWith: studentCode.slice(0, 2) } : undefined,
-      },
-      select: {
-        id: true,
-        code: true,
-        thaiName: true,
-        skill_collections: {
-          select: {
-            id: true,
-            gainedLevel: true,
-            clo: {
-              select: {
-                id: true,
-                expectSkillLevel: true,
-                skill: {
-                  select: {
-                    id: true,
-                    thaiName: true,
-                    domain: true,
-                  },
-                },
-              },
-            },
-          },
-        },
-      },
+        OR: [
+          { thaiName: { contains: subjectName } },
+          { engName: { contains: subjectName } },
+        ],
+      }
+    : undefined;
+
+  // ---------- ดึงพื้นฐานใน transaction ----------
+  const { students,  subjects, skills } = await this.prisma.$transaction(async (tx) => {
+    const students = await tx.student.findMany({
+      where: studentWhere,
+      select: { id: true, code: true, thaiName: true },
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'code']: (orderBy as any) ?? 'asc' },
+      skip: _skip,
+      take: _limit,
     });
 
-    // 2. เตรียมดึงเฉพาะ skill ที่มีใน subjectName (ถ้ามีระบุ)
-    let skills: { id: number; thaiName: string; domain: string }[];
+    const total = await tx.student.count({ where: studentWhere });
 
-    if (subjectName) {
-      // หา subject ที่ชื่อ match
-      const matchedSubjects = await this.prisma.subject.findMany({
-        where: {
-          curriculumId,
-          OR: [
-            { thaiName: { contains: subjectName } },
-            { engName: { contains: subjectName } },
-          ],
-        },
-        select: {
-          id: true,
-          clos: {
-            select: {
-              skillId: true,
-            },
-          },
-        },
+    let subjects: { id: number; clos: { skillId: number|null; expectSkillLevel: number|null }[] }[] = [];
+    if (subjectFilter) {
+      subjects = await tx.subject.findMany({
+        where: subjectFilter,
+        select: { id: true, clos: { select: { skillId: true, expectSkillLevel: true } } },
       });
+    }
 
-      // รวม skillId ที่มีใน CLO ของ subject เหล่านั้น
-      const skillIds = [
-        ...new Set(
-          matchedSubjects
-            .flatMap((subj) => subj.clos.map((clo) => clo.skillId))
-            .filter((id): id is number => id !== null),
-        ),
-      ];
-
-      // ดึง skill ตาม skillId ที่เจอ
-      skills = await this.prisma.skill.findMany({
-        where: {
-          id: { in: skillIds },
-        },
-        select: {
-          id: true,
-          thaiName: true,
-          domain: true,
-        },
+    // ดึงรายการ skills
+    let skills: { id: number; thaiName: string; domain: string }[];
+    if (subjectFilter) {
+      const subs = await tx.subject.findMany({
+        where: subjectFilter,
+        select: { clos: { select: { skillId: true } } },
+      });
+      const ids = [...new Set(subs.flatMap(s => s.clos.map(c => c.skillId).filter((x): x is number => !!x)))];
+      skills = await tx.skill.findMany({
+        where: { id: { in: ids.length ? ids : [-1] } },
+        select: { id: true, thaiName: true, domain: true },
       });
     } else {
-      // ดึง skill ทั้งหมดใน curriculum
-      skills = await this.prisma.skill.findMany({
-        where: { curriculumId },
-        select: {
-          id: true,
-          thaiName: true,
-          domain: true,
-        },
+      skills = await tx.skill.findMany({
+        where: { curriculumId: curriculumId },
+        select: { id: true, thaiName: true, domain: true },
       });
     }
 
-    // 3. แยก skills ตาม domain และหา expectedLevel สำหรับแต่ละ skill
-    const cognitivePsychomotorSkills = skills.filter(
-      (skill) => skill.domain === 'ความรู้' || skill.domain === 'ทักษะ',
-    );
-    const affectiveEthicsSkills = skills.filter(
-      (skill) =>
-        skill.domain === 'คุณลักษณะบุคคล' || skill.domain === 'จริยธรรม',
-    );
+    return { students, total, subjects, skills };
+  });
 
-    // หา expectedLevel สำหรับแต่ละ skill เมื่อมี subjectName
-    const getExpectedLevelForSkill = async (
-      skillId: number,
-    ): Promise<number | null> => {
-      if (!subjectName) return null;
+  // ---------- กรอง skill ตาม type ----------
+  const isSoft = type === 'soft';
+  const isHard = type === 'hard';
+  const isSoftDomain = (d: string) => d === 'คุณลักษณะบุคคล' || d === 'จริยธรรม';
+  const isHardDomain = (d: string) => d === 'ความรู้' || d === 'ทักษะ';
 
-      // หา CLO ที่เกี่ยวข้องกับ skill นี้และ subject ที่เลือก
-      const matchedSubjects = await this.prisma.subject.findMany({
-        where: {
-          curriculumId,
-          OR: [
-            { thaiName: { contains: subjectName } },
-            { engName: { contains: subjectName } },
-          ],
-        },
-        select: {
-          id: true,
-          clos: {
-            where: { skillId },
-            select: { expectSkillLevel: true },
-          },
-        },
-      });
+  let filteredSkills = skills;
+  if (isSoft) filteredSkills = skills.filter(s => isSoftDomain(s.domain));
+  if (isHard) filteredSkills = skills.filter(s => isHardDomain(s.domain));
 
-      // หา expectedLevel จาก CLO แรกที่เจอ
-      for (const subject of matchedSubjects) {
-        if (subject.clos.length > 0) {
-          return subject.clos[0].expectSkillLevel;
+  // map expectedLevel ต่อ skill (กรณีมี subjectName)
+  const expectedLevelMap = new Map<number, number | null>();
+  if (subjects.length) {
+    for (const subj of subjects) {
+      for (const clo of subj.clos) {
+        if (clo.skillId != null && !expectedLevelMap.has(clo.skillId)) {
+          expectedLevelMap.set(clo.skillId, clo.expectSkillLevel ?? null);
         }
       }
-
-      return null;
-    };
-
-    // 4. รวมข้อมูลผลลัพธ์
-    const result = {
-      curriculumId,
-      students: [],
-    };
-
-    // ฟังก์ชันหาความถี่สูงสุด
-    const getMostFrequentLevel = (levels: number[]): number | null => {
-      if (levels.length === 0) return null;
-
-      const frequency: { [key: number]: number } = {};
-      levels.forEach((level) => {
-        frequency[level] = (frequency[level] || 0) + 1;
-      });
-
-      let maxFreq = 0;
-      let mostFrequent = levels[0];
-
-      Object.entries(frequency).forEach(([level, freq]) => {
-        if (freq > maxFreq) {
-          maxFreq = freq;
-          mostFrequent = parseInt(level);
-        }
-      });
-
-      return mostFrequent;
-    };
-
-    const createSkillData = async (
-      skillList: typeof skills,
-      skillMap: Map<number, number[]>,
-    ) => {
-      const skillData = [];
-      for (const sk of skillList) {
-        const levels = skillMap.get(sk.id) || [];
-        const gainedLevel = subjectName
-          ? levels[0] || null
-          : getMostFrequentLevel(levels);
-
-        // หา expectedLevel จาก CLO เมื่อมี subjectName
-        const expectedLevel = await getExpectedLevelForSkill(sk.id);
-
-        skillData.push({
-          skillId: sk.id,
-          skillName: sk.thaiName,
-          gainedLevel,
-          expectedLevel,
-        });
-      }
-      return skillData;
-    };
-
-    // ประมวลผลข้อมูลนักเรียนทีละคน
-    for (const stu of students) {
-      const skillMap = new Map<number, number[]>();
-
-      // รวบรวม gainedLevel ทั้งหมดสำหรับแต่ละ skill
-      for (const sc of stu.skill_collections) {
-        const skill = sc.clo?.skill;
-        if (skill) {
-          if (!skillMap.has(skill.id)) {
-            skillMap.set(skill.id, []);
-          }
-          skillMap.get(skill.id)?.push(sc.gainedLevel);
-        }
-      }
-
-      const studentData = {
-        studentId: stu.id,
-        studentName: stu.thaiName,
-        studentCode: stu.code,
-        cognitivePsychomotorSkills: await createSkillData(
-          cognitivePsychomotorSkills,
-          skillMap,
-        ),
-        affectiveEthicsSkills: await createSkillData(
-          affectiveEthicsSkills,
-          skillMap,
-        ),
-      };
-
-      result.students.push(studentData);
     }
-
-    return result;
   }
+
+  // ดึง skill_collections สำหรับ “นักเรียนในหน้านี้” + “สกิลที่กรองแล้ว”
+  const studentIds = students.map(s => s.id);
+  const skillIds   = filteredSkills.map(s => s.id);
+
+  const scWhere: Prisma.skill_collectionWhereInput = {
+    studentId: { in: studentIds.length ? studentIds : [-1] },
+    clo: {
+      skillId: { in: skillIds.length ? skillIds : undefined },
+      ...(subjectFilter ? { subject: subjectFilter as any } : {}),
+    },
+  };
+
+  const scRows = await this.prisma.skill_collection.findMany({
+    where: scWhere,
+    select: {
+      studentId: true,
+      gainedLevel: true,
+      clo: { select: { skillId: true } },
+    },
+  });
+
+  // group: studentId -> (skillId -> [gainedLevel...])
+  const byStudent = new Map<number, Map<number, number[]>>();
+  for (const r of scRows) {
+    const sid = r.studentId!;
+    const skid = r.clo?.skillId;
+    if (!sid || !skid) continue;
+    if (!byStudent.has(sid)) byStudent.set(sid, new Map());
+    const m = byStudent.get(sid)!;
+    if (!m.has(skid)) m.set(skid, []);
+    m.get(skid)!.push(r.gainedLevel);
+  }
+
+  const mostFrequent = (arr: number[]) => {
+    if (!arr?.length) return null;
+    const freq: Record<number, number> = {};
+    for (const v of arr) freq[v] = (freq[v] || 0) + 1;
+    let ans = arr[0], mx = 0;
+    for (const [k, v] of Object.entries(freq)) if (v > mx) { mx = v; ans = +k; }
+    return ans;
+  };
+
+  const buildSkillData = (list: typeof filteredSkills, m?: Map<number, number[]>) =>
+    list.map(sk => {
+      const levels = m?.get(sk.id) ?? [];
+      const gainedLevel = subjectName ? (levels[0] ?? null) : mostFrequent(levels);
+      const expectedLevel = subjectName ? (expectedLevelMap.get(sk.id) ?? null) : null;
+      return { skillId: sk.id, skillName: sk.thaiName, domain: sk.domain, gainedLevel, expectedLevel };
+    });
+
+  // สร้างผลลัพธ์ (เลือกส่งเฉพาะกลุ่มตาม type)
+  const data = students.map(stu => {
+    const m = byStudent.get(stu.id);
+
+    // ถ้าอยากแยกกล่อง soft/hard ใน output เสมอ
+    const softSkills = filteredSkills.filter(s => isSoftDomain(s.domain));
+    const hardSkills = filteredSkills.filter(s => isHardDomain(s.domain));
+
+    return {
+      studentId: stu.id,
+      studentName: stu.thaiName,
+      studentCode: stu.code,
+      hardSkills: buildSkillData(hardSkills, m), // ความรู้/ทักษะ
+      softSkills: buildSkillData(softSkills, m), // คุณลักษณะบุคคล/จริยธรรม
+    };
+  });
+
+  return createPaginatedData(data, students.length ? (await this.prisma.student.count({ where: studentWhere })) : 0, _page, _limit);
+}
+
+
 }
