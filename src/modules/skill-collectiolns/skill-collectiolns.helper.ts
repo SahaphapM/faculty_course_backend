@@ -4,10 +4,23 @@ import { Skill } from 'src/generated/nestjs-dto/skill.entity';
 import { Student } from 'src/generated/nestjs-dto/student.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
 
-// แนะนำให้พิมพ์ type ให้ชัดแทน any
-type SkillLite = { id: number; parent?: { id: number } | null };
+type SkillFull = {
+  id: number;
+  engName: string | null;
+  domain: string | null;
+  parentId: number | null;
+};
 
-// Minimal shape used by syncStudentSkillAssessments, matching Prisma select in service
+export type SkillNode = {
+  id: number;
+  name: string | null;
+  domain: string | null;
+  parentId: number | null;
+  gained: number;
+  subskills: SkillNode[];
+};
+
+// เดิมของคุณ
 type SkillCollectionLite = {
   id?: number;
   gainedLevel: number;
@@ -16,6 +29,9 @@ type SkillCollectionLite = {
 
 type RootSkillLite = {
   id: number;
+  thaiName: string;
+  engName: string;
+  domain: string;
   parentId: number | null;
 };
 
@@ -31,20 +47,14 @@ export class SkillCollectionsHelper {
     console.log(
       `=== [DEBUG] Start Skill Assessment Sync for student ${student} ===`,
     );
-
-    if (!student) {
-      console.error(`Student ${student} not found`);
-      return;
-    }
-
     console.log('=== [DEBUG] Student ===');
-    console.log(student)
+    // console.log(student);
 
     console.log('=== [DEBUG] Root Skills ===');
-    console.log(rootSkills)
+    // console.log(rootSkills);
 
     console.log('=== [DEBUG] Skill Collections ===');
-    console.log(skillCollections)
+    console.log(skillCollections);
 
     // เก็บ skillId ทั้งหมดจาก skillCollections
     const skillIds = new Set<number>();
@@ -54,19 +64,24 @@ export class SkillCollectionsHelper {
     });
 
     console.log('=== [DEBUG] Skill IDs ===');
-    console.log(skillIds)
+    // console.log(skillIds);
 
     const relatedSkills = await this.fetchParents(Array.from(skillIds));
 
     console.log('=== [DEBUG] Related Skills ===');
-    console.log(relatedSkills);
+    // console.log(relatedSkills);
 
-    // เพิ่ม root skills เข้าไป ถ้ายังไม่มี
-    rootSkills.forEach((root) => {
-      if (!relatedSkills.has(root.id)) {
-        relatedSkills.set(root.id, root);
+    // อัด rootSkills เข้า map ให้เป็นชนิดเดียวกับ SkillFull
+    for (const r of rootSkills) {
+      if (!relatedSkills.has(r.id)) {
+        relatedSkills.set(r.id, {
+          id: r.id,
+          engName: r.engName ?? null,
+          domain: r.domain ?? null,
+          parentId: r.parentId ?? null,
+        });
       }
-    });
+    }
 
     // สร้าง skillLevelMap (เก็บ gained level ของทุก skill ที่ student มี)
     const skillLevelMap = new Map<number, number>();
@@ -78,47 +93,52 @@ export class SkillCollectionsHelper {
       }
     });
 
-    console.log('=== [DEBUG] Skill Level Map ===');
-    console.log(skillLevelMap);
-
-    // Build skill tree
-    const skillMap = new Map<number, any>();
-    relatedSkills.forEach((skill) => {
-      skillMap.set(skill.id, {
-        id: skill.id,
-        parentId: skill.parent?.id || null,
-        gained: skillLevelMap.get(skill.id) || 0,
+    // Build nodes พร้อม name/domain
+    const skillMap = new Map<number, SkillNode>();
+    for (const s of relatedSkills.values()) {
+      skillMap.set(s.id, {
+        id: s.id,
+        name: s.engName ?? null,
+        domain: s.domain ?? null,
+        parentId: s.parentId ?? null,
+        gained: skillLevelMap.get(s.id) ?? 0,
         subskills: [],
       });
-    });
+    }
 
+    console.log('=== [DEBUG] Skill Map ===');
+    // console.log(skillMap);
+
+    // ทำเป็น tree
     for (const node of skillMap.values()) {
       if (node.parentId) {
-        const parent = skillMap.get(node.parentId);
-        if (parent) parent.subskills.push(node);
+        const p = skillMap.get(node.parentId);
+        if (p) p.subskills.push(node);
       }
     }
 
-    // คำนวณ root gained level และ debug
-    rootSkills.forEach((root) => {
-      const rootNode = skillMap.get(root.id);
-      if (rootNode) {
-        this.fillGained(rootNode);
-        this.printTree(rootNode);
-      }
-    });
+    // คำนวณ gained และจัดเรียง แล้วเตรียมผลลัพธ์สำหรับ return
+    const result: SkillNode[] = [];
+    for (const r of rootSkills) {
+      const rootNode = skillMap.get(r.id);
+      if (!rootNode) continue;
+      const g = this.fillGained(rootNode);
+      rootNode.gained = g ?? rootNode.gained ?? 0;
+      // this.sortTree(rootNode); // ออปชัน: ให้ “เรียง” ตามชื่อ
+      result.push(rootNode);
+      this.printTree(rootNode);
+    }
 
-    console.log('=== [DEBUG] Skill Tree Calculation Complete ===');
-    console.log(skillMap);
-   
-    const skillAssessments = [];
+    console.log('=== [DEBUG] Skill Tree ===');
+    // console.log(result);
+
 
     // สร้าง/อัปเดต skill_assessment
     for (const rootSkill of rootSkills) {
       const rootNode = skillMap.get(rootSkill.id);
       const curriculumLevel = rootNode?.gained || 0;
 
-      const skillAssessment = await this.prisma.skill_assessment.upsert({
+      await this.prisma.skill_assessment.upsert({
         where: {
           skillId_studentId: { skillId: rootSkill.id, studentId: student.id },
         },
@@ -135,22 +155,21 @@ export class SkillCollectionsHelper {
         },
       });
 
-      skillAssessments.push(skillAssessment);
     }
-    
-    console.log('=== [DEBUG] Skill Assessment Calculation Complete ===');
-    console.log(skillAssessments)
 
-    return skillAssessments;
+    console.log('=== [DEBUG] Skill Assessment Calculation Complete ===');
+    // console.log(skillAssessments);
+
+    return skillMap;
   }
 
   fetchParents = async (
     ids: number[],
-    relatedSkills = new Map<number, SkillLite>(), // << ตัวสะสม
-  ): Promise<Map<number, SkillLite>> => {
+    relatedSkills = new Map<number, SkillFull>(), // << ตัวสะสม
+  ): Promise<Map<number, SkillFull>> => {
     if (!ids.length) return relatedSkills;
 
-    const skills: SkillLite[] = await this.prisma.skill.findMany({
+    const skills: SkillFull[] = await this.prisma.skill.findMany({
       where: { id: { in: ids } },
       include: { parent: { select: { id: true } } },
     });
@@ -160,7 +179,7 @@ export class SkillCollectionsHelper {
     for (const skill of skills) {
       if (!relatedSkills.has(skill.id)) {
         relatedSkills.set(skill.id, skill);
-        const pid = skill.parent?.id ?? null;
+        const pid = skill.parentId ?? null;
         if (pid && !relatedSkills.has(pid)) {
           newParentIds.push(pid);
         }
@@ -189,16 +208,16 @@ export class SkillCollectionsHelper {
   fillGained(node: any): number | undefined {
     if (!node.subskills.length) return node.gained;
     const childGained = node.subskills
-    .map((child: any) => this.fillGained(child))
-    .filter((x: any) => x !== undefined) as number[];
-  
+      .map((child: any) => this.fillGained(child))
+      .filter((x: any) => x !== undefined) as number[];
+
     if (childGained.length > 0) node.gained = this.calculateMode(childGained);
     return node.gained;
   }
 
   // Debug Tree
   printTree(node: any, indent = '') {
-    // console.log(`${indent}- Skill ${node.id} (level ${node.gained || 0})`);
+    console.log(`${indent}- Skill ${node.id} (level ${node.gained || 0})`);
     for (const child of node.subskills) {
       this.printTree(child, indent + '  ');
     }

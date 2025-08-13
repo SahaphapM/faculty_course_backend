@@ -11,6 +11,7 @@ import { SkillCollectionDto } from 'src/generated/nestjs-dto/skillCollection.dto
 import { Prisma } from '@prisma/client';
 import { SkillCollectionsHelper } from './skill-collectiolns.helper';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
+import { SkillNode } from './skill-collectiolns.helper';
 
 @Injectable()
 export class SkillCollectionsService {
@@ -20,7 +21,9 @@ export class SkillCollectionsService {
     private skillCollectionsHelper: SkillCollectionsHelper,
   ) {}
 
-  async getTranscriptFromAssessment(studentCode: string) {
+  async getTranscriptFromAssessment(
+    studentCode: string,
+  ): Promise<{ specific: SkillNode[]; soft: SkillNode[] }> {
     const student = await this.prisma.student.findUnique({
       where: { code: studentCode },
       select: {
@@ -62,7 +65,7 @@ export class SkillCollectionsService {
       },
     });
 
-    if (!assessments.length) return console.log('No assessments found');
+    if (!assessments.length) return { specific: [], soft: [] };
 
     // 2. ดึง skill_collection ของ student (สำหรับ subskills)
     const skillCollections = await this.prisma.skill_collection.findMany({
@@ -79,19 +82,39 @@ export class SkillCollectionsService {
       select: {
         id: true,
         parentId: true,
+        domain: true,
+        thaiName: true,
+        engName: true,
       },
     });
 
     // 3. คำนวณ root skill assessment จาก leaf skill ของ student
-    const skillAssessments = await this.skillCollectionsHelper.syncStudentSkillAssessments(
-      student,
-      rootSkills,
-      skillCollections,
+    const skillTree =
+      await this.skillCollectionsHelper.syncStudentSkillAssessments(
+        student,
+        rootSkills,
+        skillCollections,
+      );
+
+    // filter root where gainedLevel > 0
+    const filteredSkillTree = Array.from(skillTree.values()).filter(
+      (skill) => skill.gained > 0,
     );
 
-    
+    // 12. แยก specific (hard) และ soft skill
+    const specific = filteredSkillTree.filter(
+      (r) =>
+        r.domain === LearningDomain.Cognitive ||
+        r.domain === LearningDomain.Psychomotor,
+    );
 
-    return console.log('Skill Assessment Sync Complete');
+    const soft = filteredSkillTree.filter(
+      (r) =>
+        r.domain === LearningDomain.Affective ||
+        r.domain === LearningDomain.Ethics,
+    );
+
+    return { specific, soft };
   }
 
   async getByCloId(
