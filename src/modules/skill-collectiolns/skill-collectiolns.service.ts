@@ -91,7 +91,7 @@ export class SkillCollectionsService {
     // 3. คำนวณ root skill assessment จาก leaf skill ของ student
     const skillTree =
       await this.skillCollectionsHelper.syncStudentSkillAssessments(
-        student,
+        student.id,
         rootSkills,
         skillCollections,
       );

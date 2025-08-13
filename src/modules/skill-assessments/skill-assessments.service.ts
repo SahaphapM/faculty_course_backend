@@ -1,11 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { UpdateSkillAssessmentDto } from 'src/generated/nestjs-dto/update-skillAssessment.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { BadRequestException } from '@nestjs/common';
+import { SkillCollectionsHelper } from '../skill-collectiolns/skill-collectiolns.helper';
 
 @Injectable()
 export class SkillAssessmentsService {
-  constructor(private readonly prisma: PrismaService) { }
+  constructor(private readonly prisma: PrismaService,
+    private readonly skHelper: SkillCollectionsHelper,
+  ) { }
 
 
 
@@ -62,27 +65,77 @@ export class SkillAssessmentsService {
   }
 
   async getStudentSkillAssessments(studentId: number) {
-    // const student = await this.prisma.student.findUnique({
-    //   where: { id: studentId },
-    // });
-    // console.log(student);
 
-    // if (!student) {
-    //   throw new BadRequestException('Student not found');
-    // }
-
-    const skillAssessments = await this.prisma.skill_assessment.findMany({
-      where: { studentId: studentId },
-      include: {
-        skill: {
+    const student = await this.prisma.student.findUnique({
+      where: { id: studentId },
+      select: {
+        id: true,
+        curriculumId: true,
+        skill_collections: {
           select: {
             id: true,
-            thaiName: true,
+            gainedLevel: true,
+            clo: {
+              select: {
+                skill: {
+                  select: {
+                    id: true,
+                    parentId: true,
+                    engName: true,
+                    domain: true,
+                    thaiName: true,
+                  },
+                },
+              },
+            },
           },
         },
       },
     });
 
+    if (!student) {
+      throw new NotFoundException(`Student with ID ${studentId} not found`);
+    }
+
+    const rootSkills = await this.prisma.skill.findMany({
+      where: { parent: null, curriculumId: student.curriculumId },
+      select: {
+        id: true,
+        parentId: true,
+        domain: true,
+        thaiName: true,
+        engName: true,
+      },
+    });
+
+    
+
+    this.skHelper.syncStudentSkillAssessments(student.id, rootSkills, student.skill_collections);
+
+
+    const skillAssessments = await this.prisma.skill_assessment.findMany({
+      where: { studentId },
+      select: {
+        id: true,
+        skillId: true,
+        skill: {
+          select: {
+            id: true,
+            parentId: true,
+            engName: true,
+            domain: true,
+            thaiName: true,
+          },
+        },
+        curriculumLevel: true,
+        companyLevel: true,
+        finalLevel: true,
+        curriculumComment: true,
+        companyComment: true,
+      },
+    });
+
+ 
     return skillAssessments.map((assessment) => ({
       id: assessment.id,
       skillId: assessment.skillId,

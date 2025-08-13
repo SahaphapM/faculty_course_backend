@@ -40,12 +40,12 @@ export class SkillCollectionsHelper {
   constructor(private prisma: PrismaService) {}
 
   async syncStudentSkillAssessments(
-    student: Partial<Student>,
+    studentId: number,
     rootSkills: RootSkillLite[],
     skillCollections: SkillCollectionLite[],
   ) {
     console.log(
-      `=== [DEBUG] Start Skill Assessment Sync for student ${student} ===`,
+      `=== [DEBUG] Start Skill Assessment Sync for student ${studentId} ===`,
     );
     console.log('=== [DEBUG] Student ===');
     // console.log(student);
@@ -140,14 +140,14 @@ export class SkillCollectionsHelper {
 
       await this.prisma.skill_assessment.upsert({
         where: {
-          skillId_studentId: { skillId: rootSkill.id, studentId: student.id },
+          skillId_studentId: { skillId: rootSkill.id, studentId },
         },
         update: {
           curriculumLevel,
           finalLevel: curriculumLevel,
         },
         create: {
-          studentId: student.id,
+          studentId,
           skillId: rootSkill.id,
           curriculumLevel,
           companyLevel: 0,
