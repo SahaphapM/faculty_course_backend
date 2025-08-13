@@ -19,7 +19,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { InstructorsModule } from 'src/modules/instructors/instructors.module';
 import { SkillCollectionsModule } from 'src/modules/skill-collectiolns/skill-collectiolns.module';
 import { providePrismaClientExceptionFilter } from 'nestjs-prisma';
-// import { AuthModule } from 'src/auth/auth.module';
+import { AuthModule } from 'src/auth/auth.module';
 import { CompaniesModule } from 'src/modules/companies/companies.module';
 import { InternshipsModule } from 'src/modules/internships/internships.module';
 import { JobPositionsModule } from 'src/modules/job-positions/job-positions.module';
@@ -46,7 +46,7 @@ import { SeedModule } from 'src/seed/seed.module';
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    // ...process.env.UNAUTH === 'true' ? [] : [AuthModule],
+    AuthModule,
     StudentsModule,
     CoursesModule,
     SubjectModule,

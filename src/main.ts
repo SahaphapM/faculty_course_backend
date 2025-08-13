@@ -41,13 +41,48 @@ async function bootstrap() {
     app.get(AuditLogDecoratorInterceptor),
   );
 
-  const config = new DocumentBuilder()
+  // If UNAUTH is true, disable Swagger security to bypass authorization in Swagger UI
+  const isUnAuth = process.env.UNAUTH === 'true' || process.env.UNAUTH === '1';
+
+  const swaggerBuilder = new DocumentBuilder()
     .setTitle('BUU APIs')
     .setDescription('The API description')
-    .setVersion('0.4')
-    .addBearerAuth()
-    .build();
-  const document = SwaggerModule.createDocument(app, config);
+    .setVersion('0.4');
+
+  if (!isUnAuth) {
+    swaggerBuilder.addBearerAuth();
+  }
+
+  const config = swaggerBuilder.build();
+  const document: any = SwaggerModule.createDocument(app, config);
+
+  if (isUnAuth) {
+    // Remove global and per-operation security requirements
+    if (document.components) {
+      document.components.securitySchemes = {};
+    }
+    document.security = [];
+    const methods = [
+      'get',
+      'put',
+      'post',
+      'delete',
+      'options',
+      'head',
+      'patch',
+      'trace',
+    ];
+    if (document.paths) {
+      Object.values(document.paths).forEach((pathItem: any) => {
+        methods.forEach((m) => {
+          if (pathItem?.[m]?.security) {
+            delete pathItem[m].security;
+          }
+        });
+      });
+    }
+  }
+
   SwaggerModule.setup('api', app, document);
 
   await app.listen(3000);
