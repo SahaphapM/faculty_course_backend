@@ -55,7 +55,7 @@ model course {
   year               Int                 @db.SmallInt
   /// @DtoRelationIncludeId
   subjectId          Int
-  subject            subject             @relation(fields: [subjectId], references: [id])
+  subject            subject             @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   course_instructors course_instructor[]
   skill_collections  skill_collection[]
 
@@ -87,8 +87,7 @@ model subject {
   isRoot          Boolean?   @default(false)
   clos            clo[]
   courses         course[]
-  lesson          lesson?
-  curriculum      curriculum @relation(fields: [curriculumId], references: [id])
+  curriculum      curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
 
   @@index([curriculumId])
 }
@@ -206,7 +205,7 @@ model skill {
   /// @DtoRelationIncludeId
   curriculumId      Int
   clos              clo[]
-  curriculum        curriculum         @relation(fields: [curriculumId], references: [id])
+  curriculum        curriculum         @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
   parent            skill?             @relation("SkillHierarchy", fields: [parentId], references: [id], onDelete: NoAction)
   subs              skill[]            @relation("SkillHierarchy")
   skill_assessments skill_assessment[]
@@ -248,23 +247,12 @@ model student {
   skill_collections   skill_collection[]
   branch              branch?              @relation(fields: [branchId], references: [id], onDelete: Restrict, onUpdate: NoAction)
   curriculum          curriculum?          @relation(fields: [curriculumId], references: [id], onUpdate: NoAction)
-  student_internships student_internship[]
+  student_internships student_internship[] 
   user                user?
 
   @@index([code])
   @@index([branchId], map: "student_branchId_fkey")
   @@index([curriculumId], map: "student_curriculumId_fkey")
-}
-
-model lesson {
-  id        Int     @id @default(autoincrement())
-  /// @DtoRelationIncludeId
-  subjectId Int     @unique
-  thaiName  String? @db.VarChar(255)
-  engName   String? @db.VarChar(255)
-  subject   subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-
-  @@index([subjectId])
 }
 
 model user {
@@ -307,8 +295,8 @@ model company_job_position {
   id            Int           @id @default(autoincrement())
   companyId     Int?
   jobPositionId Int?
-  company       company?      @relation(fields: [companyId], references: [id])
-  jobPosition   job_position? @relation(fields: [jobPositionId], references: [id])
+  company       company?      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  jobPosition   job_position? @relation(fields: [jobPositionId], references: [id], onDelete: Cascade)
 
   @@index([companyId], map: "company_job_position_companyId_fkey")
   @@index([jobPositionId], map: "company_job_position_jobPositionId_fkey")
@@ -320,7 +308,7 @@ model internship {
   token              String?              @unique @db.VarChar(32)
   /// @DtoRelationIncludeId
   companyId          Int?
-  company            company?             @relation(fields: [companyId], references: [id])
+  company            company?             @relation(fields: [companyId], references: [id], onDelete: NoAction)
   studentInternships student_internship[]
 
   @@index([companyId], map: "internship_companyId_fkey")
@@ -337,9 +325,9 @@ model student_internship {
   jobPositionId Int?
   /// @DtoRelationIncludeId
   internshipId  Int?
-  internship    internship?   @relation(fields: [internshipId], references: [id])
-  jobPosition   job_position? @relation(fields: [jobPositionId], references: [id])
-  student       student?      @relation(fields: [studentId], references: [id])
+  internship    internship?   @relation(fields: [internshipId], references: [id], onDelete: NoAction)
+  jobPosition   job_position? @relation(fields: [jobPositionId], references: [id], onDelete: NoAction)
+  student       student?      @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@index([internshipId])
   @@index([jobPositionId])
@@ -357,8 +345,8 @@ model skill_assessment {
   skillId           Int?
   /// @DtoRelationIncludeId
   studentId         Int?
-  skill             skill?   @relation(fields: [skillId], references: [id])
-  student           student? @relation(fields: [studentId], references: [id])
+  skill             skill?   @relation(fields: [skillId], references: [id], onDelete: NoAction)
+  student           student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([skillId, studentId])
   @@index([skillId, studentId])
