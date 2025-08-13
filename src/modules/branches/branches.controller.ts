@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
-import { ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -28,6 +28,38 @@ export class BranchesController {
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (1-based)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    description: 'Sort field, prefix with - for DESC (e.g. "-id")',
+  })
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description: 'Override sort direction (asc|desc)',
+  })
+  @ApiQuery({
+    name: 'thaiName',
+    required: false,
+    description: 'Filter by Thai name (contains)',
+  })
+  @ApiQuery({
+    name: 'engName',
+    required: false,
+    description: 'Filter by English name (contains)',
+  })
   @Get()
   findAll(@Query() pag?: BranchFilterDto) {
     return this.branchService.findAll(pag);

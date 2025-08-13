@@ -11,7 +11,7 @@ import {
   ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UserService } from './users.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -29,6 +29,33 @@ export class UsersController {
     return this.usersService.create(createUserDto);
   }
   @Roles(UserRole.Admin)
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (1-based)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    description: 'Sort field, prefix with - for DESC (e.g. -id)',
+  })
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description: 'Explicit sort direction (asc|desc) overrides sort prefix',
+  })
+  @ApiQuery({
+    name: 'email',
+    required: false,
+    description: 'Filter by user email (contains)',
+  })
   @Get()
   findAll(@Query() pag?: UserFilterDto) {
     return this.usersService.findAll(pag);

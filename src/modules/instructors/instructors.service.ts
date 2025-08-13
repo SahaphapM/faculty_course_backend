@@ -9,6 +9,7 @@ import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.
 import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.dto';
 import { Prisma } from '@prisma/client';
 import { InstructorFilterDto } from 'src/dto/filters/filter.instructors.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class InstructorsService {
@@ -89,7 +90,12 @@ export class InstructorsService {
         this.prisma.instructor.findMany(options),
         this.prisma.instructor.count({ where: whereCondition }),
       ]);
-      return { data: instructors, total };
+      return createPaginatedData(
+        instructors,
+        total,
+        Number(page || defaultPage),
+        Number(limit || defaultLimit),
+      );
     } catch (error) {
       console.error('Error fetching instructors:', error);
       throw new InternalServerErrorException('Failed to fetch instructors');

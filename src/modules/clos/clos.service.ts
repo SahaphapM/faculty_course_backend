@@ -8,6 +8,7 @@ import { clo, Prisma } from 'prisma/prisma-client';
 import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
 import { CreateCloDto } from 'src/generated/nestjs-dto/create-clo.dto';
 import { CloFilterDto } from 'src/dto/filters/filter.clo.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 @Injectable()
 export class ClosService {
   constructor(private readonly prisma: PrismaService) {}
@@ -34,17 +35,18 @@ export class ClosService {
     }
   }
 
-  async findAll(pag?: CloFilterDto): Promise<{ data: clo[]; total: number }> {
-    const { subjectId } = pag;
+  async findAll(pag?: CloFilterDto) {
+    const { subjectId, page = 1, limit = 10 } = pag || {};
 
-    // Prisma query options
-    const whereCondition: Prisma.cloWhereInput = {
-      subjectId: Number(subjectId),
-    };
+    const whereCondition: Prisma.cloWhereInput = subjectId
+      ? { subjectId: Number(subjectId) }
+      : {};
 
     const options: Prisma.cloFindManyArgs = {
       include: { skill: true, plo: true },
       where: whereCondition,
+      take: limit,
+      skip: (page - 1) * limit,
     };
 
     try {
@@ -53,7 +55,7 @@ export class ClosService {
         this.prisma.clo.count({ where: whereCondition }),
       ]);
 
-      return { data, total };
+      return createPaginatedData(data, total, Number(page), Number(limit));
     } catch (error) {
       console.error(`Error fetching CLOs: ${error.message}`);
       throw new InternalServerErrorException('Failed to retrieve data');

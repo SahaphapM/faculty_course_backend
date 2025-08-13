@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ClosService } from './clos.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CreateCloDto } from 'src/generated/nestjs-dto/create-clo.dto';
 import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -27,6 +27,24 @@ export class ClosController {
     return this.closService.create(createCloDto);
   }
 
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (1-based)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'subjectId',
+    required: false,
+    type: Number,
+    description: 'Filter by subject ID',
+  })
   @Get()
   findAllByPage(@Query() paginationDto: CloFilterDto) {
     return this.closService.findAll(paginationDto);

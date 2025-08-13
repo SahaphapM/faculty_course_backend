@@ -11,7 +11,7 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
 import { UpdateSkillDto } from 'src/generated/nestjs-dto/update-skill.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -24,6 +24,63 @@ export class SkillsController {
   constructor(private readonly skillsService: SkillsService) {}
 
   @Get()
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (1-based)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    description: 'Sort field, prefix with - for DESC (e.g. -id)',
+  })
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description: 'Explicit sort direction (asc|desc) overrides sort prefix',
+  })
+  @ApiQuery({
+    name: 'nameCode',
+    required: false,
+    description: 'Filter by Thai/English name (contains)',
+  })
+  @ApiQuery({
+    name: 'domain',
+    required: false,
+    description: 'Filter by skill domain',
+  })
+  @ApiQuery({
+    name: 'curriculumId',
+    required: false,
+    type: Number,
+    description: 'Filter root skills by curriculum',
+  })
+  @ApiQuery({
+    name: 'branchId',
+    required: false,
+    type: Number,
+    description: 'Filter root skills by branch',
+  })
+  @ApiQuery({
+    name: 'facultyId',
+    required: false,
+    type: Number,
+    description: 'Filter root skills by faculty',
+  })
+  @ApiQuery({
+    name: 'subjectId',
+    required: false,
+    type: Number,
+    description:
+      'Filter root skills by subject (derives skills from related CLOs)',
+  })
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: SkillFilterDto) {
     if (pag?.curriculumId) {

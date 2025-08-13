@@ -4,6 +4,7 @@ import { SubjectFilterDto } from 'src/dto/filters/filter.subject.dto';
 import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
 import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class SubjectService {
@@ -84,7 +85,12 @@ export class SubjectService {
       this.prisma.subject.findMany(options),
       this.prisma.subject.count({ where: options.where }),
     ]);
-    return { data: subjects, total };
+    return createPaginatedData(
+      subjects,
+      total,
+      Number(page ?? defaultPage),
+      Number(limit ?? defaultLimit),
+    );
   }
 
   async findOne(id: number) {

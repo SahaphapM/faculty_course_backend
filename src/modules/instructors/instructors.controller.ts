@@ -44,51 +44,6 @@ export class InstructorsController {
     );
   }
 
-  // @Post(':id/image/upload')
-  // @UseInterceptors(FileInterceptor('image'))
-  // public async uploadFile(
-  //   @Param('id') id: string,
-  //   @UploadedFile(
-  //     new ParseFilePipeBuilder()
-  //       .addValidator(
-  //         // we use custom validator to validate the hiatus file example prevent .pdf to .png
-  //         new CustomUploadFileTypeValidator({
-  //           fileType: VALID_UPLOADS_MIME_TYPES,
-  //         }),
-  //       )
-  //       .addMaxSizeValidator({ maxSize: MAX_PROFILE_PICTURE_SIZE_IN_BYTES })
-  //       .build({ errorHttpStatusCode: HttpStatus.UNPROCESSABLE_ENTITY }),
-  //   )
-  //   file: Express.Multer.File,
-  // ) {
-  //   if (!file) {
-  //     return 'No file uploaded.';
-  //   }
-
-  //   // Generate a random filename
-  //   const fileExtension = path.extname(file.originalname);
-  //   const randomFileName = `${uuidv4()}${fileExtension}`;
-  //   const uploadPath = path.join(
-  //     process.cwd(),
-  //     '/public/teachers/images',
-  //     randomFileName,
-  //   );
-
-  //   // Ensure the uploads directory exists
-  //   fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
-
-  //   // Save the file
-  //   fs.writeFileSync(uploadPath, file.buffer);
-
-  //   // set image name of teacher
-  //   const teacher = (await this.insService.findOne(
-  //     +id,
-  //   )) as unknown as UpdateInstructorDto;
-  //   teacher.picture = randomFileName;
-  //   await this.insService.update(+id, teacher);
-  //   return { message: 'File upload successful', filename: randomFileName };
-  // }
-
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
   @HttpCode(HttpStatus.OK)

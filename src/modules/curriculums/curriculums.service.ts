@@ -16,6 +16,7 @@ import {
   getStudentIds,
 } from './curriculums.helper';
 import { CreateLevelDescriptionDto } from 'src/generated/nestjs-dto/create-levelDescription.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class CurriculumsService {
@@ -34,56 +35,57 @@ export class CurriculumsService {
     });
 
     // defult level description
-    const levels : CreateLevelDescriptionDto[] = [
+    const levels: CreateLevelDescriptionDto[] = [
       {
-          level: 1,
-          description: "สามารถอธิบายหลักการหรือแนวคิดพื้นฐานได้ ยังไม่สามารถนำไปปฏิบัติได้ด้วยตนเอง",
-          isHardSkill: true,
-          curriculumId: curriculum.id
-        },
-        {
-          level: 2,
-          description: "สามารถปฏิบัติงานได้เมื่อมีคนชี้แนะหรือติดตามใกล้ชิด",
-          isHardSkill: true,
-          curriculumId: curriculum.id
-        },
-        {
-          level: 3,
-          description: "สามารถทำงานได้สำเร็จโดยไม่ต้องมีคนคอยกำกับ",
-          isHardSkill: true,
-          curriculumId: curriculum.id
-        },
-        {
-          level: 4,
-          description: "ทำได้คล่องและปรับวิธีให้เหมาะสมกับสถานการณ์",
-          isHardSkill: true,
-          curriculumId: curriculum.id
-        },
-        {
-          level: 5,
-          description: "เป็นผู้เชี่ยวชาญ ให้คำปรึกษาหรือพัฒนาวิธีใหม่ได้",
-          isHardSkill: true,
-          curriculumId: curriculum.id
-        },
-        {
-          level: 1,
-          description: "เข้าใจหลักการสื่อสารที่ดี",
-          isHardSkill: false,
-          curriculumId: curriculum.id
-        },
-        {
-          level: 2,
-          description: "สามารถสื่อสารได้ชัดเจนเมื่อมีคำแนะนำหรือโครงสร้างช่วย",
-          isHardSkill: false,
-          curriculumId: curriculum.id
-        },
-        {
-          level: 3,
-          description: "จัดการความขัดแย้งหรือสถานการณ์ที่ซับซ้อนได้ด้วยตนเอง",
-          isHardSkill: false,
-          curriculumId: curriculum.id
-        }
-  ];
+        level: 1,
+        description:
+          'สามารถอธิบายหลักการหรือแนวคิดพื้นฐานได้ ยังไม่สามารถนำไปปฏิบัติได้ด้วยตนเอง',
+        isHardSkill: true,
+        curriculumId: curriculum.id,
+      },
+      {
+        level: 2,
+        description: 'สามารถปฏิบัติงานได้เมื่อมีคนชี้แนะหรือติดตามใกล้ชิด',
+        isHardSkill: true,
+        curriculumId: curriculum.id,
+      },
+      {
+        level: 3,
+        description: 'สามารถทำงานได้สำเร็จโดยไม่ต้องมีคนคอยกำกับ',
+        isHardSkill: true,
+        curriculumId: curriculum.id,
+      },
+      {
+        level: 4,
+        description: 'ทำได้คล่องและปรับวิธีให้เหมาะสมกับสถานการณ์',
+        isHardSkill: true,
+        curriculumId: curriculum.id,
+      },
+      {
+        level: 5,
+        description: 'เป็นผู้เชี่ยวชาญ ให้คำปรึกษาหรือพัฒนาวิธีใหม่ได้',
+        isHardSkill: true,
+        curriculumId: curriculum.id,
+      },
+      {
+        level: 1,
+        description: 'เข้าใจหลักการสื่อสารที่ดี',
+        isHardSkill: false,
+        curriculumId: curriculum.id,
+      },
+      {
+        level: 2,
+        description: 'สามารถสื่อสารได้ชัดเจนเมื่อมีคำแนะนำหรือโครงสร้างช่วย',
+        isHardSkill: false,
+        curriculumId: curriculum.id,
+      },
+      {
+        level: 3,
+        description: 'จัดการความขัดแย้งหรือสถานการณ์ที่ซับซ้อนได้ด้วยตนเอง',
+        isHardSkill: false,
+        curriculumId: curriculum.id,
+      },
+    ];
 
     // for each curriculum
     await this.prisma.level_description.createMany({
@@ -158,7 +160,13 @@ export class CurriculumsService {
       this.prisma.curriculum.findMany(options),
       this.prisma.curriculum.count({ where: whereCondition }),
     ]);
-    return { data: curriculums, total };
+
+    return createPaginatedData(
+      curriculums,
+      total,
+      Number(page || defaultPage),
+      Number(limit || defaultLimit),
+    );
   }
 
   // Find a curriculum by ID
@@ -192,7 +200,6 @@ export class CurriculumsService {
 
   async update(id: number, dto: UpdateCurriculumDto) {
     try {
-
       const old = await this.prisma.curriculum.findUnique({ where: { id } });
       if (!old) {
         throw new NotFoundException(`Curriculum with ID ${id} not found`);
@@ -296,15 +303,7 @@ export class CurriculumsService {
     const cloIds = closData.map((clo) => clo.id);
 
     if (cloIds.length === 0) {
-      return {
-        data: [],
-        meta: {
-          total: 0,
-          page,
-          limit,
-          totalPages: 0,
-        },
-      };
+      return createPaginatedData([], 0, Number(page), Number(limit));
     }
 
     // 3. Build student filter for yearCode and search
@@ -396,15 +395,12 @@ export class CurriculumsService {
     });
 
     // 7. Return formatted response
-    return {
-      data: studentWithClo,
-      meta: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+    return createPaginatedData(
+      studentWithClo,
+      total,
+      Number(page),
+      Number(limit),
+    );
   }
 
   private async findAllDescendants(
@@ -545,16 +541,19 @@ export class CurriculumsService {
 
     // 3. แยก skills ตาม domain และหา expectedLevel สำหรับแต่ละ skill
     const cognitivePsychomotorSkills = skills.filter(
-      (skill) => skill.domain === 'ความรู้' || skill.domain === 'ทักษะ'
+      (skill) => skill.domain === 'ความรู้' || skill.domain === 'ทักษะ',
     );
     const affectiveEthicsSkills = skills.filter(
-      (skill) => skill.domain === 'คุณลักษณะบุคคล' || skill.domain === 'จริยธรรม'
+      (skill) =>
+        skill.domain === 'คุณลักษณะบุคคล' || skill.domain === 'จริยธรรม',
     );
 
     // หา expectedLevel สำหรับแต่ละ skill เมื่อมี subjectName
-    const getExpectedLevelForSkill = async (skillId: number): Promise<number | null> => {
+    const getExpectedLevelForSkill = async (
+      skillId: number,
+    ): Promise<number | null> => {
       if (!subjectName) return null;
-      
+
       // หา CLO ที่เกี่ยวข้องกับ skill นี้และ subject ที่เลือก
       const matchedSubjects = await this.prisma.subject.findMany({
         where: {
@@ -579,7 +578,7 @@ export class CurriculumsService {
           return subject.clos[0].expectSkillLevel;
         }
       }
-      
+
       return null;
     };
 
@@ -592,34 +591,39 @@ export class CurriculumsService {
     // ฟังก์ชันหาความถี่สูงสุด
     const getMostFrequentLevel = (levels: number[]): number | null => {
       if (levels.length === 0) return null;
-      
+
       const frequency: { [key: number]: number } = {};
-      levels.forEach(level => {
+      levels.forEach((level) => {
         frequency[level] = (frequency[level] || 0) + 1;
       });
-      
+
       let maxFreq = 0;
       let mostFrequent = levels[0];
-      
+
       Object.entries(frequency).forEach(([level, freq]) => {
         if (freq > maxFreq) {
           maxFreq = freq;
           mostFrequent = parseInt(level);
         }
       });
-      
+
       return mostFrequent;
     };
 
-    const createSkillData = async (skillList: typeof skills, skillMap: Map<number, number[]>) => {
+    const createSkillData = async (
+      skillList: typeof skills,
+      skillMap: Map<number, number[]>,
+    ) => {
       const skillData = [];
       for (const sk of skillList) {
         const levels = skillMap.get(sk.id) || [];
-        const gainedLevel = subjectName ? levels[0] || null : getMostFrequentLevel(levels);
-        
+        const gainedLevel = subjectName
+          ? levels[0] || null
+          : getMostFrequentLevel(levels);
+
         // หา expectedLevel จาก CLO เมื่อมี subjectName
         const expectedLevel = await getExpectedLevelForSkill(sk.id);
-        
+
         skillData.push({
           skillId: sk.id,
           skillName: sk.thaiName,
@@ -649,8 +653,14 @@ export class CurriculumsService {
         studentId: stu.id,
         studentName: stu.thaiName,
         studentCode: stu.code,
-        cognitivePsychomotorSkills: await createSkillData(cognitivePsychomotorSkills, skillMap),
-        affectiveEthicsSkills: await createSkillData(affectiveEthicsSkills, skillMap),
+        cognitivePsychomotorSkills: await createSkillData(
+          cognitivePsychomotorSkills,
+          skillMap,
+        ),
+        affectiveEthicsSkills: await createSkillData(
+          affectiveEthicsSkills,
+          skillMap,
+        ),
       };
 
       result.students.push(studentData);

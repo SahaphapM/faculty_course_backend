@@ -20,22 +20,46 @@ export type PaginatedResult<T> = {
 };
 
 export class BaseFilterParams {
+  @ApiPropertyOptional({
+    description:
+      'Full-text search term applied to name/code/email/etc (implementation specific)',
+    required: false,
+    example: 'computer',
+  })
   @IsOptional()
   @IsString()
   search?: string;
   // base
+  @ApiPropertyOptional({
+    description: 'Page number (1-based)',
+    required: false,
+    minimum: 1,
+    example: 1,
+  })
   @IsOptional()
   @IsInt()
   @IsPositive()
   @Type(() => Number)
   page?: number;
 
+  @ApiPropertyOptional({
+    description: 'Items per page',
+    required: false,
+    minimum: 1,
+    example: 10,
+  })
   @IsOptional()
   @IsInt()
   @IsPositive()
   @Type(() => Number)
   limit?: number;
 
+  @ApiPropertyOptional({
+    description:
+      'Sort field (prefix with - for descending). Example: "name" or "-createdAt". If absent, service default is used.',
+    required: false,
+    example: '-id',
+  })
   @IsOptional()
   @IsString()
   sort?: string;

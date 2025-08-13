@@ -10,6 +10,7 @@ import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from '@node-rs/bcrypt';
 import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class UserService {
@@ -42,14 +43,22 @@ export class UserService {
       email,
     } = pag || {};
 
-    // Normalize orderBy and ensure it's either 'asc' or 'desc'
-    const validOrder = orderBy.toLowerCase() === 'desc' ? 'desc' : 'asc';
+    // Normalize sort: allow leading '-' for descending (e.g. '-id')
+    const normalizedSort = sort || 'id';
+    const sortField = normalizedSort.startsWith('-')
+      ? normalizedSort.slice(1)
+      : normalizedSort;
+    const sortDirection = normalizedSort.startsWith('-')
+      ? 'desc'
+      : orderBy?.toLowerCase() === 'desc'
+        ? 'desc'
+        : 'asc';
 
     // Prisma query options
     const options: Prisma.userFindManyArgs = {
       take: limit,
       skip: (page - 1) * limit,
-      orderBy: { [sort]: validOrder },
+      orderBy: { [sortField]: sortDirection },
       where: email ? { email: { contains: email } } : undefined, // Avoids unnecessary `where`
       include: {
         student: { select: { id: true, thaiName: true } },
@@ -63,7 +72,7 @@ export class UserService {
         this.prisma.user.count({ where: options.where }),
       ]);
 
-      return { data: users, total };
+      return createPaginatedData(users, total, Number(page), Number(limit));
     } catch (error) {
       console.error('Error fetching users:', error);
       throw new InternalServerErrorException('Failed to fetch users');

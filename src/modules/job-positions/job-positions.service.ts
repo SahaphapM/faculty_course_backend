@@ -11,6 +11,7 @@ import {
   PaginatedResult,
 } from 'src/dto/filters/filter.base.dto';
 import { JobPosition } from 'src/generated/nestjs-dto/jobPosition.entity';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class JobPositionsService {
@@ -41,30 +42,30 @@ export class JobPositionsService {
     const { search, page = 1, limit = 5, sort } = filter;
     const skip = (page - 1) * limit;
 
-    const data = await this.prisma.job_position.findMany({
-      skip,
-      take: limit,
-      orderBy: sort
-        ? { [sort.replace('-', '')]: sort.startsWith('-') ? 'desc' : 'asc' }
-        : { id: 'asc' },
-      where: {
-        name: {
-          contains: search,
-        },
-      },
-    });
-
-    const totalPages = Math.ceil(data.length / limit);
-
-    return {
-      data,
-      meta: {
-        total: data.length,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages,
+    const where = {
+      name: {
+        contains: search || '',
       },
     };
+
+    const [data, total] = await Promise.all([
+      this.prisma.job_position.findMany({
+        skip,
+        take: limit,
+        orderBy: sort
+          ? { [sort.replace('-', '')]: sort.startsWith('-') ? 'desc' : 'asc' }
+          : { id: 'asc' },
+        where,
+      }),
+      this.prisma.job_position.count({ where }),
+    ]);
+
+    return createPaginatedData(
+      data,
+      total,
+      Number(page),
+      Number(limit),
+    ) as PaginatedResult<JobPosition>;
   }
 
   findOne(id: number) {

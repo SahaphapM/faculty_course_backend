@@ -10,6 +10,7 @@ import { Prisma } from '@prisma/client'; // Import Prisma types
 import { CreateFacultyDto } from 'src/generated/nestjs-dto/create-faculty.dto';
 import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
 import { FacultyFilterDto } from 'src/dto/filters/filter.faculties.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class FacultiesService {
@@ -83,7 +84,12 @@ export class FacultiesService {
           this.prisma.faculty.findMany(options),
           this.prisma.faculty.count({ where: options.where }),
         ]);
-        return { data: faculties, total };
+        return createPaginatedData(
+          faculties,
+          total,
+          Number(page || defaultPage),
+          Number(limit || defaultLimit),
+        );
       } catch (error) {
         console.error('Error fetching faculties:', error);
         throw new InternalServerErrorException('Failed to fetch faculties');

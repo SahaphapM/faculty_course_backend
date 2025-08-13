@@ -9,6 +9,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateLessonDto } from 'src/generated/nestjs-dto/create-lesson.dto';
 import { UpdateLessonDto } from 'src/generated/nestjs-dto/update-lesson.dto';
 import { LessonFilterDto } from 'src/dto/filters/filter.lesson.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class LessonsService {
@@ -64,15 +65,17 @@ export class LessonsService {
     };
 
     try {
-      if (pag) {
-        const [lessons, total] = await Promise.all([
-          this.prisma.lesson.findMany(options),
-          this.prisma.lesson.count({ where: options.where }),
-        ]);
-        return { data: lessons, total };
-      } else {
-        return await this.prisma.lesson.findMany(options);
-      }
+      const [lessons, total] = await Promise.all([
+        this.prisma.lesson.findMany(options),
+        this.prisma.lesson.count({ where: options.where }),
+      ]);
+
+      return createPaginatedData(
+        lessons,
+        total,
+        Number(page || defaultPage),
+        Number(limit || defaultLimit),
+      );
     } catch (error) {
       console.error('Error fetching lessons:', error);
       throw new InternalServerErrorException('Failed to fetch lessons');
@@ -98,7 +101,6 @@ export class LessonsService {
 
   async remove(id: number): Promise<void> {
     try {
-
       await this.prisma.lesson.delete({
         where: { id },
       });
@@ -111,7 +113,6 @@ export class LessonsService {
       );
     }
   }
-
 
   // async filters(curriculumId: number) {
   //   try {

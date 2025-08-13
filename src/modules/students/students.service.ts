@@ -8,6 +8,7 @@ import { Prisma } from '@prisma/client';
 import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
 import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 import { StudentFilterDto } from 'src/dto/filters/filter.student.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class StudentsService {
@@ -119,7 +120,12 @@ export class StudentsService {
       this.prisma.student.count({ where: options.where }),
     ]);
 
-    return { data: students, total };
+    return createPaginatedData(
+      students,
+      total,
+      Number(page ?? defaultPage),
+      Number(limit ?? defaultLimit),
+    );
   }
 
   // get exist student year from code like 65160123, 66160123, 67160123 => [65, 66, 67]
@@ -258,6 +264,11 @@ export class StudentsService {
       this.prisma.student.count({ where: options.where }),
     ]);
 
-    return { data: students, total };
+    return createPaginatedData(
+      students,
+      total,
+      Number(page ?? defaultPage),
+      Number(limit ?? defaultLimit),
+    );
   }
 }

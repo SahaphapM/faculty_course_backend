@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { PloService } from './plos.service';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
 import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -27,6 +27,23 @@ export class PlosController {
     return this.plosService.create(createPloDto);
   }
 
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (1-based)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'curriculumCode',
+    required: false,
+    description: 'Filter PLOs by curriculum code',
+  })
   @Get()
   findAll(@Query() filter?: PloFilterDto) {
     return this.plosService.findAll(filter);

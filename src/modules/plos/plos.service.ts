@@ -4,6 +4,7 @@ import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
 import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
 import { Prisma } from '@prisma/client';
 import { PloFilterDto } from 'src/dto/filters/filter.plo.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class PloService {
@@ -38,7 +39,7 @@ export class PloService {
       this.prisma.plo.findMany(options),
       this.prisma.plo.count({ where: whereCondition }),
     ]);
-    return { data: list, total };
+    return createPaginatedData(list, total, 1, list.length);
   }
 
   // Find a PLO by ID

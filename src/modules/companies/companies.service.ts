@@ -6,6 +6,7 @@ import {
 } from 'src/dto/filters/filter.base.dto';
 import { Company } from 'src/generated/nestjs-dto/company.entity';
 import { CreateCompanyWithJobPositionsDto } from './dto/create.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class CompaniesService {
@@ -34,39 +35,39 @@ export class CompaniesService {
     const { search, page = 1, limit = 10, sort } = filter;
     const skip = (page - 1) * limit;
 
-    const data = await this.prisma.company.findMany({
-      skip,
-      take: limit,
-      orderBy: sort
-        ? { [sort.replace('-', '')]: sort.startsWith('-') ? 'desc' : 'asc' }
-        : { id: 'asc' },
-      where: {
-        OR: [
-          { name: { contains: search || '' } },
-          { tel: { contains: search || '' } },
-          { email: { contains: search || '' } },
-        ],
-      },
-      include: {
-        company_job_positions: {
-          include: {
-            jobPosition: true,
+    const where = {
+      OR: [
+        { name: { contains: search || '' } },
+        { tel: { contains: search || '' } },
+        { email: { contains: search || '' } },
+      ],
+    };
+
+    const [data, total] = await Promise.all([
+      this.prisma.company.findMany({
+        skip,
+        take: limit,
+        orderBy: sort
+          ? { [sort.replace('-', '')]: sort.startsWith('-') ? 'desc' : 'asc' }
+          : { id: 'asc' },
+        where,
+        include: {
+          company_job_positions: {
+            include: {
+              jobPosition: true,
+            },
           },
         },
-      },
-    });
+      }),
+      this.prisma.company.count({ where }),
+    ]);
 
-    const totalPages = Math.ceil(data.length / limit);
-
-    return {
+    return createPaginatedData(
       data,
-      meta: {
-        total: data.length,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages,
-      },
-    };
+      total,
+      Number(page),
+      Number(limit),
+    ) as PaginatedResult<Company>;
   }
 
   findOne(id: number): Promise<Company> {

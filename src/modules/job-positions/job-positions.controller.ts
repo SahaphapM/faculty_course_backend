@@ -15,6 +15,7 @@ import { JobPositionsService } from './job-positions.service';
 import { CreateJobPositionDto } from 'src/generated/nestjs-dto/create-jobPosition.dto';
 import { UpdateJobPositionDto } from 'src/generated/nestjs-dto/update-jobPosition.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller('job-positions')
 export class JobPositionsController {
@@ -32,6 +33,33 @@ export class JobPositionsController {
     }
   }
 
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (1-based)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Search term to filter job position name (contains)',
+  })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    description: 'Sort field, prefix with - for DESC (e.g. -id)',
+  })
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description: 'Explicit sort direction (asc|desc) overrides sort prefix',
+  })
   @Get()
   findAll(@Query() filter: BaseFilterParams) {
     return this.jobPositionsService.findAll(filter);

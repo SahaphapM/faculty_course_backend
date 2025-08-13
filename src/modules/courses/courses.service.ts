@@ -9,6 +9,7 @@ import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { Prisma } from '@prisma/client';
 import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class CourseService {
@@ -140,7 +141,12 @@ export class CourseService {
         this.prisma.course.findMany(options),
         this.prisma.course.count({ where: whereCondition }),
       ]);
-      return { data: courses, total };
+      return createPaginatedData(
+        courses,
+        total,
+        Number(page || defaultPage),
+        Number(limit || defaultLimit),
+      );
     } catch (error) {
       console.error('Error fetching courses:', error);
       throw new InternalServerErrorException('Failed to fetch courses');

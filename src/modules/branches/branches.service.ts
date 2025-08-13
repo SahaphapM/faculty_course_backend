@@ -8,6 +8,7 @@ import { branch, Prisma } from '@prisma/client'; // Import the Prisma-generated 
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 import { BranchFilterDto } from 'src/dto/filters/filter.branch.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class BranchesService {
@@ -68,16 +69,12 @@ export class BranchesService {
     };
 
     try {
-      if (pag) {
-        const [branches, total] = await Promise.all([
-          this.prisma.branch.findMany(options),
-          this.prisma.branch.count({ where: options.where }),
-        ]);
+      const [branches, total] = await Promise.all([
+        this.prisma.branch.findMany(options),
+        this.prisma.branch.count({ where: options.where }),
+      ]);
 
-        return { data: branches, total };
-      } else {
-        return await this.prisma.branch.findMany(options);
-      }
+      return createPaginatedData(branches, total, Number(page), Number(limit));
     } catch (error) {
       console.error('Error fetching branches:', error);
       throw new InternalServerErrorException('Failed to fetch branches');

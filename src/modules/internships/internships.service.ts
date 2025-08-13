@@ -3,6 +3,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInternshipWithStudentDto } from './dto/create.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { randomBytes } from 'crypto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class InternshipsService {
@@ -69,21 +70,11 @@ export class InternshipsService {
       },
     });
 
-    const total = Math.ceil(
-      await this.prisma.internship.count({
-        where,
-      }),
-    );
+    const total = await this.prisma.internship.count({
+      where,
+    });
 
-    return {
-      data,
-      meta: {
-        total: total,
-        page: Number(page),
-        limit: Number(limit),
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+    return createPaginatedData(data, total, Number(page), Number(limit));
   }
 
   findOne(id: number) {
@@ -214,7 +205,13 @@ export class InternshipsService {
                 code: true,
                 thaiName: true,
                 engName: true,
-                branch: { select: { thaiName: true, engName: true, faculty: { select: { thaiName: true, engName: true } } } },
+                branch: {
+                  select: {
+                    thaiName: true,
+                    engName: true,
+                    faculty: { select: { thaiName: true, engName: true } },
+                  },
+                },
               },
             },
             jobPosition: { select: { name: true } },
@@ -256,10 +253,18 @@ export class InternshipsService {
                 faculty: { select: { thaiName: true, engName: true } },
               },
             },
-            curriculum: { select: { thaiName: true, engName: true , level_descriptions: true} },
+            curriculum: {
+              select: {
+                thaiName: true,
+                engName: true,
+                level_descriptions: true,
+              },
+            },
             skill_assessments: {
               include: {
-                skill: { select: { thaiName: true, engName: true, domain: true } },
+                skill: {
+                  select: { thaiName: true, engName: true, domain: true },
+                },
               },
             },
           },

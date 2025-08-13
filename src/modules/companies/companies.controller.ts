@@ -11,7 +11,7 @@ import {
 import { CompaniesService } from './companies.service';
 import { CreateCompanyWithJobPositionsDto } from './dto/create.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 
@@ -27,6 +27,33 @@ export class CompaniesController {
   }
 
   @ApiBearerAuth()
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    type: Number,
+    description: 'Page number (1-based)',
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Items per page',
+  })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Search term to match name / tel / email',
+  })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    description: 'Sort field, prefix with - for DESC (e.g. -id)',
+  })
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    description: 'Explicit sort direction (asc|desc) overrides sort prefix',
+  })
   @Get()
   findAll(@Query() filter: BaseFilterParams) {
     return this.companiesService.findAll(filter);

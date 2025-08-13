@@ -10,6 +10,7 @@ import { UpdateSkillDto } from 'src/generated/nestjs-dto/update-skill.dto';
 import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
 import { Skill } from 'src/generated/nestjs-dto/skill.entity';
 import { SkillFilterDto } from 'src/dto/filters/filter.skill.dto';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class SkillsService {
@@ -93,7 +94,15 @@ export class SkillsService {
       this.prisma.skill.count({ where: options.where }),
     ]);
 
-    return pag ? { data: skills, total } : skills;
+    if (!pag) {
+      return skills;
+    }
+    return createPaginatedData(
+      skills,
+      total,
+      Number(page || defaultPage),
+      Number(limit || defaultLimit),
+    );
   }
 
   // Find skills by curriculum with pagination
@@ -128,7 +137,15 @@ export class SkillsService {
       this.prisma.skill.count({ where: options.where }),
     ]);
 
-    return pag ? { data: skills, total } : skills;
+    if (!pag) {
+      return skills;
+    }
+    return createPaginatedData(
+      skills,
+      total,
+      Number(page || defaultPage),
+      Number(limit || defaultLimit),
+    );
   }
 
   // Find skills by branch
@@ -191,7 +208,15 @@ export class SkillsService {
       this.prisma.skill.count({ where: options.where }),
     ]);
 
-    return pag ? { data: skills, total } : skills;
+    if (!pag) {
+      return skills;
+    }
+    return createPaginatedData(
+      skills,
+      total,
+      Number(page || defaultPage),
+      Number(limit || defaultLimit),
+    );
   }
 
   // Find skills by faculty
@@ -260,7 +285,15 @@ export class SkillsService {
       this.prisma.skill.count({ where: options.where }),
     ]);
 
-    return pag ? { data: skills, total } : skills;
+    if (!pag) {
+      return skills;
+    }
+    return createPaginatedData(
+      skills,
+      total,
+      Number(page || defaultPage),
+      Number(limit || defaultLimit),
+    );
   }
 
   // Find skills by subject
@@ -330,7 +363,15 @@ export class SkillsService {
       this.prisma.skill.count({ where: options.where }),
     ]);
 
-    return pag ? { data: skills, total } : skills;
+    if (!pag) {
+      return skills;
+    }
+    return createPaginatedData(
+      skills,
+      total,
+      Number(page || defaultPage),
+      Number(limit || defaultLimit),
+    );
   }
 
   // Helper method for consistent include structure
