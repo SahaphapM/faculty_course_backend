@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 import { Skill } from 'src/generated/nestjs-dto/skill.entity';
+import { SkillAssessment } from 'src/generated/nestjs-dto/skillAssessment.entity';
 import { Student } from 'src/generated/nestjs-dto/student.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
 
@@ -132,7 +133,6 @@ export class SkillCollectionsHelper {
     console.log('=== [DEBUG] Skill Tree ===');
     // console.log(result);
 
-
     // สร้าง/อัปเดต skill_assessment
     for (const rootSkill of rootSkills) {
       const rootNode = skillMap.get(rootSkill.id);
@@ -154,7 +154,6 @@ export class SkillCollectionsHelper {
           finalLevel: curriculumLevel,
         },
       });
-
     }
 
     console.log('=== [DEBUG] Skill Assessment Calculation Complete ===');
@@ -221,5 +220,78 @@ export class SkillCollectionsHelper {
     for (const child of node.subskills) {
       this.printTree(child, indent + '  ');
     }
+  }
+
+  async skillTree(
+    skillCollections: SkillCollectionLite[],
+    skill_assessments: SkillAssessment[],
+  ) {
+    const rootSkills = skill_assessments.map((sa) => sa.skill);
+
+    // เก็บ skillId ทั้งหมดจาก skillCollections
+    const skillIds = new Set<number>();
+    skillCollections.forEach((sc) => {
+      const skillId = sc.clo?.skill?.id;
+      if (skillId) skillIds.add(skillId);
+    });
+
+    const relatedSkills = await this.fetchParents(Array.from(skillIds));
+
+    // สร้าง skillLevelMap (เก็บ gained level ของทุก skill ที่ student มี)
+    const skillLevelMap = new Map<number, number>();
+    skillCollections.forEach((sc) => {
+      const skillId = sc.clo?.skill?.id;
+      if (skillId) {
+        const current = skillLevelMap.get(skillId) || 0;
+        skillLevelMap.set(skillId, Math.max(current, sc.gainedLevel));
+      }
+    });
+
+    // Build nodes พร้อม name/domain
+    const skillMap = new Map<number, SkillNode>();
+    for (const s of relatedSkills.values()) {
+      skillMap.set(s.id, {
+        id: s.id,
+        name: s.engName ?? null,
+        domain: s.domain ?? null,
+        parentId: s.parentId ?? null,
+        gained: skillLevelMap.get(s.id) ?? 0,
+        subskills: [],
+      });
+    }
+
+    // ทำเป็น tree
+    for (const node of skillMap.values()) {
+      if (node.parentId) {
+        const p = skillMap.get(node.parentId);
+        if (p) p.subskills.push(node);
+      }
+    }
+
+    // คำนวณ gained และจัดเรียง แล้วเตรียมผลลัพธ์สำหรับ return
+    const result: SkillNode[] = [];
+    for (const r of rootSkills) {
+      const rootNode = skillMap.get(r.id);
+      if (!rootNode) continue;
+      const g = this.fillGained(rootNode);
+      rootNode.gained = g ?? rootNode.gained ?? 0;
+      // this.sortTree(rootNode); // ออปชัน: ให้ “เรียง” ตามชื่อ
+      result.push(rootNode);
+      // this.printTree(rootNode);
+    }
+
+    console.log('=== [DEBUG] Skill Tree ===');
+    // console.log(result);
+
+    /// set skillmap gained level from skill_assessments
+    skillMap.forEach((node) => {
+      const sa = skill_assessments.find((sa) => sa.skillId === node.id);
+      if (sa) node.gained = sa.finalLevel;
+    });
+
+    console.log('=== [DEBUG] Skill Map ===');
+    // console.dir(skillMap, { depth: 10 });
+
+    return skillMap;
   }
 }

@@ -48,29 +48,25 @@ export class SkillCollectionsService {
       },
     });
 
-    const rootSkills = await this.prisma.skill.findMany({
-      where: { parent: null, curriculumId: student.curriculumId },
-      select: {
-        id: true,
-        parentId: true,
-        domain: true,
-        thaiName: true,
-        engName: true,
-      },
+    const skill_assessments = await this.prisma.skill_assessment.findMany({
+      where: { studentId: student.id },
+      include: {
+        skill:true
+      }
     });
 
     // 3. คำนวณ root skill assessment จาก leaf skill ของ student
     const skillTree =
-      await this.skillCollectionsHelper.syncStudentSkillAssessments(
-        student.id,
-        rootSkills,
+      await this.skillCollectionsHelper.skillTree(
         skillCollections,
+        skill_assessments
       );
 
     // filter root where gainedLevel > 0
     const filteredSkillTree = Array.from(skillTree.values()).filter(
       (skill) => skill.gained > 0,
     );
+
 
     // 12. แยก specific (hard) และ soft skill
     const specific = filteredSkillTree.filter(
@@ -85,6 +81,12 @@ export class SkillCollectionsService {
         r.domain === LearningDomain.Ethics,
     );
 
+    console.log('=== [DEBUG] Specific Skill Tree ===');
+    console.dir(specific, { depth: 10 });
+
+    console.log('=== [DEBUG] Soft Skill Tree ===');
+    console.dir(soft, { depth: 10 });
+    
     return { specific, soft };
   }
 
@@ -166,41 +168,45 @@ export class SkillCollectionsService {
       }
 
       // 2. ดึง skill_collections ของ student 
-      const skillCollections = await this.prisma.skill_collection.findMany({
-        where: { studentId: student.id},
-        include: {
-          clo: {
-           include: {
-            skill: true
-           }
-          },
-        },
+
+      const skillCollection = await this.prisma.skill_collection.findFirst({
+        where: { studentId: student.id, courseId: course.id, cloId: clo.id },
       });
 
-      // 3. หา skill_collection ของ student ที่มี cloId และ courseId 
-      let skillCollection = skillCollections.findIndex(
-        (sc) => sc.cloId === cloId && sc.courseId === course.id, 
-      );
+      
+      let skillCollections = [];
+
 
       // 4. compare skillCollection.gainedLevel with studentScore.gainedLevel
-      if (skillCollection > -1) {
-        if (skillCollections[skillCollection].gainedLevel !== studentScore.gainedLevel) {
+      if (skillCollection) {
+        if (skillCollection.gainedLevel !== studentScore.gainedLevel) {
           await this.prisma.skill_collection.update({
-            where: { id: skillCollections[skillCollection].id },
+            where: { id: skillCollection.id },
             data: {
               gainedLevel: studentScore.gainedLevel,
               passed: studentScore.gainedLevel >= clo.expectSkillLevel,
             },
           });
 
-          skillCollections[skillCollection].gainedLevel = studentScore.gainedLevel;
-          skillCollections[skillCollection].passed = studentScore.gainedLevel >= clo.expectSkillLevel;
+          skillCollection.gainedLevel = studentScore.gainedLevel;
+          skillCollection.passed = studentScore.gainedLevel >= clo.expectSkillLevel;
 
           this.skillCollectionsHelper.syncStudentSkillAssessments(
             student.id,
             rootSkills,
             skillCollections,
           );   
+
+          skillCollections = await this.prisma.skill_collection.findMany({
+            where: { studentId: student.id},
+            include: {
+              clo: {
+               include: {
+                skill: true
+               }
+              },
+            },
+          });
 
 
         }
@@ -229,6 +235,17 @@ export class SkillCollectionsService {
           rootSkills,
           skillCollections,
         );
+
+        skillCollections = await this.prisma.skill_collection.findMany({
+          where: { studentId: student.id},
+          include: {
+            clo: {
+             include: {
+              skill: true
+             }
+            },
+          },
+        });
       }
     }
 
