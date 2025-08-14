@@ -115,10 +115,10 @@ export class InstructorsService {
   }
 
   async updateCoordinatorToCurriculum(
-    instructorId: number,
+    instructorIds: number[],
     curriculumId: number,
   ) {
-    if (!instructorId) {
+    if (!instructorIds) {
       throw new BadRequestException('Instructor ID is required');
     }
 
@@ -128,19 +128,22 @@ export class InstructorsService {
       if (curriculumId <= 0) {
         await prisma.curriculum_coordinators.deleteMany({
           where: {
-            instructorId,
+            instructorId: {
+              in: instructorIds,
+            },
           },
         });
         return {
-          message: `Success: Removed Instructor ID ${instructorId} from all curriculums`,
+          message: `Success: Removed Instructor ID ${instructorIds} from all curriculums`,
         };
       }
 
-      // Insert/Update only if curriculumId is valid
-      await prisma.curriculum_coordinators.upsert({
-        where: {
-          instructorId_curriculumId: {
-            instructorId,
+      for (const instructorId of instructorIds) {
+        // Insert/Update only if curriculumId is valid
+        await prisma.curriculum_coordinators.upsert({
+          where: {
+            instructorId_curriculumId: {
+              instructorId,
             curriculumId,
           },
         },
@@ -150,9 +153,9 @@ export class InstructorsService {
         },
         update: {}, // No update needed, just ensure existence
       });
-
+    }
       return {
-        message: `Success: Updated Instructor ID ${instructorId} to Curriculum ID ${curriculumId}`,
+        message: `Success: Updated Instructor ID ${instructorIds} to Curriculum ID ${curriculumId}`,
       };
     });
   }

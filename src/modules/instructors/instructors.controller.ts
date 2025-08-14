@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { InstructorsService } from './instructors.service';
 
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.dto';
 import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -33,13 +33,14 @@ export class InstructorsController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Post('assign-coordinator')
+  @ApiBody({ type: [Number] })
   @HttpCode(HttpStatus.OK)
   selectInstructorToCurriculum(
     @Query('curriculumId') curriculumId: string,
-    @Query('instructorId') instructorId: string,
+    @Body() instructorIds: number[],
   ) {
     return this.insService.updateCoordinatorToCurriculum(
-      +instructorId,
+      instructorIds,
       +curriculumId,
     );
   }
