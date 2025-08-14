@@ -8,6 +8,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 type SkillFull = {
   id: number;
   engName: string | null;
+  thaiName: string | null;
   domain: string | null;
   parentId: number | null;
 };
@@ -77,6 +78,7 @@ export class SkillCollectionsHelper {
       if (!relatedSkills.has(r.id)) {
         relatedSkills.set(r.id, {
           id: r.id,
+          thaiName: r.thaiName ?? null,
           engName: r.engName ?? null,
           domain: r.domain ?? null,
           parentId: r.parentId ?? null,
@@ -99,7 +101,7 @@ export class SkillCollectionsHelper {
     for (const s of relatedSkills.values()) {
       skillMap.set(s.id, {
         id: s.id,
-        name: s.engName ?? null,
+        name: s.thaiName ?? null,
         domain: s.domain ?? null,
         parentId: s.parentId ?? null,
         gained: skillLevelMap.get(s.id) ?? 0,
@@ -252,7 +254,7 @@ export class SkillCollectionsHelper {
     for (const s of relatedSkills.values()) {
       skillMap.set(s.id, {
         id: s.id,
-        name: s.engName ?? null,
+        name: s.thaiName ?? null,
         domain: s.domain ?? null,
         parentId: s.parentId ?? null,
         gained: skillLevelMap.get(s.id) ?? 0,
@@ -280,18 +282,40 @@ export class SkillCollectionsHelper {
       // this.printTree(rootNode);
     }
 
-    console.log('=== [DEBUG] Skill Tree ===');
-    // console.log(result);
-
-    /// set skillmap gained level from skill_assessments
-    skillMap.forEach((node) => {
-      const sa = skill_assessments.find((sa) => sa.skillId === node.id);
-      if (sa) node.gained = sa.finalLevel;
-    });
+    for( const sa of skill_assessments){
+      if(!skillMap.has(sa.skillId) && (this.getLevelFromSkillAssessment(sa) !== null)) {
+        skillMap.set(sa.skillId, {
+          id: sa.id,
+          name: sa.skill.thaiName,
+          domain: sa.skill.domain,
+          parentId: sa.skill.parentId,
+          gained: this.getLevelFromSkillAssessment(sa),
+          subskills: [],
+        })
+      }
+      const node = skillMap.get(sa.skillId);
+      if(node){
+        node.id = sa.id;
+        node.gained = this.getLevelFromSkillAssessment(sa) || node.gained;
+      }
+    }
 
     console.log('=== [DEBUG] Skill Map ===');
     // console.dir(skillMap, { depth: 10 });
 
     return skillMap;
+  }
+
+  getLevelFromSkillAssessment(sa: SkillAssessment) {
+    if(sa.finalLevel && sa.finalLevel > 0){
+      return sa.finalLevel;
+    }
+    if(sa.companyLevel && sa.companyLevel > 0){
+      return sa.companyLevel;
+    }
+    if(sa.curriculumLevel && sa.curriculumLevel > 0){
+      return sa.curriculumLevel;
+    }
+    return null;
   }
 }
