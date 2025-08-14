@@ -6,3 +6,5 @@ export enum SubjectType {
   FreeElective = 'เสรี',
   CWIE = 'CWIE',
 }
+
+export const SubjectTypeValues = Object.values(SubjectType);
