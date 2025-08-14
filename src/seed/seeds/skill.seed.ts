@@ -13,26 +13,36 @@ export async function createSkills(prisma: PrismaClient) {
   
   const skillsData = await loadData('skills.json');
   
-  for (const skillData of skillsData) {
-    try {
-      await prisma.skill.create({
-        data: {
-          thaiName: skillData.thaiName,
-          engName: skillData.engName,
-          thaiDescription: skillData.thaiDescription,
-          engDescription: skillData.engDescription,
-          domain: skillData.domain,
-          curriculumId: 1, // Default curriculum ID - ต้องหา curriculum ที่มีอยู่จริง
-        },
-      });
-    } catch (error) {
-      if (error.code === 'P2002') {
-        console.log(`⚠️  Skill "${skillData.thaiName}" already exists, skipping...`);
-      } else {
-        console.error(`❌ Error creating skill "${skillData.thaiName}":`, error.message);
-      }
+  for (const skill of skillsData) {
+    await createSKilltree(skill, prisma);
+  }
+
+  console.log('✅ Skills created successfully');
+}
+
+
+async function createSKilltree(skill : any, prisma: PrismaClient, parentSkillId?: number){
+  try {
+  const skillSaved = await prisma.skill.create({
+    data: {
+      thaiName: skill.thaiName,
+      engName: skill.engName,
+      thaiDescription: skill.thaiDescription,
+      engDescription: skill.engDescription,
+      domain: skill.domain,
+      curriculumId: 1, // Default curriculum ID - ต้องหา curriculum ที่มีอยู่จริง
+      parentId: parentSkillId
+    },
+  });
+  if(skill.subs){
+    for (const sub of skill.subs) {
+      await createSKilltree(sub, prisma, skillSaved.id);
+    }
+  }  } catch (error) {
+    if (error.code === 'P2002') {
+      console.log(`⚠️  Skill "${skill.thaiName}" already exists, skipping...`);
+    } else {
+      console.error(`❌ Error creating skill "${skill.thaiName}":`, error.message);
     }
   }
-  
-  console.log('✅ Skills created successfully');
 }

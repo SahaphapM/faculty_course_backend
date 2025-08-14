@@ -18,14 +18,164 @@
     "engName": "Web Application Development",
     "thaiDescription": "ความสามารถในการพัฒนาเว็บแอปพลิเคชันสมัยใหม่",
     "engDescription": "Ability to develop modern web applications",
-    "domain": "ทักษะ"
+    "domain": "ทักษะ",
+    "subs": [
+      {
+        "thaiName": "การเขียนโปรแกรม",
+        "engName": "Programming",
+        "thaiDescription": "ความสามารถในการเขียนโปรแกรมคอมพิวเตอร์ในภาษาต่างๆ",
+        "engDescription": "Ability to write computer programs in various programming languages",
+        "domain": "ทักษะ",
+        "subs": [
+          {
+            "thaiName": "การพัฒนา Frontend",
+            "engName": "Frontend Development",
+            "thaiDescription": "การพัฒนาส่วนติดต่อผู้ใช้ของเว็บแอปพลิเคชัน",
+            "engDescription": "Development of the user interface for web applications",
+            "domain": "ทักษะ",
+            "subs": [
+              {
+                "thaiName": "การใช้ HTML และ CSS",
+                "engName": "Using HTML and CSS",
+                "thaiDescription": "ความสามารถในการสร้างและตกแต่งหน้าเว็บ",
+                "engDescription": "Ability to create and style web pages",
+                "domain": "ทักษะ"
+              },
+              {
+                "thaiName": "การใช้ JavaScript",
+                "engName": "Using JavaScript",
+                "thaiDescription": "ความสามารถในการเขียนสคริปต์ฝั่งผู้ใช้",
+                "engDescription": "Ability to write client-side scripts",
+                "domain": "ทักษะ"
+              }
+            ]
+          },
+          {
+            "thaiName": "การพัฒนา Backend",
+            "engName": "Backend Development",
+            "thaiDescription": "การพัฒนาส่วนประมวลผลของเว็บแอปพลิเคชัน",
+            "engDescription": "Development of the server-side logic of web applications",
+            "domain": "ทักษะ",
+            "subs": [
+              {
+                "thaiName": "การสร้าง API",
+                "engName": "Creating APIs",
+                "thaiDescription": "ความสามารถในการออกแบบและสร้าง API",
+                "engDescription": "Ability to design and build APIs",
+                "domain": "ทักษะ"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "thaiName": "การออกแบบประสบการณ์ผู้ใช้",
+        "engName": "User Experience Design",
+        "thaiDescription": "ความสามารถในการออกแบบให้ผู้ใช้ใช้งานง่ายและพึงพอใจ",
+        "engDescription": "Ability to design easy and satisfying user experiences",
+        "domain": "ทักษะ",
+        "subs": [
+          {
+            "thaiName": "การออกแบบอินเทอร์เฟซผู้ใช้",
+            "engName": "User Interface Design",
+            "thaiDescription": "การออกแบบหน้าตาและองค์ประกอบการใช้งาน",
+            "engDescription": "Designing the look and interactive components",
+            "domain": "ทักษะ",
+            "subs": [
+              {
+                "thaiName": "การเลือกสีและฟอนต์",
+                "engName": "Choosing Colors and Fonts",
+                "thaiDescription": "ความสามารถในการเลือกสีและฟอนต์ให้เหมาะสม",
+                "engDescription": "Ability to choose appropriate colors and fonts",
+                "domain": "ทักษะ"
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
-    "thaiName": "การวิเคราะห์และออกแบบระบบ",
-    "engName": "System Analysis and Design",
-    "thaiDescription": "ความสามารถในการวิเคราะห์และออกแบบระบบสารสนเทศ",
-    "engDescription": "Ability to analyze and design information systems",
-    "domain": "ทักษะ"
+    "thaiName": "การวิเคราะห์ข้อมูล",
+    "engName": "Data Analysis",
+    "thaiDescription": "ความสามารถในการรวบรวม จัดการ และตีความข้อมูลเพื่อใช้ในการตัดสินใจ",
+    "engDescription": "Ability to collect, manage, and interpret data for decision-making",
+    "domain": "ทักษะ",
+    "subs": [
+      {
+        "thaiName": "การเตรียมข้อมูล",
+        "engName": "Data Preparation",
+        "thaiDescription": "การทำความสะอาดและจัดรูปแบบข้อมูลเพื่อให้พร้อมใช้งาน",
+        "engDescription": "Cleaning and formatting data to make it ready for use",
+        "domain": "ทักษะ",
+        "subs": [
+          {
+            "thaiName": "การล้างข้อมูล",
+            "engName": "Data Cleaning",
+            "thaiDescription": "การลบหรือแก้ไขข้อมูลที่ไม่ถูกต้องหรือขาดหาย",
+            "engDescription": "Removing or correcting inaccurate or missing data",
+            "domain": "ทักษะ",
+            "subs": [
+              {
+                "thaiName": "การจัดการค่าที่หายไป",
+                "engName": "Handling Missing Values",
+                "thaiDescription": "การจัดการกับข้อมูลที่มีค่าเว้นว่างหรือไม่มีข้อมูล",
+                "engDescription": "Dealing with empty or missing data fields",
+                "domain": "ทักษะ"
+              },
+              {
+                "thaiName": "การแก้ไขข้อมูลผิดรูปแบบ",
+                "engName": "Fixing Data Format Errors",
+                "thaiDescription": "การปรับข้อมูลให้มีรูปแบบที่ถูกต้อง",
+                "engDescription": "Adjusting data to the correct format",
+                "domain": "ทักษะ"
+              }
+            ]
+          },
+          {
+            "thaiName": "การรวมข้อมูล",
+            "engName": "Data Integration",
+            "thaiDescription": "การรวมข้อมูลจากหลายแหล่งให้อยู่ในชุดเดียว",
+            "engDescription": "Combining data from multiple sources into a single dataset",
+            "domain": "ทักษะ",
+            "subs": [
+              {
+                "thaiName": "การเชื่อมตารางข้อมูล",
+                "engName": "Joining Data Tables",
+                "thaiDescription": "การรวมข้อมูลจากหลายตารางโดยใช้คีย์ร่วม",
+                "engDescription": "Merging data from multiple tables using common keys",
+                "domain": "ทักษะ"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "thaiName": "การวิเคราะห์เชิงสำรวจ",
+        "engName": "Exploratory Data Analysis",
+        "thaiDescription": "การสำรวจข้อมูลเพื่อค้นหารูปแบบ แนวโน้ม และความผิดปกติ",
+        "engDescription": "Exploring data to find patterns, trends, and anomalies",
+        "domain": "ทักษะ",
+        "subs": [
+          {
+            "thaiName": "การใช้สถิติเบื้องต้น",
+            "engName": "Basic Statistics",
+            "thaiDescription": "การใช้สถิติพื้นฐานในการสรุปข้อมูล",
+            "engDescription": "Using basic statistics to summarize data",
+            "domain": "ทักษะ",
+            "subs": [
+              {
+                "thaiName": "การคำนวณค่าเฉลี่ยและมัธยฐาน",
+                "engName": "Calculating Mean and Median",
+                "thaiDescription": "การหาค่าเฉลี่ยและค่ากลางของข้อมูล",
+                "engDescription": "Finding the mean and median values of data",
+                "domain": "ทักษะ"
+              }
+            ]
+          }
+        ]
+      }
+    ]
   },
   {
     "thaiName": "การทดสอบซอฟต์แวร์",

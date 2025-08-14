@@ -116,7 +116,7 @@ export class SeedService {
     // minimal data fetches
     const students = await this.prisma.student.findMany({ select: { code: true } });
     const course = await this.prisma.course.findFirst({ select: { id: true, subjectId: true } }); 
-    const clos = await this.prisma.clo.findMany({ select: { id: true, subjectId: true, expectSkillLevel: true } });
+    const clos = await this.prisma.clo.findMany({ select: { id: true, subjectId: true, expectSkillLevel: true, skillId: true } });
 
       const relatedClos = clos.filter((c) => c.subjectId === course.subjectId);
       for (const clo of relatedClos) {
