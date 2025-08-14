@@ -19,6 +19,9 @@ import { CreateLevelDescriptionDto } from 'src/generated/nestjs-dto/create-level
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
 
+// types ช่วยอ่านง่ายขึ้น
+type TargetLevel = 'on' | 'above' | 'below' | 'all';
+
 @Injectable()
 export class CurriculumsService {
   constructor(private prisma: PrismaService) {}
@@ -276,6 +279,8 @@ export class CurriculumsService {
     return generateSkillSummary(skills);
   }
 
+  
+
   async findStudentsBySkillLevel(
     skillId: number,
     targetLevel: 'on' | 'above' | 'below' | 'all',
@@ -285,177 +290,141 @@ export class CurriculumsService {
     search?: string,
   ) {
 
-    const take = Math.max(1, Number(limit) || 10);         // <-- แปลงเป็น number
-    const skip = Math.max(0, (Number(page) - 1) * take || 0);
-    
-    const offset = (page - 1) * limit;
 
-    // 1. Find all descendant skills (including the root skill itself)
-    const allSkills = await this.findAllDescendants(skillId);
-    const skillIds = allSkills.map((skill) => skill.id);
+    const take = Math.max(1, Number(limit) || 10);
+    const currPage = Math.max(1, Number(page) || 1);
+    const skip = (currPage - 1) * take;
 
-    // 2. Find all CLOs related to these skills
-    const closData = await this.prisma.clo.findMany({
-      where: {
-        skillId: { in: skillIds },
-      },
-      select: {
-        id: true,
-        expectSkillLevel: true,
-        skill: {
-          select: {
-            id: true,
-            thaiName: true,
-            engName: true,
-            domain: true,
-          },
-        },
-      },
-    });
-    const cloIds = closData.map((clo) => clo.id);
+       // STEP 1
+       const skillIds = await this.findAllDescendants(skillId);
 
-    if (cloIds.length === 0) {
-      return createPaginatedData([], 0, Number(page), Number(limit));
+       // STEP 2: CLO ของ skillIds
+       const clos = await this.prisma.clo.findMany({
+         where: { skillId: { in: skillIds } },
+         select: { id: true, expectSkillLevel: true, skillId: true, name: true },
+       });
+       const cloIds = clos.map((c) => c.id);
+       if (cloIds.length === 0) {
+         return createPaginatedData([], 0, currPage, take);
+       }
+
+    // STEP 3: เงื่อนไข skill_collection แบบ per-CLO
+    // - กรณี 'all' = ไม่เทียบ expected; แค่ต้อง match cloIds และ gainedLevel มีค่า (ตัวอย่างกำหนด 1..3)
+    // - กรณีอื่น ๆ: OR ของรายการ (cloId == X AND gainedLevel <|=|> expectedX)
+    let whereSC: any;
+    if (targetLevel === 'all') {
+      whereSC = {
+        cloId: { in: cloIds },
+        gainedLevel: { in: [1, 2, 3] }, // ปรับตามธุรกิจคุณ
+      };
+    } else {
+      const orClauses = clos
+        .map((c) => {
+          const cmp = this.buildLevelComparator(targetLevel, c.expectSkillLevel);
+          if (!cmp) return null; // ไม่มี expected ข้าม
+          return { AND: [{ cloId: c.id }, { gainedLevel: cmp }] };
+        })
+        .filter(Boolean) as any[];
+      // ถ้าไม่มี CLO ไหนมี expected เลย ก็ให้ไม่มีผลลัพธ์
+      if (orClauses.length === 0) {
+        return createPaginatedData([], 0, currPage, take);
+      }
+      whereSC = { OR: orClauses };
     }
 
-    // 3. Build student filter for yearCode and search
-    const studentWhere: any = {};
-    if (yearCode) {
-      studentWhere.code = { startsWith: yearCode };
-    }
-    if (search) {
-      studentWhere.OR = [
-        { thaiName: { contains: search } },
-        { engName: { contains: search } },
-        { code: { contains: search } },
-      ];
-    }
-    // 4. Build the main query conditions
-    const whereClause: any = {
-      cloId: { in: cloIds },
-      student: { is: studentWhere },   // <-- ถ้าเป็น relation แบบ to-one ควรใช้ is:
-    };
-
-    if (targetLevel !== 'all') {
-      // For non-'all' cases, we need to handle each CLO's expected level separately
-      const orConditions = closData.map((clo) => {
-        let levelCondition: any;
-        if (targetLevel === 'on') {
-          levelCondition = { equals: clo.expectSkillLevel };
-        } else if (targetLevel === 'above') {
-          levelCondition = { gt: clo.expectSkillLevel };
-        } else if (targetLevel === 'below') {
-          levelCondition = { lt: clo.expectSkillLevel };
-        }
-
-        return {
-          AND: [{ cloId: clo.id }, { gainedLevel: levelCondition }],
+        // STEP 4: เงื่อนไข student (ปี/ค้นหา) + ต้องมี skill_collections ตรง whereSC
+        const studentWhere: Prisma.studentWhereInput = {
+          ...(yearCode
+            ? { code: { startsWith: yearCode } } // ปรับตามรูปแบบรหัสนักศึกษา
+            : {}),
+          ...(search
+            ? {
+                OR: [
+                  { thaiName: { contains: search } },
+                  { engName: { contains: search } },
+                  { code: { contains: search } },
+                ],
+              }
+            : {}),
+          skill_collections: { some: whereSC },
         };
-      });
 
-      whereClause.OR = orConditions;
-    }
-
-    // 5. Get total count for pagination
-    const total = await this.prisma.skill_collection.count({
-      where: whereClause,
-    });
-
-    // 6. Get paginated results with students as main objects
-    const results = await this.prisma.student.findMany({
-      where: {
-        id: {
-          in: await this.prisma.skill_collection
-            .findMany({
-              where: whereClause,
-              select: { studentId: true },
-              distinct: ['studentId'],
-            })
-            .then((sc) => sc.map((s) => s.studentId)),
-        },
-      },
+   // STEP 5: นับ total และดึงหน้าที่ขอ
+   const [total, students] = await this.prisma.$transaction([
+    this.prisma.student.count({ where: studentWhere }),
+    this.prisma.student.findMany({
+      where: studentWhere,
       include: {
         skill_collections: {
-          where: whereClause,
+          where: { cloId: { in: cloIds } }, // เอาเฉพาะ clo ที่เกี่ยวข้องชุดนี้
           select: {
+            id: true,
             studentId: true,
-            gainedLevel: true,
             cloId: true,
+            gainedLevel: true,
+            clo: { select: { id: true, expectSkillLevel: true, name: true, skill: true } },
           },
-          // include: {
-          //   clo: true,
-          // },
         },
       },
-      take,
+      orderBy: { id: 'asc' }, // ปรับได้ตามต้องการ
       skip,
-    });
+      take,
+    }),
+  ]);
 
-    // map closData from first query to skill_collections
-    const studentWithClo = results.map((student) => {
-      const skillCollections = student.skill_collections.map((sc) => {
-        const clo = closData.find((clo) => clo.id === sc.cloId);
-        return {
-          ...sc,
-          clo,
-        };
-      });
-      return {
-        ...student,
-        skill_collections: skillCollections,
-      };
-    });
+      // (ถ้าต้องการ) สามารถคำนวน flag เทียบ expected/gained ต่อรายการให้ฝั่ง service เลย
+      // const mapped = students.map((st) => ({
+      //   ...st,
+      //   skill_collections: st.skill_collections.map((sc) => {
+      //     const expected = sc.clo?.expectSkillLevel ?? null;
+      //     const gained = sc.gainedLevel;
+      //     let compare: 'below' | 'on' | 'above' | null = null;
+      //     if (expected == null) compare = null;
+      //     else if (gained < expected) compare = 'below';
+      //     else if (gained === expected) compare = 'on';
+      //     else compare = 'above';
+      //     return { ...sc, expected, compare };
+      //   }),
+      // }));
 
-    // 7. Return formatted response
-    return createPaginatedData(
-      studentWithClo,
-      total,
-      Number(page),
-      Number(limit),
-    );
+      console.dir(students, { depth: 10 });
+
+
+    // // STEP 6: ส่งกลับแบบแบ่งหน้า
+    // return createPaginatedData(mapped, total, currPage, take);
   }
 
-  private async findAllDescendants(
-    rootSkillId: number,
-  ): Promise<{ id: number }[]> {
-    const result: { id: number }[] = [];
-    const queue: number[] = [rootSkillId];
-    const visited = new Set<number>();
+   // STEP 1: หา descendant skills ทีละชั้น (batch)
+   private async findAllDescendants(rootSkillId: number): Promise<number[]> {
+    const result: number[] = [];
+    let frontier: number[] = [rootSkillId];
+    const seen = new Set<number>();
 
-    while (queue.length > 0) {
-      const currentId = queue.shift();
+    while (frontier.length) {
+      // เก็บชั้นนี้
+      const current = frontier.filter((id) => !seen.has(id));
+      current.forEach((id) => seen.add(id));
+      result.push(...current);
 
-      // Skip if already visited
-      if (visited.has(currentId)) continue;
-
-      visited.add(currentId);
-
-      // Get the current skill
-      const currentSkill = await this.prisma.skill.findUnique({
-        where: { id: currentId },
+      // หา children ของ “ชั้น” นี้ในคำสั่งเดียว
+      const children = await this.prisma.skill.findMany({
+        where: { parentId: { in: current } },
         select: { id: true },
       });
-
-      if (currentSkill) {
-        result.push(currentSkill);
-
-        // Find all direct children of the current skill
-        const children = await this.prisma.skill.findMany({
-          where: { parentId: currentId },
-          select: { id: true },
-        });
-
-        // Add children to the queue for processing
-        for (const child of children) {
-          if (!visited.has(child.id)) {
-            queue.push(child.id);
-          }
-        }
-      }
+      frontier = children.map((c) => c.id);
     }
-
     return result;
   }
+
+    // ตัวช่วยสร้าง comparator สำหรับ gainedLevel เทียบกับ expected
+    private buildLevelComparator(target: TargetLevel, expected: number | null | undefined) {
+      if (target === 'all') return undefined;      // ไม่บังคับ comparator
+      if (expected == null) return undefined;      // CLO นี้ไม่มี expected ข้ามไป
+  
+      if (target === 'on')    return { equals: expected };
+      if (target === 'above') return { gt: expected };
+      if (target === 'below') return { lt: expected };
+    }
 
   // สมมติว่ามี helper ชื่อ createPaginatedData แบบเดียวกับตัวอย่าง findAll()
 
