@@ -16,6 +16,7 @@ import jwtConfig from './config/jwt.config';
 import { RefreshJwtStrategy } from './strategies/refresh.strategy';
 import { JwtModule } from '@nestjs/jwt';
 import { PrismaModule } from 'src/prisma/prisma.module';
+import { StudentsModule } from 'src/modules/students/students.module';
 
 @Module({
   imports: [
@@ -24,8 +25,9 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     ConfigModule.forFeature(refreshJwtConfig),
     ConfigModule.forFeature(googleOauthConfig),
     UsersModule,
+    StudentsModule,
     PassportModule,
-    JwtModule.registerAsync(jwtConfig.asProvider()),
+    JwtModule.registerAsync(jwtConfig.asProvider()), // Register JWT module with async config
   ],
   controllers: [AuthController],
   providers: [

@@ -7,6 +7,8 @@ import refreshJwtConfig from './config/refresh-jwt.config';
 import { ConfigType } from '@nestjs/config';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { LoginDto } from 'src/dto/login.dto';
+import { UserRole } from 'src/enums/role.enum';
+import { StudentsService } from 'src/modules/students/students.service';
 
 export interface JwtPayload {
   id: number;
@@ -26,6 +28,7 @@ const INVALID_REFRESH_TOKEN_MESSAGE = 'Invalid Refresh Token';
 export class AuthService {
   constructor(
     private readonly usersService: UserService,
+    private readonly studentService: StudentsService, // Injected directly from StudentsModule
     private readonly jwtService: JwtService,
     @Inject(refreshJwtConfig.KEY)
     private readonly refreshTokenConfig: ConfigType<typeof refreshJwtConfig>,
@@ -61,10 +64,8 @@ export class AuthService {
     const user = await this.validateUserCredentials(dto);
 
     // Then generate tokens
-    const { accessToken, refreshToken } = await this.generateTokens(
-      user.id,
-    );
-  const hashedRefreshToken = await bcryptHash(refreshToken);
+    const { accessToken, refreshToken } = await this.generateTokens(user.id);
+    const hashedRefreshToken = await bcryptHash(refreshToken);
 
     // Update hashed refresh token in the database
     await this.usersService.updateHashedRefreshToken(
@@ -90,10 +91,8 @@ export class AuthService {
   }
 
   async refreshToken(userId: number) {
-    const { accessToken, refreshToken } = await this.generateTokens(
-      userId,
-    );
-  const hashedRefreshToken = await bcryptHash(refreshToken);
+    const { accessToken, refreshToken } = await this.generateTokens(userId);
+    const hashedRefreshToken = await bcryptHash(refreshToken);
     await this.usersService.updateHashedRefreshToken(
       userId,
       hashedRefreshToken,
@@ -111,8 +110,10 @@ export class AuthService {
     if (!user?.hashedRefreshToken)
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
 
-
-    const refreshTokenMatches = await bcryptCompare(refreshToken, user.hashedRefreshToken);
+    const refreshTokenMatches = await bcryptCompare(
+      refreshToken,
+      user.hashedRefreshToken,
+    );
     if (!refreshTokenMatches)
       throw new UnauthorizedException(INVALID_REFRESH_TOKEN_MESSAGE);
 
@@ -131,29 +132,41 @@ export class AuthService {
 
   async validateGoogleUser(
     googleUser: CreateUserDto,
-  _name: string,
+    _name: string,
   ): Promise<PayloadUser> {
     const user = await this.usersService.findByEmail(googleUser.email);
     if (user) {
       // If user exists, generate tokens and return them
-      const { accessToken, refreshToken } = await this.generateTokens(
-        user.id,
-      );
+      const { accessToken, refreshToken } = await this.generateTokens(user.id);
       return {
         ...user,
         accessToken,
         refreshToken,
       };
     } else {
-      // If user does not exist, create a new user with default role and generate tokens
-      const userWithDefaultRole = {
+      const name = googleUser.email.split('@')[0];
+      const isNumeric = /^\d+$/.test(name);
+
+      // Create the user first
+      const newUser = await this.usersService.create({
         ...googleUser,
-        role: 'Student', // Default role for Google OAuth users
-      };
-      const newUser = await this.usersService.create(userWithDefaultRole);
+        role: isNumeric ? UserRole.Student : UserRole.Instructor,
+      });
+
+      if (isNumeric) {
+        // If student, create student record and link to user
+        const student = await this.studentService.create({
+          code: name,
+          userId: newUser.id,
+        });
+        // Optionally update the user with studentId
+        await this.usersService.update(newUser.id, { studentId: student.id });
+      }
+
       const { accessToken, refreshToken } = await this.generateTokens(
         newUser.id,
       );
+
       return {
         ...newUser,
         accessToken,
