@@ -4,3 +4,5 @@ export enum UserRole {
   Instructor = 'Instructor',
   Student = 'Student',
 }
+
+export const UserRoleValues = Object.values(UserRole);

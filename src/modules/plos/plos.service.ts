@@ -61,6 +61,8 @@ export class PloService {
       select: {
         id: true,
         name: true,
+        thaiDescription: true,
+        engDescription: true,
       },
       where: { curriculumId },
     } as Prisma.ploFindManyArgs;

@@ -51,7 +51,7 @@ export class SkillsService {
         id: true,
         thaiName: true,
         engName: true,
-        subs: true,
+        domain: true
       },
       where: {
         curriculumId,

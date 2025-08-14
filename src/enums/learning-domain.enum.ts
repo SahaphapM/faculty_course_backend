@@ -4,3 +4,5 @@ export enum LearningDomain {
   Cognitive = 'ความรู้', // hard
   Ethics = 'จริยธรรม', // soft
 }
+
+export const LearningDomainValues = Object.values(LearningDomain);
