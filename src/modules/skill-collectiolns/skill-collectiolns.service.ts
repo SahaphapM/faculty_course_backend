@@ -38,35 +38,6 @@ export class SkillCollectionsService {
       throw new NotFoundException(`Student with code ${studentCode} not found`);
     }
 
-    // 1. ดึง skill_assessment ที่เกี่ยวข้องกับ student และมีอย่างน้อยหนึ่ง level > 0
-    const assessments = await this.prisma.skill_assessment.findMany({
-      where: {
-        studentId: student.id,
-        // OR: [
-        //   { curriculumLevel: { gt: 0 } },
-        //   { companyLevel: { gt: 0 } },
-        //   { finalLevel: { gt: 0 } },
-        // ],
-      },
-      select: {
-        id: true,
-        skillId: true,
-        curriculumLevel: true,
-        companyLevel: true,
-        finalLevel: true,
-        skill: {
-          select: {
-            id: true,
-            parentId: true,
-            engName: true,
-            domain: true,
-          },
-        },
-      },
-    });
-
-    if (!assessments.length) return { specific: [], soft: [] };
-
     // 2. ดึง skill_collection ของ student (สำหรับ subskills)
     const skillCollections = await this.prisma.skill_collection.findMany({
       where: { studentId: student.id },
@@ -143,8 +114,7 @@ export class SkillCollectionsService {
     courseId: number,
     cloId: number,
     studentScoreList: StudentScoreList[],
-  ): Promise<SkillCollection[]> {
-    console.log('Import Path 2', courseId, cloId, studentScoreList);
+  ){
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
       select: {
@@ -152,31 +122,34 @@ export class SkillCollectionsService {
         subjectId: true,
         subject: {
           select: {
-            curriculum: {
-              select: {
-                id: true,
-              },
-            },
+            curriculumId: true,
           },
         },
       },
     });
 
-    if (!course) {
-      throw new NotFoundException(`Course with ID ${courseId} not found`);
+    if (!course || !course.subjectId) {
+      throw new NotFoundException(`Course with ID ${courseId} not found` || `Subject with ID ${course.subjectId} not found`);
     }
 
-    const clo = await this.cloService.findOne(cloId);
-
-    if (!course.subjectId) {
-      throw new BadRequestException(
-        'Course must have a subject before importing skill collections',
-      );
-    }
+    const clo = await this.prisma.clo.findUnique({
+      where: { id: cloId },
+    });
 
     if (!clo) {
       throw new NotFoundException(`CLO with ID ${cloId} not found`);
     }
+
+    const rootSkills = await this.prisma.skill.findMany({
+      where: { parent: null, curriculumId: course.subject.curriculumId },
+      select: {
+        id: true,
+        parentId: true,
+        domain: true,
+        thaiName: true,
+        engName: true,
+      },
+    });
 
     const skillCollections = [];
 
@@ -192,25 +165,47 @@ export class SkillCollectionsService {
         });
       }
 
-      // 2. สร้างหรืออัปเดต skill_collection
-      let skillCollection = await this.prisma.skill_collection.findFirst({
-        where: {
-          studentId: student.id,
-          courseId: course.id,
-          cloId: clo.id,
+      // 2. ดึง skill_collections ของ student 
+      const skillCollections = await this.prisma.skill_collection.findMany({
+        where: { studentId: student.id},
+        include: {
+          clo: {
+           include: {
+            skill: true
+           }
+          },
         },
       });
 
-      if (skillCollection) {
-        skillCollection = await this.prisma.skill_collection.update({
-          where: { id: skillCollection.id },
-          data: {
-            gainedLevel: studentScore.gainedLevel,
-            passed: studentScore.gainedLevel >= clo.expectSkillLevel,
-          },
-        });
+      // 3. หา skill_collection ของ student ที่มี cloId และ courseId 
+      let skillCollection = skillCollections.findIndex(
+        (sc) => sc.cloId === cloId && sc.courseId === course.id, 
+      );
+
+      // 4. compare skillCollection.gainedLevel with studentScore.gainedLevel
+      if (skillCollection > -1) {
+        if (skillCollections[skillCollection].gainedLevel !== studentScore.gainedLevel) {
+          await this.prisma.skill_collection.update({
+            where: { id: skillCollections[skillCollection].id },
+            data: {
+              gainedLevel: studentScore.gainedLevel,
+              passed: studentScore.gainedLevel >= clo.expectSkillLevel,
+            },
+          });
+
+          skillCollections[skillCollection].gainedLevel = studentScore.gainedLevel;
+          skillCollections[skillCollection].passed = studentScore.gainedLevel >= clo.expectSkillLevel;
+
+          this.skillCollectionsHelper.syncStudentSkillAssessments(
+            student.id,
+            rootSkills,
+            skillCollections,
+          );   
+
+
+        }
       } else {
-        skillCollection = await this.prisma.skill_collection.create({
+        const newSkillCollection = await this.prisma.skill_collection.create({
           data: {
             studentId: student.id,
             courseId: course.id,
@@ -218,13 +213,25 @@ export class SkillCollectionsService {
             gainedLevel: studentScore.gainedLevel,
             passed: studentScore.gainedLevel >= clo.expectSkillLevel,
           },
+          include: {
+            clo: {
+              include: {
+                skill: true
+              }
+            },
+          },
         });
-      }
 
-      skillCollections.push(skillCollection);
+        skillCollections.push(newSkillCollection);
+
+        this.skillCollectionsHelper.syncStudentSkillAssessments(
+          student.id,
+          rootSkills,
+          skillCollections,
+        );
+      }
     }
 
-    return skillCollections;
   }
 
   async generateTestData() {
