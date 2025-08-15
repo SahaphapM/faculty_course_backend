@@ -16,15 +16,6 @@ export class CoordinatorsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateCoordinatorDto) {
-    const existing = await this.prisma.coordinator.findUnique({
-      where: { email: dto.email },
-    });
-
-    if (existing) {
-      throw new BadRequestException(
-        `Coordinator with email ${dto.email} already exists`,
-      );
-    }
 
     const coordinator = await this.prisma.coordinator.create({
       data: dto,
@@ -39,10 +30,8 @@ export class CoordinatorsService {
     const whereCondition: Prisma.coordinatorWhereInput = {
       ...(nameCodeMail && {
         OR: [
-          { code: { contains: nameCodeMail } },
           { thaiName: { contains: nameCodeMail } },
           { engName: { contains: nameCodeMail } },
-          { email: { contains: nameCodeMail } },
         ],
       }),
     };
