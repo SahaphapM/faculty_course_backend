@@ -160,7 +160,7 @@ export class AuthService {
           userId: newUser.id,
         });
         // Optionally update the user with studentId
-        await this.usersService.update(newUser.id, { studentId: student.id });
+        await this.usersService.updateStudentId(newUser.id, { studentId: student.id });
       }
 
       const { accessToken, refreshToken } = await this.generateTokens(

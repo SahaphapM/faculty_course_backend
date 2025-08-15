@@ -10,6 +10,7 @@ import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
 import { Prisma } from '@prisma/client';
 import * as bcrypt from '@node-rs/bcrypt';
 import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
+import { UpdateUserStudentDto } from 'src/dto/update-user-student.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
@@ -127,6 +128,29 @@ export class UserService {
     } catch (error) {
       console.error('Error updating user:', error);
       throw new BadRequestException('Failed to update user');
+    }
+  }
+
+  async updateStudentId(id: number, dto: UpdateUserStudentDto) {
+    const user = await this.findOneById(id);
+    if (!user) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    try {
+      return await this.prisma.user.update({
+        where: { id },
+        data: {
+          student: { connect: { id: dto.studentId } },
+        },
+        include: {
+          student: { select: { id: true, thaiName: true } },
+          instructor: { select: { id: true, thaiName: true } },
+        },
+      });
+    } catch (error) {
+      console.error('Error updating user student ID:', error);
+      throw new BadRequestException('Failed to update user student ID');
     }
   }
 

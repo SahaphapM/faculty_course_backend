@@ -43,56 +43,6 @@ export class StudentsController {
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number (1-based)',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Items per page',
-  })
-  @ApiQuery({
-    name: 'sort',
-    required: false,
-    description: 'Sort field, prefix with - for DESC (e.g. -id)',
-  })
-  @ApiQuery({
-    name: 'orderBy',
-    required: false,
-    description: 'Explicit sort direction (asc|desc) overrides sort prefix',
-  })
-  @ApiQuery({
-    name: 'nameCode',
-    required: false,
-    description: 'Filter by name/code (contains)',
-  })
-  @ApiQuery({
-    name: 'branchId',
-    required: false,
-    type: Number,
-    description: 'Filter by branch id',
-  })
-  @ApiQuery({
-    name: 'facultyId',
-    required: false,
-    type: Number,
-    description: 'Filter by faculty id',
-  })
-  @ApiQuery({
-    name: 'curriculumId',
-    required: false,
-    type: Number,
-    description: 'Filter by curriculum id',
-  })
-  @ApiQuery({
-    name: 'skillName',
-    required: false,
-    description: 'Filter by related skill name (contains)',
-  })
   @Get('skill')
   findAllBySkill(@Query() pag?: StudentFilterDto) {
     return this.studentsService.findAllBySkill(pag);
@@ -116,51 +66,6 @@ export class StudentsController {
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number (1-based)',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Items per page',
-  })
-  @ApiQuery({
-    name: 'sort',
-    required: false,
-    description: 'Sort field, prefix with - for DESC (e.g. -id)',
-  })
-  @ApiQuery({
-    name: 'orderBy',
-    required: false,
-    description: 'Explicit sort direction (asc|desc) overrides sort prefix',
-  })
-  @ApiQuery({
-    name: 'nameCode',
-    required: false,
-    description: 'Filter by name/code (contains)',
-  })
-  @ApiQuery({
-    name: 'branchId',
-    required: false,
-    type: Number,
-    description: 'Filter by branch id',
-  })
-  @ApiQuery({
-    name: 'facultyId',
-    required: false,
-    type: Number,
-    description: 'Filter by faculty id',
-  })
-  @ApiQuery({
-    name: 'curriculumId',
-    required: false,
-    type: Number,
-    description: 'Filter by curriculum id',
-  })
   @Get()
   findAll(@Query() pag?: StudentFilterDto) {
     return this.studentsService.findAll(pag);
