@@ -1,7 +1,6 @@
 
 import {ApiProperty} from '@nestjs/swagger'
 import {CourseInstructor} from './courseInstructor.entity'
-import {CurriculumCoordinators} from './curriculumCoordinators.entity'
 import {Branch} from './branch.entity'
 import {User} from './user.entity'
 
@@ -51,12 +50,6 @@ email: string ;
   required: false,
 })
 course_instructors?: CourseInstructor[] ;
-@ApiProperty({
-  type: () => CurriculumCoordinators,
-  isArray: true,
-  required: false,
-})
-curriculums?: CurriculumCoordinators[] ;
 @ApiProperty({
   type: () => Branch,
   required: false,

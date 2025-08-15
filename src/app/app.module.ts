@@ -25,6 +25,7 @@ import { JobPositionsModule } from 'src/modules/job-positions/job-positions.modu
 import { LoggingModule } from 'src/logging/logging.module';
 import { SkillAssessmentsModule } from 'src/modules/skill-assessments/skill-assessments.module';
 import { SeedModule } from 'src/seed/seed.module';
+import { CoordinatorsModule } from 'src/modules/coordinators/coordinators.module';
 
 @Module({
   imports: [
@@ -44,7 +45,7 @@ import { SeedModule } from 'src/seed/seed.module';
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    AuthModule,
+    // AuthModule,
     StudentsModule,
     CoursesModule,
     SubjectModule,
@@ -56,6 +57,7 @@ import { SeedModule } from 'src/seed/seed.module';
     JobPositionsModule,
     SkillAssessmentsModule,
     SeedModule,
+    CoordinatorsModule,
   ],
   controllers: [AppController],
   providers: [

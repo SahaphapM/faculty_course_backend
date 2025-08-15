@@ -54,6 +54,14 @@ studentId?: number ;
 @IsInt()
 instructorId?: number ;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+})
+@IsOptional()
+@IsInt()
+coordinatorId?: number ;
+@ApiProperty({
   type: UserInstructorIdStudentIdUniqueInputDto,
   required: false,
 })

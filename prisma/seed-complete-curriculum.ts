@@ -839,8 +839,8 @@ async function main() {
   // 13. สร้าง Curriculum Coordinators
   const curriculumCoordinators = await prisma.curriculum_coordinators.createMany({
     data: [
-      { instructorId: createdInstructors[0].id, curriculumId: curriculum.id },
-      { instructorId: createdInstructors[1].id, curriculumId: curriculum.id },
+      { coordinatorId: createdInstructors[0].id, curriculumId: curriculum.id },
+      { coordinatorId: createdInstructors[1].id, curriculumId: curriculum.id },
     ],
   });
   console.log('✅ Created curriculum coordinators');

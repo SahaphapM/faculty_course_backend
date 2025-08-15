@@ -38,7 +38,7 @@ export class CurriculumsService {
           ? {
               create: [
                 {
-                  instructor: {
+                  coordinator: {
                     connect: { id: coordinatorId },
                   },
                 },
@@ -152,7 +152,7 @@ export class CurriculumsService {
       ...(branchId && { branchId }),
       ...(facultyId && { branch: { facultyId } }),
       ...(coordinatorId && {
-        coordinators: { some: { instructorId: coordinatorId } },
+        coordinators: { some: { coordinatorId: coordinatorId } },
       }),
     };
 

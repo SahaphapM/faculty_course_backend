@@ -31,20 +31,6 @@ export class InstructorsController {
     return this.insService.create(createTeacherDto);
   }
 
-  @Roles(UserRole.Admin, UserRole.Coordinator)
-  @Post('assign-coordinator')
-  @ApiBody({ type: [Number] })
-  @HttpCode(HttpStatus.OK)
-  selectInstructorToCurriculum(
-    @Query('curriculumId') curriculumId: string,
-    @Body() instructorIds: number[],
-  ) {
-    return this.insService.updateCoordinatorToCurriculum(
-      instructorIds,
-      +curriculumId,
-    );
-  }
-
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
   @HttpCode(HttpStatus.OK)

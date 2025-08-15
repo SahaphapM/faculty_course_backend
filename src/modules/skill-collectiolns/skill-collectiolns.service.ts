@@ -314,7 +314,8 @@ export class SkillCollectionsService {
             // Assign as curriculum coordinator
             await tx.curriculum_coordinators.create({
               data: {
-                instructorId: coordinator.id,
+                // instructorId: coordinator.id,
+                coordinatorId: coordinator.id,
                 curriculumId: curriculum.id,
               },
             });

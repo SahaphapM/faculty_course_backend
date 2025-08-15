@@ -13,7 +13,7 @@ export class UpdateCurriculumCoordinatorsDto {
 })
 @IsOptional()
 @IsInt()
-instructorId?: number ;
+coordinatorId?: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',

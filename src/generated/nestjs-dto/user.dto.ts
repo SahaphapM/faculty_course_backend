@@ -43,4 +43,10 @@ studentId: number  | null;
   nullable: true,
 })
 instructorId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+coordinatorId: number  | null;
 }

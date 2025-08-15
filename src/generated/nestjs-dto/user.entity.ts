@@ -2,6 +2,7 @@
 import {ApiProperty} from '@nestjs/swagger'
 import {Instructor} from './instructor.entity'
 import {Student} from './student.entity'
+import {Coordinator} from './coordinator.entity'
 import {AuditLog} from './auditLog.entity'
 
 
@@ -47,6 +48,12 @@ studentId: number  | null;
 })
 instructorId: number  | null;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+coordinatorId: number  | null;
+@ApiProperty({
   type: () => Instructor,
   required: false,
   nullable: true,
@@ -58,6 +65,12 @@ instructor?: Instructor  | null;
   nullable: true,
 })
 student?: Student  | null;
+@ApiProperty({
+  type: () => Coordinator,
+  required: false,
+  nullable: true,
+})
+coordinator?: Coordinator  | null;
 @ApiProperty({
   type: () => AuditLog,
   isArray: true,

@@ -1,0 +1,77 @@
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  HttpStatus,
+  HttpCode,
+  Query,
+} from '@nestjs/common';
+import { CoordinatorsService } from './coordinators.service';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { CreateCoordinatorDto } from 'src/generated/nestjs-dto/create-coordinator.dto';
+import { UpdateCoordinatorDto } from 'src/generated/nestjs-dto/update-coordinator.dto';
+import { UserRole } from 'src/enums/role.enum';
+import { Roles } from 'src/decorators/roles.decorator';
+import { CoordinatorFilterDto } from 'src/dto/filters/filter.coordinator.dto';
+
+@ApiBearerAuth()
+@Controller('coordinators')
+export class CoordinatorsController {
+  constructor(private readonly coordinatorsService: CoordinatorsService) {}
+
+  @Roles(UserRole.Admin)
+  @Post()
+  @HttpCode(HttpStatus.CREATED)
+  create(@Body() createCoordinatorDto: CreateCoordinatorDto) {
+    return this.coordinatorsService.create(createCoordinatorDto);
+  }
+
+  @Roles(UserRole.Admin, UserRole.Coordinator)
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  findAll(@Query() pag?: CoordinatorFilterDto) {
+    return this.coordinatorsService.findAll(pag);
+  }
+
+  @Roles(UserRole.Admin, UserRole.Coordinator)
+  @Get(':id')
+  @HttpCode(HttpStatus.OK)
+  findOne(@Param('id') id: string) {
+    return this.coordinatorsService.findOne(+id);
+  }
+
+  @Roles(UserRole.Admin)
+  @Patch(':id')
+  @HttpCode(HttpStatus.OK)
+  update(
+    @Param('id') id: string,
+    @Body() updateCoordinatorDto: UpdateCoordinatorDto,
+  ) {
+    return this.coordinatorsService.update(+id, updateCoordinatorDto);
+  }
+
+  @Roles(UserRole.Admin)
+  @Delete(':id')
+  @HttpCode(HttpStatus.OK)
+  remove(@Param('id') id: string) {
+    return this.coordinatorsService.remove(+id);
+  }
+
+    @Roles(UserRole.Admin, UserRole.Coordinator)
+    @Post('assign-coordinator')
+    @ApiBody({ type: [Number] })
+    @HttpCode(HttpStatus.OK)
+    selectInstructorToCurriculum(
+      @Query('curriculumId') curriculumId: string,
+      @Body() coordinatorIds: number[],
+    ) {
+      return this.coordinatorsService.updateCoordinatorToCurriculum(
+        coordinatorIds,
+        +curriculumId,
+      );
+    }
+}

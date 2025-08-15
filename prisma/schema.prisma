@@ -118,14 +118,14 @@ model curriculum {
 
 model curriculum_coordinators {
   /// @DtoRelationIncludeId
-  instructorId Int
+  coordinatorId Int
   /// @DtoRelationIncludeId
-  curriculumId Int
-  curriculum   curriculum @relation(fields: [curriculumId], references: [id])
-  instructor   instructor @relation(fields: [instructorId], references: [id])
+  curriculumId  Int
+  curriculum    curriculum  @relation(fields: [curriculumId], references: [id])
+  coordinator   coordinator @relation(fields: [coordinatorId], references: [id])
 
-  @@id([instructorId, curriculumId])
-  @@index([instructorId])
+  @@id([coordinatorId, curriculumId])
+  @@index([coordinatorId])
   @@index([curriculumId])
 }
 
@@ -139,19 +139,30 @@ model faculty {
   branch          branch[]
 }
 
+model coordinator {
+  id          Int                       @id @default(autoincrement())
+  code        String?                   @unique @db.VarChar(255)
+  thaiName    String                    @unique @db.VarChar(255) @default("")
+  engName     String                    @unique @db.VarChar(255)  @default("")
+  tel         String?                   @db.VarChar(255)
+  position    String?                   @db.VarChar(255)
+  email       String                    @unique @db.VarChar(255)
+  user        user?
+  curriculums curriculum_coordinators[]
+}
+
 model instructor {
-  id                 Int                       @id @default(autoincrement())
+  id                 Int                 @id @default(autoincrement())
   /// @DtoRelationIncludeId
   branchId           Int?
-  code               String?                   @unique @db.VarChar(255)
-  thaiName           String                    @unique @db.VarChar(255)
-  engName            String                    @unique @db.VarChar(255)
-  tel                String?                   @db.VarChar(255)
-  position           String?                   @db.VarChar(255)
-  email              String                    @unique @db.VarChar(255)
+  code               String?             @unique @db.VarChar(255)
+  thaiName           String              @unique @db.VarChar(255)
+  engName            String              @unique @db.VarChar(255)
+  tel                String?             @db.VarChar(255)
+  position           String?             @db.VarChar(255)
+  email              String              @unique @db.VarChar(255)
   course_instructors course_instructor[]
-  curriculums        curriculum_coordinators[]
-  branch             branch?                   @relation(fields: [branchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  branch             branch?             @relation(fields: [branchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
   user               user?
 
   @@index([branchId], map: "instructor_branchId_fkey")
@@ -266,8 +277,11 @@ model user {
   studentId          Int?        @unique
   /// @DtoRelationIncludeId
   instructorId       Int?        @unique
+  /// @DtoRelationIncludeId
+  coordinatorId      Int?        @unique
   instructor         instructor? @relation(fields: [instructorId], references: [id], onUpdate: NoAction)
   student            student?    @relation(fields: [studentId], references: [id], onUpdate: NoAction)
+  coordinator        coordinator? @relation(fields: [coordinatorId], references: [id], onUpdate: NoAction)
   audit_logs         audit_log[]
 
   @@unique([instructorId, studentId])

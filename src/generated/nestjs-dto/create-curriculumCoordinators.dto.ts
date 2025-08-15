@@ -12,7 +12,7 @@ export class CreateCurriculumCoordinatorsDto {
 })
 @IsNotEmpty()
 @IsInt()
-instructorId: number ;
+coordinatorId: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
