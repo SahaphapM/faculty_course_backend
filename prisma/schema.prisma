@@ -141,12 +141,8 @@ model faculty {
 
 model coordinator {
   id          Int                       @id @default(autoincrement())
-  code        String?                   @unique @db.VarChar(255)
   thaiName    String                    @unique @db.VarChar(255) @default("")
   engName     String                    @unique @db.VarChar(255)  @default("")
-  tel         String?                   @db.VarChar(255)
-  position    String?                   @db.VarChar(255)
-  email       String                    @unique @db.VarChar(255)
   user        user?
   curriculums curriculum_coordinators[]
 }
@@ -284,7 +280,7 @@ model user {
   coordinator        coordinator? @relation(fields: [coordinatorId], references: [id], onUpdate: NoAction)
   audit_logs         audit_log[]
 
-  @@unique([instructorId, studentId])
+  @@unique([instructorId, studentId, coordinatorId])
 }
 
 model company {

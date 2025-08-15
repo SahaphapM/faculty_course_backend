@@ -3,7 +3,7 @@ import {ApiExtraModels,ApiProperty} from '@nestjs/swagger'
 import {IsInt,IsNotEmpty,IsOptional,IsString,ValidateNested} from 'class-validator'
 import {Type} from 'class-transformer'
 
-export class UserInstructorIdStudentIdUniqueInputDto {
+export class UserInstructorIdStudentIdCoordinatorIdUniqueInputDto {
     @ApiProperty({
   type: 'integer',
   format: 'int32',
@@ -18,9 +18,16 @@ instructorId: number ;
 @IsNotEmpty()
 @IsInt()
 studentId: number ;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+})
+@IsNotEmpty()
+@IsInt()
+coordinatorId: number ;
   }
 
-@ApiExtraModels(UserInstructorIdStudentIdUniqueInputDto)
+@ApiExtraModels(UserInstructorIdStudentIdCoordinatorIdUniqueInputDto)
 export class ConnectUserDto {
   @ApiProperty({
   type: 'integer',
@@ -62,11 +69,11 @@ instructorId?: number ;
 @IsInt()
 coordinatorId?: number ;
 @ApiProperty({
-  type: UserInstructorIdStudentIdUniqueInputDto,
+  type: UserInstructorIdStudentIdCoordinatorIdUniqueInputDto,
   required: false,
 })
 @IsOptional()
 @ValidateNested()
-@Type(() => UserInstructorIdStudentIdUniqueInputDto)
-instructorId_studentId?: UserInstructorIdStudentIdUniqueInputDto ;
+@Type(() => UserInstructorIdStudentIdCoordinatorIdUniqueInputDto)
+instructorId_studentId_coordinatorId?: UserInstructorIdStudentIdCoordinatorIdUniqueInputDto ;
 }
