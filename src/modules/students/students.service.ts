@@ -162,6 +162,52 @@ export class StudentsService {
     });
   }
 
+  async findMissingData(pag: StudentFilterDto) {
+    const whereCondition = {
+      OR: [
+        { thaiName: null },
+        { engName: null },
+        { branchId: null },
+        { curriculumId: null },
+      ],
+    };
+
+    const students = this.prisma.student.findMany({
+      where: whereCondition,
+      take: pag?.limit || 10,
+      skip: ((pag?.page || 1) - 1) * (pag?.limit || 10),
+      orderBy: { id: pag?.orderBy || 'asc' },
+      include: {
+        branch: {
+          select: {
+            thaiName: true,
+            engName: true,
+          },
+        },
+        curriculum: {
+          select: {
+            thaiName: true,
+            engName: true,
+            code: true,
+          },
+        },
+      },
+    });
+
+    const total = this.prisma.student.count({
+      where: whereCondition,
+    });
+
+    return Promise.all([students, total]).then(([students, total]) => {
+      return createPaginatedData(
+        students,
+        total,
+        pag?.page || 1,
+        pag?.limit || 10,
+      );
+    });
+  }
+
   // Get a student by ID
   async findOne(code: string) {
     const student = await this.prisma.student.findUnique({

@@ -104,6 +104,12 @@ export class StudentsController {
     res.send();
   }
 
+  @Get('missing-data')
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  findMissingData(@Query() pag?: StudentFilterDto) {
+    return this.studentsService.findMissingData(pag);
+  }
+
   @Roles(
     UserRole.Admin,
     UserRole.Coordinator,
