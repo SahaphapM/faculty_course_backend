@@ -45,7 +45,7 @@ import { CoordinatorsModule } from 'src/modules/coordinators/coordinators.module
     ClosModule,
     SkillsModule,
     FacultiesModule,
-    // AuthModule,
+    AuthModule,
     StudentsModule,
     CoursesModule,
     SubjectModule,
