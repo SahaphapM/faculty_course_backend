@@ -18,6 +18,7 @@ import {
 import { CreateLevelDescriptionDto } from 'src/generated/nestjs-dto/create-levelDescription.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
+import { UpdateLevelDescriptionDto } from 'src/generated/nestjs-dto/update-levelDescription.dto';
 
 // types ช่วยอ่านง่ายขึ้น
 type TargetLevel = 'on' | 'above' | 'below' | 'all';
@@ -111,6 +112,15 @@ export class CurriculumsService {
       message: 'Curriculum created successfully',
       data: curriculum,
     };
+  }
+
+  updateLevelDescription(id: number, dto: UpdateLevelDescriptionDto) {
+    return this.prisma.level_description.update({
+      where: { id },
+      data: {
+        description: dto.description,
+      },
+    });
   }
 
   // Find all curriculums with pagination and search

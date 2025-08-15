@@ -16,6 +16,7 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
+import { UpdateLevelDescriptionDto } from 'src/generated/nestjs-dto/update-levelDescription.dto';
 
 @ApiBearerAuth()
 @Controller('curriculums')
@@ -66,6 +67,15 @@ export class CurriculumsController {
     @Body() updateCurriculumDto: UpdateCurriculumDto,
   ) {
     return this.curriculumsService.update(+id, updateCurriculumDto);
+  }
+
+  @Roles(UserRole.Admin, UserRole.Coordinator)
+  @Patch('level-description/:id')
+  updateLevelDescription(
+    @Param('id') id: string,
+    @Body() description: UpdateLevelDescriptionDto,
+  ) {
+    return this.curriculumsService.updateLevelDescription(+id, description);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
