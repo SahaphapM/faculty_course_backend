@@ -274,7 +274,7 @@ export class CurriculumsService {
     skillType: string,
     debug?: { studentId?: number; rootSkillId?: number }, // optional ดีบัก
   ): Promise<any> {
-    return getSkillSummary(curriculumId, yearCode, skillType, {
+    return getSkillSummary(curriculumId, yearCode.slice(-2), skillType, {
       studentId: 2,
       rootSkillId: 13,
     });
