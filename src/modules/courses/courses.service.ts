@@ -112,14 +112,15 @@ export class CourseService {
         { subject: { code: { contains: nameCode } } },
       );
     }
-    if (years?.length) {
-      OR.push(...years.map((y) => ({ year: Number(y) })));
-    }
-    if (semesters?.length) {
-      OR.push(...semesters.map((s) => ({ semester: Number(s) })));
-    }
+
     if (OR.length) AND.push({ OR });
 
+    if (years?.length) {
+      AND.push(...years.map((y) => ({ year: Number(y) })));
+    }
+    if (semesters?.length) {
+      AND.push(...semesters.map((s) => ({ semester: Number(s) })));
+    }
     if (active !== undefined) AND.push({ active }); // รองรับทั้ง true/false
     if (subjectId) AND.push({ subjectId });
     if (curriculumId) AND.push({ subject: { curriculumId } });
