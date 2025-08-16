@@ -397,3 +397,54 @@ function summarizeAcrossStudentsUsingAssessments(
     })),
   }));
 }
+
+////////////////////////////////////////////
+type TargetLevel = 'on' | 'above' | 'below' | 'all';
+
+export async function findAllDescendants(
+  rootSkillId: number,
+): Promise<number[]> {
+  const result: number[] = [];
+  let frontier: number[] = [rootSkillId];
+  const seen = new Set<number>();
+
+  while (frontier.length) {
+    // เก็บชั้นนี้
+    const current = frontier.filter((id) => !seen.has(id));
+    current.forEach((id) => seen.add(id));
+    result.push(...current);
+
+    // หา children ของ “ชั้น” นี้ในคำสั่งเดียว
+    const children = await prisma.skill.findMany({
+      where: { parentId: { in: current } },
+      select: { id: true },
+    });
+    frontier = children.map((c) => c.id);
+  }
+  return result;
+}
+
+// ตัวช่วยสร้าง comparator สำหรับ gainedLevel เทียบกับ expected
+export function buildLevelComparator(
+  target: TargetLevel,
+  expected: number | null | undefined,
+) {
+  if (target === 'all') return undefined; // ไม่บังคับ comparator
+  if (expected == null) return undefined; // CLO นี้ไม่มี expected ข้ามไป
+
+  if (target === 'on') return { equals: expected };
+  if (target === 'above') return { gt: expected };
+  if (target === 'below') return { lt: expected };
+}
+
+
+// เดินขึ้นหาตัวรากจริง หากผู้ใช้ส่ง id ของโหนดกลางมา
+async function resolveRootSkillId(skillId: number): Promise<number> {
+  let cur = await prisma.skill.findUnique({ where: { id: skillId }, select: { id: true, parentId: true } });
+  if (!cur) throw new Error(`Skill ${skillId} not found`);
+  while (cur.parentId != null) {
+    cur = await prisma.skill.findUnique({ where: { id: cur.parentId }, select: { id: true, parentId: true } });
+    if (!cur) break;
+  }
+  return cur?.id ?? skillId;
+}

@@ -9,14 +9,17 @@ import { Prisma } from '@prisma/client'; // Import Prisma types
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
-import { getSkillSummary } from './curriculums.helper';
+import {
+  buildLevelComparator,
+  findAllDescendants,
+  getSkillSummary,
+} from './curriculums.helper';
 import { CreateLevelDescriptionDto } from 'src/generated/nestjs-dto/create-levelDescription.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
 import { UpdateLevelDescriptionDto } from 'src/generated/nestjs-dto/update-levelDescription.dto';
 
 // types ช่วยอ่านง่ายขึ้น
-type TargetLevel = 'on' | 'above' | 'below' | 'all';
 
 @Injectable()
 export class CurriculumsService {
@@ -292,57 +295,12 @@ export class CurriculumsService {
     const currPage = Math.max(1, Number(page) || 1);
     const skip = (currPage - 1) * take;
 
-    // STEP 1
-    const skillIds = await this.findAllDescendants(skillId);
-
-    // STEP 2: CLO ของ skillIds
-    const clos = await this.prisma.clo.findMany({
-      where: { skillId: { in: skillIds } },
-      select: { id: true, expectSkillLevel: true, skillId: true, name: true },
-    });
-    const cloIds = clos.map((c) => c.id);
-    if (cloIds.length === 0) {
-      return createPaginatedData([], 0, currPage, take);
-    }
-
-    // STEP 3: เงื่อนไข skill_collection แบบ per-CLO
-    // - กรณี 'all' = ไม่เทียบ expected; แค่ต้อง match cloIds และ gainedLevel มีค่า (ตัวอย่างกำหนด 1..3)
-    // - กรณีอื่น ๆ: OR ของรายการ (cloId == X AND gainedLevel <|=|> expectedX)
-    let whereSC: any;
-    if (targetLevel === 'all') {
-      whereSC = {
-        cloId: { in: cloIds },
-        gainedLevel: { in: [0, 1, 2, 3, 4, 5] }, // ปรับตามธุรกิจคุณ
-      };
-    } else {
-      const orClauses = clos
-        .map((c) => {
-          const cmp = this.buildLevelComparator(
-            targetLevel,
-            c.expectSkillLevel,
-          );
-          if (!cmp) return null; // ไม่มี expected ข้าม
-          return { AND: [{ cloId: c.id }, { gainedLevel: cmp }] };
-        })
-        .filter(Boolean) as any[];
-      // ถ้าไม่มี CLO ไหนมี expected เลย ก็ให้ไม่มีผลลัพธ์
-      if (orClauses.length === 0) {
-        return createPaginatedData([], 0, currPage, take);
-      }
-      whereSC = { OR: orClauses };
-    }
-
     // ใช้กับทั้ง student.where และ include
     const assessmentWhere: Prisma.skill_assessmentWhereInput = {
-      skillId: { in: skillIds }, // ลูก ๆ ของ skill เป้าหมาย
-      OR: [
-        { finalLevel: { gte: 1 } },
-        { companyLevel: { gte: 1 } },
-        { curriculumLevel: { gte: 1 } },
-      ],
+      skillId: skillId, // ลูก ๆ ของ skill เป้าหมาย
     };
 
-    // STEP 4: เงื่อนไข student (ปี/ค้นหา) + ต้องมี skill_collections ตรง whereSC
+    // STEP 4: เงื่อนไข student (ปี/ค้นหา) + ต้องมี skill_assessments ตรง whereSC
     const studentWhere: Prisma.studentWhereInput = {
       ...(yearCode
         ? { code: { startsWith: yearCode } } // ปรับตามรูปแบบรหัสนักศึกษา
@@ -357,10 +315,7 @@ export class CurriculumsService {
           }
         : {}),
       // ต้องมีทั้ง skill_collections (ตาม targetLevel) และ skill_assessments (ตามเงื่อนไขที่กำหนด)
-      AND: [
-        { skill_collections: { some: whereSC } },
-        { skill_assessments: { some: assessmentWhere } },
-      ],
+      AND: [{ skill_assessments: { some: assessmentWhere } }],
     };
 
     // STEP 5: นับ total และดึงหน้าที่ขอ
@@ -379,50 +334,9 @@ export class CurriculumsService {
       }),
     ]);
 
-    console.log('students', students);
-
-    console.dir(students, { depth: 10 });
-
     // // STEP 6: ส่งกลับแบบแบ่งหน้า
     return createPaginatedData(students, total, currPage, take);
   }
-
-  // STEP 1: หา descendant skills ทีละชั้น (batch)
-  private async findAllDescendants(rootSkillId: number): Promise<number[]> {
-    const result: number[] = [];
-    let frontier: number[] = [rootSkillId];
-    const seen = new Set<number>();
-
-    while (frontier.length) {
-      // เก็บชั้นนี้
-      const current = frontier.filter((id) => !seen.has(id));
-      current.forEach((id) => seen.add(id));
-      result.push(...current);
-
-      // หา children ของ “ชั้น” นี้ในคำสั่งเดียว
-      const children = await this.prisma.skill.findMany({
-        where: { parentId: { in: current } },
-        select: { id: true },
-      });
-      frontier = children.map((c) => c.id);
-    }
-    return result;
-  }
-
-  // ตัวช่วยสร้าง comparator สำหรับ gainedLevel เทียบกับ expected
-  private buildLevelComparator(
-    target: TargetLevel,
-    expected: number | null | undefined,
-  ) {
-    if (target === 'all') return undefined; // ไม่บังคับ comparator
-    if (expected == null) return undefined; // CLO นี้ไม่มี expected ข้ามไป
-
-    if (target === 'on') return { equals: expected };
-    if (target === 'above') return { gt: expected };
-    if (target === 'below') return { lt: expected };
-  }
-
-  // สมมติว่ามี helper ชื่อ createPaginatedData แบบเดียวกับตัวอย่าง findAll()
 
   // curriculums.service.ts
   async getSkillCollectionSummaryByCurriculumPaginated(
