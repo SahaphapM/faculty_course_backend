@@ -94,7 +94,8 @@ export class StudentsService {
       ...(codeYears?.length && {
         OR: codeYears.map((prefix) => ({
           code: {
-            startsWith: prefix,
+            // slice to kept two last character example 2565 => 65
+            startsWith: prefix.slice(-2),
           },
         })),
       }),
@@ -150,7 +151,7 @@ export class StudentsService {
     // slice code to year
     const slice = codes.map((code) => code.code.slice(0, 2));
     // remove duplicate
-    const uniqueCodes = [...new Set(slice.map((item) => item))];
+    const uniqueCodes = [...new Set(slice.map((item) => '25' + item))];
     return uniqueCodes;
   }
   // Find students by a list of IDs
