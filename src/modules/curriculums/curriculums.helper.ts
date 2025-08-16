@@ -4,6 +4,7 @@
 
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 import { SkillAssessment } from 'src/generated/nestjs-dto/skillAssessment.entity';
+import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
 import { PrismaService } from 'src/prisma/prisma.service';
 
 const prisma = new PrismaService();
@@ -24,10 +25,6 @@ interface Clo {
   expectSkillLevel: Level | null;
   skill_collections?: SkillCollection[];
 }
-interface SkillCollection {
-  studentId: number | null;
-  gainedLevel: Level;
-}
 
 interface RootSummary {
   skillName: string;
@@ -45,7 +42,7 @@ interface RootSummary {
 const isNum = (v: unknown): v is number =>
   typeof v === 'number' && !Number.isNaN(v);
 
-function modeThenMax(xs: readonly Level[]): Level | null {
+export function modeThenMax(xs: readonly Level[]): Level | null {
   if (!xs.length) return null;
   const f = new Map<Level, number>();
   for (const x of xs) f.set(x, (f.get(x) ?? 0) + 1);
@@ -61,7 +58,7 @@ function modeThenMax(xs: readonly Level[]): Level | null {
 }
 
 // ---------- Tree helpers ----------
-function buildIndex(skills: Skill[]) {
+export function buildIndex(skills: Skill[]) {
   const byId = new Map<number, Skill>(skills.map((s) => [s.id, s]));
   const children = new Map<number | null, Skill[]>();
   for (const s of skills) {
@@ -91,7 +88,7 @@ function buildExpectedForestForStudent(
 /** รวม expected/gained จาก CLO ใต้สกิล “เฉพาะของนักเรียนคนนี้” */
 /** expected เฉพาะ CLO ใต้โหนดนี้ที่นักเรียนคนนี้เกี่ยวข้อง (mask ด้วย skill_collections) */
 function collectExpectedForStudentOnNode(
-  skill: Skill,
+  skill: Partial<Skill>,
   studentId: number,
 ): Level[] {
   const xs: Level[] = [];
@@ -319,7 +316,7 @@ async function fetchRootAssessments(
   });
 }
 
-function pickAssessedLevel(
+export function pickAssessedLevel(
   assessment: Pick<
     SkillAssessment,
     'curriculumLevel' | 'companyLevel' | 'finalLevel'
@@ -396,55 +393,4 @@ function summarizeAcrossStudentsUsingAssessments(
       studentIds: b.buckets[cat].studentIds,
     })),
   }));
-}
-
-////////////////////////////////////////////
-type TargetLevel = 'on' | 'above' | 'below' | 'all';
-
-export async function findAllDescendants(
-  rootSkillId: number,
-): Promise<number[]> {
-  const result: number[] = [];
-  let frontier: number[] = [rootSkillId];
-  const seen = new Set<number>();
-
-  while (frontier.length) {
-    // เก็บชั้นนี้
-    const current = frontier.filter((id) => !seen.has(id));
-    current.forEach((id) => seen.add(id));
-    result.push(...current);
-
-    // หา children ของ “ชั้น” นี้ในคำสั่งเดียว
-    const children = await prisma.skill.findMany({
-      where: { parentId: { in: current } },
-      select: { id: true },
-    });
-    frontier = children.map((c) => c.id);
-  }
-  return result;
-}
-
-// ตัวช่วยสร้าง comparator สำหรับ gainedLevel เทียบกับ expected
-export function buildLevelComparator(
-  target: TargetLevel,
-  expected: number | null | undefined,
-) {
-  if (target === 'all') return undefined; // ไม่บังคับ comparator
-  if (expected == null) return undefined; // CLO นี้ไม่มี expected ข้ามไป
-
-  if (target === 'on') return { equals: expected };
-  if (target === 'above') return { gt: expected };
-  if (target === 'below') return { lt: expected };
-}
-
-
-// เดินขึ้นหาตัวรากจริง หากผู้ใช้ส่ง id ของโหนดกลางมา
-async function resolveRootSkillId(skillId: number): Promise<number> {
-  let cur = await prisma.skill.findUnique({ where: { id: skillId }, select: { id: true, parentId: true } });
-  if (!cur) throw new Error(`Skill ${skillId} not found`);
-  while (cur.parentId != null) {
-    cur = await prisma.skill.findUnique({ where: { id: cur.parentId }, select: { id: true, parentId: true } });
-    if (!cur) break;
-  }
-  return cur?.id ?? skillId;
 }
