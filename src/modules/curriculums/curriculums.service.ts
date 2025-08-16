@@ -15,6 +15,8 @@ import { createPaginatedData } from 'src/utils/paginated.utils';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
 import { UpdateLevelDescriptionDto } from 'src/generated/nestjs-dto/update-levelDescription.dto';
 import { findStudentsTargetSkillLevel } from './curriculums.helper2';
+import { UpdateLevelDescriptionDtos } from './dto/curriculums.dto';
+import { LevelDescription } from 'src/generated/nestjs-dto/levelDescription.entity';
 
 // types ช่วยอ่านง่ายขึ้น
 
@@ -109,13 +111,28 @@ export class CurriculumsService {
     };
   }
 
-  updateLevelDescription(id: number, dto: UpdateLevelDescriptionDto) {
-    return this.prisma.level_description.update({
-      where: { id },
-      data: {
-        description: dto.description,
+  async updateLevelDescriptions(updates: Partial<LevelDescription>[]) {
+    console.dir(updates, { depth: 3 });
+    return Promise.all(
+      updates.map((update) =>
+        this.prisma.level_description.update({
+          where: { id: update.id },
+          data: { description: update.description },
+        }),
+      ),
+    );
+  }
+
+  async getAllLevelDescription(curriculumCode: string) {
+    console.log(curriculumCode);
+    const curriculum = await this.prisma.curriculum.findUnique({
+      where: { code: curriculumCode },
+      select: {
+        level_descriptions: true,
       },
     });
+    console.log(curriculum);
+    return curriculum?.level_descriptions;
   }
 
   // Find all curriculums with pagination and search

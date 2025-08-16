@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
-import { ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -17,6 +17,7 @@ import { UserRole } from 'src/enums/role.enum';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
 import { UpdateLevelDescriptionDto } from 'src/generated/nestjs-dto/update-levelDescription.dto';
+import { UpdateLevelDescriptionDtos } from './dto/curriculums.dto';
 
 @ApiBearerAuth()
 @Controller('curriculums')
@@ -61,6 +62,17 @@ export class CurriculumsController {
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
+  @Patch('skillLevel/descriptions') // เส้นทางคงที่
+  updateLevelDescriptions(
+    @Body() body: { levelDescription: { id: number; description: string }[] },
+  ) {
+    console.dir(body, { depth: 3 });
+    return this.curriculumsService.updateLevelDescriptions(
+      body.levelDescription,
+    );
+  }
+
+  @Roles(UserRole.Admin, UserRole.Coordinator)
   @Patch(':id')
   update(
     @Param('id') id: string,
@@ -69,13 +81,10 @@ export class CurriculumsController {
     return this.curriculumsService.update(+id, updateCurriculumDto);
   }
 
-  @Roles(UserRole.Admin, UserRole.Coordinator)
-  @Patch('level-description/:id')
-  updateLevelDescription(
-    @Param('id') id: string,
-    @Body() description: UpdateLevelDescriptionDto,
-  ) {
-    return this.curriculumsService.updateLevelDescription(+id, description);
+  // get all level description
+  @Get('level-description/:curriculumCode')
+  getAllLevelDescription(@Param('curriculumCode') curriculumCode: string) {
+    return this.curriculumsService.getAllLevelDescription(curriculumCode);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
@@ -126,7 +135,7 @@ export class CurriculumsController {
 
   @Get('summary/skill-collection/:curriculumId')
   async getSkillCollectionSummaryByCurriculum(
-     @Param('curriculumId') curriculumId: number,
+    @Param('curriculumId') curriculumId: number,
     @Query() q: SkillCollectionSummaryFilterDto,
   ) {
     // ส่ง DTO ก้อนเดียวไปที่ service (ที่เราเขียนแบบรองรับ pagination แล้ว)
