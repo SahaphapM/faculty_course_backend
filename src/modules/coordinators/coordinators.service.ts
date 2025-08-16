@@ -16,7 +16,6 @@ export class CoordinatorsService {
   constructor(private prisma: PrismaService) {}
 
   async create(dto: CreateCoordinatorDto) {
-
     const coordinator = await this.prisma.coordinator.create({
       data: dto,
     });
@@ -24,14 +23,31 @@ export class CoordinatorsService {
     return coordinator;
   }
 
-  async findAll(pag?: CoordinatorFilterDto) {
-    const { limit = 10, page = 1, orderBy = 'asc', sort = 'id', nameCodeMail } = pag || {};
+  async findAll(params?: CoordinatorFilterDto) {
+    const {
+      limit = 10,
+      page = 1,
+      orderBy = 'asc',
+      sort = 'id',
+      nameCodeMail,
+    } = params || {};
 
     const whereCondition: Prisma.coordinatorWhereInput = {
       ...(nameCodeMail && {
         OR: [
           { thaiName: { contains: nameCodeMail } },
           { engName: { contains: nameCodeMail } },
+        ],
+      }),
+      ...(params?.curriculumId && {
+        OR: [
+          {
+            curriculums: {
+              some: {
+                curriculumId: +params.curriculumId,
+              },
+            },
+          },
         ],
       }),
     };
@@ -88,7 +104,7 @@ export class CoordinatorsService {
     }
   }
 
-    async updateCoordinatorToCurriculum(
+  async updateCoordinatorToCurriculum(
     coordinatorIds: number[],
     curriculumId: number,
   ) {
@@ -104,7 +120,9 @@ export class CoordinatorsService {
     });
 
     if (!curriculum) {
-      throw new NotFoundException(`Curriculum with ID ${curriculumId} not found`);
+      throw new NotFoundException(
+        `Curriculum with ID ${curriculumId} not found`,
+      );
     }
 
     const currentCoordinatorIds = curriculum.coordinators.map(

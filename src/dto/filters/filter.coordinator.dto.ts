@@ -1,4 +1,4 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
 
 export class CoordinatorFilterDto extends BaseFilterParams {
@@ -9,4 +9,8 @@ export class CoordinatorFilterDto extends BaseFilterParams {
   @IsOptional()
   @IsString()
   position?: string;
+
+  @IsOptional()
+  @IsString()
+  curriculumId?: string;
 }
