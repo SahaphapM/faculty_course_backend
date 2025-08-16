@@ -272,14 +272,17 @@ export async function getSkillSummary(
 
   // debug (optional): expected tree ของคนที่ระบุ
   if (debug?.studentId && debug?.rootSkillId) {
-    const { forest } = buildExpectedForestForStudent(skills, debug.studentId);
+    const { forest } = buildExpectedForestForStudent(
+      skills as Skill[],
+      debug.studentId,
+    );
     for (const root of forest) printAggTree(root); // จะพิมพ์ E: ที่ทุกชั้น
     // ดึง assessment เฉพาะ root
   }
 
   // สรุป per-root โดยเทียบ "assessment vs expected (per-student)"
   return summarizeAcrossStudentsUsingAssessments(
-    skills,
+    skills as Skill[],
     studentIds,
     assessments,
   );
