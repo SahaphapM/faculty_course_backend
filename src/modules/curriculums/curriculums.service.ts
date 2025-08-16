@@ -284,8 +284,8 @@ export class CurriculumsService {
     skillId: number,
     targetLevel: 'on' | 'above' | 'below' | 'all',
     yearCode: string, // 68 69 70
-    page: number,
-    limit: number,
+    page: number = 1,
+    limit: number = 10,
     search?: string,
   ) {
     const take = Math.max(1, Number(limit) || 10);
@@ -369,16 +369,6 @@ export class CurriculumsService {
       this.prisma.student.findMany({
         where: studentWhere,
         include: {
-          // skill_collections: {
-          //   where: { cloId: { in: cloIds } }, // เอาเฉพาะ clo ที่เกี่ยวข้องชุดนี้
-          // select: {
-          //   id: true,
-          //   studentId: true,
-          //   cloId: true,
-          //   gainedLevel: true,
-          //   clo: { select: { id: true, expectSkillLevel: true, name: true, skill: true } },
-          // },
-          // },
           skill_assessments: {
             where: assessmentWhere,
           },
@@ -389,20 +379,7 @@ export class CurriculumsService {
       }),
     ]);
 
-    // (ถ้าต้องการ) สามารถคำนวน flag เทียบ expected/gained ต่อรายการให้ฝั่ง service เลย
-    // const mapped = students.map((st) => ({
-    //   ...st,
-    //   skill_collections: st.skill_collections.map((sc) => {
-    //     const expected = sc.clo?.expectSkillLevel ?? null;
-    //     const gained = sc.gainedLevel;
-    //     let compare: 'below' | 'on' | 'above' | null = null;
-    //     if (expected == null) compare = null;
-    //     else if (gained < expected) compare = 'below';
-    //     else if (gained === expected) compare = 'on';
-    //     else compare = 'above';
-    //     return { ...sc, expected, compare };
-    //   }),
-    // }));
+    console.log('students', students);
 
     console.dir(students, { depth: 10 });
 
