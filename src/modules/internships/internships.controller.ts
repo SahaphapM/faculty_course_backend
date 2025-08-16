@@ -23,45 +23,22 @@ export class InternshipsController {
   }
 
   @Get()
-  // set name for this api swagger
-  @ApiOperation({
-    summary: 'ดึง internship ทั้งหมด',
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number (1-based)',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Items per page',
-  })
-  @ApiQuery({
-    name: 'search',
-    required: false,
-    description: 'Search term to filter company name (contains)',
-  })
-  @ApiQuery({
-    name: 'sort',
-    required: false,
-    description: 'Sort field, prefix with - for DESC (e.g. -id)',
-  })
-  @ApiQuery({
-    name: 'orderBy',
-    required: false,
-    description: 'Explicit sort direction (asc|desc) overrides sort prefix',
-  })
   @ApiQuery({
     name: 'year',
     required: false,
-    type: Number,
+    type: String,
     description: 'Filter by internship year',
   })
-  findAll(@Query() pag?: BaseFilterParams, @Query('year') year?: number) {
+  findAll(@Query() pag?: BaseFilterParams, @Query('year') year?: string) {
     return this.internshipsService.findAllPagination(pag, year);
+  }
+
+  @Get('get-years')
+  @ApiOperation({
+    summary: 'สถานประกอบการดึง internship ด้วย year',
+  })
+  getInternshipYear() {
+    return this.internshipsService.getInternshipYear();
   }
 
   @Get(':id')

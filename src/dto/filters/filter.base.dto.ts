@@ -58,7 +58,7 @@ export class BaseFilterParams {
     description:
       'Sort field (prefix with - for descending). Example: "name" or "-createdAt". If absent, service default is used.',
     required: false,
-    example: '-id',
+    example: 'id',
   })
   @IsOptional()
   @IsString()

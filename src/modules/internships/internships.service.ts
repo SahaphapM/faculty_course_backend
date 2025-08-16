@@ -43,17 +43,15 @@ export class InternshipsService {
   }
 
   // findAll pagination
-  async findAllPagination(filter: BaseFilterParams, year?: number) {
+  async findAllPagination(filter: BaseFilterParams, year?: string) {
     const { search, page = 1, limit = 10 } = filter;
 
     const where = {
-      year: year || undefined,
-      company: {
-        name: {
-          contains: search,
-        },
-      },
+      ...(year !== undefined ? { year: Number(year) } : {}),
+      ...(search ? { company: { name: { contains: search } } } : {}),
     };
+
+    console.log(where);
 
     const data = await this.prisma.internship.findMany({
       where,
@@ -84,6 +82,15 @@ export class InternshipsService {
       include: {
         studentInternships: { include: { student: true } },
         company: { include: { company_job_positions: true } },
+      },
+    });
+  }
+
+  getInternshipYear() {
+    return this.prisma.internship.groupBy({
+      by: ['year'],
+      orderBy: {
+        year: 'asc',
       },
     });
   }
