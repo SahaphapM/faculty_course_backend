@@ -191,7 +191,7 @@ export class SkillCollectionsService {
           skillCollection.gainedLevel = studentScore.gainedLevel;
           skillCollection.passed = studentScore.gainedLevel >= clo.expectSkillLevel;
 
-          this.skillCollectionsHelper.syncStudentSkillAssessments(
+          await this.skillCollectionsHelper.syncStudentSkillAssessments(
             student.id,
             rootSkills,
             skillCollections,
@@ -230,7 +230,7 @@ export class SkillCollectionsService {
 
         skillCollections.push(newSkillCollection);
 
-        this.skillCollectionsHelper.syncStudentSkillAssessments(
+        await this.skillCollectionsHelper.syncStudentSkillAssessments(
           student.id,
           rootSkills,
           skillCollections,
