@@ -76,21 +76,29 @@ function buildIndex(skills: Skill[]) {
 
 function buildExpectedForestForStudent(
   skills: Skill[],
-  studentId: number
+  studentId: number,
 ): { forest: AggNode[]; expectedByRoot: Map<number, Level | null> } {
   const { children, roots } = buildIndex(skills);
-  const forest = roots.map(r => aggregateNodeForStudent(r, children, studentId, 0));
-  const expectedByRoot = new Map<number, Level | null>(forest.map(n => [n.id, n.expected]));
+  const forest = roots.map((r) =>
+    aggregateNodeForStudent(r, children, studentId, 0),
+  );
+  const expectedByRoot = new Map<number, Level | null>(
+    forest.map((n) => [n.id, n.expected]),
+  );
   return { forest, expectedByRoot };
 }
 
-
 /** รวม expected/gained จาก CLO ใต้สกิล “เฉพาะของนักเรียนคนนี้” */
 /** expected เฉพาะ CLO ใต้โหนดนี้ที่นักเรียนคนนี้เกี่ยวข้อง (mask ด้วย skill_collections) */
-function collectExpectedForStudentOnNode(skill: Skill, studentId: number): Level[] {
+function collectExpectedForStudentOnNode(
+  skill: Skill,
+  studentId: number,
+): Level[] {
   const xs: Level[] = [];
-  for (const clo of (skill.clos ?? [])) {
-    const related = (clo.skill_collections ?? []).some(sc => sc.studentId === studentId);
+  for (const clo of skill.clos ?? []) {
+    const related = (clo.skill_collections ?? []).some(
+      (sc) => sc.studentId === studentId,
+    );
     if (!related) continue;
     if (isNum(clo.expectSkillLevel)) xs.push(clo.expectSkillLevel);
   }
@@ -116,10 +124,12 @@ function aggregateNodeForStudent(
   depth: number,
 ): AggNode {
   const kids = childrenMap.get(skill.id) ?? [];
-  const childAggs = kids.map(k => aggregateNodeForStudent(k, childrenMap, studentId, depth + 1));
+  const childAggs = kids.map((k) =>
+    aggregateNodeForStudent(k, childrenMap, studentId, depth + 1),
+  );
 
   // รวมค่าจากลูก (expected เท่านั้น)
-  const childExp = childAggs.map(c => c.expected).filter(isNum) as Level[];
+  const childExp = childAggs.map((c) => c.expected).filter(isNum) as Level[];
 
   // expected จาก CLO ของโหนดนี้ (เฉพาะที่เด็กเกี่ยวข้อง)
   const selfExpVals = collectExpectedForStudentOnNode(skill, studentId);
@@ -141,7 +151,6 @@ function aggregateNodeForStudent(
     children: childAggs,
   };
 }
-
 
 /** รวมทั้ง forest (ทุก root) ของนักเรียน 1 คน */
 function aggregateStudentForest(skills: Skill[], studentId: number): AggNode[] {
@@ -259,21 +268,24 @@ export async function getSkillSummary(
     studentIds,
   );
 
-
   // ดึง assessment เฉพาะ root
   const { roots } = buildIndex(skills);
-  const rootIds = roots.map(r => r.id);
+  const rootIds = roots.map((r) => r.id);
   const assessments = await fetchRootAssessments(rootIds, studentIds);
 
   // debug (optional): expected tree ของคนที่ระบุ
   if (debug?.studentId && debug?.rootSkillId) {
     const { forest } = buildExpectedForestForStudent(skills, debug.studentId);
     for (const root of forest) printAggTree(root); // จะพิมพ์ E: ที่ทุกชั้น
-    // ดึง assessment เฉพาะ root 
+    // ดึง assessment เฉพาะ root
   }
 
   // สรุป per-root โดยเทียบ "assessment vs expected (per-student)"
-  return summarizeAcrossStudentsUsingAssessments(skills, studentIds, assessments);
+  return summarizeAcrossStudentsUsingAssessments(
+    skills,
+    studentIds,
+    assessments,
+  );
 }
 
 // ---------- Debug helpers ----------
@@ -286,9 +298,10 @@ export function printAggTree(node: AggNode, indent = '') {
   for (const c of node.children) printAggTree(c, indent + '  ');
 }
 
-
-
-async function fetchRootAssessments(rootIds: number[], studentIds: number[]): Promise<Partial<SkillAssessment>[]> {
+async function fetchRootAssessments(
+  rootIds: number[],
+  studentIds: number[],
+): Promise<Partial<SkillAssessment>[]> {
   if (!rootIds.length || !studentIds.length) return [];
   return prisma.skill_assessment.findMany({
     where: {
@@ -306,10 +319,18 @@ async function fetchRootAssessments(rootIds: number[], studentIds: number[]): Pr
   });
 }
 
-function pickAssessedLevel(assessment: Pick<SkillAssessment, 'curriculumLevel' | 'companyLevel' | 'finalLevel'>, pickOrder: string[]) {
+function pickAssessedLevel(
+  assessment: Pick<
+    SkillAssessment,
+    'curriculumLevel' | 'companyLevel' | 'finalLevel'
+  >,
+  pickOrder: string[],
+) {
   if (isNum(assessment.finalLevel)) return assessment.finalLevel!;
-  if (pickOrder[0] === 'company' && isNum(assessment.companyLevel)) return assessment.companyLevel!;
-  if (isNum(assessment.companyLevel) && pickOrder.includes('company')) return assessment.companyLevel!;
+  if (pickOrder[0] === 'company' && isNum(assessment.companyLevel))
+    return assessment.companyLevel!;
+  if (isNum(assessment.companyLevel) && pickOrder.includes('company'))
+    return assessment.companyLevel!;
   if (isNum(assessment.curriculumLevel)) return assessment.curriculumLevel!;
   return null;
 }
@@ -318,18 +339,22 @@ function summarizeAcrossStudentsUsingAssessments(
   skills: Skill[],
   studentIds: number[],
   assessments: Partial<SkillAssessment>[],
-  pickOrder: Array<'final' | 'company' | 'curriculum'> = ['final', 'company', 'curriculum'],
+  pickOrder: Array<'final' | 'company' | 'curriculum'> = [
+    'final',
+    'company',
+    'curriculum',
+  ],
 ): RootSummary[] {
   const { roots } = buildIndex(skills);
 
-  const base = roots.map(r => ({
+  const base = roots.map((r) => ({
     skillName: r.thaiName,
     skillId: r.id,
     domain: r.domain,
     totalStudent: studentIds.length,
     buckets: {
       above: { count: 0, studentIds: [] as number[] },
-      on:    { count: 0, studentIds: [] as number[] },
+      on: { count: 0, studentIds: [] as number[] },
       below: { count: 0, studentIds: [] as number[] },
     },
   }));
@@ -338,30 +363,34 @@ function summarizeAcrossStudentsUsingAssessments(
   const assessMap = new Map<string, number | null>();
   for (const a of assessments) {
     if (!isNum(a.skillId) || !isNum(a.studentId)) continue;
-    assessMap.set(`${a.skillId}:${a.studentId}`, pickAssessedLevel(a as SkillAssessment, pickOrder));
+    assessMap.set(
+      `${a.skillId}:${a.studentId}`,
+      pickAssessedLevel(a as SkillAssessment, pickOrder),
+    );
   }
 
   // วนทีละนักเรียน → คำนวณ expectedByRoot (ต่อคน) → เทียบกับ assessment ที่ root
   for (const sid of studentIds) {
     const { expectedByRoot } = buildExpectedForestForStudent(skills, sid);
     for (const root of roots) {
-      const target   = expectedByRoot.get(root.id);
+      const target = expectedByRoot.get(root.id);
       const assessed = assessMap.get(`${root.id}:${sid}`);
       if (!isNum(target) || !isNum(assessed)) continue;
 
-      const bucket = assessed > target ? 'above' : (assessed === target ? 'on' : 'below');
-      const dest = base.find(b => b.skillId === root.id)!;
+      const bucket =
+        assessed > target ? 'above' : assessed === target ? 'on' : 'below';
+      const dest = base.find((b) => b.skillId === root.id)!;
       dest.buckets[bucket].count += 1;
       dest.buckets[bucket].studentIds.push(sid);
     }
   }
 
-  return base.map(b => ({
+  return base.map((b) => ({
     skillName: b.skillName,
     skillId: b.skillId,
     domain: b.domain,
     totalStudent: b.totalStudent,
-    levelSummary: (['above','on','below'] as const).map(cat => ({
+    levelSummary: (['above', 'on', 'below'] as const).map((cat) => ({
       category: cat,
       count: b.buckets[cat].count,
       studentIds: b.buckets[cat].studentIds,
