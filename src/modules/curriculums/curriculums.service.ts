@@ -357,7 +357,7 @@ export class CurriculumsService {
   async findStudentsBySkillLevel(
     skillId: number,
     targetLevel: 'on' | 'above' | 'below' | 'all',
-    yearCode: string, // 68 69 70
+    yearCode: string, // 2568 2569 2570
     page: number = 1,
     limit: number = 15,
     search?: string,
@@ -366,7 +366,7 @@ export class CurriculumsService {
     return findStudentsTargetSkillLevel(
       skillId,
       targetLevel,
-      yearCode,
+      yearCode.slice(-2),
       page,
       limit,
       search,
