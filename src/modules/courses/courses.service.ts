@@ -33,10 +33,7 @@ export class CourseService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Create a new course(s)
-  async create(
-    createCourseDtos: CreateCourseDtoWithInstructor[],
-    InstructorId?: number,
-  ) {
+  async create(createCourseDtos: CreateCourseDtoWithInstructor[]) {
     const createCoursePromises = createCourseDtos.map(
       async (createCourseDto) => {
         const { subjectId, course_instructors, ...rest } = createCourseDto;
@@ -55,11 +52,13 @@ export class CourseService {
             data: {
               ...rest,
               subject: { connect: { id: subjectId } },
-              course_instructors: {
-                create: course_instructors.map((ci) => ({
-                  instructorId: ci.instructorId,
-                })),
-              },
+              ...(course_instructors && {
+                course_instructors: {
+                  create: course_instructors.map((ci) => ({
+                    instructorId: ci.instructorId,
+                  })),
+                },
+              }),
             },
           });
 

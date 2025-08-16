@@ -1,16 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import {
-  IsBoolean,
-  IsInt,
-  IsNotEmpty,
-  IsOptional,
-  IsString,
-} from 'class-validator';
-import { CourseInstructorDto } from 'src/generated/nestjs-dto/courseInstructor.dto';
+import { IsBoolean, IsInt, IsNotEmpty, IsOptional } from 'class-validator';
 
 export class InstructorIds {
   @ApiProperty({ type: [Number], example: [1, 2, 3] })
   instructorIds: number[];
+}
+
+export class CourseInstructor {
+  @ApiProperty({ type: Number, example: 1, required: false, nullable: true })
+  instructorId: number;
 }
 
 export class CreateCourseDtoWithInstructor {
@@ -46,10 +44,10 @@ export class CreateCourseDtoWithInstructor {
   subjectId: number;
 
   @ApiProperty({
-    type: [CourseInstructorDto],
+    type: [CourseInstructor],
     required: false,
     nullable: true,
   })
   @IsOptional()
-  course_instructors?: CourseInstructorDto[];
+  course_instructors?: CourseInstructor[];
 }
