@@ -7,10 +7,5 @@ export class CourseInstructorDto {
   type: 'integer',
   format: 'int32',
 })
-instructorId: number ;
-@ApiProperty({
-  type: 'integer',
-  format: 'int32',
-})
-courseId: number ;
+id: number ;
 }

@@ -9,20 +9,29 @@ export class CourseInstructor {
   type: 'integer',
   format: 'int32',
 })
-instructorId: number ;
+id: number ;
 @ApiProperty({
   type: 'integer',
   format: 'int32',
+  nullable: true,
 })
-courseId: number ;
+instructorId: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+courseId: number  | null;
 @ApiProperty({
   type: () => Course,
   required: false,
+  nullable: true,
 })
-course?: Course ;
+course?: Course  | null;
 @ApiProperty({
   type: () => Instructor,
   required: false,
+  nullable: true,
 })
-instructor?: Instructor ;
+instructor?: Instructor  | null;
 }
