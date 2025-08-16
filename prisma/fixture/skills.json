@@ -213,13 +213,6 @@
     "domain": "ทักษะ"
   },
   {
-    "thaiName": "การวิเคราะห์ข้อมูล",
-    "engName": "Data Analysis",
-    "thaiDescription": "ความสามารถในการวิเคราะห์และตีความข้อมูล",
-    "engDescription": "Ability to analyze and interpret data",
-    "domain": "ทักษะ"
-  },
-  {
     "thaiName": "การใช้ปัญญาประดิษฐ์",
     "engName": "Artificial Intelligence",
     "thaiDescription": "ความสามารถในการประยุกต์ใช้เทคโนโลยี AI",

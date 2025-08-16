@@ -9,12 +9,7 @@ import { Prisma } from '@prisma/client'; // Import Prisma types
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
-import {
-  fetchSkillsWithCollections,
-  generateSkillSummary,
-  getSkillDomains,
-  getStudentIds,
-} from './curriculums.helper';
+import { getSkillSummary } from './curriculums.helper';
 import { CreateLevelDescriptionDto } from 'src/generated/nestjs-dto/create-levelDescription.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
@@ -272,26 +267,17 @@ export class CurriculumsService {
     });
   }
 
+  // ---------- Service entry (พร้อมดีบักทางเลือก) ----------
   async getSkillSummaryByCurriculum(
     curriculumId: number,
     yearCode: string,
     skillType: string,
-  ) {
-    const domains = getSkillDomains(skillType);
-
-    const studentIds = await getStudentIds(curriculumId, yearCode);
-    console.log('totalStudent', studentIds.length);
-
-    // 3. Fetch skills with their CLOs and skill collections
-    const skills = await fetchSkillsWithCollections(
-      curriculumId,
-      domains,
-      studentIds,
-    );
-    console.log('totalSkills', skills);
-
-    // 4. Process root skills and generate summary
-    return generateSkillSummary(skills);
+    debug?: { studentId?: number; rootSkillId?: number }, // optional ดีบัก
+  ): Promise<any> {
+    return getSkillSummary(curriculumId, yearCode, skillType, {
+      studentId: 2,
+      rootSkillId: 13,
+    });
   }
 
   async findStudentsBySkillLevel(
@@ -326,7 +312,7 @@ export class CurriculumsService {
     if (targetLevel === 'all') {
       whereSC = {
         cloId: { in: cloIds },
-        gainedLevel: { in: [0,1, 2, 3, 4, 5] }, // ปรับตามธุรกิจคุณ
+        gainedLevel: { in: [0, 1, 2, 3, 4, 5] }, // ปรับตามธุรกิจคุณ
       };
     } else {
       const orClauses = clos
@@ -385,13 +371,13 @@ export class CurriculumsService {
         include: {
           // skill_collections: {
           //   where: { cloId: { in: cloIds } }, // เอาเฉพาะ clo ที่เกี่ยวข้องชุดนี้
-            // select: {
-            //   id: true,
-            //   studentId: true,
-            //   cloId: true,
-            //   gainedLevel: true,
-            //   clo: { select: { id: true, expectSkillLevel: true, name: true, skill: true } },
-            // },
+          // select: {
+          //   id: true,
+          //   studentId: true,
+          //   cloId: true,
+          //   gainedLevel: true,
+          //   clo: { select: { id: true, expectSkillLevel: true, name: true, skill: true } },
+          // },
           // },
           skill_assessments: {
             where: assessmentWhere,
