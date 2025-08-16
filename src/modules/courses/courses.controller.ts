@@ -10,13 +10,11 @@ import {
 } from '@nestjs/common';
 import { CourseService } from './courses.service';
 import { ApiBearerAuth, ApiBody, ApiQuery } from '@nestjs/swagger';
-import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
-import { ApiProperty } from '@nestjs/swagger';
-import { InstructorIds } from './dto/course.dto';
+import { CreateCourseDtoWithInstructor, InstructorIds } from './dto/course.dto';
 
 @ApiBearerAuth()
 @Controller('courses')
@@ -25,9 +23,9 @@ export class CoursesController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @ApiQuery({ name: 'InstructorId', required: false })
-  @ApiBody({ type: CreateCourseDto, isArray: true })
+  @ApiBody({ type: CreateCourseDtoWithInstructor, isArray: true })
   @Post()
-  create(@Body() createCourseDto: CreateCourseDto[]) {
+  create(@Body() createCourseDto: CreateCourseDtoWithInstructor[]) {
     return this.coursesService.create(createCourseDto);
   }
 

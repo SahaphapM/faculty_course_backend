@@ -5,11 +5,11 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateCourseDto } from 'src/generated/nestjs-dto/create-course.dto';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { Prisma } from '@prisma/client';
 import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { CreateCourseDtoWithInstructor } from './dto/course.dto';
 
 @Injectable()
 export class CourseService {
@@ -33,10 +33,13 @@ export class CourseService {
   constructor(private readonly prisma: PrismaService) {}
 
   // Create a new course(s)
-  async create(createCourseDtos: CreateCourseDto[], InstructorId?: number) {
+  async create(
+    createCourseDtos: CreateCourseDtoWithInstructor[],
+    InstructorId?: number,
+  ) {
     const createCoursePromises = createCourseDtos.map(
       async (createCourseDto) => {
-        const { subjectId, ...rest } = createCourseDto;
+        const { subjectId, course_instructors, ...rest } = createCourseDto;
 
         try {
           // Find the subject
@@ -52,6 +55,11 @@ export class CourseService {
             data: {
               ...rest,
               subject: { connect: { id: subjectId } },
+              course_instructors: {
+                create: course_instructors.map((ci) => ({
+                  instructorId: ci.instructorId,
+                })),
+              },
             },
           });
 
