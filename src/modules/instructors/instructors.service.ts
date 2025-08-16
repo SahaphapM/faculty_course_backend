@@ -39,7 +39,7 @@ export class InstructorsService {
     return teacher;
   }
 
-  async findAll(pag?: InstructorFilterDto) {
+  async findAll(params?: InstructorFilterDto) {
     const defaultLimit = 10;
     const defaultPage = 1;
 
@@ -52,7 +52,8 @@ export class InstructorsService {
       curriculumId,
       branchId,
       facultyId,
-    } = pag || {};
+      courseId,
+    } = params || {};
 
     const whereCondition: Prisma.instructorWhereInput = {
       ...(nameCodeMail && {
@@ -66,6 +67,7 @@ export class InstructorsService {
       ...(curriculumId && { curriculums: { some: { curriculumId } } }),
       ...(branchId && { branchId }),
       ...(facultyId && { branch: { facultyId } }),
+      ...(courseId && { course_instructors: { some: { courseId } } }),
     };
 
     // With pagination
@@ -113,8 +115,6 @@ export class InstructorsService {
     }
     return teacher;
   }
-
-
 
   async update(id: number, updateTeacherDto: UpdateInstructorDto) {
     try {
