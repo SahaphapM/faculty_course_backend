@@ -266,7 +266,7 @@ export async function getSkillSummary(
   );
 
   // ดึง assessment เฉพาะ root
-  const { roots } = buildIndex(skills);
+  const { roots } = buildIndex(skills as Skill[]);
   const rootIds = roots.map((r) => r.id);
   const assessments = await fetchRootAssessments(rootIds, studentIds);
 
