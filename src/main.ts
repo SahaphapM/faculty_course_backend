@@ -1,9 +1,8 @@
-import { HttpAdapterHost, NestFactory } from '@nestjs/core';
+import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app/app.module';
 import { ValidationPipe } from '@nestjs/common';
 import * as cookieParser from 'cookie-parser';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { PrismaClientExceptionFilter } from 'nestjs-prisma';
 import { LoggingInterceptor } from './logging/logging.interceptor';
 import { AppLoggerService } from './logging/app-logger.service';
 import { AuditLogInterceptor } from './logging/audit-log.interceptor';
@@ -30,9 +29,6 @@ async function bootstrap() {
       // forbidNonWhitelisted: true,
     }),
   );
-
-  const { httpAdapter } = app.get(HttpAdapterHost);
-  app.useGlobalFilters(new PrismaClientExceptionFilter(httpAdapter));
 
   // Global HTTP logging interceptor
   app.useGlobalInterceptors(

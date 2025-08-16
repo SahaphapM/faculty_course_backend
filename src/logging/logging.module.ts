@@ -8,7 +8,7 @@ import { AuditLogInterceptor } from './audit-log.interceptor';
 import { AuditLogDecoratorInterceptor } from './audit-log-decorator.interceptor';
 import { AuditLogController } from './audit-log.controller';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { PrismaModule } from 'nestjs-prisma';
+import { PrismaModule } from 'src/prisma/prisma.module';
 
 @Global()
 @Module({

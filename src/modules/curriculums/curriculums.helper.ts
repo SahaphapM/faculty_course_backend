@@ -150,10 +150,10 @@ function aggregateNodeForStudent(
 }
 
 /** รวมทั้ง forest (ทุก root) ของนักเรียน 1 คน */
-function aggregateStudentForest(skills: Skill[], studentId: number): AggNode[] {
-  const { children, roots } = buildIndex(skills);
-  return roots.map((r) => aggregateNodeForStudent(r, children, studentId, 0));
-}
+// function aggregateStudentForest(skills: Skill[], studentId: number): AggNode[] {
+//   const { children, roots } = buildIndex(skills);
+//   return roots.map((r) => aggregateNodeForStudent(r, children, studentId, 0));
+// }
 
 // ---------- Public APIs (DB) ----------
 export function getSkillDomains(skillType: string): LearningDomain[] {
@@ -200,55 +200,55 @@ export async function fetchSkillsWithCollections(
 }
 
 // ---------- สรุปผล per-root (ทุกนักเรียน) ----------
-function summarizeAcrossStudentsHierarchical(
-  skills: Skill[],
-  studentIds: number[],
-): RootSummary[] {
-  const { roots } = buildIndex(skills);
+// function summarizeAcrossStudentsHierarchical(
+//   skills: Skill[],
+//   studentIds: number[],
+// ): RootSummary[] {
+//   const { roots } = buildIndex(skills);
 
-  // เตรียมโครงสรุป
-  const base = roots.map((r) => ({
-    skillName: r.thaiName,
-    skillId: r.id,
-    domain: r.domain,
-    totalStudent: studentIds.length,
-    buckets: {
-      above: { count: 0, studentIds: [] as number[] },
-      on: { count: 0, studentIds: [] as number[] },
-      below: { count: 0, studentIds: [] as number[] },
-    },
-  }));
+//   // เตรียมโครงสรุป
+//   const base = roots.map((r) => ({
+//     skillName: r.thaiName,
+//     skillId: r.id,
+//     domain: r.domain,
+//     totalStudent: studentIds.length,
+//     buckets: {
+//       above: { count: 0, studentIds: [] as number[] },
+//       on: { count: 0, studentIds: [] as number[] },
+//       below: { count: 0, studentIds: [] as number[] },
+//     },
+//   }));
 
-  // วนทีละนักเรียน → roll-up แบบไล่ชั้น → อัปเดต bucket ของแต่ละ root
-  for (const sid of studentIds) {
-    const forest = aggregateStudentForest(skills, sid);
-    for (const rootNode of forest) {
-      const dest = base.find((b) => b.skillId === rootNode.id)!;
-      if (
-        rootNode.category === 'above' ||
-        rootNode.category === 'on' ||
-        rootNode.category === 'below'
-      ) {
-        dest.buckets[rootNode.category].count += 1;
-        dest.buckets[rootNode.category].studentIds.push(sid);
-      }
-      // ถ้า 'n/a' จะไม่นับรวม (ข้อมูลไม่พอ)
-    }
-  }
+//   // วนทีละนักเรียน → roll-up แบบไล่ชั้น → อัปเดต bucket ของแต่ละ root
+//   for (const sid of studentIds) {
+//     const forest = aggregateStudentForest(skills, sid);
+//     for (const rootNode of forest) {
+//       const dest = base.find((b) => b.skillId === rootNode.id)!;
+//       if (
+//         rootNode.category === 'above' ||
+//         rootNode.category === 'on' ||
+//         rootNode.category === 'below'
+//       ) {
+//         dest.buckets[rootNode.category].count += 1;
+//         dest.buckets[rootNode.category].studentIds.push(sid);
+//       }
+//       // ถ้า 'n/a' จะไม่นับรวม (ข้อมูลไม่พอ)
+//     }
+//   }
 
-  // จัดรูปแบบ levelSummary (มีค่า 0 ก็แสดง)
-  return base.map((b) => ({
-    skillName: b.skillName,
-    skillId: b.skillId,
-    domain: b.domain,
-    totalStudent: b.totalStudent,
-    levelSummary: (['above', 'on', 'below'] as const).map((cat) => ({
-      category: cat,
-      count: b.buckets[cat].count,
-      studentIds: b.buckets[cat].studentIds,
-    })),
-  }));
-}
+//   // จัดรูปแบบ levelSummary (มีค่า 0 ก็แสดง)
+//   return base.map((b) => ({
+//     skillName: b.skillName,
+//     skillId: b.skillId,
+//     domain: b.domain,
+//     totalStudent: b.totalStudent,
+//     levelSummary: (['above', 'on', 'below'] as const).map((cat) => ({
+//       category: cat,
+//       count: b.buckets[cat].count,
+//       studentIds: b.buckets[cat].studentIds,
+//     })),
+//   }));
+// }
 
 // ---------- Service entry (พร้อมดีบักทางเลือก) ----------
 export async function getSkillSummary(
@@ -266,14 +266,14 @@ export async function getSkillSummary(
   );
 
   // ดึง assessment เฉพาะ root
-  const { roots } = buildIndex(skills as Skill[]);
+  const { roots } = buildIndex(skills as unknown as Skill[]);
   const rootIds = roots.map((r) => r.id);
   const assessments = await fetchRootAssessments(rootIds, studentIds);
 
   // debug (optional): expected tree ของคนที่ระบุ
   if (debug?.studentId && debug?.rootSkillId) {
     const { forest } = buildExpectedForestForStudent(
-      skills as Skill[],
+      skills as unknown as Skill[],
       debug.studentId,
     );
     for (const root of forest) printAggTree(root); // จะพิมพ์ E: ที่ทุกชั้น
@@ -282,7 +282,7 @@ export async function getSkillSummary(
 
   // สรุป per-root โดยเทียบ "assessment vs expected (per-student)"
   return summarizeAcrossStudentsUsingAssessments(
-    skills as Skill[],
+    skills as unknown as Skill[],
     studentIds,
     assessments,
   );

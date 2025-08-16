@@ -1,4 +1,4 @@
-import { HttpStatus, Module } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsersModule } from '../modules/users/users.module';
@@ -17,7 +17,6 @@ import { SubjectModule } from 'src/modules/subjects/subjects.module';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { InstructorsModule } from 'src/modules/instructors/instructors.module';
 import { SkillCollectionsModule } from 'src/modules/skill-collectiolns/skill-collectiolns.module';
-import { providePrismaClientExceptionFilter } from 'nestjs-prisma';
 import { AuthModule } from 'src/auth/auth.module';
 import { CompaniesModule } from 'src/modules/companies/companies.module';
 import { InternshipsModule } from 'src/modules/internships/internships.module';
@@ -60,15 +59,6 @@ import { CoordinatorsModule } from 'src/modules/coordinators/coordinators.module
     CoordinatorsModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    PrismaService,
-    providePrismaClientExceptionFilter({
-      // Prisma Error Code: HTTP Status Response
-      P2000: HttpStatus.BAD_REQUEST,
-      P2002: HttpStatus.CONFLICT,
-      P2025: HttpStatus.NOT_FOUND,
-    }),
-  ],
+  providers: [AppService, PrismaService],
 })
 export class AppModule {}
