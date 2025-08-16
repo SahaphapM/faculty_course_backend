@@ -17,6 +17,7 @@ import { UpdateCoordinatorDto } from 'src/generated/nestjs-dto/update-coordinato
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { CoordinatorFilterDto } from 'src/dto/filters/filter.coordinator.dto';
+import { CoordinatorIds } from './dto/coordinator.dto';
 
 @ApiBearerAuth()
 @Controller('coordinators')
@@ -61,17 +62,17 @@ export class CoordinatorsController {
     return this.coordinatorsService.remove(+id);
   }
 
-    @Roles(UserRole.Admin, UserRole.Coordinator)
-    @Post('assign-coordinator')
-    @ApiBody({ type: [Number] })
-    @HttpCode(HttpStatus.OK)
-    selectInstructorToCurriculum(
-      @Query('curriculumId') curriculumId: string,
-      @Body() coordinatorIds: number[],
-    ) {
-      return this.coordinatorsService.updateCoordinatorToCurriculum(
-        coordinatorIds,
-        +curriculumId,
-      );
-    }
+  @Roles(UserRole.Admin, UserRole.Coordinator)
+  @Post('assign-coordinator')
+  @ApiBody({ type: CoordinatorIds })
+  @HttpCode(HttpStatus.OK)
+  selectInstructorToCurriculum(
+    @Query('curriculumId') curriculumId: string,
+    @Body() coordinatorIds: CoordinatorIds,
+  ) {
+    return this.coordinatorsService.updateCoordinatorToCurriculum(
+      coordinatorIds.coordinatorIds,
+      +curriculumId,
+    );
+  }
 }

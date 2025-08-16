@@ -52,7 +52,6 @@ export class CourseService {
             data: {
               ...rest,
               subject: { connect: { id: subjectId } },
-              ...(InstructorId ? { course_instructors: { create: { instructorId: InstructorId } } } : {}),
             },
           });
 
@@ -98,31 +97,33 @@ export class CourseService {
 
     const AND: Prisma.courseWhereInput[] = [];
     const OR: Prisma.courseWhereInput[] = [];
-  
+
     if (nameCode) {
       OR.push(
         { subject: { thaiName: { contains: nameCode } } },
-        { subject: { engName:  { contains: nameCode } } },
-        { subject: { code:     { contains: nameCode } } },
+        { subject: { engName: { contains: nameCode } } },
+        { subject: { code: { contains: nameCode } } },
       );
     }
     if (years?.length) {
-      OR.push(...years.map(y => ({ year: Number(y) })));
+      OR.push(...years.map((y) => ({ year: Number(y) })));
     }
     if (semesters?.length) {
-      OR.push(...semesters.map(s => ({ semester: Number(s) })));
+      OR.push(...semesters.map((s) => ({ semester: Number(s) })));
     }
     if (OR.length) AND.push({ OR });
-  
-    if (active !== undefined) AND.push({ active });           // รองรับทั้ง true/false
+
+    if (active !== undefined) AND.push({ active }); // รองรับทั้ง true/false
     if (subjectId) AND.push({ subjectId });
     if (curriculumId) AND.push({ subject: { curriculumId } });
     if (branchId) AND.push({ subject: { curriculum: { branchId } } });
-    if (facultyId) AND.push({ subject: { curriculum: { branch: { facultyId } } } });
-    if (instructorId) AND.push({ course_instructors: { some: { instructorId } } });
-  
+    if (facultyId)
+      AND.push({ subject: { curriculum: { branch: { facultyId } } } });
+    if (instructorId)
+      AND.push({ course_instructors: { some: { instructorId } } });
+
     const whereCondition: Prisma.courseWhereInput = AND.length ? { AND } : {};
-  
+
     const options: Prisma.courseFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
@@ -221,6 +222,77 @@ export class CourseService {
         throw new NotFoundException(`Course with ID ${id} not found`);
       }
       throw new BadRequestException('Failed to delete course');
+    }
+  }
+
+  // assign instructor to course and remove instructor from course (diff update)
+  async assignInstructor(id: number, instructorIds: number[]) {
+    // กันค่า duplicate ใน input
+    const uniqueIds = Array.from(new Set(instructorIds));
+
+    try {
+      return await this.prisma.$transaction(async (tx) => {
+        const course = await tx.course.findUnique({
+          where: { id },
+          include: { course_instructors: true },
+        });
+
+        if (!course) {
+          throw new NotFoundException(`Course with ID ${id} not found`);
+        }
+
+        const currentIds = course.course_instructors.map(
+          (ci) => ci.instructorId,
+        );
+
+        // ids ที่ต้องลบ (เคยมี แต่ไม่ได้ส่งมาแล้ว)
+        const instructorIdsToRemove = currentIds.filter(
+          (instructorId) => !uniqueIds.includes(instructorId),
+        );
+
+        // ids ที่ต้องเพิ่ม (ส่งมา แต่ยังไม่มี)
+        const instructorIdsToInsert = uniqueIds.filter(
+          (instructorId) => !currentIds.includes(instructorId),
+        );
+
+        if (instructorIdsToRemove.length > 0) {
+          await tx.course_instructor.deleteMany({
+            where: {
+              courseId: id,
+              instructorId: { in: instructorIdsToRemove },
+            },
+          });
+        }
+
+        if (instructorIdsToInsert.length > 0) {
+          await tx.course_instructor.createMany({
+            data: instructorIdsToInsert.map((instructorId) => ({
+              courseId: id,
+              instructorId,
+            })),
+            skipDuplicates: true, // กัน unique ซ้ำ ๆ หากมี constraint
+          });
+        }
+
+        // คืนค่าหลังอัปเดต (จะได้เห็นรายการล่าสุด)
+        return tx.course.findUnique({
+          where: { id },
+          include: {
+            course_instructors: {
+              include: { instructor: true }, // ถ้าต้องการข้อมูล instructor
+            },
+          },
+        });
+      });
+    } catch (error: any) {
+      // หมายเหตุ: deleteMany/createMany จะไม่โยน P2025 เวลาไม่เจอ record
+      if (error.code === 'P2003') {
+        // FK constraint failed -> มี instructorId ที่ไม่มีอยู่จริง
+        throw new BadRequestException('Some instructorIds do not exist');
+      }
+      throw new BadRequestException(
+        'Failed to assign instructor to course: ' + error.message,
+      );
     }
   }
 }
