@@ -61,14 +61,24 @@ export class StudentsService {
       codeYears,
     } = pag || {};
 
+    const or: Prisma.studentWhereInput[] = [];
+
+    if (nameCode) {
+      or.push(
+        { thaiName: { contains: nameCode } },
+        { engName: { contains: nameCode } },
+      );
+    }
+
     const where: Prisma.studentWhereInput = {
-      ...(nameCode && {
-        OR: [
-          { thaiName: { contains: nameCode } },
-          { engName: { contains: nameCode } },
-          { code: { contains: nameCode } },
-        ],
-      }),
+      ...(or.length ? { OR: or } : {}),
+      ...(codeYears?.length
+        ? {
+            AND: codeYears.map((year) => ({
+              code: { startsWith: year.slice(-2) },
+            })),
+          }
+        : {}),
       ...(curriculumId && { curriculumId }),
       ...(branchId && { branchId }),
       ...(facultyId && { branch: { facultyId } }),
@@ -90,16 +100,9 @@ export class StudentsService {
           },
         },
       }),
-
-      ...(codeYears?.length && {
-        OR: codeYears.map((prefix) => ({
-          code: {
-            // slice to kept two last character example 2565 => 65
-            startsWith: prefix.slice(-2),
-          },
-        })),
-      }),
     };
+
+    console.dir(where, { depth: 10 });
 
     const options: Prisma.studentFindManyArgs = {
       where,
