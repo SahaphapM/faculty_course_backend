@@ -39,7 +39,7 @@ export class JobPositionsService {
   async findAll(
     filter: BaseFilterParams,
   ): Promise<PaginatedResult<JobPosition>> {
-    const { search, page = 1, limit = 5, sort } = filter;
+    const { search, page = 1, limit = 5, sort, orderBy } = filter;
     const skip = (page - 1) * limit;
 
     const where = {
@@ -52,9 +52,7 @@ export class JobPositionsService {
       this.prisma.job_position.findMany({
         skip,
         take: limit,
-        orderBy: sort
-          ? { [sort.replace('-', '')]: sort.startsWith('-') ? 'desc' : 'asc' }
-          : { id: 'asc' },
+        orderBy: { [sort || 'id']: orderBy || 'desc' },
         where,
       }),
       this.prisma.job_position.count({ where }),
