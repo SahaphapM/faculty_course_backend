@@ -5,13 +5,17 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { ClosService } from '../clos/clos.service';
-import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 import { StudentScoreList } from 'src/dto/filters/filter.base.dto';
 import { SkillCollectionDto } from 'src/generated/nestjs-dto/skillCollection.dto';
 import { Prisma } from '@prisma/client';
 import { SkillCollectionsHelper } from './skill-collectiolns.helper';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 import { SkillNode } from './skill-collectiolns.helper';
+import {
+  SkillCollectionByCourseFilterDto,
+} from 'src/dto/filters/filter.skill-collection-summary.dto';
+
 
 @Injectable()
 export class SkillCollectionsService {
@@ -51,22 +55,20 @@ export class SkillCollectionsService {
     const skill_assessments = await this.prisma.skill_assessment.findMany({
       where: { studentId: student.id },
       include: {
-        skill:true
-      }
+        skill: true,
+      },
     });
 
     // 3. คำนวณ root skill assessment จาก leaf skill ของ student
-    const skillTree =
-      await this.skillCollectionsHelper.skillTree(
-        skillCollections,
-        skill_assessments
-      );
+    const skillTree = await this.skillCollectionsHelper.skillTree(
+      skillCollections,
+      skill_assessments,
+    );
 
     // filter root where gainedLevel > 0
     const filteredSkillTree = Array.from(skillTree.values()).filter(
       (skill) => skill.gained > 0,
     );
-
 
     // 12. แยก specific (hard) และ soft skill
     const specific = filteredSkillTree.filter(
@@ -86,7 +88,7 @@ export class SkillCollectionsService {
 
     console.log('=== [DEBUG] Soft Skill Tree ===');
     console.dir(soft, { depth: 10 });
-    
+
     return { specific, soft };
   }
 
@@ -116,7 +118,7 @@ export class SkillCollectionsService {
     courseId: number,
     cloId: number,
     studentScoreList: StudentScoreList[],
-  ){
+  ) {
     const course = await this.prisma.course.findUnique({
       where: { id: courseId },
       select: {
@@ -130,8 +132,11 @@ export class SkillCollectionsService {
       },
     });
 
-    if (!course || !course.subjectId) {
-      throw new NotFoundException(`Course with ID ${courseId} not found` || `Subject with ID ${course.subjectId} not found`);
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${courseId} not found`);
+    }
+    if (!course.subjectId) {
+      throw new NotFoundException(`Subject with ID ${course.subjectId} not found`);
     }
 
     const clo = await this.prisma.clo.findUnique({
@@ -167,15 +172,13 @@ export class SkillCollectionsService {
         });
       }
 
-      // 2. ดึง skill_collections ของ student 
+      // 2. ดึง skill_collections ของ student
 
       const skillCollection = await this.prisma.skill_collection.findFirst({
         where: { studentId: student.id, courseId: course.id, cloId: clo.id },
       });
 
-      
       let skillCollections = [];
-
 
       // 4. compare skillCollection.gainedLevel with studentScore.gainedLevel
       if (skillCollection) {
@@ -189,26 +192,25 @@ export class SkillCollectionsService {
           });
 
           skillCollection.gainedLevel = studentScore.gainedLevel;
-          skillCollection.passed = studentScore.gainedLevel >= clo.expectSkillLevel;
+          skillCollection.passed =
+            studentScore.gainedLevel >= clo.expectSkillLevel;
 
           await this.skillCollectionsHelper.syncStudentSkillAssessments(
             student.id,
             rootSkills,
             skillCollections,
-          );   
+          );
 
           skillCollections = await this.prisma.skill_collection.findMany({
-            where: { studentId: student.id},
+            where: { studentId: student.id },
             include: {
               clo: {
-               include: {
-                skill: true
-               }
+                include: {
+                  skill: true,
+                },
               },
             },
           });
-
-
         }
       } else {
         const newSkillCollection = await this.prisma.skill_collection.create({
@@ -222,8 +224,8 @@ export class SkillCollectionsService {
           include: {
             clo: {
               include: {
-                skill: true
-              }
+                skill: true,
+              },
             },
           },
         });
@@ -237,18 +239,17 @@ export class SkillCollectionsService {
         );
 
         skillCollections = await this.prisma.skill_collection.findMany({
-          where: { studentId: student.id},
+          where: { studentId: student.id },
           include: {
             clo: {
-             include: {
-              skill: true
-             }
+              include: {
+                skill: true,
+              },
             },
           },
         });
       }
     }
-
   }
 
   async generateTestData() {
@@ -1048,4 +1049,142 @@ export class SkillCollectionsService {
   }
 
   generateTestSkillCollections() {}
+  // service
+  async getSkillCollectionSummaryByCoursePaginated(
+    courseId: number,
+    pag: SkillCollectionByCourseFilterDto,
+  ) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const { studentName, studentCode, page, limit, sort, orderBy } = pag;
+    const _limit = Number(limit ?? defaultLimit);
+    const _page = Number(page ?? defaultPage);
+    const _skip = (_page - 1) * _limit;
+
+    const codePrefix = studentCode ? studentCode.slice(0, 2) : undefined;
+
+    const studentWhere: Prisma.studentWhereInput = {
+      thaiName: studentName ? { contains: studentName } : undefined,
+      code: codePrefix ? { startsWith: codePrefix } : undefined,
+      skill_collections: { some: { courseId } }, // join กับ course
+    };
+
+    // ดึง student + total
+    const { students, total } = await this.prisma.$transaction(async (tx) => {
+      const students = await tx.student.findMany({
+        where: studentWhere,
+        select: { id: true, code: true, thaiName: true },
+        orderBy: { [sort || 'code']: (orderBy as any) ?? 'asc' },
+        skip: _skip,
+        take: _limit,
+      });
+
+      const total = await tx.student.count({ where: studentWhere });
+      return { students, total };
+    });
+
+    if (!students.length) {
+      return createPaginatedData([], 0, _page, _limit);
+    }
+
+    const studentIds = students.map((s) => s.id);
+
+    // join skill_collection + skill
+    const scRows = await this.prisma.skill_collection.findMany({
+      where: { courseId, studentId: { in: studentIds } },
+      select: {
+        studentId: true,
+        gainedLevel: true,
+        clo: {
+          select: {
+            skillId: true,
+            skill: { select: { id: true, thaiName: true } },
+          },
+        },
+      },
+    });
+
+    const byStudent = new Map<number, Map<number, number[]>>();
+    const skillNameMap = new Map<number, string>();
+
+    for (const r of scRows) {
+      const sid = r.studentId;
+      const skId = r.clo?.skillId ?? null;
+      const skName = r.clo?.skill?.thaiName ?? '';
+      if (!sid || !skId) continue;
+
+      if (!byStudent.has(sid)) byStudent.set(sid, new Map());
+      const m = byStudent.get(sid)!;
+      if (!m.has(skId)) m.set(skId, []);
+      m.get(skId)!.push(r.gainedLevel);
+
+      if (skName && !skillNameMap.has(skId)) skillNameMap.set(skId, skName);
+    }
+
+    /** helpers (ไม่มี any) */
+    const mode = (arr: number[]): number | null => {
+      if (!arr.length) return null;
+      const freq: Record<number, number> = {};
+      for (const v of arr) freq[v] = (freq[v] || 0) + 1;
+      let ans = arr[0],
+        mx = 0;
+      for (const [k, v] of Object.entries(freq)) {
+        if (v > mx) {
+          mx = v;
+          ans = Number(k);
+        }
+      }
+      return ans;
+    };
+    const avg = (arr: number[]): number | null =>
+      arr.length
+        ? Number((arr.reduce((a, b) => a + b, 0) / arr.length).toFixed(2))
+        : null;
+    const min = (arr: number[]): number | null =>
+      arr.length ? Math.min(...arr) : null;
+    const max = (arr: number[]): number | null =>
+      arr.length ? Math.max(...arr) : null;
+
+    /** ✅ ไม่แยกโดเมน: ใส่ skills เป็นก้อนเดียว + summary รวม */
+    const data = students.map((stu) => {
+      const m = byStudent.get(stu.id);
+      const skills: {
+        skillId: number;
+        skillName: string;
+        gainedLevel: number | null;
+      }[] = [];
+      const allLevels: number[] = [];
+
+      if (m) {
+        for (const [skId, levels] of m.entries()) {
+          const picked = mode(levels);
+          if (levels.length) allLevels.push(...levels);
+          skills.push({
+            skillId: skId,
+            skillName: skillNameMap.get(skId) ?? '',
+            gainedLevel: picked,
+          });
+        }
+      }
+
+      return {
+        studentId: stu.id,
+        studentName: stu.thaiName,
+        studentCode: stu.code,
+        // ไม่แยก hard/soft แล้ว
+        skills,
+        // รวมภาพรวมทั้งคอร์สของนิสิตคนนั้น (จะเก็บ/ไม่เก็บก็ได้)
+        summary: {
+          mode: mode(allLevels),
+          avg: avg(allLevels),
+          min: min(allLevels),
+          max: max(allLevels),
+          count: allLevels.length,
+        },
+      };
+    });
+
+    return createPaginatedData(data, total, _page, _limit);
+  }
 }

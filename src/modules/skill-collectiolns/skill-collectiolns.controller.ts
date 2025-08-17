@@ -5,6 +5,7 @@ import {
   Query,
   ParseIntPipe,
   Get,
+  Param,
 } from '@nestjs/common';
 import { SkillCollectionsService } from './skill-collectiolns.service';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -17,6 +18,7 @@ import {
   ApiOperation,
   ApiResponse,
 } from '@nestjs/swagger';
+import { SkillCollectionByCourseFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
 
 @ApiBearerAuth()
 @Controller('skill-collections')
@@ -127,5 +129,17 @@ export class SkillCollectionsController {
   })
   generateTestData() {
     return this.skillCollectionsService.generateTestData();
+  }
+
+  // GET /skill-collections/course/:id
+  @Get('course/:id')
+  async getSkillCollectionSummaryByCoursePaginated(
+    @Param('id', ParseIntPipe) courseId: number,
+    @Query() pag: SkillCollectionByCourseFilterDto,
+  ) {
+    return this.skillCollectionsService.getSkillCollectionSummaryByCoursePaginated(
+      courseId,
+      pag,
+    );
   }
 }

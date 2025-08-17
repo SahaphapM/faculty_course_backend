@@ -20,3 +20,12 @@ export class SkillCollectionSummaryFilterDto extends BaseFilterParams {
   @IsString()
   subjectName?: string;
 }
+export class SkillCollectionByCourseFilterDto extends BaseFilterParams {
+  @IsOptional()
+  @IsString()
+  studentName?: string;
+
+  @IsOptional()
+  @IsString()
+  studentCode?: string;
+}
