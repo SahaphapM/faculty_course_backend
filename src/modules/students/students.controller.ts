@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   Res,
+  NotFoundException,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
 import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
@@ -19,6 +20,7 @@ import { StudentFilterDto } from 'src/dto/filters/filter.student.dto';
 import { Response } from 'express';
 import axios from 'axios';
 import { Public } from 'src/decorators/public.decorator';
+
 
 @ApiBearerAuth()
 @Controller('students')
@@ -71,6 +73,12 @@ export class StudentsController {
     return this.studentsService.findAll(pag);
   }
 
+  @Roles(UserRole.Admin)
+  @Get('available-users')
+  findAvailableStudentsForUser(@Query() query?: StudentFilterDto) {
+    return this.studentsService.findAvailableStudentsForUser(query);
+  }
+
   @Public()
   @Get('student-image/:id')
   async getStudentImage(@Param('id') id: string, @Res() res: Response) {
@@ -90,7 +98,8 @@ export class StudentsController {
 
       res.send(response.data);
     } catch (error) {
-      res.status(404).send('Image not found');
+      console.error('Error fetching student image:', error);
+      throw new NotFoundException(`Image for student with ID ${id} not found`);
     }
   }
   @Public()

@@ -12,7 +12,7 @@ import {
 } from '@nestjs/common';
 import { InstructorsService } from './instructors.service';
 
-import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth } from '@nestjs/swagger';
 import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.dto';
 import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -36,6 +36,12 @@ export class InstructorsController {
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: InstructorFilterDto) {
     return this.insService.findAll(pag);
+  }
+
+  @Roles(UserRole.Admin)
+  @Get('available-users')
+  findAvailableInstructorsForUser(@Query() query?: InstructorFilterDto) {
+    return this.insService.findAvailableInstructorsForUser(query);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
