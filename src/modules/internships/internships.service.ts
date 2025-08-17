@@ -44,7 +44,7 @@ export class InternshipsService {
 
   // findAll pagination
   async findAllPagination(filter: BaseFilterParams, year?: string) {
-    const { search, page = 1, limit = 10 } = filter;
+    const { search, page = 1, limit = 10, sort, orderBy } = filter;
 
     const where = {
       ...(year !== undefined ? { year: Number(year) } : {}),
@@ -66,6 +66,7 @@ export class InternshipsService {
           },
         },
       },
+      orderBy: { [sort || 'id']: orderBy || 'asc' },
     });
 
     const total = await this.prisma.internship.count({
