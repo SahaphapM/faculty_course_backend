@@ -32,24 +32,26 @@ export class CompaniesService {
   }
 
   async findAll(filter: BaseFilterParams): Promise<PaginatedResult<Company>> {
-    const { search, page = 1, limit = 10, sort } = filter;
+    const { search, page = 1, limit = 10, sort, orderBy } = filter;
     const skip = (page - 1) * limit;
 
     const where = {
-      OR: [
-        { name: { contains: search || '' } },
-        { tel: { contains: search || '' } },
-        { email: { contains: search || '' } },
-      ],
+      ...(search
+        ? {
+            OR: [
+              { name: { contains: search } },
+              { tel: { contains: search } },
+              { email: { contains: search } },
+            ],
+          }
+        : {}),
     };
 
     const [data, total] = await Promise.all([
       this.prisma.company.findMany({
         skip,
         take: limit,
-        orderBy: sort
-          ? { [sort.replace('-', '')]: sort.startsWith('-') ? 'desc' : 'asc' }
-          : { id: 'asc' },
+        orderBy: { [sort || 'id']: orderBy || 'asc' },
         where,
         include: {
           company_job_positions: {
