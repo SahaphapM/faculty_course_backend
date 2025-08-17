@@ -36,11 +36,20 @@ export class ClosService {
   }
 
   async findAll(pag?: CloFilterDto) {
-    const { subjectId, page = 1, limit = 10 } = pag || {};
+    const { subjectId, page = 1, limit = 10, search } = pag || {};
 
     const whereCondition: Prisma.cloWhereInput = subjectId
       ? { subjectId: Number(subjectId) }
       : {};
+
+    if (search) {
+      whereCondition.OR = [
+        { name: { contains: search } },
+        { thaiDescription: { contains: search } },
+        { skill: { thaiName: { contains: search } } },
+        { skill: { engName: { contains: search } } },
+      ];
+    }
 
     const options: Prisma.cloFindManyArgs = {
       include: { skill: true, plo: true },
