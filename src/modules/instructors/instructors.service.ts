@@ -104,6 +104,36 @@ export class InstructorsService {
     }
   }
 
+  async findAvailableInstructorsForUser(query: InstructorFilterDto) {
+    const { limit, page, orderBy, sort } = query || {};
+
+    const options: Prisma.instructorFindManyArgs = {
+      where: {
+        user: { is: null },
+      },
+      take: limit || 10,
+      skip: ((page || 1) - 1) * (limit || 10),
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+    };
+
+    const result = this.prisma.instructor.findMany(options);
+
+    const total = this.prisma.instructor.count({
+      where: {
+        user: { is: null },
+      },
+    });
+
+    const response = await Promise.all([result, total]);
+
+    return createPaginatedData(
+      response[0],
+      response[1],
+      Number(page || 1),
+      Number(limit || 10),
+    );
+  }
+
   async findOne(id: number) {
     const teacher = await this.prisma.instructor.findUnique({
       where: { id },
@@ -124,6 +154,7 @@ export class InstructorsService {
       });
       return teacher;
     } catch (error) {
+      console.error('Error updating instructor:', error);
       throw new BadRequestException('Failed to update Instructor/Coordinator');
     }
   }
@@ -135,6 +166,7 @@ export class InstructorsService {
       });
       return `Success Delete ID ${id}`;
     } catch (error) {
+      console.error('Error removing instructor:', error);
       throw new BadRequestException('Failed to remove Instructor/Coordinator');
     }
   }

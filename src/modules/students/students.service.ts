@@ -132,6 +132,36 @@ export class StudentsService {
     );
   }
 
+  async findAvailableStudentsForUser(query: StudentFilterDto) {
+    const { limit, page, orderBy, sort } = query || {};
+
+    const options: Prisma.studentFindManyArgs = {
+      where: {
+        user: { is: null },
+      },
+      take: limit || 10,
+      skip: ((page || 1) - 1) * (limit || 10),
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+    };
+
+    const result = this.prisma.student.findMany(options);
+
+    const total = this.prisma.student.count({
+      where: {
+        user: { is: null },
+      },
+    });
+
+    const response = await Promise.all([result, total]);
+
+    return createPaginatedData(
+      response[0],
+      response[1],
+      Number(page || 1),
+      Number(limit || 10),
+    );
+  }
+
   // get exist student year from code like 65160123, 66160123, 67160123 => [65, 66, 67]
   async getExistYearFromCode(
     facultyId: number,

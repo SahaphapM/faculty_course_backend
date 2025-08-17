@@ -71,6 +71,36 @@ export class CoordinatorsService {
     }
   }
 
+  async findAvailableCoordinatorsForUser(query: CoordinatorFilterDto) {
+    const { limit, page, orderBy, sort } = query || {};
+
+    const options: Prisma.coordinatorFindManyArgs = {
+      where: {
+        user: { is: null },
+      },
+      take: limit || 10,
+      skip: ((page || 1) - 1) * (limit || 10),
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+    };
+
+    const result = this.prisma.coordinator.findMany(options);
+
+    const total = this.prisma.coordinator.count({
+      where: {
+        user: { is: null },
+      },
+    });
+
+    const response = await Promise.all([result, total]);
+
+    return createPaginatedData(
+      response[0],
+      response[1],
+      Number(page || 1),
+      Number(limit || 10),
+    );
+  }
+
   async findOne(id: number) {
     const coordinator = await this.prisma.coordinator.findUnique({
       where: { id },
@@ -89,7 +119,7 @@ export class CoordinatorsService {
       });
       return coordinator;
     } catch (error) {
-      throw new BadRequestException('Failed to update Coordinator');
+      throw new BadRequestException('Failed to update Coordinator', error);
     }
   }
 
@@ -100,7 +130,7 @@ export class CoordinatorsService {
       });
       return `Success Delete ID ${id}`;
     } catch (error) {
-      throw new BadRequestException('Failed to remove Coordinator');
+      throw new BadRequestException('Failed to remove Coordinator', error);
     }
   }
 

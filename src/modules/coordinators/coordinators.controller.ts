@@ -38,6 +38,12 @@ export class CoordinatorsController {
     return this.coordinatorsService.findAll(pag);
   }
 
+  @Roles(UserRole.Admin)
+  @Get('available-users')
+  findAvailableCoordinatorsForUser(@Query() query?: CoordinatorFilterDto) {
+    return this.coordinatorsService.findAvailableCoordinatorsForUser(query);
+  }
+
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
