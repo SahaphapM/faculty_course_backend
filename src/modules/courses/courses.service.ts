@@ -259,7 +259,6 @@ export class CourseService {
   async assignInstructor(id: number, instructorIds: number[]) {
     // กันค่า duplicate ใน input
     const uniqueIds = Array.from(new Set(instructorIds));
-
     try {
       return await this.prisma.$transaction(async (tx) => {
         const course = await tx.course.findUnique({

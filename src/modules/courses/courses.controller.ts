@@ -66,12 +66,11 @@ export class CoursesController {
   @Patch(':id/instructor')
   assignInstructor(
     @Param('id') id: string,
-    @Body() instructorIds: InstructorIds,
+    @Body() body: InstructorIds,
   ) {
-    console.log('Update Path', instructorIds);
     return this.coursesService.assignInstructor(
       +id,
-      instructorIds.instructorIds,
+      body.instructorIds,
     );
   }
 }
