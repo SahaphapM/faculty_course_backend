@@ -11,6 +11,7 @@ import { CreateFacultyDto } from 'src/generated/nestjs-dto/create-faculty.dto';
 import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
 import { FacultyFilterDto } from 'src/dto/filters/filter.faculties.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 @Injectable()
 export class FacultiesService {
@@ -52,15 +53,15 @@ export class FacultiesService {
           },
         },
       });
-    } catch (error) {
+  } catch (_error) {
       throw new InternalServerErrorException('Failed to fetch faculties');
     }
   }
 
   // Find all faculties with pagination and search
   async findAll(pag?: FacultyFilterDto) {
-    const defaultLimit = 10;
-    const defaultPage = 1;
+  const defaultLimit = DefaultPaginaitonValue.limit;
+  const defaultPage = DefaultPaginaitonValue.page;
 
     const options: Prisma.facultyFindManyArgs = {
       include: { branch: true },
@@ -68,11 +69,17 @@ export class FacultiesService {
     };
 
     if (pag) {
-      const { thaiName, engName, limit, page, orderBy: order } = pag;
+      const {
+        thaiName,
+        engName,
+        limit,
+        page,
+        orderBy: order = DefaultPaginaitonValue.orderBy,
+      } = pag;
 
       options.take = limit || defaultLimit;
       options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-      options.orderBy = { id: order || 'asc' };
+  options.orderBy = { id: (order as Prisma.SortOrder) || 'asc' };
 
       options.where = {
         ...(thaiName && { thaiName: { contains: thaiName } }),
@@ -80,7 +87,7 @@ export class FacultiesService {
       };
 
       try {
-        const [faculties, total] = await Promise.all([
+  const [faculties, total] = await Promise.all([
           this.prisma.faculty.findMany(options),
           this.prisma.faculty.count({ where: options.where }),
         ]);
@@ -90,8 +97,8 @@ export class FacultiesService {
           Number(page || defaultPage),
           Number(limit || defaultLimit),
         );
-      } catch (error) {
-        console.error('Error fetching faculties:', error);
+  } catch (_error) {
+  console.error('Error fetching faculties:', _error);
         throw new InternalServerErrorException('Failed to fetch faculties');
       }
     }
@@ -99,8 +106,8 @@ export class FacultiesService {
     // No pagination applied when pag is undefined
     try {
       return await this.prisma.faculty.findMany({ include: { branch: true } });
-    } catch (error) {
-      console.error('Error fetching faculties:', error);
+  } catch (_error) {
+  console.error('Error fetching faculties:', _error);
       throw new InternalServerErrorException('Failed to fetch faculties');
     }
   }
@@ -118,7 +125,7 @@ export class FacultiesService {
       }
 
       return faculty;
-    } catch (error) {
+  } catch (_error) {
       throw new InternalServerErrorException('Failed to fetch faculty');
     }
   }

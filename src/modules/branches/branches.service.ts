@@ -9,6 +9,7 @@ import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 import { BranchFilterDto } from 'src/dto/filters/filter.branch.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 @Injectable()
 export class BranchesService {
@@ -50,10 +51,10 @@ export class BranchesService {
 
   async findAll(pag: BranchFilterDto) {
     const {
-      page = 1,
-      limit = 10,
-      sort = 'id',
-      orderBy = 'asc',
+      page = DefaultPaginaitonValue.page,
+      limit = DefaultPaginaitonValue.limit,
+      sort = DefaultPaginaitonValue.sortBy,
+      orderBy = DefaultPaginaitonValue.orderBy,
       thaiName,
       engName,
     } = pag;
@@ -61,7 +62,7 @@ export class BranchesService {
     const options: Prisma.branchFindManyArgs = {
       take: limit,
       skip: (page - 1) * limit,
-      orderBy: { [sort]: orderBy },
+      orderBy: { [sort]: orderBy as Prisma.SortOrder },
       where: {
         ...(thaiName && { thaiName: { contains: thaiName } }),
         ...(engName && { engName: { contains: engName } }),

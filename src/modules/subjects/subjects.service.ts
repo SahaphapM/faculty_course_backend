@@ -5,20 +5,21 @@ import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
 import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 @Injectable()
 export class SubjectService {
   constructor(private prisma: PrismaService) {}
 
   async findAll(pag?: SubjectFilterDto) {
-    const defaultLimit = 10;
-    const defaultPage = 1;
+  const defaultLimit = DefaultPaginaitonValue.limit;
+  const defaultPage = DefaultPaginaitonValue.page;
 
     const {
       limit,
       page,
-      sort,
-      orderBy,
+  sort = DefaultPaginaitonValue.sortBy,
+  orderBy = DefaultPaginaitonValue.orderBy,
       nameCode,
       type,
       branchId,
@@ -75,7 +76,7 @@ export class SubjectService {
       where,
       skip: ((page ?? defaultPage) - 1) * (limit || defaultLimit),
       take: limit || defaultLimit,
-      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: (orderBy as Prisma.SortOrder) ?? 'asc' },
       include: {
         clos: true,
       },

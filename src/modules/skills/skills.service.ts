@@ -11,6 +11,7 @@ import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
 import { Skill } from 'src/generated/nestjs-dto/skill.entity';
 import { SkillFilterDto } from 'src/dto/filters/filter.skill.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 @Injectable()
 export class SkillsService {
@@ -65,10 +66,17 @@ export class SkillsService {
 
   // Find all skills with pagination and basic search
   async findAll(pag?: SkillFilterDto) {
-    const defaultLimit = 10;
-    const defaultPage = 1;
+    const defaultLimit = DefaultPaginaitonValue.limit;
+    const defaultPage = DefaultPaginaitonValue.page;
 
-    const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
+    const {
+      limit,
+      page,
+      orderBy = DefaultPaginaitonValue.orderBy,
+      sort = DefaultPaginaitonValue.sortBy,
+      nameCode,
+      domain,
+    } = pag || {};
 
     const whereCondition: Prisma.skillWhereInput = {
       parentId: null, // Root skills only
@@ -84,7 +92,7 @@ export class SkillsService {
     const options: Prisma.skillFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy },
       include: this.getSkillIncludeStructure(),
       where: whereCondition,
     };
@@ -107,10 +115,16 @@ export class SkillsService {
 
   // Find skills by curriculum with pagination
   async findByCurriculum(curriculumId: number, pag?: SkillFilterDto) {
-    const defaultLimit = 15;
-    const defaultPage = 1;
-
-    const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
+    const defaultLimit = DefaultPaginaitonValue.limit;
+    const defaultPage = DefaultPaginaitonValue.page;
+    const {
+      limit,
+      page,
+      orderBy = DefaultPaginaitonValue.orderBy,
+      sort = DefaultPaginaitonValue.sortBy,
+      nameCode,
+      domain,
+    } = pag || {};
 
     const whereCondition: Prisma.skillWhereInput = {
       parentId: null,
@@ -127,7 +141,7 @@ export class SkillsService {
     const options: Prisma.skillFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy },
       include: this.getSkillIncludeStructure(),
       where: whereCondition,
     };
@@ -150,10 +164,16 @@ export class SkillsService {
 
   // Find skills by branch
   async findByBranch(branchId: number, pag?: SkillFilterDto) {
-    const defaultLimit = 10;
-    const defaultPage = 1;
-
-    const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
+    const defaultLimit = DefaultPaginaitonValue.limit;
+    const defaultPage = DefaultPaginaitonValue.page;
+    const {
+      limit,
+      page,
+      orderBy = DefaultPaginaitonValue.orderBy,
+      sort = DefaultPaginaitonValue.sortBy,
+      nameCode,
+      domain,
+    } = pag || {};
 
     const whereCondition: Prisma.skillWhereInput = {
       parentId: null,

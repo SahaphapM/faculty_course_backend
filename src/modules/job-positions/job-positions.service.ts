@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  ConflictException,
-  BadRequestException,
-} from '@nestjs/common';
+import { Injectable, ConflictException } from '@nestjs/common';
 import { CreateJobPositionDto } from 'src/generated/nestjs-dto/create-jobPosition.dto';
 import { UpdateJobPositionDto } from 'src/generated/nestjs-dto/update-jobPosition.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -12,6 +8,7 @@ import {
 } from 'src/dto/filters/filter.base.dto';
 import { JobPosition } from 'src/generated/nestjs-dto/jobPosition.entity';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 @Injectable()
 export class JobPositionsService {
@@ -39,7 +36,13 @@ export class JobPositionsService {
   async findAll(
     filter: BaseFilterParams,
   ): Promise<PaginatedResult<JobPosition>> {
-    const { search, page = 1, limit = 5, sort, orderBy } = filter;
+    const {
+      search,
+      page = DefaultPaginaitonValue.page,
+      limit = DefaultPaginaitonValue.limit,
+      sort = DefaultPaginaitonValue.sortBy,
+      orderBy = DefaultPaginaitonValue.orderBy,
+    } = filter;
     const skip = (page - 1) * limit;
 
     const where = {
@@ -52,7 +55,7 @@ export class JobPositionsService {
       this.prisma.job_position.findMany({
         skip,
         take: limit,
-        orderBy: { [sort || 'id']: orderBy || 'desc' },
+        orderBy: { [sort || 'id']: (orderBy as any) || 'desc' },
         where,
       }),
       this.prisma.job_position.count({ where }),

@@ -10,6 +10,7 @@ import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.
 import { Prisma } from '@prisma/client';
 import { InstructorFilterDto } from 'src/dto/filters/filter.instructors.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 @Injectable()
 export class InstructorsService {
@@ -40,14 +41,14 @@ export class InstructorsService {
   }
 
   async findAll(params?: InstructorFilterDto) {
-    const defaultLimit = 10;
-    const defaultPage = 1;
+  const defaultLimit = DefaultPaginaitonValue.limit;
+  const defaultPage = DefaultPaginaitonValue.page;
 
     const {
       limit,
       page,
-      orderBy,
-      sort,
+  orderBy = DefaultPaginaitonValue.orderBy,
+  sort = DefaultPaginaitonValue.sortBy,
       nameCodeMail,
       curriculumId,
       branchId,
@@ -74,7 +75,7 @@ export class InstructorsService {
     const options: Prisma.instructorFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy as Prisma.SortOrder },
       include: {
         branch: {
           select: {
@@ -105,15 +106,20 @@ export class InstructorsService {
   }
 
   async findAvailableInstructorsForUser(query: InstructorFilterDto) {
-    const { limit, page, orderBy, sort } = query || {};
+    const {
+      limit = DefaultPaginaitonValue.limit,
+      page = DefaultPaginaitonValue.page,
+      orderBy = DefaultPaginaitonValue.orderBy,
+      sort = DefaultPaginaitonValue.sortBy,
+    } = query || {};
 
     const options: Prisma.instructorFindManyArgs = {
       where: {
         user: { is: null },
       },
-      take: limit || 10,
-      skip: ((page || 1) - 1) * (limit || 10),
-      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+  take: limit,
+  skip: (page - 1) * limit,
+  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy as Prisma.SortOrder },
     };
 
     const result = this.prisma.instructor.findMany(options);
@@ -126,12 +132,7 @@ export class InstructorsService {
 
     const response = await Promise.all([result, total]);
 
-    return createPaginatedData(
-      response[0],
-      response[1],
-      Number(page || 1),
-      Number(limit || 10),
-    );
+  return createPaginatedData(response[0], response[1], Number(page), Number(limit));
   }
 
   async findOne(id: number) {

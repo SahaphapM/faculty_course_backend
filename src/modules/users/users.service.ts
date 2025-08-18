@@ -12,6 +12,7 @@ import * as bcrypt from '@node-rs/bcrypt';
 import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
 import { UpdateUserStudentDto } from 'src/dto/update-user-student.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 @Injectable()
 export class UserService {
@@ -37,10 +38,10 @@ export class UserService {
 
   async findAll(pag?: UserFilterDto) {
     const {
-      page = 1,
-      limit = 10,
-      sort = 'id',
-      orderBy = 'asc',
+      page = DefaultPaginaitonValue.page,
+      limit = DefaultPaginaitonValue.limit,
+      sort = DefaultPaginaitonValue.sortBy,
+      orderBy = DefaultPaginaitonValue.orderBy,
       email,
     } = pag || {};
 

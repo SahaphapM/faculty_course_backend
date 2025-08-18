@@ -10,6 +10,7 @@ import { Prisma } from '@prisma/client';
 import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { CreateCourseDtoWithInstructor } from './dto/course.dto';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 @Injectable()
 export class CourseService {
@@ -84,14 +85,14 @@ export class CourseService {
 
   // Find all courses with pagination and search
   async findAll(pag?: CourseFilterDto, instructorId?: number) {
-    const defaultLimit = 15;
-    const defaultPage = 1;
+  const defaultLimit = DefaultPaginaitonValue.limit;
+  const defaultPage = DefaultPaginaitonValue.page;
 
     const {
       limit,
       page,
-      orderBy,
-      sort,
+  orderBy = DefaultPaginaitonValue.orderBy,
+  sort = DefaultPaginaitonValue.sortBy,
       nameCode,
       active,
       years,
@@ -135,7 +136,7 @@ export class CourseService {
     const options: Prisma.courseFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { [sort ?? 'id']: (orderBy ?? 'asc') as Prisma.SortOrder },
+  orderBy: { [sort ?? 'id']: (orderBy as Prisma.SortOrder) ?? 'asc' },
       where: whereCondition,
       select: {
         id: true,

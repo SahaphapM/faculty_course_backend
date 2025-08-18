@@ -9,6 +9,7 @@ import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
 import { CreateCloDto } from 'src/generated/nestjs-dto/create-clo.dto';
 import { CloFilterDto } from 'src/dto/filters/filter.clo.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 @Injectable()
 export class ClosService {
   constructor(private readonly prisma: PrismaService) {}
@@ -36,7 +37,12 @@ export class ClosService {
   }
 
   async findAll(pag?: CloFilterDto) {
-    const { subjectId, page = 1, limit = 10, search } = pag || {};
+    const {
+      subjectId,
+      page = DefaultPaginaitonValue.page,
+      limit = DefaultPaginaitonValue.limit,
+      search,
+    } = pag || {};
 
     const whereCondition: Prisma.cloWhereInput = subjectId
       ? { subjectId: Number(subjectId) }

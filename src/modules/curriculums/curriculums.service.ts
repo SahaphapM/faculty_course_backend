@@ -13,10 +13,9 @@ import { getSkillSummary } from './curriculums.helper';
 import { CreateLevelDescriptionDto } from 'src/generated/nestjs-dto/create-levelDescription.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
-import { UpdateLevelDescriptionDto } from 'src/generated/nestjs-dto/update-levelDescription.dto';
 import { findStudentsTargetSkillLevel } from './curriculums.helper2';
-import { UpdateLevelDescriptionDtos } from './dto/curriculums.dto';
 import { LevelDescription } from 'src/generated/nestjs-dto/levelDescription.entity';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 // types ช่วยอ่านง่ายขึ้น
 
@@ -137,14 +136,14 @@ export class CurriculumsService {
 
   // Find all curriculums with pagination and search
   async findAll(pag?: CurriculumFilterDto, coordinatorId?: number) {
-    const defaultLimit = 15;
-    const defaultPage = 1;
+  const defaultLimit = DefaultPaginaitonValue.limit;
+  const defaultPage = DefaultPaginaitonValue.page;
 
     const {
       limit,
       page,
-      orderBy,
-      sort,
+  orderBy = DefaultPaginaitonValue.orderBy,
+  sort = DefaultPaginaitonValue.sortBy,
       nameCode,
       degree,
       branchId,
@@ -181,7 +180,7 @@ export class CurriculumsService {
     const options: Prisma.curriculumFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: (orderBy as Prisma.SortOrder) ?? 'asc' },
       include: {
         branch: {
           select: {
@@ -289,7 +288,7 @@ export class CurriculumsService {
     curriculumId: number,
     yearCode: string,
     skillType: string,
-    debug?: { studentId?: number; rootSkillId?: number }, // optional ดีบัก
+  _debug?: { studentId?: number; rootSkillId?: number }, // optional ดีบัก
   ): Promise<any> {
     return getSkillSummary(curriculumId, yearCode.slice(-2), skillType, {
       studentId: 2,

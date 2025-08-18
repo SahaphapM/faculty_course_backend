@@ -9,6 +9,7 @@ import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
 import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 import { StudentFilterDto } from 'src/dto/filters/filter.student.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 @Injectable()
 export class StudentsService {
@@ -45,14 +46,14 @@ export class StudentsService {
 
   // Get all students with pagination and search
   async findAll(pag?: StudentFilterDto) {
-    const defaultLimit = 10;
-    const defaultPage = 1;
+  const defaultLimit = DefaultPaginaitonValue.limit;
+  const defaultPage = DefaultPaginaitonValue.page;
 
     const {
       limit,
       page,
-      orderBy,
-      sort,
+  orderBy = DefaultPaginaitonValue.orderBy,
+  sort = DefaultPaginaitonValue.sortBy,
       nameCode,
       branchId,
       facultyId,
@@ -109,7 +110,7 @@ export class StudentsService {
       where,
       take: limit ?? defaultLimit,
       skip: ((page ?? defaultPage) - 1) * (limit ?? defaultLimit),
-      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy as Prisma.SortOrder },
       include: {
         branch: {
           select: {
@@ -141,15 +142,20 @@ export class StudentsService {
   }
 
   async findAvailableStudentsForUser(query: StudentFilterDto) {
-    const { limit, page, orderBy, sort } = query || {};
+    const {
+      limit = DefaultPaginaitonValue.limit,
+      page = DefaultPaginaitonValue.page,
+      orderBy = DefaultPaginaitonValue.orderBy,
+      sort = DefaultPaginaitonValue.sortBy,
+    } = query || {};
 
     const options: Prisma.studentFindManyArgs = {
       where: {
         user: { is: null },
       },
-      take: limit || 10,
-      skip: ((page || 1) - 1) * (limit || 10),
-      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy ?? 'asc' },
+  take: limit,
+  skip: (page - 1) * limit,
+  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy as Prisma.SortOrder },
     };
 
     const result = this.prisma.student.findMany(options);
@@ -162,12 +168,7 @@ export class StudentsService {
 
     const response = await Promise.all([result, total]);
 
-    return createPaginatedData(
-      response[0],
-      response[1],
-      Number(page || 1),
-      Number(limit || 10),
-    );
+  return createPaginatedData(response[0], response[1], Number(page), Number(limit));
   }
 
   // get exist student year from code like 65160123, 66160123, 67160123 => [65, 66, 67]
