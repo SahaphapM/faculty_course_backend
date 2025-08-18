@@ -99,4 +99,52 @@ export class JobPositionsService {
   remove(id: number) {
     return this.prisma.job_position.delete({ where: { id } });
   }
+
+  // insert and remove job positions to company
+  async updateJobPositionsToCompany(
+    companyId: number,
+    jobPositionIds: number[],
+  ) {
+    const currentJobPositions = await this.prisma.company_job_position.findMany(
+      {
+        where: { companyId },
+        select: { jobPositionId: true },
+      },
+    );
+
+    const currentPositionIds = currentJobPositions.map((p) => p.jobPositionId);
+    const positionsToAdd = jobPositionIds.filter(
+      (id) => !currentPositionIds.includes(id),
+    );
+    const positionsToRemove = currentPositionIds.filter(
+      (id) => !jobPositionIds.includes(id),
+    );
+
+    console.log('positionsToAdd', positionsToAdd);
+    console.log('positionsToRemove', positionsToRemove);
+
+    await this.prisma.$transaction(async (prisma) => {
+      // Remove positions not in the new list
+      if (positionsToRemove.length > 0) {
+        await prisma.company_job_position.deleteMany({
+          where: {
+            companyId: companyId,
+            jobPositionId: { in: positionsToRemove },
+          },
+        });
+      }
+
+      // Add new positions using create to avoid conflicts
+      if (positionsToAdd.length > 0) {
+        for (const jobPositionId of positionsToAdd) {
+          await prisma.company_job_position.create({
+            data: {
+              companyId: companyId,
+              jobPositionId: jobPositionId,
+            },
+          });
+        }
+      }
+    });
+  }
 }

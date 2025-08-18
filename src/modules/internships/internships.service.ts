@@ -61,8 +61,9 @@ export class InternshipsService {
         company: { select: { name: true } },
         studentInternships: {
           select: {
-            student: { select: { id: true, code: true, thaiName: true } },
-            jobPosition: { select: { id: true, name: true } },
+            id: true,
+            // student: { select: { id: true, code: true, thaiName: true } },
+            // jobPosition: { select: { id: true, name: true } },
           },
         },
       },
@@ -81,8 +82,18 @@ export class InternshipsService {
     return this.prisma.internship.findUnique({
       where: { id },
       include: {
-        studentInternships: { include: { student: true } },
-        company: { include: { company_job_positions: true } },
+        studentInternships: {
+          include: { student: true, jobPosition: true },
+        },
+        company: {
+          include: {
+            company_job_positions: {
+              select: {
+                jobPosition: true,
+              },
+            },
+          },
+        },
       },
     });
   }
