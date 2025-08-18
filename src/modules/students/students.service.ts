@@ -65,6 +65,7 @@ export class StudentsService {
 
     if (nameCode) {
       or.push(
+        { code: { contains: nameCode } },
         { thaiName: { contains: nameCode } },
         { engName: { contains: nameCode } },
       );
@@ -112,6 +113,13 @@ export class StudentsService {
       include: {
         branch: {
           select: {
+            thaiName: true,
+            engName: true,
+          },
+        },
+        curriculum: {
+          select: {
+            id: true,
             thaiName: true,
             engName: true,
           },

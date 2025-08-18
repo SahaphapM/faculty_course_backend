@@ -137,7 +137,28 @@ export class CourseService {
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
       orderBy: { [sort ?? 'id']: (orderBy ?? 'asc') as Prisma.SortOrder },
       where: whereCondition,
-      include: { subject: true },
+      select: {
+        id: true,
+        year: true,
+        semester: true,
+        active: true,
+        subject: {
+          select: {
+            id: true,
+            engName: true,
+            thaiName: true,
+            code: true,
+            curriculum: {
+              select: {
+                id: true,
+                code: true,
+                thaiName: true,
+                engName: true,
+              },
+            },
+          },
+        },
+      },
     };
 
     try {
