@@ -14,15 +14,100 @@ import { UpdateUserStudentDto } from 'src/dto/update-user-student.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
+type MaybeId = number | null | undefined;
+type RelationInput = {
+  coordinatorId?: MaybeId;
+  instructorId?: MaybeId;
+  studentId?: MaybeId;
+};
+type Mode = 'create' | 'update';
+
 @Injectable()
 export class UserService {
   constructor(private readonly prisma: PrismaService) {}
+
+  /**
+   * จำกัดให้มีได้ "แค่หนึ่ง" ความสัมพันธ์จากชุด {coordinator, instructor, student}
+   * - ถ้ารับค่า id มากกว่าหนึ่ง => throw
+   * - ถ้าเป็น update:
+   *    - id => connect
+   *    - null => disconnect
+   *    - ตัวอื่นที่ไม่ได้เลือก => disconnect เสมอ (กันซ้ำซ้อน)
+   * - ถ้าเป็น create:
+   *    - id => connect
+   *    - null/undefined => ไม่ส่งคำสั่ง (Prisma ไม่มีอะไรให้ disconnect ตอนสร้าง)
+   */
+  private buildExclusiveRelations(
+    input: RelationInput,
+    mode: Mode = 'update',
+  ): Pick<
+    Prisma.userCreateInput & Prisma.userUpdateInput,
+    'coordinator' | 'instructor' | 'student'
+  > {
+    const { coordinatorId, instructorId, studentId } = input;
+
+    const provided = [
+      ['coordinator', coordinatorId],
+      ['instructor', instructorId],
+      ['student', studentId],
+    ] as const;
+
+    const nonNullCount = provided.filter(
+      ([, v]) => v !== null && v !== undefined,
+    ).length;
+    if (nonNullCount > 1) {
+      throw new BadRequestException(
+        'Only one relation is allowed: pick exactly one of coordinatorId, instructorId, studentId',
+      );
+    }
+
+    const toCmd = (val: MaybeId) => {
+      if (val === null) return { disconnect: true };
+      if (typeof val === 'number') return { connect: { id: val } };
+      return undefined;
+    };
+
+    const chosenKey = provided.find(([, v]) => typeof v === 'number')?.[0] as
+      | 'coordinator'
+      | 'instructor'
+      | 'student'
+      | undefined;
+
+    if (mode === 'update') {
+      return {
+        coordinator:
+          chosenKey === 'coordinator'
+            ? toCmd(coordinatorId)
+            : coordinatorId === null
+              ? { disconnect: true }
+              : { disconnect: true },
+        instructor:
+          chosenKey === 'instructor'
+            ? toCmd(instructorId)
+            : instructorId === null
+              ? { disconnect: true }
+              : { disconnect: true },
+        student:
+          chosenKey === 'student'
+            ? toCmd(studentId)
+            : studentId === null
+              ? { disconnect: true }
+              : { disconnect: true },
+      };
+    }
+
+    // create
+    return {
+      coordinator: toCmd(coordinatorId),
+      instructor: toCmd(instructorId),
+      student: toCmd(studentId),
+    };
+  }
 
   async create(createUserDto: CreateUserDto) {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: createUserDto.email },
     });
-
     if (existingUser) {
       throw new BadRequestException(
         `User with Email ${createUserDto.email} already exists`,
@@ -31,8 +116,29 @@ export class UserService {
 
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
+    const {
+      studentId,
+      instructorId,
+      coordinatorId,
+      ...restCreate // เฉพาะฟิลด์ปกติ (email, name, ฯลฯ) + password
+    } = createUserDto;
+
+    const relationData = this.buildExclusiveRelations(
+      { studentId, instructorId, coordinatorId },
+      'create',
+    );
+
     return await this.prisma.user.create({
-      data: { ...createUserDto, password: hashedPassword },
+      data: {
+        ...restCreate,
+        password: hashedPassword,
+        ...relationData,
+      },
+      include: {
+        student: { select: { id: true, thaiName: true } },
+        instructor: { select: { id: true, thaiName: true } },
+        coordinator: { select: { id: true, thaiName: true } },
+      },
     });
   }
 
@@ -45,7 +151,6 @@ export class UserService {
       email,
     } = pag || {};
 
-    // Normalize sort: allow leading '-' for descending (e.g. '-id')
     const normalizedSort = sort || 'id';
     const sortField = normalizedSort.startsWith('-')
       ? normalizedSort.slice(1)
@@ -56,12 +161,11 @@ export class UserService {
         ? 'desc'
         : 'asc';
 
-    // Prisma query options
     const options: Prisma.userFindManyArgs = {
       take: limit,
       skip: (page - 1) * limit,
       orderBy: { [sortField]: sortDirection },
-      where: email ? { email: { contains: email } } : undefined, // Avoids unnecessary `where`
+      where: email ? { email: { contains: email } } : undefined,
       include: {
         student: { select: { id: true, thaiName: true } },
         instructor: { select: { id: true, thaiName: true } },
@@ -85,7 +189,7 @@ export class UserService {
   async findOneById(id: number) {
     const user = await this.prisma.user.findUnique({
       where: { id },
-      include: { student: true, instructor: true },
+      include: { student: true, instructor: true, coordinator: true },
     });
 
     if (!user) {
@@ -102,30 +206,43 @@ export class UserService {
   }
 
   async update(id: number, dto: UpdateUserDto) {
+    const {
+      studentId,
+      instructorId,
+      coordinatorId,
+      password,
+      ...rest // ฟิลด์ปกติอื่น ๆ
+    } = dto as any;
+
     const user = await this.findOneById(id);
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    let hashedPassword = undefined;
-    if (dto.password) {
-      hashedPassword = await bcrypt.hash(dto.password, 10);
-    }
+
+    const relationData = this.buildExclusiveRelations(
+      { studentId, instructorId, coordinatorId },
+      'update',
+    );
+
+    const hashedPassword = password
+      ? await bcrypt.hash(password, 10)
+      : undefined;
 
     const data: Prisma.userUpdateInput = {
-      ...dto,
-      password: hashedPassword,
-      ...(dto.studentId && {
-        student: { connect: { id: dto.studentId } },
-      }),
-      ...(dto.instructorId && {
-        instructor: { connect: { id: dto.instructorId } },
-      }),
+      ...rest,
+      ...(hashedPassword && { password: hashedPassword }),
+      ...relationData, 
     };
 
     try {
       return await this.prisma.user.update({
         where: { id },
         data,
+        include: {
+          student: { select: { id: true, thaiName: true } },
+          instructor: { select: { id: true, thaiName: true } },
+          coordinator: { select: { id: true, thaiName: true } },
+        },
       });
     } catch (error) {
       console.error('Error updating user:', error);
@@ -139,15 +256,22 @@ export class UserService {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
 
+    // ใช้ exclusive rule: เลือก student เพียงตัวเดียว และ disconnect ความสัมพันธ์อื่น
+    const relationData = this.buildExclusiveRelations(
+      { studentId: dto.studentId, instructorId: null, coordinatorId: null },
+      'update',
+    );
+
     try {
       return await this.prisma.user.update({
         where: { id },
         data: {
-          student: { connect: { id: dto.studentId } },
+          ...relationData,
         },
         include: {
           student: { select: { id: true, thaiName: true } },
           instructor: { select: { id: true, thaiName: true } },
+          coordinator: { select: { id: true, thaiName: true } },
         },
       });
     } catch (error) {

@@ -42,19 +42,15 @@ export class AuthService {
       role: true,
     });
 
-    if (!user) throw new UnauthorizedException(USER_NOT_FOUND_MESSAGE);
-
-    if (!user) {
-      throw new Error('User not found');
-    }
-
-    if (!user.password) {
-      throw new Error('User password not found in database');
+    // Avoid user enumeration: always use Unauthorized for invalid credentials
+    if (!user || !user.password) {
+      throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
     }
 
     const isPasswordMatch = await compare(dto.password, user.password);
-    if (!isPasswordMatch)
+    if (!isPasswordMatch) {
       throw new UnauthorizedException(INVALID_CREDENTIALS_MESSAGE);
+    }
 
     return user;
   }
