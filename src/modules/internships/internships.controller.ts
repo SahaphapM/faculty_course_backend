@@ -13,6 +13,7 @@ import { CreateInternshipWithStudentDto } from './dto/create-internship-with-stu
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { ApiOkResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
 import { PaginatedInternshipDto } from 'src/dto/pagination.types';
+import { InternshipsFilterDto } from 'src/dto/filters/filter.internships.dto';
 
 @Controller('internships')
 export class InternshipsController {
@@ -24,14 +25,14 @@ export class InternshipsController {
   }
 
   @Get()
-  @ApiOkResponse({type: PaginatedInternshipDto})
+  @ApiOkResponse({ type: PaginatedInternshipDto })
   @ApiQuery({
     name: 'year',
     required: false,
     type: String,
     description: 'Filter by internship year',
   })
-  findAll(@Query() pag?: BaseFilterParams, @Query('year') year?: string) {
+  findAll(@Query() pag?: InternshipsFilterDto, @Query('year') year?: string) {
     return this.internshipsService.findAllPagination(pag, year);
   }
 
