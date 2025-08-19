@@ -37,7 +37,7 @@ export class CoordinatorsController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Get()
-  @ApiOkResponse({type: PaginatedCoordinatorDto})
+  @ApiOkResponse({ type: PaginatedCoordinatorDto })
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: CoordinatorFilterDto) {
     return this.coordinatorsService.findAll(pag);
@@ -79,10 +79,13 @@ export class CoordinatorsController {
   @HttpCode(HttpStatus.OK)
   selectInstructorToCurriculum(
     @Query('curriculumId') curriculumId: string,
-    @Body() coordinatorIds: CoordinatorIds,
+    @Body()
+    body: {
+      coordinatorIds: number[];
+    },
   ) {
     return this.coordinatorsService.updateCoordinatorToCurriculum(
-      coordinatorIds.coordinatorIds,
+      body.coordinatorIds,
       +curriculumId,
     );
   }

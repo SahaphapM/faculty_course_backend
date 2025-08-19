@@ -65,7 +65,7 @@ export class CoordinatorsService {
         this.prisma.coordinator.findMany(options),
         this.prisma.coordinator.count({ where: whereCondition }),
       ]);
-  return createPaginatedData(coordinators, total, page, limit);
+      return createPaginatedData(coordinators, total, page, limit);
     } catch (error) {
       console.error('Error fetching coordinators:', error);
       throw new InternalServerErrorException('Failed to fetch coordinators');
@@ -84,9 +84,9 @@ export class CoordinatorsService {
       where: {
         user: { is: null },
       },
-  take: limit,
-  skip: (page - 1) * limit,
-  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy },
+      take: limit,
+      skip: (page - 1) * limit,
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy },
     };
 
     const result = this.prisma.coordinator.findMany(options);
@@ -99,7 +99,12 @@ export class CoordinatorsService {
 
     const response = await Promise.all([result, total]);
 
-  return createPaginatedData(response[0], response[1], Number(page), Number(limit));
+    return createPaginatedData(
+      response[0],
+      response[1],
+      Number(page),
+      Number(limit),
+    );
   }
 
   async findOne(id: number) {
