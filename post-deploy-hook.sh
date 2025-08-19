@@ -13,11 +13,11 @@ echo "📦 Installing dependencies..."
 # else
 #   npm install --only=production
 # fi
-npm install
+pnpm install
 
 # Step 2: Build the application
 echo "🔨 Building application..."
-npm run build
+pnpm run build
 
 # Step 3: Generate Prisma client
 echo "🗄️  Generating Prisma client..."
