@@ -85,14 +85,14 @@ export class CourseService {
 
   // Find all courses with pagination and search
   async findAll(pag?: CourseFilterDto, instructorId?: number) {
-  const defaultLimit = DefaultPaginaitonValue.limit;
-  const defaultPage = DefaultPaginaitonValue.page;
+    const defaultLimit = DefaultPaginaitonValue.limit;
+    const defaultPage = DefaultPaginaitonValue.page;
 
     const {
       limit,
       page,
-  orderBy = DefaultPaginaitonValue.orderBy,
-  sort = DefaultPaginaitonValue.sortBy,
+      orderBy = DefaultPaginaitonValue.orderBy,
+      sort = DefaultPaginaitonValue.sortBy,
       nameCode,
       active,
       years,
@@ -136,7 +136,7 @@ export class CourseService {
     const options: Prisma.courseFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-  orderBy: { [sort ?? 'id']: (orderBy as Prisma.SortOrder) ?? 'asc' },
+      orderBy: { [sort ?? 'id']: (orderBy as Prisma.SortOrder) ?? 'asc' },
       where: whereCondition,
       select: {
         id: true,
@@ -190,7 +190,12 @@ export class CourseService {
               clos: {
                 include: {
                   skill: {
-                    select: { id: true, engName: true, thaiName: true },
+                    select: {
+                      id: true,
+                      engName: true,
+                      thaiName: true,
+                      domain: true,
+                    },
                   },
                 },
               },
