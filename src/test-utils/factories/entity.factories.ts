@@ -82,6 +82,7 @@ export function makeCurriculum(
     level_descriptions: (overrides.level_descriptions as any) ?? [],
     ...overrides,
     minimumGrade: minimumGrade as Prisma.Decimal,
+    internships: (overrides.internships as any) ?? [],
   };
 }
 
