@@ -1,11 +1,10 @@
 import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type, Transform } from 'class-transformer';
+import { Type } from 'class-transformer';
 import {
   IsOptional,
   IsPositive,
   IsInt,
   IsString,
-  IsNumber,
   IsEnum,
 } from 'class-validator';
 
@@ -67,14 +66,3 @@ export class BaseFilterParams {
   orderBy?: 'asc' | 'desc' = 'asc';
 }
 
-export class StudentScoreList {
-  @IsString()
-  studentCode: string;
-
-  @IsNumber()
-  @Transform(({ value }) => {
-    // Convert string to number if needed
-    return typeof value === 'string' ? Number(value) : value;
-  })
-  gainedLevel: number;
-}

@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
-import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -61,6 +61,8 @@ export class BranchesController {
     required: false,
     description: 'Filter by English name (contains)',
   })
+  @ApiExtraModels(BranchFilterDto)
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(BranchFilterDto) }, description: 'Filter/query parameters' })
   @Get()
   @ApiOkResponse({ type: PaginatedBranchDto })
   findAll(@Query() pag?: BranchFilterDto) {

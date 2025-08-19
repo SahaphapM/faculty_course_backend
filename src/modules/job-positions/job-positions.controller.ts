@@ -15,7 +15,7 @@ import { JobPositionsService } from './job-positions.service';
 import { CreateJobPositionDto } from 'src/generated/nestjs-dto/create-jobPosition.dto';
 import { UpdateJobPositionDto } from 'src/generated/nestjs-dto/update-jobPosition.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
-import { ApiOkResponse } from '@nestjs/swagger';
+import { ApiOkResponse, ApiExtraModels, ApiQuery, getSchemaPath } from '@nestjs/swagger';
 import { PaginatedJobPositionDto } from 'src/dto/pagination.types';
 
 @Controller('job-positions')
@@ -35,6 +35,8 @@ export class JobPositionsController {
   }
 
   @Get()
+  @ApiExtraModels(BaseFilterParams)
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(BaseFilterParams) } })
   @ApiOkResponse({type: PaginatedJobPositionDto})
   findAll(@Query() filter: BaseFilterParams) {
     return this.jobPositionsService.findAll(filter);

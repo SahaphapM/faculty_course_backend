@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { FacultiesService } from './faculties.service';
-import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiExtraModels, getSchemaPath, ApiQuery } from '@nestjs/swagger';
 import { CreateFacultyDto } from 'src/generated/nestjs-dto/create-faculty.dto';
 import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -28,6 +28,8 @@ export class FacultiesController {
     return this.facultiesService.create(createFacultyDto);
   }
 
+  @ApiExtraModels(FacultyFilterDto)
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(FacultyFilterDto) }, description: 'Filter/query parameters' })
   @Get()
   @ApiOkResponse({type: PaginatedFacultyDto})
   findAll(@Query() pag?: FacultyFilterDto) {

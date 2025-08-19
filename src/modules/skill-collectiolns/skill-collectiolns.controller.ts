@@ -11,14 +11,12 @@ import { SkillCollectionsService } from './skill-collectiolns.service';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
-import { StudentScoreList } from 'src/dto/filters/filter.base.dto';
 import {
   ApiBearerAuth,
   ApiBody,
-  ApiOperation,
-  ApiResponse,
 } from '@nestjs/swagger';
 import { SkillCollectionByCourseFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
+import { StudentScoreList } from 'src/dto/student-score.dto';
 
 @ApiBearerAuth()
 @Controller('skill-collections')

@@ -1,7 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInternshipWithStudentDto } from './dto/create-internship-with-student.dto';
-import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { randomBytes } from 'crypto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { InternshipsFilterDto } from 'src/dto/filters/filter.internships.dto';
@@ -47,18 +46,14 @@ export class InternshipsService {
   }
 
   // findAll pagination
-  async findAllPagination(filter: InternshipsFilterDto, year?: string) {
-    const { search, page = 1, limit = 10, sort, orderBy } = filter;
+  async findAllPagination(filter: InternshipsFilterDto) {
+    const { search, page = 1, limit = 10, sort, orderBy, year } = filter;
 
     const where = {
-      ...(year !== undefined ? { year: Number(year) } : {}),
+      ...(year !== undefined && year !== null ? { year: Number(year) } : {}),
       ...(search ? { company: { name: { contains: search } } } : {}),
-      ...(filter.curriculumId
-        ? { curriculumId: Number(filter.curriculumId) }
-        : {}),
+      ...(filter.curriculumId ? { curriculumId: Number(filter.curriculumId) } : {}),
     };
-
-    console.log(where);
 
     const data = await this.prisma.internship.findMany({
       where,
@@ -126,6 +121,7 @@ export class InternshipsService {
       data: {
         ...rest,
         ...(companyId ? { company: { connect: { id: companyId } } } : {}),
+        ...(curriculumId ? { curriculum: { connect: { id: curriculumId } } } : {}),
       },
     });
 

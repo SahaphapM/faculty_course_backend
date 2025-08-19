@@ -13,6 +13,7 @@ import {
 import { UserService } from './users.service';
 import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
+import { ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
 import { UpdateUserStudentDto } from 'src/dto/update-user-student.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -58,8 +59,10 @@ export class UsersController {
     required: false,
     description: 'Filter by user email (contains)',
   })
+  @ApiExtraModels(UserFilterDto)
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(UserFilterDto) }, description: 'Filter/query parameters' })
   @Get()
-  @ApiOkResponse({type: PaginatedUserDto})
+  @ApiOkResponse({ type: PaginatedUserDto })
   findAll(@Query() pag?: UserFilterDto) {
     return this.usersService.findAll(pag);
   }

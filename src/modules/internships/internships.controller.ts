@@ -10,8 +10,7 @@ import {
 } from '@nestjs/common';
 import { InternshipsService } from './internships.service';
 import { CreateInternshipWithStudentDto } from './dto/create-internship-with-student.dto';
-import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
-import { ApiOkResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 import { PaginatedInternshipDto } from 'src/dto/pagination.types';
 import { InternshipsFilterDto } from 'src/dto/filters/filter.internships.dto';
 
@@ -25,15 +24,11 @@ export class InternshipsController {
   }
 
   @Get()
+  @ApiExtraModels(InternshipsFilterDto)
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(InternshipsFilterDto) }, description: 'Filter/query parameters' })
   @ApiOkResponse({ type: PaginatedInternshipDto })
-  @ApiQuery({
-    name: 'year',
-    required: false,
-    type: String,
-    description: 'Filter by internship year',
-  })
-  findAll(@Query() pag?: InternshipsFilterDto, @Query('year') year?: string) {
-    return this.internshipsService.findAllPagination(pag, year);
+  findAll(@Query() pag?: InternshipsFilterDto) {
+    return this.internshipsService.findAllPagination(pag);
   }
 
   @Get('get-years')

@@ -11,7 +11,7 @@ import {
 import { CompaniesService } from './companies.service';
 import { CreateCompanyWithJobPositionsDto } from './dto/create-company-with-job.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
-import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { PaginatedCompanyDto } from 'src/dto/pagination.types';
@@ -55,6 +55,8 @@ export class CompaniesController {
     required: false,
     description: 'Explicit sort direction (asc|desc) overrides sort prefix',
   })
+  @ApiExtraModels(BaseFilterParams)
+  @ApiQuery({ name: 'filter', required: false, schema: { $ref: getSchemaPath(BaseFilterParams) }, description: 'Filter/query parameters' })
   @Get()
   @ApiOkResponse({type: PaginatedCompanyDto})
   findAll(@Query() filter: BaseFilterParams) {

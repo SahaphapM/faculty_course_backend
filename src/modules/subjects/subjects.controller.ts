@@ -13,7 +13,7 @@ import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
 import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
-import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 import { SubjectFilterDto } from 'src/dto/filters/filter.subject.dto';
 import { PaginatedSubjectDto } from 'src/dto/pagination.types';
 
@@ -72,6 +72,8 @@ export class SubjectController {
     type: Number,
     description: 'Filter by curriculum id',
   })
+  @ApiExtraModels(SubjectFilterDto)
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(SubjectFilterDto) }, description: 'Filter/query parameters' })
   @Get()
   @ApiOkResponse({type: PaginatedSubjectDto})
   findAll(@Query() pag?: SubjectFilterDto) {

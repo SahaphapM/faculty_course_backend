@@ -11,7 +11,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { CoordinatorsService } from './coordinators.service';
-import { ApiBearerAuth, ApiBody, ApiOkResponse } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOkResponse, ApiExtraModels, getSchemaPath, ApiQuery } from '@nestjs/swagger';
 import { CreateCoordinatorDto } from 'src/generated/nestjs-dto/create-coordinator.dto';
 import { UpdateCoordinatorDto } from 'src/generated/nestjs-dto/update-coordinator.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -33,6 +33,8 @@ export class CoordinatorsController {
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
+  @ApiExtraModels(CoordinatorFilterDto)
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(CoordinatorFilterDto) }, description: 'Filter/query parameters' })
   @Get()
   @ApiOkResponse({ type: PaginatedCoordinatorDto })
   @HttpCode(HttpStatus.OK)

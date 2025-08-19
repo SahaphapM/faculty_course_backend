@@ -9,7 +9,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { PloService } from './plos.service';
-import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
 import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -45,6 +45,8 @@ export class PlosController {
     required: false,
     description: 'Filter PLOs by curriculum code',
   })
+  @ApiExtraModels(PloFilterDto)
+  @ApiQuery({ name: 'filter', required: false, schema: { $ref: getSchemaPath(PloFilterDto) }, description: 'Filter/query parameters' })
   @Get()
   @ApiOkResponse({type: PaginatedPloDto})
   findAll(@Query() filter?: PloFilterDto) {
