@@ -18,10 +18,7 @@ import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { InstructorFilterDto } from 'src/dto/filters/filter.instructors.dto';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Instructor } from 'src/generated/nestjs-dto/instructor.entity';
-
-const PaginatedInstructorDto = Paginated(Instructor);
+import { PaginatedInstructorDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
 @Controller('instructors')

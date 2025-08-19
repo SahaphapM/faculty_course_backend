@@ -16,10 +16,7 @@ import { CreateJobPositionDto } from 'src/generated/nestjs-dto/create-jobPositio
 import { UpdateJobPositionDto } from 'src/generated/nestjs-dto/update-jobPosition.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { ApiOkResponse } from '@nestjs/swagger';
-import { Paginated } from 'src/dto/pagination.dto';
-import { JobPosition } from 'src/generated/nestjs-dto/jobPosition.entity';
-
-const PaginatedJobPositionDto = Paginated(JobPosition);
+import { PaginatedJobPositionDto } from 'src/dto/pagination.types';
 
 @Controller('job-positions')
 export class JobPositionsController {

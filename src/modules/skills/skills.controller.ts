@@ -17,10 +17,7 @@ import { UpdateSkillDto } from 'src/generated/nestjs-dto/update-skill.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { SkillFilterDto } from 'src/dto/filters/filter.skill.dto';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Skill } from 'src/generated/nestjs-dto/skill.entity';
-
-const PaginatedSkillDto = Paginated(Skill);
+import { PaginatedSkillDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
 @Controller('skills')

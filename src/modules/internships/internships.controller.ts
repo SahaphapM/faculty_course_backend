@@ -12,10 +12,7 @@ import { InternshipsService } from './internships.service';
 import { CreateInternshipWithStudentDto } from './dto/create-internship-with-student.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { ApiOkResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Internship } from 'src/generated/nestjs-dto/internship.entity';
-
-const PaginatedInternshipDto = Paginated(Internship);
+import { PaginatedInternshipDto } from 'src/dto/pagination.types';
 
 @Controller('internships')
 export class InternshipsController {

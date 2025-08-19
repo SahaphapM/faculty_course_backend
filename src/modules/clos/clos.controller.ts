@@ -15,10 +15,7 @@ import { UpdateCloDto } from 'src/generated/nestjs-dto/update-clo.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { CloFilterDto } from 'src/dto/filters/filter.clo.dto';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Clo } from 'src/generated/nestjs-dto/clo.entity';
-
-const PaginatedCloDto = Paginated(Clo);
+import { PaginatedCloDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
 @Controller('clos')

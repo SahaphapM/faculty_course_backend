@@ -20,10 +20,7 @@ import { StudentFilterDto } from 'src/dto/filters/filter.student.dto';
 import { Response } from 'express';
 import axios from 'axios';
 import { Public } from 'src/decorators/public.decorator';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Student } from 'src/generated/nestjs-dto/student.entity';
-
-const PaginatedStudentDto = Paginated(Student);
+import { PaginatedStudentDto } from 'src/dto/pagination.types';
 
 
 @ApiBearerAuth()

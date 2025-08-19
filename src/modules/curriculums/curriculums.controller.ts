@@ -16,10 +16,7 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Curriculum } from 'src/generated/nestjs-dto/curriculum.entity';
-
-const PaginatedCurriculumDto = Paginated(Curriculum);
+import { PaginatedCurriculumDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
 @Controller('curriculums')

@@ -15,10 +15,7 @@ import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { FacultyFilterDto } from 'src/dto/filters/filter.faculties.dto';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Faculty } from 'src/generated/nestjs-dto/faculty.entity';
-
-const PaginatedFacultyDto = Paginated(Faculty);
+import { PaginatedFacultyDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
 @Controller('faculties')

@@ -10,7 +10,7 @@ export class PaginationMetaDto {
 
 // Generic factory: คืนคลาสใหม่ที่มี data<T>[] + meta
 export const Paginated = <TModel extends NestType<any>>(model: TModel) => {
-  class PaginatedClass {
+  abstract class PaginatedClass {
     @ApiProperty({ type: [model] })
     data: InstanceType<TModel>[];
 

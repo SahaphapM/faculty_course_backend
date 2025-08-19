@@ -18,10 +18,7 @@ import { UpdateUserStudentDto } from 'src/dto/update-user-student.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
-import { Paginated } from 'src/dto/pagination.dto';
-import { User } from 'src/generated/nestjs-dto/user.entity';
-
-const PaginatedUserDto = Paginated(User);
+import { PaginatedUserDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
 @UseInterceptors(ClassSerializerInterceptor)

@@ -20,10 +20,7 @@ import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
 import { CreateCourseDtoWithInstructor } from './dto/create-course-with-instructor.dto';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Course } from 'src/generated/nestjs-dto/course.entity';
-
-const PaginatedCourseDto = Paginated(Course);
+import { PaginatedCourseDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
 @Controller('courses')

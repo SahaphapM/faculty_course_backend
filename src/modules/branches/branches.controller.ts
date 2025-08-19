@@ -15,10 +15,7 @@ import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { BranchFilterDto } from 'src/dto/filters/filter.branch.dto';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Branch } from 'src/generated/nestjs-dto/branch.entity';
-
-const PaginatedBranchDto = Paginated(Branch);
+import { PaginatedBranchDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
 @Roles(UserRole.Admin)

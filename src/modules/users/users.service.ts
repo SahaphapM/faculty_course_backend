@@ -270,8 +270,6 @@ export class UserService {
         },
         include: {
           student: { select: { id: true, thaiName: true } },
-          instructor: { select: { id: true, thaiName: true } },
-          coordinator: { select: { id: true, thaiName: true } },
         },
       });
     } catch (error) {

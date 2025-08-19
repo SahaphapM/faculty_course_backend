@@ -18,10 +18,7 @@ import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { CoordinatorFilterDto } from 'src/dto/filters/filter.coordinator.dto';
 import { CoordinatorIds } from './dto/coordinator.dto';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Coordinator } from 'src/generated/nestjs-dto/coordinator.entity';
-
-const PaginatedCoordinatorDto = Paginated(Coordinator);
+import { PaginatedCoordinatorDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
 @Controller('coordinators')

@@ -15,10 +15,7 @@ import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { SubjectFilterDto } from 'src/dto/filters/filter.subject.dto';
-import { Paginated } from 'src/dto/pagination.dto';
-import { Subject } from 'src/generated/nestjs-dto/subject.entity';
-
-const PaginatedSubjectDto = Paginated(Subject);
+import { PaginatedSubjectDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
 @Controller('subjects')
