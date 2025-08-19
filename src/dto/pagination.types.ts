@@ -9,7 +9,6 @@ import { CourseEnrollment } from 'src/generated/nestjs-dto/courseEnrollment.enti
 import { CourseInstructor } from 'src/generated/nestjs-dto/courseInstructor.entity';
 import { Curriculum } from 'src/generated/nestjs-dto/curriculum.entity';
 import { CurriculumCoordinators } from 'src/generated/nestjs-dto/curriculumCoordinators.entity';
-import { CurriculumSubjects } from 'src/generated/nestjs-dto/curriculumSubjects.entity';
 import { Faculty } from 'src/generated/nestjs-dto/faculty.entity';
 import { Instructor } from 'src/generated/nestjs-dto/instructor.entity';
 import { Internship } from 'src/generated/nestjs-dto/internship.entity';
@@ -38,7 +37,6 @@ export class PaginatedCourseEnrollmentDto extends Paginated(CourseEnrollment) {}
 export class PaginatedCourseInstructorDto extends Paginated(CourseInstructor) {}
 export class PaginatedCurriculumDto extends Paginated(Curriculum) {}
 export class PaginatedCurriculumCoordinatorsDto extends Paginated(CurriculumCoordinators) {}
-export class PaginatedCurriculumSubjectsDto extends Paginated(CurriculumSubjects) {}
 export class PaginatedFacultyDto extends Paginated(Faculty) {}
 export class PaginatedInstructorDto extends Paginated(Instructor) {}
 export class PaginatedInternshipDto extends Paginated(Internship) {}
