@@ -198,12 +198,21 @@ export class CurriculumsService {
       this.prisma.curriculum.count({ where: whereCondition }),
     ]);
 
-    return createPaginatedData(
-      curriculums,
-      total,
-      Number(page || defaultPage),
-      Number(limit || defaultLimit),
-    );
+    return createPaginatedData(curriculums, total, page, limit);
+  }
+
+  async findOptions() {
+    const options = {
+      select: {
+        id: true,
+        code: true,
+        thaiName: true,
+        engName: true,
+        thaiDegree: true,
+        engDegree: true,
+      },
+    } as Prisma.curriculumFindManyArgs;
+    return await this.prisma.curriculum.findMany(options);
   }
 
   // Find a curriculum by ID

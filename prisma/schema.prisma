@@ -247,6 +247,7 @@ model student {
   thaiName            String?              @db.VarChar(255)
   /// @DtoRelationIncludeId
   curriculumId        Int?
+  /// @DtoRelationIncludeId
   branchId            Int?
   /// @DtoRelationIncludeId
   userId              Int?

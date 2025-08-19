@@ -9,15 +9,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
-import { ApiBearerAuth, ApiBody, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
-import { UpdateLevelDescriptionDto } from 'src/generated/nestjs-dto/update-levelDescription.dto';
-import { UpdateLevelDescriptionDtos } from './dto/curriculums.dto';
 
 @ApiBearerAuth()
 @Controller('curriculums')
@@ -41,6 +39,12 @@ export class CurriculumsController {
     @Query('coordinatorId') coordinatorId?: number,
   ) {
     return this.curriculumsService.findAll(pag, coordinatorId);
+  }
+
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @Get('options')
+  findAllOptions() {
+    return this.curriculumsService.findOptions();
   }
 
   @Get('summary/:curriculumId')
