@@ -323,7 +323,7 @@ model internship {
   companyId          Int?
   /// @DtoRelationIncludeId
   curriculumId       Int?
-  company            company?             @relation(fields: [companyId], references: [id], onDelete: NoAction)
+  company            company?             @relation(fields: [companyId], references: [id], onDelete: SetNull)
   studentInternships student_internship[]
   curriculum         curriculum?          @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
 
