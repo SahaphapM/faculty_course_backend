@@ -8,6 +8,7 @@ import {Skill} from './skill.entity'
 import {Student} from './student.entity'
 import {Subject} from './subject.entity'
 import {LevelDescription} from './levelDescription.entity'
+import {Internship} from './internship.entity'
 
 
 export class Curriculum {
@@ -106,4 +107,10 @@ subjects?: Subject[] ;
   required: false,
 })
 level_descriptions?: LevelDescription[] ;
+@ApiProperty({
+  type: () => Internship,
+  isArray: true,
+  required: false,
+})
+internships?: Internship[] ;
 }

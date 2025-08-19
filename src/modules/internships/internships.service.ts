@@ -4,13 +4,15 @@ import { CreateInternshipWithStudentDto } from './dto/create-internship-with-stu
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { randomBytes } from 'crypto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
+import { InternshipsFilterDto } from 'src/dto/filters/filter.internships.dto';
 
 @Injectable()
 export class InternshipsService {
   constructor(private readonly prisma: PrismaService) {}
 
   async create(createInternshipDto: CreateInternshipWithStudentDto) {
-    const { studentInternships, companyId, ...rest } = createInternshipDto;
+    const { studentInternships, companyId, curriculumId, ...rest } =
+      createInternshipDto;
 
     const token = randomBytes(16).toString('hex');
 
@@ -19,6 +21,7 @@ export class InternshipsService {
         ...rest,
         token: token,
         company: { connect: { id: companyId } },
+        curriculum: { connect: { id: curriculumId } },
       },
     });
 
@@ -38,17 +41,21 @@ export class InternshipsService {
           include: { student: true, jobPosition: true },
         },
         company: true,
+        curriculum: true,
       },
     });
   }
 
   // findAll pagination
-  async findAllPagination(filter: BaseFilterParams, year?: string) {
+  async findAllPagination(filter: InternshipsFilterDto, year?: string) {
     const { search, page = 1, limit = 10, sort, orderBy } = filter;
 
     const where = {
       ...(year !== undefined ? { year: Number(year) } : {}),
       ...(search ? { company: { name: { contains: search } } } : {}),
+      ...(filter.curriculumId
+        ? { curriculumId: Number(filter.curriculumId) }
+        : {}),
     };
 
     console.log(where);
@@ -111,7 +118,8 @@ export class InternshipsService {
     id: number,
     updateInternshipDto: CreateInternshipWithStudentDto,
   ) {
-    const { studentInternships, companyId, ...rest } = updateInternshipDto;
+    const { studentInternships, companyId, curriculumId, ...rest } =
+      updateInternshipDto;
 
     await this.prisma.internship.update({
       where: { id },

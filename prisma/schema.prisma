@@ -112,6 +112,7 @@ model curriculum {
   students           student[]
   subjects           subject[]
   level_descriptions level_description[]
+  internships        internship[]
 
   @@index([branchId])
 }
@@ -320,10 +321,14 @@ model internship {
   token              String?              @unique @db.VarChar(32)
   /// @DtoRelationIncludeId
   companyId          Int?
+  /// @DtoRelationIncludeId
+  curriculumId       Int?
   company            company?             @relation(fields: [companyId], references: [id], onDelete: NoAction)
   studentInternships student_internship[]
+  curriculum         curriculum?          @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
 
   @@index([companyId], map: "internship_companyId_fkey")
+  @@index([curriculumId], map: "internship_curriculumId_fkey")
 }
 
 model student_internship {
