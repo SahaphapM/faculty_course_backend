@@ -270,6 +270,9 @@ export async function getSkillSummary(
   const rootIds = roots.map((r) => r.id);
   const assessments = await fetchRootAssessments(rootIds, studentIds);
 
+  console.log('=== [DEBUG] Assessments ===');
+  console.log(assessments.filter((a) => a.studentId === debug?.studentId));
+
   // debug (optional): expected tree ของคนที่ระบุ
   if (debug?.studentId && debug?.rootSkillId) {
     console.log('=== [DEBUG] Expected Tree ===');
@@ -341,6 +344,15 @@ export function pickAssessedLevel(
   return null;
 }
 
+// fallback ให้เคสไม่มี expected จาก skillcollection
+function fallbackCategoryFromLevel(lvl: number): Category {
+  // ตามโจทย์: level = 0 -> 'below', level > 1 -> 'on'
+  // (กรณี lvl === 1 ไม่ได้ระบุไว้ ชงให้เป็น 'below' เพื่อ conservative)
+  if (lvl === 0) return 'below';
+  if (lvl > 1) return 'on';
+  return 'below';
+}
+
 function summarizeAcrossStudentsUsingAssessments(
   skills: Skill[],
   studentIds: number[],
@@ -381,10 +393,21 @@ function summarizeAcrossStudentsUsingAssessments(
     for (const root of roots) {
       const target = expectedByRoot.get(root.id);
       const assessed = assessMap.get(`${root.id}:${sid}`);
-      if (!isNum(target) || !isNum(assessed)) continue;
+      // ไม่มี assessment ก็ข้ามเหมือนเดิม
+      if (!isNum(assessed)) continue;
 
-      const bucket =
-        assessed > target ? 'above' : assessed === target ? 'on' : 'below';
+      let bucket: 'above' | 'on' | 'below';
+      if (!isNum(target)) {
+        // <<< NEW: ไม่มี expected → ใช้ fallback rule
+        // level = 0 → 'below', level > 1 → 'on', (ระดับอื่นถือเป็น 'below')
+        // ถ้าอยากให้ 1 เป็น 'on' ด้วย เปลี่ยนเป็น (assessed >= 1)
+        bucket = assessed === 0 ? 'below' : assessed > 1 ? 'on' : 'below';
+      } else {
+        // เทียบปกติเมื่อมี expected
+        bucket =
+          assessed > target ? 'above' : assessed === target ? 'on' : 'below';
+      }
+
       const dest = base.find((b) => b.skillId === root.id)!;
       dest.buckets[bucket].count += 1;
       dest.buckets[bucket].studentIds.push(sid);

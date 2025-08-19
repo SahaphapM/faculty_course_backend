@@ -62,7 +62,7 @@ export class BranchesController {
     description: 'Filter by English name (contains)',
   })
   @Get()
-  @ApiOkResponse({type: PaginatedBranchDto})
+  @ApiOkResponse({ type: PaginatedBranchDto })
   findAll(@Query() pag?: BranchFilterDto) {
     return this.branchService.findAll(pag);
   }
@@ -73,7 +73,12 @@ export class BranchesController {
     return this.branchService.findOptions();
   }
 
-  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @Roles(
+    UserRole.Admin,
+    UserRole.Coordinator,
+    UserRole.Instructor,
+    UserRole.Student,
+  )
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.branchService.findOne(+id);

@@ -302,7 +302,10 @@ export class CurriculumsService {
     skillType: string,
     _debug?: { studentId?: number; rootSkillId?: number }, // optional ดีบัก
   ): Promise<any> {
-    return getSkillSummary(curriculumId, yearCode.slice(-2), skillType);
+    return getSkillSummary(curriculumId, yearCode.slice(-2), skillType, {
+      studentId: 113,
+      rootSkillId: 1,
+    });
   }
 
   // async findStudentsBySkillLevel(
