@@ -136,14 +136,14 @@ export class CurriculumsService {
 
   // Find all curriculums with pagination and search
   async findAll(pag?: CurriculumFilterDto, coordinatorId?: number) {
-  const defaultLimit = DefaultPaginaitonValue.limit;
-  const defaultPage = DefaultPaginaitonValue.page;
+    const defaultLimit = DefaultPaginaitonValue.limit;
+    const defaultPage = DefaultPaginaitonValue.page;
 
     const {
       limit,
       page,
-  orderBy = DefaultPaginaitonValue.orderBy,
-  sort = DefaultPaginaitonValue.sortBy,
+      orderBy = DefaultPaginaitonValue.orderBy,
+      sort = DefaultPaginaitonValue.sortBy,
       nameCode,
       degree,
       branchId,
@@ -180,7 +180,10 @@ export class CurriculumsService {
     const options: Prisma.curriculumFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: (orderBy as Prisma.SortOrder) ?? 'asc' },
+      orderBy: {
+        [(sort === '' ? 'id' : sort) ?? 'id']:
+          (orderBy as Prisma.SortOrder) ?? 'asc',
+      },
       include: {
         branch: {
           select: {
@@ -297,12 +300,9 @@ export class CurriculumsService {
     curriculumId: number,
     yearCode: string,
     skillType: string,
-  _debug?: { studentId?: number; rootSkillId?: number }, // optional ดีบัก
+    _debug?: { studentId?: number; rootSkillId?: number }, // optional ดีบัก
   ): Promise<any> {
-    return getSkillSummary(curriculumId, yearCode.slice(-2), skillType, {
-      studentId: 2,
-      rootSkillId: 13,
-    });
+    return getSkillSummary(curriculumId, yearCode.slice(-2), skillType);
   }
 
   // async findStudentsBySkillLevel(

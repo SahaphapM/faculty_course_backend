@@ -18,7 +18,6 @@ import { SkillCollectionByCourseFilterDto } from 'src/dto/filters/filter.skill-c
 export class SkillCollectionsService {
   constructor(
     private prisma: PrismaService,
-    private cloService: ClosService,
     private skillCollectionsHelper: SkillCollectionsHelper,
   ) {}
 

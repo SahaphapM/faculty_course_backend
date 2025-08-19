@@ -46,17 +46,17 @@ export class SkillCollectionsHelper {
     rootSkills: RootSkillLite[],
     skillCollections: SkillCollectionLite[],
   ) {
-    console.log(
-      `=== [DEBUG] Start Skill Assessment Sync for student ${studentId} ===`,
-    );
-    console.log('=== [DEBUG] Student ===');
-    // console.log(student);
+    // console.log(
+    //   `=== [DEBUG] Start Skill Assessment Sync for student ${studentId} ===`,
+    // );
+    // console.log('=== [DEBUG] Student ===');
+    // // console.log(student);
 
-    console.log('=== [DEBUG] Root Skills ===');
-    // console.log(rootSkills);
+    // console.log('=== [DEBUG] Root Skills ===');
+    // // console.log(rootSkills);
 
-    console.log('=== [DEBUG] Skill Collections ===');
-    console.log(skillCollections);
+    // console.log('=== [DEBUG] Skill Collections ===');
+    // console.log(skillCollections);
 
     // เก็บ skillId ทั้งหมดจาก skillCollections
     const skillIds = new Set<number>();
@@ -65,12 +65,12 @@ export class SkillCollectionsHelper {
       if (skillId) skillIds.add(skillId);
     });
 
-    console.log('=== [DEBUG] Skill IDs ===');
+    // console.log('=== [DEBUG] Skill IDs ===');
     // console.log(skillIds);
 
     const relatedSkills = await this.fetchParents(Array.from(skillIds));
 
-    console.log('=== [DEBUG] Related Skills ===');
+    // console.log('=== [DEBUG] Related Skills ===');
     // console.log(relatedSkills);
 
     // อัด rootSkills เข้า map ให้เป็นชนิดเดียวกับ SkillFull
@@ -109,7 +109,7 @@ export class SkillCollectionsHelper {
       });
     }
 
-    console.log('=== [DEBUG] Skill Map ===');
+    // console.log('=== [DEBUG] Skill Map ===');
     // console.log(skillMap);
 
     // ทำเป็น tree
@@ -132,7 +132,7 @@ export class SkillCollectionsHelper {
       this.printTree(rootNode);
     }
 
-    console.log('=== [DEBUG] Skill Tree ===');
+    // console.log('=== [DEBUG] Skill Tree ===');
     // console.log(result);
 
     // สร้าง/อัปเดต skill_assessment
@@ -158,7 +158,7 @@ export class SkillCollectionsHelper {
       });
     }
 
-    console.log('=== [DEBUG] Skill Assessment Calculation Complete ===');
+    // console.log('=== [DEBUG] Skill Assessment Calculation Complete ===');
     // console.log(skillAssessments);
 
     return skillMap;
@@ -282,8 +282,11 @@ export class SkillCollectionsHelper {
       // this.printTree(rootNode);
     }
 
-    for( const sa of skill_assessments){
-      if(!skillMap.has(sa.skillId) && (this.getLevelFromSkillAssessment(sa) !== null)) {
+    for (const sa of skill_assessments) {
+      if (
+        !skillMap.has(sa.skillId) &&
+        this.getLevelFromSkillAssessment(sa) !== null
+      ) {
         skillMap.set(sa.skillId, {
           id: sa.id,
           name: sa.skill.thaiName,
@@ -291,29 +294,29 @@ export class SkillCollectionsHelper {
           parentId: sa.skill.parentId,
           gained: this.getLevelFromSkillAssessment(sa),
           subskills: [],
-        })
+        });
       }
       const node = skillMap.get(sa.skillId);
-      if(node){
+      if (node) {
         node.id = sa.id;
         node.gained = this.getLevelFromSkillAssessment(sa) || node.gained;
       }
     }
 
-    console.log('=== [DEBUG] Skill Map ===');
+    // console.log('=== [DEBUG] Skill Map ===');
     // console.dir(skillMap, { depth: 10 });
 
     return skillMap;
   }
 
   getLevelFromSkillAssessment(sa: SkillAssessment) {
-    if(sa.finalLevel && sa.finalLevel > 0){
+    if (sa.finalLevel && sa.finalLevel > 0) {
       return sa.finalLevel;
     }
-    if(sa.companyLevel && sa.companyLevel > 0){
+    if (sa.companyLevel && sa.companyLevel > 0) {
       return sa.companyLevel;
     }
-    if(sa.curriculumLevel && sa.curriculumLevel > 0){
+    if (sa.curriculumLevel && sa.curriculumLevel > 0) {
       return sa.curriculumLevel;
     }
     return null;

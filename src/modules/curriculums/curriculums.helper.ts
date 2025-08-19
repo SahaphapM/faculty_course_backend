@@ -272,6 +272,12 @@ export async function getSkillSummary(
 
   // debug (optional): expected tree ของคนที่ระบุ
   if (debug?.studentId && debug?.rootSkillId) {
+    console.log('=== [DEBUG] Expected Tree ===');
+    const student = await prisma.student.findUnique({
+      where: { id: debug.studentId },
+    });
+
+    console.log('Student:', student?.code, student.thaiName, student.id);
     const { forest } = buildExpectedForestForStudent(
       skills as unknown as Skill[],
       debug.studentId,
