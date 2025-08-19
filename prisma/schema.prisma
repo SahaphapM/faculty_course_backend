@@ -227,12 +227,13 @@ model skill_collection {
   studentId   Int?
   gainedLevel Int      @default(0)
   passed      Boolean  @default(false)
-  cloId       Int?
+  cloId       Int? 
   courseId    Int?
   clo         clo?     @relation(fields: [cloId], references: [id], onUpdate: NoAction)
   course      course?  @relation(fields: [courseId], references: [id], onUpdate: NoAction)
   student     student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
+  @@unique([studentId, courseId, cloId])
   @@index([studentId, cloId, courseId])
   @@index([cloId], map: "skill_collection_cloId_fkey")
   @@index([courseId], map: "skill_collection_courseId_fkey")
