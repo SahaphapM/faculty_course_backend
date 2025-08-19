@@ -12,10 +12,7 @@ import { Prisma } from '@prisma/client';
 import { SkillCollectionsHelper } from './skill-collectiolns.helper';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 import { SkillNode } from './skill-collectiolns.helper';
-import {
-  SkillCollectionByCourseFilterDto,
-} from 'src/dto/filters/filter.skill-collection-summary.dto';
-
+import { SkillCollectionByCourseFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
 
 @Injectable()
 export class SkillCollectionsService {
@@ -127,6 +124,11 @@ export class SkillCollectionsService {
         subject: {
           select: {
             curriculumId: true,
+            curriculum: {
+              select: {
+                branchId: true,
+              },
+            },
           },
         },
       },
@@ -136,7 +138,9 @@ export class SkillCollectionsService {
       throw new NotFoundException(`Course with ID ${courseId} not found`);
     }
     if (!course.subjectId) {
-      throw new NotFoundException(`Subject with ID ${course.subjectId} not found`);
+      throw new NotFoundException(
+        `Subject with ID ${course.subjectId} not found`,
+      );
     }
 
     const clo = await this.prisma.clo.findUnique({
@@ -168,7 +172,11 @@ export class SkillCollectionsService {
 
       if (!student) {
         student = await this.prisma.student.create({
-          data: { code: studentScore.studentCode },
+          data: {
+            code: studentScore.studentCode,
+            curriculumId: course.subject.curriculumId,
+            branchId: course.subject.curriculum.branchId,
+          },
         });
       }
 
