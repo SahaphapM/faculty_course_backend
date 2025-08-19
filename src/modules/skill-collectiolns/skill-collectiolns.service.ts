@@ -169,17 +169,17 @@ export class SkillCollectionsService {
     });
     const scByStudentId = new Map(existing.map((sc) => [sc.studentId!, sc]));
 
-    // 3) เตรียม root skills เอาไว้ใช้ตอนสรุป
-    const rootSkills = await this.prisma.skill.findMany({
-      where: { curriculumId: course.subject.curriculumId, parentId: null },
-      select: {
-        id: true,
-        parentId: true,
-        domain: true,
-        thaiName: true,
-        engName: true,
-      },
-    });
+    // // 3) เตรียม root skills เอาไว้ใช้ตอนสรุป
+    // const rootSkills = await this.prisma.skill.findMany({
+    //   where: { curriculumId: course.subject.curriculumId, parentId: null },
+    //   select: {
+    //     id: true,
+    //     parentId: true,
+    //     domain: true,
+    //     thaiName: true,
+    //     engName: true,
+    //   },
+    // });
 
     // (ออปชัน) กันข้อมูลซ้ำในไฟล์ นับ “ค่าล่าสุด” ของแต่ละ code
     const lastScoreByCode = new Map<string, number>();

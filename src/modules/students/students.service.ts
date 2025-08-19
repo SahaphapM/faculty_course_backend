@@ -21,6 +21,24 @@ export class StudentsService {
       const newStudent = await this.prisma.student.create({
         data: studentDto,
       });
+
+      let skillIds: number[] = [];
+      if (studentDto.curriculumId) {
+        const skills = await this.prisma.skill.findMany({
+          select: {
+            id: true,
+          },
+          where: {
+            parent: null,
+            curriculumId: studentDto.curriculumId,
+          },
+        });
+        skillIds = skills.map((s) => s.id);
+      }
+
+      // create skill assessment for new student
+      await this.createSkillAssessments(newStudent.id, skillIds);
+
       return newStudent;
     } catch (error) {
       throw new BadRequestException('Failed to create student', error.message);
@@ -33,27 +51,55 @@ export class StudentsService {
       throw new BadRequestException('Expected students to be an array');
     }
 
-    await this.prisma.$transaction(
-      students.map((cur) =>
-        this.prisma.student.upsert({
+    const curriculum = await this.prisma.curriculum.findUnique({
+      where: {
+        id: students[0].curriculumId,
+      },
+      select: {
+        id: true,
+        branchId: true,
+      },
+    });
+
+    const studentsUpsert = await this.prisma.$transaction(
+      students.map((cur) => {
+        return this.prisma.student.upsert({
           where: { code: cur.code },
           update: { ...cur },
-          create: { ...cur },
-        }),
-      ),
+          create: { ...cur, branchId: curriculum?.branchId },
+        });
+      }),
     );
+
+    if (curriculum) {
+      const skills = await this.prisma.skill.findMany({
+        select: {
+          id: true,
+        },
+        where: {
+          parent: null,
+          curriculumId: curriculum.id,
+        },
+      });
+
+      const skillIds = skills.map((s) => s.id);
+
+      for (const student of studentsUpsert) {
+        await this.createSkillAssessments(student.id, skillIds);
+      }
+    }
   }
 
   // Get all students with pagination and search
   async findAll(pag?: StudentFilterDto) {
-  const defaultLimit = DefaultPaginaitonValue.limit;
-  const defaultPage = DefaultPaginaitonValue.page;
+    const defaultLimit = DefaultPaginaitonValue.limit;
+    const defaultPage = DefaultPaginaitonValue.page;
 
     const {
       limit,
       page,
-  orderBy = DefaultPaginaitonValue.orderBy,
-  sort = DefaultPaginaitonValue.sortBy,
+      orderBy = DefaultPaginaitonValue.orderBy,
+      sort = DefaultPaginaitonValue.sortBy,
       nameCode,
       branchId,
       facultyId,
@@ -110,7 +156,9 @@ export class StudentsService {
       where,
       take: limit ?? defaultLimit,
       skip: ((page ?? defaultPage) - 1) * (limit ?? defaultLimit),
-  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy as Prisma.SortOrder },
+      orderBy: {
+        [(sort === '' ? 'id' : sort) ?? 'id']: orderBy as Prisma.SortOrder,
+      },
       include: {
         branch: {
           select: {
@@ -153,9 +201,11 @@ export class StudentsService {
       where: {
         user: { is: null },
       },
-  take: limit,
-  skip: (page - 1) * limit,
-  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy as Prisma.SortOrder },
+      take: limit,
+      skip: (page - 1) * limit,
+      orderBy: {
+        [(sort === '' ? 'id' : sort) ?? 'id']: orderBy as Prisma.SortOrder,
+      },
     };
 
     const result = this.prisma.student.findMany(options);
@@ -168,7 +218,12 @@ export class StudentsService {
 
     const response = await Promise.all([result, total]);
 
-  return createPaginatedData(response[0], response[1], Number(page), Number(limit));
+    return createPaginatedData(
+      response[0],
+      response[1],
+      Number(page),
+      Number(limit),
+    );
   }
 
   // get exist student year from code like 65160123, 66160123, 67160123 => [65, 66, 67]
@@ -359,5 +414,19 @@ export class StudentsService {
       Number(page ?? defaultPage),
       Number(limit ?? defaultLimit),
     );
+  }
+
+  async createSkillAssessments(studentId: number, skillIds: number[]) {
+    const skillAssessments = skillIds.map((skillId) => ({
+      studentId,
+      skillId,
+      curriculumLevel: 0,
+      companyLevel: 0,
+      finalLevel: 0,
+    }));
+
+    await this.prisma.skill_assessment.createMany({
+      data: skillAssessments,
+    });
   }
 }
