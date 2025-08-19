@@ -342,10 +342,13 @@ model student_internship {
   jobPositionId Int?
   /// @DtoRelationIncludeId
   internshipId  Int?
-  internship    internship?   @relation(fields: [internshipId], references: [id], onDelete: NoAction)
-  jobPosition   job_position? @relation(fields: [jobPositionId], references: [id], onDelete: NoAction)
+  // ลบ internship แล้วให้ลบ student_internship แถวนั้นตามไปด้วย — ช่วยแก้ P2003 ได้ถ้าตารางอื่นไม่อ้างต่อ
+  internship    internship?   @relation(fields: [internshipId], references: [id], onDelete: Cascade)
+  // ถ้า business rule อนุญาต แนะนำเปลี่ยนเป็น SetNull เพื่อให้ลบตำแหน่งงานได้โดยไม่พัง record ลูก
+  jobPosition   job_position? @relation(fields: [jobPositionId], references: [id], onDelete: SetNull)
   student       student?      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
+  
+  @@unique([studentId, internshipId])
   @@index([internshipId])
   @@index([jobPositionId])
   @@index([studentId], map: "student_internship_studentId_fkey")
