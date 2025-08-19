@@ -9,12 +9,21 @@ import {
   Query,
 } from '@nestjs/common';
 import { CourseService } from './courses.service';
-import { ApiBearerAuth, ApiBody, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
-import { CreateCourseDtoWithInstructor, InstructorIds } from './dto/course.dto';
+import { CreateCourseDtoWithInstructor } from './dto/create-course-with-instructor.dto';
+import { Paginated } from 'src/dto/pagination.dto';
+import { Course } from 'src/generated/nestjs-dto/course.entity';
+
+const PaginatedCourseDto = Paginated(Course);
 
 @ApiBearerAuth()
 @Controller('courses')
@@ -32,6 +41,7 @@ export class CoursesController {
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @ApiQuery({ name: 'InstructorId', required: false })
   @Get()
+  @ApiOkResponse({ type: PaginatedCourseDto })
   findAll(
     @Query() pag?: CourseFilterDto,
     @Query('InstructorId') instructorId?: number,
@@ -66,11 +76,8 @@ export class CoursesController {
   @Patch(':id/instructor')
   assignInstructor(
     @Param('id') id: string,
-    @Body() body: InstructorIds,
+    @Body() body: { instructorIds: number[] },
   ) {
-    return this.coursesService.assignInstructor(
-      +id,
-      body.instructorIds,
-    );
+    return this.coursesService.assignInstructor(+id, body.instructorIds);
   }
 }

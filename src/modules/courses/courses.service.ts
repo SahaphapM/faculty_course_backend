@@ -9,7 +9,7 @@ import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { Prisma } from '@prisma/client';
 import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
-import { CreateCourseDtoWithInstructor } from './dto/course.dto';
+import { CreateCourseDtoWithInstructor } from './dto/create-course-with-instructor.dto';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
 @Injectable()
@@ -37,7 +37,7 @@ export class CourseService {
   async create(createCourseDtos: CreateCourseDtoWithInstructor[]) {
     const createCoursePromises = createCourseDtos.map(
       async (createCourseDto) => {
-        const { subjectId, course_instructors, ...rest } = createCourseDto;
+        const { subjectId, instructorIds, ...rest } = createCourseDto;
 
         try {
           // Find the subject
@@ -53,10 +53,10 @@ export class CourseService {
             data: {
               ...rest,
               subject: { connect: { id: subjectId } },
-              ...(course_instructors && {
+              ...(instructorIds && {
                 course_instructors: {
-                  create: course_instructors.map((ci) => ({
-                    instructorId: ci.instructorId,
+                  create: instructorIds.map((id) => ({
+                    instructorId: id,
                   })),
                 },
               }),

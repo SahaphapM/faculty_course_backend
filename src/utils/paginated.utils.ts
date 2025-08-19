@@ -1,4 +1,4 @@
-import { PaginatedResult } from 'src/dto/filters/filter.base.dto';
+import type { PaginatedData } from "src/dto/pagination.dto";
 
 /**
  * Utility to build a PaginatedResult<T> object.
@@ -9,7 +9,7 @@ export function createPaginatedData<T>(
   total: number,
   page: number = 1,
   limit: number = 10,
-): PaginatedResult<T> {
+): PaginatedData<T> {
   return {
     data,
     meta: {

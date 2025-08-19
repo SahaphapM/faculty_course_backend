@@ -9,9 +9,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { InternshipsService } from './internships.service';
-import { CreateInternshipWithStudentDto } from './dto/create.dto';
+import { CreateInternshipWithStudentDto } from './dto/create-internship-with-student.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
-import { ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiQuery } from '@nestjs/swagger';
+import { Paginated } from 'src/dto/pagination.dto';
+import { Internship } from 'src/generated/nestjs-dto/internship.entity';
+
+const PaginatedInternshipDto = Paginated(Internship);
 
 @Controller('internships')
 export class InternshipsController {
@@ -23,6 +27,7 @@ export class InternshipsController {
   }
 
   @Get()
+  @ApiOkResponse({type: PaginatedInternshipDto})
   @ApiQuery({
     name: 'year',
     required: false,

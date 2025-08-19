@@ -9,12 +9,16 @@ import {
   Query,
 } from '@nestjs/common';
 import { FacultiesService } from './faculties.service';
-import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { CreateFacultyDto } from 'src/generated/nestjs-dto/create-faculty.dto';
 import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { FacultyFilterDto } from 'src/dto/filters/filter.faculties.dto';
+import { Paginated } from 'src/dto/pagination.dto';
+import { Faculty } from 'src/generated/nestjs-dto/faculty.entity';
+
+const PaginatedFacultyDto = Paginated(Faculty);
 
 @ApiBearerAuth()
 @Controller('faculties')
@@ -27,39 +31,8 @@ export class FacultiesController {
     return this.facultiesService.create(createFacultyDto);
   }
 
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number (1-based)',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Items per page',
-  })
-  @ApiQuery({
-    name: 'thaiName',
-    required: false,
-    description: 'Filter by Thai name (contains)',
-  })
-  @ApiQuery({
-    name: 'engName',
-    required: false,
-    description: 'Filter by English name (contains)',
-  })
-  @ApiQuery({
-    name: 'sort',
-    required: false,
-    description: 'Sort field, prefix with - for DESC (e.g. -id)',
-  })
-  @ApiQuery({
-    name: 'orderBy',
-    required: false,
-    description: 'Explicit sort direction (asc|desc) overrides sort prefix',
-  })
   @Get()
+  @ApiOkResponse({type: PaginatedFacultyDto})
   findAll(@Query() pag?: FacultyFilterDto) {
     return this.facultiesService.findAll(pag);
   }

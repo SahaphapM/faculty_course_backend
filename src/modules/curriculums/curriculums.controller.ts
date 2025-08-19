@@ -9,13 +9,17 @@ import {
   Query,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
-import { ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
+import { Paginated } from 'src/dto/pagination.dto';
+import { Curriculum } from 'src/generated/nestjs-dto/curriculum.entity';
+
+const PaginatedCurriculumDto = Paginated(Curriculum);
 
 @ApiBearerAuth()
 @Controller('curriculums')
@@ -33,6 +37,7 @@ export class CurriculumsController {
   }
 
   @Get()
+  @ApiOkResponse({type: PaginatedCurriculumDto})
   @ApiQuery({ name: 'coordinatorId', required: false })
   findAll(
     @Query() pag?: CurriculumFilterDto,

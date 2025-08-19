@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CompaniesService } from '../src/modules/companies/companies.service';
 import { PrismaService } from '../src/prisma/prisma.service';
-import { CreateCompanyWithJobPositionsDto } from '../src/modules/companies/dto/create.dto';
+import { CreateCompanyWithJobPositionsDto } from '../src/modules/companies/dto/create-company-with-job.dto';
 
 describe('Company with JobPositions Integration Test', () => {
   let companiesService: CompaniesService;

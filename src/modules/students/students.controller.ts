@@ -11,7 +11,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
-import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
 import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -20,6 +20,10 @@ import { StudentFilterDto } from 'src/dto/filters/filter.student.dto';
 import { Response } from 'express';
 import axios from 'axios';
 import { Public } from 'src/decorators/public.decorator';
+import { Paginated } from 'src/dto/pagination.dto';
+import { Student } from 'src/generated/nestjs-dto/student.entity';
+
+const PaginatedStudentDto = Paginated(Student);
 
 
 @ApiBearerAuth()
@@ -46,6 +50,7 @@ export class StudentsController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get('skill')
+  @ApiOkResponse({type: PaginatedStudentDto})
   findAllBySkill(@Query() pag?: StudentFilterDto) {
     return this.studentsService.findAllBySkill(pag);
   }
@@ -69,6 +74,7 @@ export class StudentsController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
+  @ApiOkResponse({type: PaginatedStudentDto})
   findAll(@Query() pag?: StudentFilterDto) {
     return this.studentsService.findAll(pag);
   }

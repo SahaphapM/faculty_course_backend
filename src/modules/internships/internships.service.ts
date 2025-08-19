@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { CreateInternshipWithStudentDto } from './dto/create.dto';
+import { CreateInternshipWithStudentDto } from './dto/create-internship-with-student.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
 import { randomBytes } from 'crypto';
 import { createPaginatedData } from 'src/utils/paginated.utils';

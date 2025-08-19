@@ -9,12 +9,16 @@ import {
   Query,
 } from '@nestjs/common';
 import { PloService } from './plos.service';
-import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
 import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { PloFilterDto } from 'src/dto/filters/filter.plo.dto';
+import { Paginated } from 'src/dto/pagination.dto';
+import { Plo } from 'src/generated/nestjs-dto/plo.entity';
+
+const PaginatedPloDto = Paginated(Plo);
 
 @ApiBearerAuth()
 @Controller('plos')
@@ -45,6 +49,7 @@ export class PlosController {
     description: 'Filter PLOs by curriculum code',
   })
   @Get()
+  @ApiOkResponse({type: PaginatedPloDto})
   findAll(@Query() filter?: PloFilterDto) {
     return this.plosService.findAll(filter);
   }

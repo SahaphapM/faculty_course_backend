@@ -9,16 +9,6 @@ import {
   IsEnum,
 } from 'class-validator';
 
-export type PaginatedResult<T> = {
-  data: T[];
-  meta: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
-};
-
 export class BaseFilterParams {
   @ApiPropertyOptional({
     description:

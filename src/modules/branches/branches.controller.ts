@@ -9,12 +9,16 @@ import {
   Query,
 } from '@nestjs/common';
 import { BranchesService } from './branches.service';
-import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { CreateBranchDto } from 'src/generated/nestjs-dto/create-branch.dto';
 import { UpdateBranchDto } from 'src/generated/nestjs-dto/update-branch.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { BranchFilterDto } from 'src/dto/filters/filter.branch.dto';
+import { Paginated } from 'src/dto/pagination.dto';
+import { Branch } from 'src/generated/nestjs-dto/branch.entity';
+
+const PaginatedBranchDto = Paginated(Branch);
 
 @ApiBearerAuth()
 @Roles(UserRole.Admin)
@@ -61,6 +65,7 @@ export class BranchesController {
     description: 'Filter by English name (contains)',
   })
   @Get()
+  @ApiOkResponse({type: PaginatedBranchDto})
   findAll(@Query() pag?: BranchFilterDto) {
     return this.branchService.findAll(pag);
   }

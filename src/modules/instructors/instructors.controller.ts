@@ -12,12 +12,16 @@ import {
 } from '@nestjs/common';
 import { InstructorsService } from './instructors.service';
 
-import { ApiBearerAuth } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.dto';
 import { UpdateInstructorDto } from 'src/generated/nestjs-dto/update-instructor.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { InstructorFilterDto } from 'src/dto/filters/filter.instructors.dto';
+import { Paginated } from 'src/dto/pagination.dto';
+import { Instructor } from 'src/generated/nestjs-dto/instructor.entity';
+
+const PaginatedInstructorDto = Paginated(Instructor);
 
 @ApiBearerAuth()
 @Controller('instructors')
@@ -33,6 +37,7 @@ export class InstructorsController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
+  @ApiOkResponse({type: PaginatedInstructorDto})
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: InstructorFilterDto) {
     return this.insService.findAll(pag);

@@ -9,11 +9,15 @@ import {
   Query,
 } from '@nestjs/common';
 import { CompaniesService } from './companies.service';
-import { CreateCompanyWithJobPositionsDto } from './dto/create.dto';
+import { CreateCompanyWithJobPositionsDto } from './dto/create-company-with-job.dto';
 import { BaseFilterParams } from 'src/dto/filters/filter.base.dto';
-import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
+import { Paginated } from 'src/dto/pagination.dto';
+import { Company } from 'src/generated/nestjs-dto/company.entity';
+
+const PaginatedCompanyDto = Paginated(Company);
 
 @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
 @Controller('companies')
@@ -55,6 +59,7 @@ export class CompaniesController {
     description: 'Explicit sort direction (asc|desc) overrides sort prefix',
   })
   @Get()
+  @ApiOkResponse({type: PaginatedCompanyDto})
   findAll(@Query() filter: BaseFilterParams) {
     return this.companiesService.findAll(filter);
   }

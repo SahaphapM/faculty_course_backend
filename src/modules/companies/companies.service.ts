@@ -2,10 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   BaseFilterParams,
-  PaginatedResult,
 } from 'src/dto/filters/filter.base.dto';
 import { Company } from 'src/generated/nestjs-dto/company.entity';
-import { CreateCompanyWithJobPositionsDto } from './dto/create.dto';
+import { CreateCompanyWithJobPositionsDto } from './dto/create-company-with-job.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
@@ -32,7 +31,7 @@ export class CompaniesService {
     return company;
   }
 
-  async findAll(filter: BaseFilterParams): Promise<PaginatedResult<Company>> {
+  async findAll(filter: BaseFilterParams){
     const {
       search,
       page = DefaultPaginaitonValue.page,
@@ -76,7 +75,7 @@ export class CompaniesService {
       total,
       Number(page),
       Number(limit),
-    ) as PaginatedResult<Company>;
+    );
   }
 
   findOne(id: number): Promise<Company> {

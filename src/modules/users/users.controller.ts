@@ -11,13 +11,17 @@ import {
   ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UserService } from './users.service';
-import { ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery } from '@nestjs/swagger';
 import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { UpdateUserDto } from 'src/generated/nestjs-dto/update-user.dto';
 import { UpdateUserStudentDto } from 'src/dto/update-user-student.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { UserFilterDto } from 'src/dto/filters/filter.user.dto';
+import { Paginated } from 'src/dto/pagination.dto';
+import { User } from 'src/generated/nestjs-dto/user.entity';
+
+const PaginatedUserDto = Paginated(User);
 
 @ApiBearerAuth()
 @UseInterceptors(ClassSerializerInterceptor)
@@ -58,6 +62,7 @@ export class UsersController {
     description: 'Filter by user email (contains)',
   })
   @Get()
+  @ApiOkResponse({type: PaginatedUserDto})
   findAll(@Query() pag?: UserFilterDto) {
     return this.usersService.findAll(pag);
   }

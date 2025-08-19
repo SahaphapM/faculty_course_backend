@@ -4,9 +4,7 @@ import { UpdateJobPositionDto } from 'src/generated/nestjs-dto/update-jobPositio
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   BaseFilterParams,
-  PaginatedResult,
 } from 'src/dto/filters/filter.base.dto';
-import { JobPosition } from 'src/generated/nestjs-dto/jobPosition.entity';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 
@@ -35,7 +33,7 @@ export class JobPositionsService {
   // findAll Paginated
   async findAll(
     filter: BaseFilterParams,
-  ): Promise<PaginatedResult<JobPosition>> {
+  ){
     const {
       search,
       page = DefaultPaginaitonValue.page,
@@ -66,7 +64,7 @@ export class JobPositionsService {
       total,
       Number(page),
       Number(limit),
-    ) as PaginatedResult<JobPosition>;
+    ) ;
   }
 
   findOne(id: number) {

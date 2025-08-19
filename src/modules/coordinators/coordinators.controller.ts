@@ -11,13 +11,17 @@ import {
   Query,
 } from '@nestjs/common';
 import { CoordinatorsService } from './coordinators.service';
-import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody, ApiOkResponse } from '@nestjs/swagger';
 import { CreateCoordinatorDto } from 'src/generated/nestjs-dto/create-coordinator.dto';
 import { UpdateCoordinatorDto } from 'src/generated/nestjs-dto/update-coordinator.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { Roles } from 'src/decorators/roles.decorator';
 import { CoordinatorFilterDto } from 'src/dto/filters/filter.coordinator.dto';
 import { CoordinatorIds } from './dto/coordinator.dto';
+import { Paginated } from 'src/dto/pagination.dto';
+import { Coordinator } from 'src/generated/nestjs-dto/coordinator.entity';
+
+const PaginatedCoordinatorDto = Paginated(Coordinator);
 
 @ApiBearerAuth()
 @Controller('coordinators')
@@ -33,6 +37,7 @@ export class CoordinatorsController {
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Get()
+  @ApiOkResponse({type: PaginatedCoordinatorDto})
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: CoordinatorFilterDto) {
     return this.coordinatorsService.findAll(pag);

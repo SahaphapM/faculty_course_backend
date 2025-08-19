@@ -51,7 +51,9 @@ async function bootstrap() {
   }
 
   const config = swaggerBuilder.build();
-  const document: any = SwaggerModule.createDocument(app, config);
+  const document: any = SwaggerModule.createDocument(app, config, {
+    deepScanRoutes: true,
+  });
 
   if (isUnAuth) {
     // Remove global and per-operation security requirements
