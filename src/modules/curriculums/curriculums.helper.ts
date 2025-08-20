@@ -410,7 +410,7 @@ function summarizeAcrossStudentsUsingAssessments(
         // <<< NEW: ไม่มี expected → ใช้ fallback rule
         // level = 0 → 'below', level > 1 → 'on', (ระดับอื่นถือเป็น 'below')
         // ถ้าอยากให้ 1 เป็น 'on' ด้วย เปลี่ยนเป็น (assessed >= 1)
-        bucket = assessed === 0 ? 'below' : assessed > 1 ? 'on' : 'below';
+        bucket = assessed === 0 ? 'below' : assessed >= 1 ? 'on' : 'below';
       } else {
         // เทียบปกติเมื่อมี expected
         bucket =
