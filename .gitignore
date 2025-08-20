@@ -98,7 +98,6 @@ docker-compose.override.yml
 
 # Prisma generated files
 prisma/ERD.svg
-/src/generated/*
 
 # Yarn v3+
 .yarn/install-state.gz
