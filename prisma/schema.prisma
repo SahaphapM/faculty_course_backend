@@ -144,6 +144,8 @@ model coordinator {
   id          Int                       @id @default(autoincrement())
   thaiName    String                    @unique @default("") @db.VarChar(255)
   engName     String                    @unique @default("") @db.VarChar(255)
+  /// @DtoRelationIncludeId
+  userId      Int?                      @unique
   user        user?
   curriculums curriculum_coordinators[]
 }
@@ -228,7 +230,7 @@ model skill_collection {
   studentId   Int?
   gainedLevel Int      @default(0)
   passed      Boolean  @default(false)
-  cloId       Int? 
+  cloId       Int?
   courseId    Int?
   clo         clo?     @relation(fields: [cloId], references: [id], onUpdate: NoAction)
   course      course?  @relation(fields: [courseId], references: [id], onUpdate: NoAction)
@@ -347,7 +349,7 @@ model student_internship {
   // ถ้า business rule อนุญาต แนะนำเปลี่ยนเป็น SetNull เพื่อให้ลบตำแหน่งงานได้โดยไม่พัง record ลูก
   jobPosition   job_position? @relation(fields: [jobPositionId], references: [id], onDelete: SetNull)
   student       student?      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  
+
   @@unique([studentId, internshipId])
   @@index([internshipId])
   @@index([jobPositionId])
