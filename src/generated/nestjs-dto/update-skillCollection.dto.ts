@@ -1,6 +1,6 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {IsInt,IsOptional} from 'class-validator'
+import {IsBoolean,IsInt,IsOptional} from 'class-validator'
 
 
 
@@ -15,4 +15,21 @@ export class UpdateSkillCollectionDto {
 @IsOptional()
 @IsInt()
 studentId?: number  | null;
+@ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  default: 0,
+  required: false,
+})
+@IsOptional()
+@IsInt()
+gainedLevel?: number ;
+@ApiProperty({
+  type: 'boolean',
+  default: false,
+  required: false,
+})
+@IsOptional()
+@IsBoolean()
+passed?: boolean ;
 }

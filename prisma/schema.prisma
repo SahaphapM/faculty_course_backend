@@ -21,7 +21,7 @@ generator nestjsDto {
   prettier                        = "false"
   reExport                        = "false"
   requiredResponseApiProperty     = "true"
-  showDefaultValues               = "false"
+  showDefaultValues               = "true"
   updateDtoPrefix                 = "Update"
   wrapRelationsAsType             = "false"
 }

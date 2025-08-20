@@ -47,6 +47,14 @@ engName?: string  | null;
 credit?: string  | null;
 @ApiProperty({
   type: 'string',
+  default: 'บังคับ',
+  required: false,
+})
+@IsOptional()
+@IsString()
+type?: string ;
+@ApiProperty({
+  type: 'string',
   required: false,
   nullable: true,
 })
