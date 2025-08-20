@@ -335,10 +335,19 @@ export function pickAssessedLevel(
   >,
   pickOrder: string[],
 ) {
-  if (isNum(assessment.finalLevel)) return assessment.finalLevel!;
-  if (pickOrder[0] === 'company' && isNum(assessment.companyLevel))
+  if (isNum(assessment.finalLevel) && assessment.finalLevel >= 1)
+    return assessment.finalLevel!;
+  if (
+    pickOrder[0] === 'company' &&
+    isNum(assessment.companyLevel) &&
+    assessment.companyLevel >= 1
+  )
     return assessment.companyLevel!;
-  if (isNum(assessment.companyLevel) && pickOrder.includes('company'))
+  if (
+    isNum(assessment.companyLevel) &&
+    pickOrder.includes('company') &&
+    assessment.companyLevel >= 1
+  )
     return assessment.companyLevel!;
   if (isNum(assessment.curriculumLevel)) return assessment.curriculumLevel!;
   return null;

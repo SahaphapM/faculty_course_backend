@@ -135,7 +135,7 @@ export class CurriculumsService {
   }
 
   // Find all curriculums with pagination and search
-  async findAll(pag?: CurriculumFilterDto,) {
+  async findAll(pag?: CurriculumFilterDto) {
     const defaultLimit = DefaultPaginaitonValue.limit;
     const defaultPage = DefaultPaginaitonValue.page;
 
@@ -148,7 +148,7 @@ export class CurriculumsService {
       degree,
       branchId,
       facultyId,
-      coordinatorId
+      coordinatorId,
     } = pag || {};
 
     const whereCondition: Prisma.curriculumWhereInput = {
@@ -304,7 +304,7 @@ export class CurriculumsService {
     _debug?: { studentId?: number; rootSkillId?: number }, // optional ดีบัก
   ): Promise<any> {
     return getSkillSummary(curriculumId, yearCode.slice(-2), skillType, {
-      studentId: 113,
+      studentId: 2376,
       rootSkillId: 1,
     });
   }

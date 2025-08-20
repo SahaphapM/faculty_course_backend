@@ -39,19 +39,6 @@ export async function findAllDescendants(
   return result;
 }
 
-// ตัวช่วยสร้าง comparator สำหรับ gainedLevel เทียบกับ expected
-export function buildLevelComparator(
-  target: TargetLevel,
-  expected: number | null | undefined,
-) {
-  if (target === 'all') return undefined; // ไม่บังคับ comparator
-  if (expected == null) return undefined; // CLO นี้ไม่มี expected ข้ามไป
-
-  if (target === 'on') return { equals: expected };
-  if (target === 'above') return { gt: expected };
-  if (target === 'below') return { lt: expected };
-}
-
 // เดินขึ้นหาตัวรากจริง หากผู้ใช้ส่ง id ของโหนดกลางมา
 async function resolveRootSkillId(skillId: number): Promise<number> {
   let cur = await prisma.skill.findUnique({
@@ -198,6 +185,8 @@ export async function findStudentsTargetSkillLevel(
       a.studentId!,
       pickAssessedLevel(a, ['final', 'company', 'curriculum']),
     );
+    console.log('a', a);
+    console.log('assessMap', assessMap);
   }
 
   // 5) คัดกรองตาม targetLevel (expected ต่อคน)
@@ -211,17 +200,34 @@ export async function findStudentsTargetSkillLevel(
     const assessed = assessMap.get(sid) ?? null;
 
     // เหมือน getSkillSummary: ถ้าไม่มี expected หรือไม่มี assessed → ข้าม
-    if (!isNum(expected) || !isNum(assessed)) continue;
+    if (!isNum(assessed)) continue;
 
-    const isPass =
-      targetLevel === 'all'
-        ? true
-        : targetLevel === 'on'
-          ? assessed === expected
-          : targetLevel === 'above'
-            ? assessed > expected
-            : /* below */ assessed < expected;
+    let isPass: boolean;
 
+    if (!isNum(expected)) {
+      // <<< NEW: ไม่มี expected (ไม่เคยได้ skillcollection) → ใช้ fallback rule
+      if (targetLevel === 'all') {
+        isPass = true;
+      } else if (targetLevel === 'on') {
+        isPass = assessed >= 1; // เปลี่ยนเป็น >= 1 ได้ถ้าต้องการ
+      } else if (targetLevel === 'below') {
+        isPass = assessed === 0;
+      } else {
+        // 'above' ทำไม่ได้เมื่อไม่มี expected
+        isPass = false;
+      }
+    } else {
+      // เดิม: มี expected → เทียบตามปกติ
+      if (targetLevel === 'all') {
+        isPass = true;
+      } else if (targetLevel === 'on') {
+        isPass = assessed === expected;
+      } else if (targetLevel === 'above') {
+        isPass = assessed > expected;
+      } else {
+        isPass = assessed < expected; // below
+      }
+    }
     if (isPass) passedIds.push(sid);
   }
 
