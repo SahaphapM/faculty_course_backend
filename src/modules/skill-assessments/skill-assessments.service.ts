@@ -6,11 +6,10 @@ import { SkillCollectionsHelper } from '../skill-collectiolns/skill-collectiolns
 
 @Injectable()
 export class SkillAssessmentsService {
-  constructor(private readonly prisma: PrismaService,
+  constructor(
+    private readonly prisma: PrismaService,
     private readonly skHelper: SkillCollectionsHelper,
-  ) { }
-
-
+  ) {}
 
   async companyAssessment(
     skillAssessmentId: number,
@@ -36,10 +35,10 @@ export class SkillAssessmentsService {
     });
   }
 
-  companySubmitAssessment(internshipId: number) {
+  companySubmitAssessment(studentInternshipId: number) {
     // ทำการเปลี่ยนสถานะ isAssessed เป็น true เมื่อประเมินเสร็จสิ้น ป้องกัน company ประเมินซ้ำ
-    return this.prisma.student_internship.updateMany({
-      where: { internshipId },
+    return this.prisma.student_internship.update({
+      where: { id: studentInternshipId },
       data: { isAssessed: true },
     });
   }
@@ -55,7 +54,7 @@ export class SkillAssessmentsService {
       skillAssessmentId,
       finalLevel,
       curriculumComment,
-      fullDto: updateSkillAssessmentDto
+      fullDto: updateSkillAssessmentDto,
     });
 
     return this.prisma.skill_assessment.update({
@@ -65,7 +64,6 @@ export class SkillAssessmentsService {
   }
 
   async getStudentSkillAssessments(studentId: number) {
-
     const student = await this.prisma.student.findUnique({
       where: { id: studentId },
       select: {
@@ -108,10 +106,11 @@ export class SkillAssessmentsService {
       },
     });
 
-    
-
-    this.skHelper.syncStudentSkillAssessments(student.id, rootSkills, student.skill_collections);
-
+    this.skHelper.syncStudentSkillAssessments(
+      student.id,
+      rootSkills,
+      student.skill_collections,
+    );
 
     const skillAssessments = await this.prisma.skill_assessment.findMany({
       where: { studentId },
@@ -135,7 +134,6 @@ export class SkillAssessmentsService {
       },
     });
 
- 
     return skillAssessments.map((assessment) => ({
       id: assessment.id,
       skillId: assessment.skillId,
