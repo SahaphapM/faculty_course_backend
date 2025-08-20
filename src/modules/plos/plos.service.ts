@@ -5,7 +5,7 @@ import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
 import { Prisma } from '@prisma/client';
 import { PloFilterDto } from 'src/dto/filters/filter.plo.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
-
+import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 @Injectable()
 export class PloService {
   constructor(private prisma: PrismaService) {}
@@ -25,21 +25,44 @@ export class PloService {
 
   // Find all PLOs
   async findAll(filter?: PloFilterDto) {
-    const { curriculumCode } = filter || {}; // Ensure filter is not undefined
+    const defaultLimit = DefaultPaginaitonValue.limit;
+    const defaultPage = DefaultPaginaitonValue.page;
+    const {
+      limit,
+      page,
+      orderBy = DefaultPaginaitonValue.orderBy,
+      sort = DefaultPaginaitonValue.sortBy,
+      curriculumCode,
+    } = filter || {};
 
     const whereCondition: Prisma.ploWhereInput = curriculumCode
       ? { curriculum: { code: curriculumCode } }
-      : {}; // Only filter if curriculumCode exists
+      : {};
+
+    // Parse sort field and direction
+    const sortField = sort.startsWith('-') ? sort.slice(1) : sort;
+    const sortDirection = sort.startsWith('-') ? 'desc' : orderBy;
 
     const options: Prisma.ploFindManyArgs = {
-      where: whereCondition, //  Directly pass whereOption (no extra object)
+      where: whereCondition,
+      take: limit ?? defaultLimit,
+      skip: ((page ?? defaultPage) - 1) * (limit ?? defaultLimit),
+      orderBy: {
+        [sortField]: sortDirection,
+      },
     };
 
     const [list, total] = await Promise.all([
       this.prisma.plo.findMany(options),
       this.prisma.plo.count({ where: whereCondition }),
     ]);
-    return createPaginatedData(list, total, 1, list.length);
+
+    return createPaginatedData(
+      list,
+      total,
+      Number(page ?? defaultPage),
+      Number(limit ?? defaultLimit),
+    );
   }
 
   // Find a PLO by ID

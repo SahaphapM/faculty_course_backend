@@ -33,12 +33,28 @@ export class PlosController {
     required: false,
     type: Number,
     description: 'Page number (1-based)',
+    example: 1,
   })
   @ApiQuery({
     name: 'limit',
     required: false,
     type: Number,
     description: 'Items per page',
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'sort',
+    required: false,
+    type: String,
+    description: 'Sort field (prefix with - for descending). Example: "name" or "-createdAt"',
+    example: 'id',
+  })
+  @ApiQuery({
+    name: 'orderBy',
+    required: false,
+    enum: ['asc', 'desc'],
+    description: 'Sort direction (asc or desc)',
+    example: 'asc',
   })
   @ApiQuery({
     name: 'curriculumCode',
