@@ -52,7 +52,7 @@ export class SkillsService {
         id: true,
         thaiName: true,
         engName: true,
-        domain: true
+        domain: true,
       },
       where: {
         curriculumId,
@@ -92,7 +92,7 @@ export class SkillsService {
     const options: Prisma.skillFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy },
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy },
       include: this.getSkillIncludeStructure(),
       where: whereCondition,
     };
@@ -141,7 +141,7 @@ export class SkillsService {
     const options: Prisma.skillFindManyArgs = {
       take: limit || defaultLimit,
       skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
-  orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy },
+      orderBy: { [(sort === '' ? 'id' : sort) ?? 'id']: orderBy },
       include: this.getSkillIncludeStructure(),
       where: whereCondition,
     };
@@ -404,6 +404,9 @@ export class SkillsService {
           id: true,
           thaiName: true,
           engName: true,
+          domain: true,
+          thaiDescription: true,
+          engDescription: true,
           subs: {
             // level 3
             select: {
@@ -411,6 +414,9 @@ export class SkillsService {
               id: true,
               thaiName: true,
               engName: true,
+              domain: true,
+              thaiDescription: true,
+              engDescription: true,
               subs: {
                 // level 4
                 select: {
@@ -418,6 +424,9 @@ export class SkillsService {
                   id: true,
                   thaiName: true,
                   engName: true,
+                  domain: true,
+                  thaiDescription: true,
+                  engDescription: true,
                   subs: {
                     // level 5
                     select: {
@@ -425,6 +434,9 @@ export class SkillsService {
                       id: true,
                       thaiName: true,
                       engName: true,
+                      domain: true,
+                      thaiDescription: true,
+                      engDescription: true,
                     },
                   },
                 },
