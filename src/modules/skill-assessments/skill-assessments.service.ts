@@ -106,12 +106,6 @@ export class SkillAssessmentsService {
       },
     });
 
-    this.skHelper.syncStudentSkillAssessments(
-      student.id,
-      rootSkills,
-      student.skill_collections,
-    );
-
     const skillAssessments = await this.prisma.skill_assessment.findMany({
       where: { studentId },
       select: {
