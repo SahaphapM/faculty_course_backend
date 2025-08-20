@@ -134,6 +134,7 @@ export async function findStudentsTargetSkillLevel(
   page: number = 1,
   limit: number = 10,
   search?: string,
+  debug?: { studentId?: number; rootSkillId?: number }, // optional ดีบัก
 ) {
   const take = Math.max(1, Number(limit) || 10);
   const currPage = Math.max(1, Number(page) || 1);
@@ -185,8 +186,8 @@ export async function findStudentsTargetSkillLevel(
       a.studentId!,
       pickAssessedLevel(a, ['final', 'company', 'curriculum']),
     );
-    console.log('a', a);
-    console.log('assessMap', assessMap);
+    // console.log('a', a);
+    // console.log('assessMap', assessMap);
   }
 
   // 5) คัดกรองตาม targetLevel (expected ต่อคน)

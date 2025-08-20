@@ -167,6 +167,7 @@ export class SkillCollectionsService {
       },
       select: { id: true, studentId: true, gainedLevel: true, passed: true },
     });
+
     const scByStudentId = new Map(existing.map((sc) => [sc.studentId!, sc]));
 
     // // 3) เตรียม root skills เอาไว้ใช้ตอนสรุป
@@ -202,6 +203,8 @@ export class SkillCollectionsService {
         continue; // ✅ ไม่มี update/ไม่มีสรุป
       }
 
+      // console.log('newPassed', scByStudentId);
+
       // มีการเปลี่ยนแปลง (หรือยังไม่มีแถว) → จัดการใน transaction
       await this.prisma.$transaction(async (tx) => {
         // re-check กัน race: อ่านค่าใหม่ล่าสุดอีกครั้งใน tx
@@ -212,22 +215,21 @@ export class SkillCollectionsService {
             })
           : null;
 
-        if (
-          fresh &&
-          fresh.gainedLevel === gainedLevel &&
-          fresh.passed === newPassed
-        ) {
+        if (fresh && fresh.gainedLevel === gainedLevel) {
           return; // มีคนอื่นอัปเดตก่อนหน้าเราแล้ว และค่าเท่ากัน → ข้ามตรงนี้
         }
 
+        // console.log('fresh', fresh);
+
         // create/update ตามสถานะ
         if (fresh) {
-          await tx.skill_collection.update({
+          const updated = await tx.skill_collection.update({
             where: { id: fresh.id },
             data: { gainedLevel, passed: newPassed },
           });
+          console.log('updated', updated);
         } else {
-          await tx.skill_collection.create({
+          const created = await tx.skill_collection.create({
             data: {
               studentId,
               courseId: course.id,
@@ -236,12 +238,15 @@ export class SkillCollectionsService {
               passed: newPassed,
             },
           });
+          console.log('created', created);
         }
 
         // 2) หา root ของกิ่งนี้
         const tree = await getSkillTree(course.subject.curriculumId, tx);
+        console.log('tree', tree);
         const leafSkillId = clo.skillId;
         const touchedRoot = findRootOf(tree, leafSkillId);
+        console.log('touchedRoot', touchedRoot);
 
         // 3) หา descendant leaves ใต้ root นี้ (ไม่ใช่ทั้งป่า)
         const leaves = collectDescendantLeaves(tree, touchedRoot);
@@ -266,6 +271,8 @@ export class SkillCollectionsService {
 
         // 6) โพรพาเกตเฉพาะกิ่งนี้
         const levelAtRoot = propagateSubtree(tree, touchedRoot, leafLevels);
+
+        console.log('levelAtRoot', levelAtRoot);
 
         // 7) upsert assessment เฉพาะ root นี้
         await tx.skill_assessment.upsert({

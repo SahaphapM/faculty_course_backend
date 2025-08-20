@@ -389,9 +389,11 @@ export function propagateSubtree(
     memo.set(rootId, v);
     return v;
   }
+  console.log('kids', kids);
   const childVals = kids.map((id) =>
     propagateSubtree(tree, id, leafLevels, memo),
   );
+  console.log('childVals', childVals);
   const v = calculateMode(childVals);
   memo.set(rootId, v);
   return v;

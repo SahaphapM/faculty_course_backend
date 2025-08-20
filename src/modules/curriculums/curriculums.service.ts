@@ -382,6 +382,10 @@ export class CurriculumsService {
       page,
       limit,
       search,
+      {
+        studentId: 4,
+        rootSkillId: 2032,
+      },
     );
   }
 
