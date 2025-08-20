@@ -5,11 +5,20 @@ import { PrismaModule } from 'src/prisma/prisma.module';
 import { StudentsModule } from '../students/students.module';
 import { ClosModule } from '../clos/clos.module';
 import { SkillCollectionsHelper } from './skill-collectiolns.helper';
+import { SkillImportService } from './skill-import.service';
 
 @Module({
   imports: [PrismaModule, StudentsModule, ClosModule],
   controllers: [SkillCollectionsController],
-  providers: [SkillCollectionsService, SkillCollectionsHelper],
-  exports: [SkillCollectionsService, SkillCollectionsHelper],
+  providers: [
+    SkillCollectionsService,
+    SkillCollectionsHelper,
+    SkillImportService,
+  ],
+  exports: [
+    SkillCollectionsService,
+    SkillCollectionsHelper,
+    SkillImportService,
+  ],
 })
 export class SkillCollectionsModule {}
