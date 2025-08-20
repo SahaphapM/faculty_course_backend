@@ -12,7 +12,7 @@ import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
 import { getSkillSummary } from './curriculums.helper';
 import { CreateLevelDescriptionDto } from 'src/generated/nestjs-dto/create-levelDescription.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
-import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
+import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection.dto';
 import { findStudentsTargetSkillLevel } from './curriculums.helper2';
 import { LevelDescription } from 'src/generated/nestjs-dto/levelDescription.entity';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';

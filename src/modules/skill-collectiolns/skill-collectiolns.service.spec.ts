@@ -345,7 +345,7 @@ describe('SkillCollectionsService', () => {
 
       prisma.skill_collection.findMany.mockResolvedValue(skillCollections);
 
-      const result = await service.getByCloId(courseId, cloId);
+      const result = await service.getByCourseAndCloId(courseId, cloId);
 
       expect(prisma.skill_collection.findMany).toHaveBeenCalledWith({
         where: { courseId, cloId },
@@ -373,7 +373,7 @@ describe('SkillCollectionsService', () => {
 
       prisma.skill_collection.findMany.mockResolvedValue([]);
 
-      const result = await service.getByCloId(courseId, cloId);
+      const result = await service.getByCourseAndCloId(courseId, cloId);
 
       expect(result).toEqual([]);
     });

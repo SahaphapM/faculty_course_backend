@@ -15,7 +15,7 @@ import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
-import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
+import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection.dto';
 import { StudentsBySkillLevelFilterDto } from 'src/dto/filters/filter.students-by-skill-level.dto';
 import { PaginatedCurriculumDto } from 'src/dto/pagination.types';
 

@@ -1,11 +1,6 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { createPaginatedData } from 'src/utils/paginated.utils';
-import { SkillCollectionDto } from 'src/generated/nestjs-dto/skillCollection.dto';
 import { Prisma } from '@prisma/client';
 import {
   collectDescendantLeaves,
@@ -16,7 +11,10 @@ import {
 } from './skill-collectiolns.helper';
 import { LearningDomain } from 'src/enums/learning-domain.enum';
 import { SkillNode } from './skill-collectiolns.helper';
-import { SkillCollectionByCourseFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
+import {
+  SkillCollectionByCourseFilterDto,
+  type SkillCollectionFilterDto,
+} from 'src/dto/filters/filter.skill-collection.dto';
 
 @Injectable()
 export class SkillCollectionsService {
@@ -92,25 +90,66 @@ export class SkillCollectionsService {
     return { specific, soft };
   }
 
-  async getByCloId(
-    courseId: number,
-    cloId: number,
-  ): Promise<Partial<SkillCollectionDto>[]> {
-    return this.prisma.skill_collection.findMany({
-      where: { courseId, cloId },
+  async getByCourseAndCloId(query: SkillCollectionFilterDto) {
+    const defaultLimit = 10;
+    const defaultPage = 1;
+
+    const {
+      limit,
+      page,
+      sort,
+      orderBy,
+      courseId,
+      cloId,
+      search,
+    } = query as any;
+
+    const _limit = Number(limit ?? defaultLimit);
+    const _page = Number(page ?? defaultPage);
+    const _skip = (_page - 1) * _limit;
+
+    // typed where clause
+    const where: Prisma.skill_collectionWhereInput = {
+      courseId,
+      cloId,
+      ...(search && {
+        OR: [
+          { student: { code: { contains: String(search) } } },
+          { student: { thaiName: { contains: String(search) } } },
+        ],
+      }),
+    };
+
+    // typed orderBy
+    const defaultOrder: Prisma.skill_collectionOrderByWithRelationInput = { student: { code: 'asc' } };
+    let order: Prisma.skill_collectionOrderByWithRelationInput = defaultOrder;
+    if (sort) {
+      const dir = orderBy === 'desc' ? 'desc' : 'asc';
+      if (sort === 'studentCode' || sort === 'student.code') order = { student: { code: dir } };
+      else if (sort === 'gainedLevel') order = { gainedLevel: dir };
+      else if (sort === 'passed') order = { passed: dir };
+      else order = defaultOrder;
+    }
+
+    const options: Prisma.skill_collectionFindManyArgs = {
+      where,
       select: {
         id: true,
         gainedLevel: true,
         passed: true,
-        student: {
-          select: {
-            code: true,
-            thaiName: true,
-          },
-        },
+        student: { select: { code: true, thaiName: true } },
       },
-      orderBy: { student: { code: 'asc' } },
-    });
+      orderBy: order,
+      skip: _skip,
+      take: _limit,
+    };
+
+    const [res, total] = await Promise.all([
+      this.prisma.skill_collection.findMany(options),
+      this.prisma.skill_collection.count({ where: options.where }),
+    ]);
+
+    return createPaginatedData(res, total, _page, _limit);
   }
 
   // import skill collections for students by clo id

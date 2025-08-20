@@ -10,12 +10,12 @@ import {
 import { SkillCollectionsService } from './skill-collectiolns.service';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
-import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
+import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiQuery, ApiResponse, ApiOperation, getSchemaPath } from '@nestjs/swagger';
 import {
-  ApiBearerAuth,
-  ApiBody,
-} from '@nestjs/swagger';
-import { SkillCollectionByCourseFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
+  SkillCollectionByCourseFilterDto,
+  SkillCollectionFilterDto,
+} from 'src/dto/filters/filter.skill-collection.dto';
+import { PaginatedSkillCollectionDto } from 'src/dto/pagination.types';
 import { StudentScoreList } from 'src/dto/student-score.dto';
 
 @ApiBearerAuth()
@@ -25,13 +25,14 @@ export class SkillCollectionsController {
     private readonly skillCollectionsService: SkillCollectionsService,
   ) {}
 
+  @ApiOperation({ summary: 'Get skill collections by course and clo (paginated)' })
+  @ApiExtraModels(SkillCollectionFilterDto, PaginatedSkillCollectionDto)
+  @ApiQuery({ name: 'query', required: true, schema: { $ref: getSchemaPath(SkillCollectionFilterDto) } })
+  @ApiResponse({ status: 200, description: 'Paginated skill collections', type: PaginatedSkillCollectionDto })
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get()
-  getSkillCollectionByCloId(
-    @Query('courseId', ParseIntPipe) courseId: number,
-    @Query('cloId', ParseIntPipe) cloId: number,
-  ): Promise<Partial<SkillCollection>[]> {
-    return this.skillCollectionsService.getByCloId(courseId, cloId);
+  getSkillCollectionByCloId(@Query() query: SkillCollectionFilterDto) {
+    return this.skillCollectionsService.getByCourseAndCloId(query);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
