@@ -94,15 +94,8 @@ export class SkillCollectionsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const {
-      limit,
-      page,
-      sort,
-      orderBy,
-      courseId,
-      cloId,
-      search,
-    } = query as any;
+    const { limit, page, sort, orderBy, courseId, cloId, search } =
+      query as any;
 
     const _limit = Number(limit ?? defaultLimit);
     const _page = Number(page ?? defaultPage);
@@ -121,11 +114,14 @@ export class SkillCollectionsService {
     };
 
     // typed orderBy
-    const defaultOrder: Prisma.skill_collectionOrderByWithRelationInput = { student: { code: 'asc' } };
+    const defaultOrder: Prisma.skill_collectionOrderByWithRelationInput = {
+      student: { code: 'asc' },
+    };
     let order: Prisma.skill_collectionOrderByWithRelationInput = defaultOrder;
     if (sort) {
       const dir = orderBy === 'desc' ? 'desc' : 'asc';
-      if (sort === 'studentCode' || sort === 'student.code') order = { student: { code: dir } };
+      if (sort === 'studentCode' || sort === 'student.code')
+        order = { student: { code: dir } };
       else if (sort === 'gainedLevel') order = { gainedLevel: dir };
       else if (sort === 'passed') order = { passed: dir };
       else order = defaultOrder;
@@ -466,5 +462,9 @@ export class SkillCollectionsService {
     });
 
     return createPaginatedData(data, total, _page, _limit);
+  }
+
+  async removeSkillCollection(id: number) {
+    await this.prisma.skill_collection.delete({ where: { id } });
   }
 }

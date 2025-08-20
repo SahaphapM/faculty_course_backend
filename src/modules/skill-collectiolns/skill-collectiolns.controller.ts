@@ -6,6 +6,7 @@ import {
   ParseIntPipe,
   Get,
   Param,
+  Delete,
 } from '@nestjs/common';
 import { SkillCollectionsService } from './skill-collectiolns.service';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -98,5 +99,10 @@ export class SkillCollectionsController {
       courseId,
       pag,
     );
+  }
+
+  @Delete(':id')
+  removeSkillCollection(@Param('id', ParseIntPipe) id: number) {
+    return this.skillCollectionsService.removeSkillCollection(id);
   }
 }
