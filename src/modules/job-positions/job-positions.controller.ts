@@ -36,7 +36,7 @@ export class JobPositionsController {
 
   @Get()
   @ApiExtraModels(BaseFilterParams)
-  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(BaseFilterParams) } })
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(BaseFilterParams) }, description: 'Filter/query parameters' })
   @ApiOkResponse({type: PaginatedJobPositionDto})
   findAll(@Query() filter: BaseFilterParams) {
     return this.jobPositionsService.findAll(filter);

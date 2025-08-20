@@ -46,7 +46,7 @@ export class PlosController {
     description: 'Filter PLOs by curriculum code',
   })
   @ApiExtraModels(PloFilterDto)
-  @ApiQuery({ name: 'filter', required: false, schema: { $ref: getSchemaPath(PloFilterDto) }, description: 'Filter/query parameters' })
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(PloFilterDto) }, description: 'Filter/query parameters' })
   @Get()
   @ApiOkResponse({type: PaginatedPloDto})
   findAll(@Query() filter?: PloFilterDto) {

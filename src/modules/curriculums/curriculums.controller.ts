@@ -9,13 +9,14 @@ import {
   Query,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
-import { ApiBearerAuth, ApiOkResponse, ApiParam, ApiQuery } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiParam, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole } from 'src/enums/role.enum';
 import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection-summary.dto';
+import { StudentsBySkillLevelFilterDto } from 'src/dto/filters/filter.students-by-skill-level.dto';
 import { PaginatedCurriculumDto } from 'src/dto/pagination.types';
 
 @ApiBearerAuth()
@@ -33,14 +34,14 @@ export class CurriculumsController {
     return this.curriculumsService.create(createCurriculumDto, coordinatorId);
   }
 
+  @ApiExtraModels(CurriculumFilterDto)
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(CurriculumFilterDto) }, description: 'Filter/query parameters' })
   @Get()
   @ApiOkResponse({type: PaginatedCurriculumDto})
-  @ApiQuery({ name: 'coordinatorId', required: false })
   findAll(
     @Query() pag?: CurriculumFilterDto,
-    @Query('coordinatorId') coordinatorId?: number,
   ) {
-    return this.curriculumsService.findAll(pag, coordinatorId);
+    return this.curriculumsService.findAll(pag);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
@@ -99,46 +100,26 @@ export class CurriculumsController {
     return this.curriculumsService.remove(+id);
   }
 
-  @ApiQuery({
-    name: 'yearCode',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'targetLevel',
-    required: true,
-  })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-  })
-  @ApiQuery({
-    name: 'search',
-    required: false,
-  })
+  @ApiExtraModels(StudentsBySkillLevelFilterDto)
+  @ApiQuery({ name: 'filter', required: false, schema: { $ref: getSchemaPath(StudentsBySkillLevelFilterDto) }, description: 'Filter/query parameters' })
   @Get('filters/skill/:skillId/students')
   @ApiParam({ name: 'skillId', type: String, description: 'Skill ID' })
   async getStudentsBySkillLevel(
     @Param('skillId') skillId: number,
-    @Query('targetLevel') targetLevel: 'on' | 'above' | 'below' | 'all',
-    @Query('year') year: string,
-    @Query('page') page = 1,
-    @Query('limit') limit = 10,
-    @Query('search') search?: string, // optional
+    @Query() filter: StudentsBySkillLevelFilterDto,
   ) {
     return await this.curriculumsService.findStudentsBySkillLevel(
       skillId,
-      targetLevel,
-      year,
-      page,
-      limit,
-      search,
+      filter.targetLevel,
+      filter.year || filter.yearCode,
+      filter.page || 1,
+      filter.limit || 10,
+      filter.search,
     );
   }
 
+  @ApiExtraModels(SkillCollectionSummaryFilterDto)
+  @ApiQuery({ name: 'q', required: false, schema: { $ref: getSchemaPath(SkillCollectionSummaryFilterDto) }, description: 'Filter/query parameters' })
   @Get('summary/skill-collection/:curriculumId')
   async getSkillCollectionSummaryByCurriculum(
     @Param('curriculumId') curriculumId: number,

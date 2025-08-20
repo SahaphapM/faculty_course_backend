@@ -56,7 +56,7 @@ export class CompaniesController {
     description: 'Explicit sort direction (asc|desc) overrides sort prefix',
   })
   @ApiExtraModels(BaseFilterParams)
-  @ApiQuery({ name: 'filter', required: false, schema: { $ref: getSchemaPath(BaseFilterParams) }, description: 'Filter/query parameters' })
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(BaseFilterParams) }, description: 'Filter/query parameters' })
   @Get()
   @ApiOkResponse({type: PaginatedCompanyDto})
   findAll(@Query() filter: BaseFilterParams) {

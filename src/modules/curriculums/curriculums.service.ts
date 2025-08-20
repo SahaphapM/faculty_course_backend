@@ -135,7 +135,7 @@ export class CurriculumsService {
   }
 
   // Find all curriculums with pagination and search
-  async findAll(pag?: CurriculumFilterDto, coordinatorId?: number) {
+  async findAll(pag?: CurriculumFilterDto,) {
     const defaultLimit = DefaultPaginaitonValue.limit;
     const defaultPage = DefaultPaginaitonValue.page;
 
@@ -148,6 +148,7 @@ export class CurriculumsService {
       degree,
       branchId,
       facultyId,
+      coordinatorId
     } = pag || {};
 
     const whereCondition: Prisma.curriculumWhereInput = {

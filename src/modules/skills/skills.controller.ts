@@ -28,63 +28,6 @@ export class SkillsController {
   @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(SkillFilterDto) }, description: 'Filter/query parameters' })
   @Get()
   @ApiOkResponse({type: PaginatedSkillDto})
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number (1-based)',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Items per page',
-  })
-  @ApiQuery({
-    name: 'sort',
-    required: false,
-    description: 'Sort field, prefix with - for DESC (e.g. -id)',
-  })
-  @ApiQuery({
-    name: 'orderBy',
-    required: false,
-    description: 'Explicit sort direction (asc|desc) overrides sort prefix',
-  })
-  @ApiQuery({
-    name: 'nameCode',
-    required: false,
-    description: 'Filter by Thai/English name (contains)',
-  })
-  @ApiQuery({
-    name: 'domain',
-    required: false,
-    description: 'Filter by skill domain',
-  })
-  @ApiQuery({
-    name: 'curriculumId',
-    required: false,
-    type: Number,
-    description: 'Filter root skills by curriculum',
-  })
-  @ApiQuery({
-    name: 'branchId',
-    required: false,
-    type: Number,
-    description: 'Filter root skills by branch',
-  })
-  @ApiQuery({
-    name: 'facultyId',
-    required: false,
-    type: Number,
-    description: 'Filter root skills by faculty',
-  })
-  @ApiQuery({
-    name: 'subjectId',
-    required: false,
-    type: Number,
-    description:
-      'Filter root skills by subject (derives skills from related CLOs)',
-  })
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: SkillFilterDto) {
     if (pag?.curriculumId) {
