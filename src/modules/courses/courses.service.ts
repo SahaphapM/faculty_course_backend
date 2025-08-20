@@ -84,7 +84,7 @@ export class CourseService {
   }
 
   // Find all courses with pagination and search
-  async findAll(pag?: CourseFilterDto, instructorId?: number) {
+  async findAll(pag?: CourseFilterDto) {
     const defaultLimit = DefaultPaginaitonValue.limit;
     const defaultPage = DefaultPaginaitonValue.page;
 
@@ -101,6 +101,7 @@ export class CourseService {
       curriculumId,
       branchId,
       facultyId,
+      instructorId
     } = pag || {};
 
     const AND: Prisma.courseWhereInput[] = [];

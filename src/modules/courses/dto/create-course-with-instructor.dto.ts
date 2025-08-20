@@ -5,19 +5,8 @@ import {
   IsNotEmpty,
   IsOptional,
   IsArray,
-  ArrayNotEmpty,
   ArrayUnique,
 } from 'class-validator';
-
-// export class InstructorIds {
-//   @ApiProperty({ type: [Number], example: [1, 2, 3] })
-//   @IsArray()
-//   @ArrayNotEmpty()
-//   @ArrayUnique()
-//   @IsInt({ each: true })
-//   instructorIds: number[];
-// }
-
 
 export class CreateCourseDtoWithInstructor {
   @ApiProperty({
@@ -53,9 +42,8 @@ export class CreateCourseDtoWithInstructor {
 
   @ApiProperty({ type: [Number], example: [1, 2, 3] })
   @IsArray()
-  @ArrayNotEmpty()
   @ArrayUnique()
   @IsInt({ each: true })
   @IsOptional()
-  instructorIds: number[];
+  instructorIds?: number[];
 }

@@ -12,8 +12,10 @@ import { CourseService } from './courses.service';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiExtraModels,
   ApiOkResponse,
   ApiQuery,
+  getSchemaPath,
 } from '@nestjs/swagger';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -36,14 +38,17 @@ export class CoursesController {
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
-  @ApiQuery({ name: 'InstructorId', required: false })
+  @ApiExtraModels(CourseFilterDto)
+  @ApiQuery({
+    name: 'pag',
+    required: false,
+    schema: { $ref: getSchemaPath(CourseFilterDto) },
+    description: 'Filter/query parameters',
+  })
   @Get()
   @ApiOkResponse({ type: PaginatedCourseDto })
-  findAll(
-    @Query() pag?: CourseFilterDto,
-    @Query('InstructorId') instructorId?: number,
-  ) {
-    return this.coursesService.findAll(pag, instructorId);
+  findAll(@Query() pag?: CourseFilterDto) {
+    return this.coursesService.findAll(pag);
   }
 
   @Get('options')
