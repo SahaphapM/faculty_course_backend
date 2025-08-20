@@ -270,8 +270,8 @@ export async function getSkillSummary(
   const rootIds = roots.map((r) => r.id);
   const assessments = await fetchRootAssessments(rootIds, studentIds);
 
-  console.log('=== [DEBUG] Assessments ===');
-  console.log(assessments.filter((a) => a.studentId === debug?.studentId));
+  // console.log('=== [DEBUG] Assessments ===');
+  // console.log(assessments.filter((a) => a.studentId === debug?.studentId));
 
   // debug (optional): expected tree ของคนที่ระบุ
   if (debug?.studentId && debug?.rootSkillId) {
@@ -280,7 +280,7 @@ export async function getSkillSummary(
       where: { id: debug.studentId },
     });
 
-    console.log('Student:', student?.code, student.thaiName, student.id);
+    // console.log('Student:', student?.code, student.thaiName, student.id);
     const { forest } = buildExpectedForestForStudent(
       skills as unknown as Skill[],
       debug.studentId,
