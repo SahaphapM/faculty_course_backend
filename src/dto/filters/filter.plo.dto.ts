@@ -1,10 +1,13 @@
-import { IsOptional, IsString } from 'class-validator';
+import { IsNumber } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
-import { ApiPropertyOptional } from '@nestjs/swagger';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class PloFilterDto extends BaseFilterParams {
-  @ApiPropertyOptional({ description: 'Curriculum code (contains)', required: false, example: 'CS' })
-  @IsOptional()
-  @IsString()
-  curriculumCode?: string;
+  @ApiProperty({
+    description: 'Curriculum id',
+    required: false,
+    example: '321312',
+  })
+  @IsNumber()
+  curriculumId: number;
 }

@@ -9,7 +9,13 @@ import {
   Query,
 } from '@nestjs/common';
 import { PloService } from './plos.service';
-import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiQuery,
+  ApiExtraModels,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { CreatePloDto } from 'src/generated/nestjs-dto/create-plo.dto';
 import { UpdatePloDto } from 'src/generated/nestjs-dto/update-plo.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -28,43 +34,15 @@ export class PlosController {
     return this.plosService.create(createPloDto);
   }
 
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'Page number (1-based)',
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'Items per page',
-    example: 10,
-  })
-  @ApiQuery({
-    name: 'sort',
-    required: false,
-    type: String,
-    description: 'Sort field (prefix with - for descending). Example: "name" or "-createdAt"',
-    example: 'id',
-  })
-  @ApiQuery({
-    name: 'orderBy',
-    required: false,
-    enum: ['asc', 'desc'],
-    description: 'Sort direction (asc or desc)',
-    example: 'asc',
-  })
-  @ApiQuery({
-    name: 'curriculumCode',
-    required: false,
-    description: 'Filter PLOs by curriculum code',
-  })
   @ApiExtraModels(PloFilterDto)
-  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(PloFilterDto) }, description: 'Filter/query parameters' })
+  @ApiQuery({
+    name: 'pag',
+    required: false,
+    schema: { $ref: getSchemaPath(PloFilterDto) },
+    description: 'Filter/query parameters',
+  })
   @Get()
-  @ApiOkResponse({type: PaginatedPloDto})
+  @ApiOkResponse({ type: PaginatedPloDto })
   findAll(@Query() filter?: PloFilterDto) {
     return this.plosService.findAll(filter);
   }
@@ -73,7 +51,6 @@ export class PlosController {
   findOne(@Param('id') id: string) {
     return this.plosService.findOne(+id);
   }
-
 
   @Get('options/:curriculumId')
   findOptions(@Param('curriculumId') curriculumId: number) {

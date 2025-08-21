@@ -32,12 +32,20 @@ export class PloService {
       page,
       orderBy = DefaultPaginaitonValue.orderBy,
       sort = DefaultPaginaitonValue.sortBy,
-      curriculumCode,
+      search,
+      curriculumId,
     } = filter || {};
 
-    const whereCondition: Prisma.ploWhereInput = curriculumCode
-      ? { curriculum: { code: curriculumCode } }
-      : {};
+    const whereCondition: Prisma.ploWhereInput = {
+      curriculum: { id: curriculumId },
+      ...search && {
+        OR: [
+          { name: { contains: search } },
+          { thaiDescription: { contains: search } },
+          { engDescription: { contains: search} },
+        ],
+      }
+    };
 
     // Parse sort field and direction
     const sortField = sort.startsWith('-') ? sort.slice(1) : sort;
