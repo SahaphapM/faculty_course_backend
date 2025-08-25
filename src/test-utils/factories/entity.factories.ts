@@ -71,6 +71,7 @@ export function makeCurriculum(
     thaiDegree: overrides.thaiDegree ?? 'วิศวกรรมศาสตรบัณฑิต',
     engDegree: overrides.engDegree ?? 'Bachelor of Engineering',
     period: overrides.period ?? 4,
+    active: overrides.active ?? true,
     thaiDescription: overrides.thaiDescription ?? null,
     engDescription: overrides.engDescription ?? null,
     branch: (overrides.branch as any) ?? undefined!,

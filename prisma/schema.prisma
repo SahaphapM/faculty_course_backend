@@ -105,6 +105,7 @@ model curriculum {
   minimumGrade       Decimal                   @db.Decimal(3, 2)
   thaiDescription    String?                   @db.Text
   engDescription     String?                   @db.Text
+  active             Boolean                   @default(true)
   branch             branch                    @relation(fields: [branchId], references: [id], onDelete: Cascade)
   coordinators       curriculum_coordinators[]
   plos               plo[]

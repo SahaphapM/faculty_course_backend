@@ -58,4 +58,8 @@ thaiDescription: string  | null;
   nullable: true,
 })
 engDescription: string  | null;
+@ApiProperty({
+  type: 'boolean',
+})
+active: boolean ;
 }

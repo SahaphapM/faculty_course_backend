@@ -152,6 +152,7 @@ export class CurriculumsService {
     } = pag || {};
 
     const whereCondition: Prisma.curriculumWhereInput = {
+      active: true, // Only show active curriculums
       ...(nameCode && {
         OR: [
           {
@@ -207,6 +208,9 @@ export class CurriculumsService {
 
   async findOptions() {
     const options = {
+      where: {
+        active: true, // Only return active curriculums
+      },
       select: {
         id: true,
         code: true,
@@ -221,8 +225,11 @@ export class CurriculumsService {
 
   // Find a curriculum by ID
   async findOne(id: number) {
-    const curriculum = await this.prisma.curriculum.findUnique({
-      where: { id },
+    const curriculum = await this.prisma.curriculum.findFirst({
+      where: {
+        id,
+        active: true, // Only return active curriculums
+      },
     });
 
     if (!curriculum) {
@@ -289,10 +296,11 @@ export class CurriculumsService {
     }
   }
 
-  // Remove a curriculum by ID
+  // Soft delete a curriculum by ID
   async remove(id: number): Promise<void> {
-    await this.prisma.curriculum.delete({
+    await this.prisma.curriculum.update({
       where: { id },
+      data: { active: false },
     });
   }
 

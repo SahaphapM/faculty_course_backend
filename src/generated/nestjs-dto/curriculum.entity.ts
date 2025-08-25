@@ -67,6 +67,10 @@ thaiDescription: string  | null;
 })
 engDescription: string  | null;
 @ApiProperty({
+  type: 'boolean',
+})
+active: boolean ;
+@ApiProperty({
   type: () => Branch,
   required: false,
 })

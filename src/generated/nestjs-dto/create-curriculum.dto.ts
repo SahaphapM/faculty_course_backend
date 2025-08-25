@@ -1,7 +1,7 @@
 
 import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
-import {IsDecimal,IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
+import {IsBoolean,IsDecimal,IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
 
 
 
@@ -82,4 +82,12 @@ thaiDescription?: string  | null;
 @IsOptional()
 @IsString()
 engDescription?: string  | null;
+@ApiProperty({
+  type: 'boolean',
+  default: true,
+  required: false,
+})
+@IsOptional()
+@IsBoolean()
+active?: boolean ;
 }
