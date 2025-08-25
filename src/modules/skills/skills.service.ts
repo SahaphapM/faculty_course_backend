@@ -76,6 +76,7 @@ export class SkillsService {
       sort = DefaultPaginaitonValue.sortBy,
       nameCode,
       domain,
+      subOnly,
     } = pag || {};
 
     const whereCondition: Prisma.skillWhereInput = {
@@ -87,6 +88,11 @@ export class SkillsService {
         ],
       }),
       ...(domain && { domain }),
+      ...(subOnly && {
+        subs: {
+          some: { id: { not: null } },
+        },
+    }),
     };
 
     const options: Prisma.skillFindManyArgs = {
