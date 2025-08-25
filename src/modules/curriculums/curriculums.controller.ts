@@ -7,8 +7,11 @@ import {
   Param,
   Delete,
   Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
+import { CoordinatorCurriculumsService } from './coordinator-curriculums.service';
 import { ApiBearerAuth, ApiOkResponse, ApiParam, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
@@ -18,11 +21,16 @@ import { CurriculumFilterDto } from 'src/dto/filters/filter.curriculum.dto';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection.dto';
 import { StudentsBySkillLevelFilterDto } from 'src/dto/filters/filter.students-by-skill-level.dto';
 import { PaginatedCurriculumDto } from 'src/dto/pagination.types';
+import { CurriculumAccess } from 'src/decorators/curriculum-access.decorator';
+import { CurriculumAccessGuard } from 'src/auth/guard/curriculum-access.guard';
 
 @ApiBearerAuth()
 @Controller('curriculums')
 export class CurriculumsController {
-  constructor(private readonly curriculumsService: CurriculumsService) {}
+  constructor(
+    private readonly curriculumsService: CurriculumsService,
+    private readonly coordinatorCurriculumsService: CoordinatorCurriculumsService,
+  ) {}
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Post()
@@ -40,16 +48,35 @@ export class CurriculumsController {
   @ApiOkResponse({type: PaginatedCurriculumDto})
   findAll(
     @Query() pag?: CurriculumFilterDto,
+    @Req() req?: any,
   ) {
+    const currentUser = req?.user;
+    
+    // If user is a coordinator, use the specialized service
+    if (currentUser?.role === UserRole.Coordinator) {
+      return this.coordinatorCurriculumsService.findAllForCoordinator(currentUser.id, pag);
+    }
+    
+    // For admins and other roles, use the regular service
     return this.curriculumsService.findAll(pag);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
   @Get('options')
-  findAllOptions() {
+  findAllOptions(@Req() req?: any) {
+    const currentUser = req?.user;
+    
+    // If user is a coordinator, use the specialized service
+    if (currentUser?.role === UserRole.Coordinator) {
+      return this.coordinatorCurriculumsService.findOptionsForCoordinator(currentUser.id);
+    }
+    
+    // For admins and other roles, use the regular service
     return this.curriculumsService.findOptions();
   }
 
+  @UseGuards(CurriculumAccessGuard)
+  @CurriculumAccess({ paramName: 'curriculumId', paramType: 'id' })
   @Get('summary/:curriculumId')
   async getSkillSummaryByCurriculum(
     @Param('curriculumId') curriculumId: number,
@@ -63,9 +90,18 @@ export class CurriculumsController {
     );
   }
 
+  @UseGuards(CurriculumAccessGuard)
+  @CurriculumAccess({ paramName: 'code', paramType: 'code' })
   @Get(':code')
   findOneByCode(@Param('code') code: string) {
     return this.curriculumsService.findOneByCode(code);
+  }
+
+  @UseGuards(CurriculumAccessGuard)
+  @CurriculumAccess({ paramName: 'id', paramType: 'id' })
+  @Get('id/:id')
+  findOne(@Param('id') id: string) {
+    return this.curriculumsService.findOne(+id);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
@@ -89,7 +125,9 @@ export class CurriculumsController {
   }
 
   // get all level description
-  @Get('level-description/:curriculumCode')
+  @UseGuards(CurriculumAccessGuard)
+  @CurriculumAccess({ paramName: 'curriculumCode', paramType: 'code' })
+  @Get('levels/:curriculumCode')
   getAllLevelDescription(@Param('curriculumCode') curriculumCode: string) {
     return this.curriculumsService.getAllLevelDescription(curriculumCode);
   }
@@ -98,6 +136,23 @@ export class CurriculumsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.curriculumsService.remove(+id);
+  }
+
+  @Roles(UserRole.Admin, UserRole.Coordinator)
+  @Patch(':id/restore')
+  restore(@Param('id') id: string) {
+    return this.curriculumsService.restore(+id);
+  }
+
+  @Roles(UserRole.Admin)
+  @ApiExtraModels(CurriculumFilterDto)
+  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(CurriculumFilterDto) }, description: 'Filter/query parameters' })
+  @Get('admin/all')
+  @ApiOkResponse({type: PaginatedCurriculumDto})
+  findAllIncludeInactive(
+    @Query() pag?: CurriculumFilterDto,
+  ) {
+    return this.curriculumsService.findAllIncludeInactive(pag);
   }
 
   @ApiExtraModels(StudentsBySkillLevelFilterDto)
@@ -118,6 +173,8 @@ export class CurriculumsController {
     );
   }
 
+  @UseGuards(CurriculumAccessGuard)
+  @CurriculumAccess({ paramName: 'curriculumId', paramType: 'id' })
   @ApiExtraModels(SkillCollectionSummaryFilterDto)
   @ApiQuery({ name: 'q', required: false, schema: { $ref: getSchemaPath(SkillCollectionSummaryFilterDto) }, description: 'Filter/query parameters' })
   @Get('summary/skill-collection/:curriculumId')
@@ -125,7 +182,6 @@ export class CurriculumsController {
     @Param('curriculumId') curriculumId: number,
     @Query() q: SkillCollectionSummaryFilterDto,
   ) {
-    // ส่ง DTO ก้อนเดียวไปที่ service (ที่เราเขียนแบบรองรับ pagination แล้ว)
     return this.curriculumsService.getSkillCollectionSummaryByCurriculumPaginated(
       curriculumId,
       q,

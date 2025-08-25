@@ -123,14 +123,22 @@ export class CurriculumsService {
   }
 
   async getAllLevelDescription(curriculumCode: string) {
-    console.log(curriculumCode);
-    const curriculum = await this.prisma.curriculum.findUnique({
-      where: { code: curriculumCode },
+    const curriculum = await this.prisma.curriculum.findFirst({
+      where: {
+        code: curriculumCode,
+        active: true,
+      },
       select: {
         level_descriptions: true,
       },
     });
-    console.log(curriculum);
+
+    if (!curriculum) {
+      throw new NotFoundException(
+        `Curriculum with code ${curriculumCode} not found`,
+      );
+    }
+
     return curriculum?.level_descriptions;
   }
 
@@ -230,6 +238,17 @@ export class CurriculumsService {
         id,
         active: true, // Only return active curriculums
       },
+      include: {
+        coordinators: {
+          include: {
+            coordinator: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
+      },
     });
 
     if (!curriculum) {
@@ -241,10 +260,22 @@ export class CurriculumsService {
 
   // Find a curriculum by code with relations
   async findOneByCode(code: string) {
-    const curriculum = await this.prisma.curriculum.findUnique({
-      where: { code },
+    const curriculum = await this.prisma.curriculum.findFirst({
+      where: {
+        code,
+        active: true, // Only return active curriculums
+      },
       include: {
         branch: true,
+        coordinators: {
+          include: {
+            coordinator: {
+              include: {
+                user: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -296,12 +327,138 @@ export class CurriculumsService {
     }
   }
 
-  // Soft delete a curriculum by ID
+  // Soft delete a curriculum by ID (set active to false)
   async remove(id: number): Promise<void> {
-    await this.prisma.curriculum.update({
-      where: { id },
-      data: { active: false },
-    });
+    try {
+      const curriculum = await this.prisma.curriculum.findUnique({
+        where: { id },
+      });
+
+      if (!curriculum) {
+        throw new NotFoundException(`Curriculum with ID ${id} not found`);
+      }
+
+      if (!curriculum.active) {
+        throw new BadRequestException(
+          `Curriculum with ID ${id} is already deleted`,
+        );
+      }
+
+      await this.prisma.curriculum.update({
+        where: { id },
+        data: { active: false },
+      });
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Curriculum with ID ${id} not found`);
+      }
+      throw new BadRequestException(
+        'Failed to delete curriculum: ' + error.message,
+      );
+    }
+  }
+
+  // Find all curriculums including inactive ones (admin only)
+  async findAllIncludeInactive(pag?: CurriculumFilterDto) {
+    const defaultLimit = DefaultPaginaitonValue.limit;
+    const defaultPage = DefaultPaginaitonValue.page;
+
+    const {
+      limit,
+      page,
+      orderBy = DefaultPaginaitonValue.orderBy,
+      sort = DefaultPaginaitonValue.sortBy,
+      nameCode,
+      degree,
+      branchId,
+      facultyId,
+      coordinatorId,
+    } = pag || {};
+
+    const whereCondition: Prisma.curriculumWhereInput = {
+      // No active filter - shows all curriculums including inactive ones
+      ...(nameCode && {
+        OR: [
+          {
+            thaiName: { contains: nameCode },
+          },
+          {
+            engName: { contains: nameCode },
+          },
+          {
+            code: { contains: nameCode },
+          },
+        ],
+      }),
+      ...(degree && {
+        OR: [
+          { engDegree: { contains: degree } },
+          { thaiDegree: { contains: degree } },
+        ],
+      }),
+      ...(branchId && { branchId }),
+      ...(facultyId && { branch: { facultyId } }),
+      ...(coordinatorId && {
+        coordinators: { some: { coordinatorId: coordinatorId } },
+      }),
+    };
+
+    const options: Prisma.curriculumFindManyArgs = {
+      take: limit || defaultLimit,
+      skip: ((page || defaultPage) - 1) * (limit || defaultLimit),
+      orderBy: {
+        [(sort === '' ? 'id' : sort) ?? 'id']:
+          (orderBy as Prisma.SortOrder) ?? 'asc',
+      },
+      include: {
+        branch: {
+          select: {
+            id: true,
+            thaiName: true,
+            engName: true,
+          },
+        },
+      },
+      where: whereCondition,
+    };
+
+    const [curriculums, total] = await Promise.all([
+      this.prisma.curriculum.findMany(options),
+      this.prisma.curriculum.count({ where: whereCondition }),
+    ]);
+
+    return createPaginatedData(curriculums, total, page, limit);
+  }
+
+  // Restore a soft-deleted curriculum (set active back to true)
+  async restore(id: number): Promise<void> {
+    try {
+      const curriculum = await this.prisma.curriculum.findUnique({
+        where: { id },
+      });
+
+      if (!curriculum) {
+        throw new NotFoundException(`Curriculum with ID ${id} not found`);
+      }
+
+      if (curriculum.active) {
+        throw new BadRequestException(
+          `Curriculum with ID ${id} is not deleted`,
+        );
+      }
+
+      await this.prisma.curriculum.update({
+        where: { id },
+        data: { active: true },
+      });
+    } catch (error: any) {
+      if (error.code === 'P2025') {
+        throw new NotFoundException(`Curriculum with ID ${id} not found`);
+      }
+      throw new BadRequestException(
+        'Failed to restore curriculum: ' + error.message,
+      );
+    }
   }
 
   // ---------- Service entry (พร้อมดีบักทางเลือก) ----------
