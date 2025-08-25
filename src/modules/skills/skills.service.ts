@@ -74,25 +74,25 @@ export class SkillsService {
       page,
       orderBy = DefaultPaginaitonValue.orderBy,
       sort = DefaultPaginaitonValue.sortBy,
-      nameCode,
+      search,
       domain,
       subOnly,
     } = pag || {};
 
     const whereCondition: Prisma.skillWhereInput = {
       parentId: null, // Root skills only
-      ...(nameCode && {
+      ...(search && {
         OR: [
-          { thaiName: { contains: nameCode } },
-          { engName: { contains: nameCode } },
+          { thaiName: { contains: search } },
+          { engName: { contains: search } },
         ],
       }),
       ...(domain && { domain }),
       ...(subOnly && {
         subs: {
-          some: { id: { not: null } },
+          some: {},
         },
-    }),
+      }),
     };
 
     const options: Prisma.skillFindManyArgs = {
@@ -128,17 +128,17 @@ export class SkillsService {
       page,
       orderBy = DefaultPaginaitonValue.orderBy,
       sort = DefaultPaginaitonValue.sortBy,
-      nameCode,
+      search,
       domain,
     } = pag || {};
 
     const whereCondition: Prisma.skillWhereInput = {
       parentId: null,
       curriculumId: curriculumId,
-      ...(nameCode && {
+      ...(search && {
         OR: [
-          { thaiName: { contains: nameCode } },
-          { engName: { contains: nameCode } },
+          { thaiName: { contains: search } },
+          { engName: { contains: search } },
         ],
       }),
       ...(domain && { domain }),
@@ -177,7 +177,7 @@ export class SkillsService {
       page,
       orderBy = DefaultPaginaitonValue.orderBy,
       sort = DefaultPaginaitonValue.sortBy,
-      nameCode,
+      search,
       domain,
     } = pag || {};
 
@@ -212,10 +212,10 @@ export class SkillsService {
           },
         },
       ],
-      ...(nameCode && {
+      ...(search && {
         OR: [
-          { thaiName: { contains: nameCode } },
-          { engName: { contains: nameCode } },
+          { thaiName: { contains: search } },
+          { engName: { contains: search } },
         ],
       }),
       ...(domain && { domain }),
@@ -250,7 +250,7 @@ export class SkillsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
+    const { limit, page, orderBy, sort, search, domain } = pag || {};
 
     const whereCondition: Prisma.skillWhereInput = {
       parentId: null,
@@ -289,10 +289,10 @@ export class SkillsService {
           },
         },
       ],
-      ...(nameCode && {
+      ...(search && {
         OR: [
-          { thaiName: { contains: nameCode } },
-          { engName: { contains: nameCode } },
+          { thaiName: { contains: search } },
+          { engName: { contains: search } },
         ],
       }),
       ...(domain && { domain }),
@@ -327,7 +327,7 @@ export class SkillsService {
     const defaultLimit = 10;
     const defaultPage = 1;
 
-    const { limit, page, orderBy, sort, nameCode, domain } = pag || {};
+    const { limit, page, orderBy, sort, search, domain } = pag || {};
 
     const whereCondition: Prisma.skillWhereInput = {
       parentId: null,
@@ -367,10 +367,10 @@ export class SkillsService {
           },
         },
       ],
-      ...(nameCode && {
+      ...(search && {
         OR: [
-          { thaiName: { contains: nameCode } },
-          { engName: { contains: nameCode } },
+          { thaiName: { contains: search } },
+          { engName: { contains: search } },
         ],
       }),
       ...(domain && { domain }),

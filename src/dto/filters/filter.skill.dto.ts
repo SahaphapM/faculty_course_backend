@@ -4,16 +4,6 @@ import { Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SkillFilterDto extends BaseFilterParams {
-  //search
-  @ApiPropertyOptional({
-    description: 'Filter by name or code',
-    required: false,
-    example: 'Programming',
-  })
-  @IsOptional()
-  @IsString()
-  nameCode?: string;
-
   @ApiPropertyOptional({
     description: 'Learning domain',
     required: false,
