@@ -11,7 +11,13 @@ import {
   HttpStatus,
 } from '@nestjs/common';
 import { SkillsService } from './skills.service';
-import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiQuery,
+  ApiExtraModels,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
 import { UpdateSkillDto } from 'src/generated/nestjs-dto/update-skill.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -25,9 +31,14 @@ export class SkillsController {
   constructor(private readonly skillsService: SkillsService) {}
 
   @ApiExtraModels(SkillFilterDto)
-  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(SkillFilterDto) }, description: 'Filter/query parameters' })
+  @ApiQuery({
+    name: 'pag',
+    required: false,
+    schema: { $ref: getSchemaPath(SkillFilterDto) },
+    description: 'Filter/query parameters',
+  })
   @Get()
-  @ApiOkResponse({type: PaginatedSkillDto})
+  @ApiOkResponse({ type: PaginatedSkillDto })
   @HttpCode(HttpStatus.OK)
   findAll(@Query() pag?: SkillFilterDto) {
     if (pag?.curriculumId) {
@@ -55,6 +66,11 @@ export class SkillsController {
   @Get('options/:curriculumId')
   findOptions(@Param('curriculumId') curriculumId: number) {
     return this.skillsService.findOptions(curriculumId);
+  }
+
+  @Get('skill-summary/:studentCode')
+  skillSummary(@Param('studentCode') studentCode: string) {
+    return this.skillsService.skillSummary(studentCode);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)

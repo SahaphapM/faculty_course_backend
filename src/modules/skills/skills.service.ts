@@ -8,10 +8,11 @@ import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { UpdateSkillDto } from 'src/generated/nestjs-dto/update-skill.dto';
 import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
-import { Skill } from 'src/generated/nestjs-dto/skill.entity';
 import { SkillFilterDto } from 'src/dto/filters/filter.skill.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
+import { Subject } from 'src/generated/nestjs-dto/subject.entity';
+import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
 
 @Injectable()
 export class SkillsService {
@@ -518,23 +519,101 @@ export class SkillsService {
     }
   }
 
-  // New method to normalize top-level skills
-  private normalizeTopLevelSkills(skills: Skill[]): Skill[] {
-    // Create a set of all skill IDs that are subs of any skill
-    const subIds = new Set<number>();
-    skills.forEach((skill) => {
-      skill.subs.forEach((sub) => subIds.add(sub.id));
+  async skillSummary(studentCode: string) {
+    const student = await this.prisma.student.findUnique({
+      where: { code: studentCode },
+      include: {
+        skill_collections: {
+          select: {
+            id: true,
+            gainedLevel: true,
+            clo: {
+              select: {
+                id: true,
+                skill: {
+                  select: {
+                    id: true,
+                    thaiName: true,
+                    engName: true,
+                  },
+                },
+                subject: {
+                  select: { id: true, thaiName: true, engName: true },
+                }, // 🟢 ดึง subject มาเลย
+              },
+            },
+          },
+        },
+      },
     });
 
-    // Filter out skills from the top level if their ID is in subIds
-    const normSkills = skills.reduce((acc: Skill[], cur: Skill) => {
-      if (!subIds.has(cur.id)) {
-        // Only keep skills that are not subs of others
-        acc.push(cur);
-      }
-      return acc;
-    }, []);
+    if (!student) {
+      throw new NotFoundException(`Student with code ${studentCode} not found`);
+    }
 
-    return normSkills;
+    // group subject
+    const subjects = Array.from(
+      new Map(
+        student.skill_collections
+          .map((sc) => sc.clo?.subject)
+          .filter(
+            (subject): subject is NonNullable<typeof subject> => !!subject,
+          )
+          .map((subject) => [subject.id, subject]),
+      ).values(),
+    );
+
+    // ทำดิกชันนารี subjectById เพื่อ lookup เร็ว ๆ
+    const subjectById = new Map<number, (typeof subjects)[number]>();
+    for (const s of subjects) subjectById.set(s.id, s);
+
+    // สร้างกลุ่ม: subjectId -> { subject, skillCollections[] }
+    type NormalizedSC = {
+      id: number;
+      gainedLevel: number;
+      cloId: number;
+      skill: { id: number; thaiName: string; engName: string };
+    };
+
+    type Grouped = {
+      subject: { id: number; thaiName: string; engName: string };
+      skillCollections: NormalizedSC[];
+    };
+
+    const groups = new Map<number, Grouped>();
+
+    for (const sc of student.skill_collections) {
+      const sid = sc.clo?.subject?.id;
+      if (!sid) continue;
+      const subject = subjectById.get(sid);
+      if (!subject) continue; // กันเคสข้อมูลไม่แมตช์
+
+      if (!groups.has(sid)) {
+        groups.set(sid, { subject, skillCollections: [] });
+      }
+
+      groups.get(sid).skillCollections.push({
+        id: sc.id,
+        gainedLevel: sc.gainedLevel,
+        cloId: sc.clo.id,
+        skill: {
+          id: sc.clo.skill.id,
+          thaiName: sc.clo.skill.thaiName,
+          engName: sc.clo.skill.engName,
+        },
+      });
+    }
+
+    // แปลง Map -> Array และจัดเรียง (เลือกเกณฑ์ที่ชอบได้)
+    const groupedSkillSubject = Array.from(groups.values()).sort((a, b) => {
+      const ax = a.subject.thaiName;
+      const bx = b.subject.thaiName;
+      return ax.localeCompare(bx, 'th'); // หรือ 'en'
+    });
+
+    return {
+      student: student,
+      groupedSkillSubject,
+    };
   }
 }
