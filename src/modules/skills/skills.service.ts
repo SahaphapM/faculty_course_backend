@@ -519,7 +519,7 @@ export class SkillsService {
     }
   }
 
-  async skillSummary(studentCode: string) {
+  async subjectStudentSummary(studentCode: string) {
     const student = await this.prisma.student.findUnique({
       where: { code: studentCode },
       include: {
@@ -537,9 +537,7 @@ export class SkillsService {
                     engName: true,
                   },
                 },
-                subject: {
-                  select: { id: true, thaiName: true, engName: true },
-                }, // 🟢 ดึง subject มาเลย
+                subjectId: true,
               },
             },
           },
@@ -551,17 +549,29 @@ export class SkillsService {
       throw new NotFoundException(`Student with code ${studentCode} not found`);
     }
 
+    // get unique subjectIds not use map ordinary
+    const subjectsIds = [
+      ...new Set(
+        student.skill_collections.map(
+          (skill_collection) => skill_collection.clo.subjectId,
+        ),
+      ),
+    ];
+
     // group subject
-    const subjects = Array.from(
-      new Map(
-        student.skill_collections
-          .map((sc) => sc.clo?.subject)
-          .filter(
-            (subject): subject is NonNullable<typeof subject> => !!subject,
-          )
-          .map((subject) => [subject.id, subject]),
-      ).values(),
-    );
+    const subjects = await this.prisma.subject.findMany({
+      where: {
+        id: {
+          in: subjectsIds,
+        },
+      },
+      select: {
+        id: true,
+        code: true,
+        thaiName: true,
+        engName: true,
+      },
+    });
 
     // ทำดิกชันนารี subjectById เพื่อ lookup เร็ว ๆ
     const subjectById = new Map<number, (typeof subjects)[number]>();
@@ -583,7 +593,7 @@ export class SkillsService {
     const groups = new Map<number, Grouped>();
 
     for (const sc of student.skill_collections) {
-      const sid = sc.clo?.subject?.id;
+      const sid = sc.clo?.subjectId;
       if (!sid) continue;
       const subject = subjectById.get(sid);
       if (!subject) continue; // กันเคสข้อมูลไม่แมตช์
@@ -610,6 +620,8 @@ export class SkillsService {
       const bx = b.subject.thaiName;
       return ax.localeCompare(bx, 'th'); // หรือ 'en'
     });
+
+    delete student.skill_collections;
 
     return {
       student: student,

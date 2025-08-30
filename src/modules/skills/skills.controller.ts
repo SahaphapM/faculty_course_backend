@@ -68,9 +68,9 @@ export class SkillsController {
     return this.skillsService.findOptions(curriculumId);
   }
 
-  @Get('skill-summary/:studentCode')
-  skillSummary(@Param('studentCode') studentCode: string) {
-    return this.skillsService.skillSummary(studentCode);
+  @Get('subject-student-summary/:studentCode')
+  subjectStudentSummary(@Param('studentCode') studentCode: string) {
+    return this.skillsService.subjectStudentSummary(studentCode);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
