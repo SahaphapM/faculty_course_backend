@@ -318,7 +318,7 @@ export class SkillCollectionsService {
             skillId: touchedRoot,
             curriculumLevel: levelAtRoot,
             companyLevel: 0,
-            finalLevel: levelAtRoot,
+            finalLevel: 0,
           },
         });
       });
