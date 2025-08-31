@@ -42,7 +42,6 @@ export class CreateCourseDtoWithInstructor {
 
   @ApiProperty({ type: [Number], example: [1, 2, 3] })
   @IsArray()
-  @ArrayUnique()
   @IsInt({ each: true })
   @IsOptional()
   instructorIds?: number[];
