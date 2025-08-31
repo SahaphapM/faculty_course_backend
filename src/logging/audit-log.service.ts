@@ -142,7 +142,8 @@ export class AuditLogService {
         FROM information_schema.tables 
         WHERE table_schema = 'skillmap_test'
       `;
-      return tables;
+      // return tables;
+      return tables.map((table) => table.table_name);
     } catch (error) {
       this.logger.error('Failed to retrieve tables', JSON.stringify(error));
       throw error;
