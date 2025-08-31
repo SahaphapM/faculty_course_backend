@@ -59,18 +59,19 @@ export class AuditLogInterceptor implements NestInterceptor {
               afterData = result;
               diff = this.getDiff(beforeData, afterData);
             } else if (method === 'DELETE') {
+              console.log('After Delete', beforeData);
               diff = beforeData;
             }
 
             await this.auditLogService.log({
               userId: user?.id,
-              action: this.mapMethodToAction(method),
+              action: method,
               resource,
               resourceId,
-              before: diff || beforeData,
+              before: beforeData,
               after: afterData,
+              diff: diff,
               metadata: {
-                method,
                 url,
                 duration: Date.now() - startTime,
                 ip: request.ip,
@@ -116,20 +117,5 @@ export class AuditLogInterceptor implements NestInterceptor {
     const parts = url.split('/').filter((p) => p.length > 0);
     const idPart = parts.find((p) => /^\d+$/.test(p));
     return idPart;
-  }
-
-  private mapMethodToAction(method: string): string {
-    switch (method) {
-      case 'POST':
-        return 'CREATE';
-      case 'PUT':
-        return 'UPDATE';
-      case 'PATCH':
-        return 'PARTIAL_UPDATE';
-      case 'DELETE':
-        return 'DELETE';
-      default:
-        return 'UNKNOWN';
-    }
   }
 }

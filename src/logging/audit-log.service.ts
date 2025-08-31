@@ -2,16 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AppLoggerService } from './app-logger.service';
 import { AuditLogQueryDto } from 'src/dto/filters/filter.audit-log.dto';
-
-export interface AuditLogEntry {
-  userId?: number;
-  action: string;
-  resource: string;
-  resourceId?: string;
-  before?: Record<string, any>;
-  after?: Record<string, any>;
-  metadata?: any;
-}
+import { AuditLog } from 'src/generated/nestjs-dto/auditLog.entity';
+import { CreateAuditLogDto } from 'src/generated/nestjs-dto/create-auditLog.dto';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class AuditLogService {
@@ -20,33 +13,16 @@ export class AuditLogService {
     private readonly logger: AppLoggerService,
   ) {}
 
-  async log(entry: AuditLogEntry): Promise<void> {
+  // audit-log.service.ts
+  async log(entry: CreateAuditLogDto): Promise<void> {
     try {
       await this.prisma.audit_log.create({
-        data: {
-          userId: entry.userId,
-          action: entry.action,
-          resource: entry.resource,
-          resourceId: entry.resourceId,
-          // In current Prisma types, metadata expects string in some generated client versions.
-          // But our schema uses Json?. To satisfy both, serialize complex values; pass through strings.
-          metadata:
-            entry.before == null &&
-            entry.after == null &&
-            entry.metadata == null
-              ? undefined
-              : JSON.stringify({
-                  before: entry.before ?? null,
-                  after: entry.after ?? null,
-                  metadata: entry.metadata ?? null,
-                }),
-        },
+        data: entry,
       });
     } catch (error) {
-      // Log the error but don't throw it to avoid disrupting the main flow
       this.logger.error(
-        'Failed to log audit entry: ' + JSON.stringify(error),
-        JSON.stringify({ entry }),
+        'Failed to log audit entry',
+        JSON.stringify({ error, entry }),
       );
     }
   }
@@ -62,10 +38,15 @@ export class AuditLogService {
     } = query;
 
     try {
-      const where: any = {};
+      const where: Prisma.audit_logWhereInput = {};
 
       if (filters?.search) {
-        where.OR = [{ user: { email: { contains: filters.search } } }];
+        where.OR = [
+          { user: { email: { contains: filters.search } } },
+          { user: { coordinator: { thaiName: { contains: filters.search } } } },
+          { user: { instructor: { thaiName: { contains: filters.search } } } },
+          { user: { student: { thaiName: { contains: filters.search } } } },
+        ];
       }
 
       if (filters?.action) {
@@ -88,9 +69,9 @@ export class AuditLogService {
 
       if (keyword) {
         where.OR = [
-          { metadata: { contains: `"${keyword}"` } }, // Search for values
-          { before: { contains: `"${keyword}"` } },
-          { after: { contains: `"${keyword}"` } },
+          { metadata: { string_contains: keyword } },
+          { before: { string_contains: keyword } },
+          { after: { string_contains: keyword } },
         ];
       }
 
@@ -104,7 +85,12 @@ export class AuditLogService {
               [sort]: orderBy.toLowerCase(),
             },
           ],
-          include: {
+          select: {
+            id: true,
+            action: true,
+            resource: true,
+            resourceId: true,
+            timestamp: true,
             user: {
               select: {
                 id: true,
@@ -129,12 +115,38 @@ export class AuditLogService {
     }
   }
 
+  async getLogById(id: number) {
+    try {
+      const log = await this.prisma.audit_log.findUnique({
+        where: {
+          id,
+        },
+        include: {
+          user: {
+            select: {
+              id: true,
+              email: true,
+              role: true,
+              coordinator: true,
+              instructor: true,
+              student: true,
+            },
+          },
+        },
+      });
+      return log;
+    } catch (error) {
+      this.logger.error('Failed to retrieve audit log', JSON.stringify(error));
+      throw error;
+    }
+  }
+
   async getTables() {
     try {
       const tables = await this.prisma.$queryRaw<{ table_name: string }[]>`
         SELECT table_name 
         FROM information_schema.tables 
-        WHERE table_schema = 'fac_db'
+        WHERE table_schema = 'skillmap_test'
       `;
       return tables;
     } catch (error) {

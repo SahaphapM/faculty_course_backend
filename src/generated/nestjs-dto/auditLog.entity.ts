@@ -49,6 +49,11 @@ after: Prisma.JsonValue  | null;
   type: () => Object,
   nullable: true,
 })
+diff: Prisma.JsonValue  | null;
+@ApiProperty({
+  type: () => Object,
+  nullable: true,
+})
 metadata: Prisma.JsonValue  | null;
 @ApiProperty({
   type: 'string',

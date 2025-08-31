@@ -1,13 +1,22 @@
 
 import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
-import {IsDateString,IsNotEmpty,IsOptional,IsString} from 'class-validator'
+import {IsDateString,IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
 
 
 
 
 export class CreateAuditLogDto {
   @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsInt()
+userId?: number  | null;
+@ApiProperty({
   type: 'string',
 })
 @IsNotEmpty()
@@ -41,6 +50,13 @@ before?: Prisma.InputJsonValue  | Prisma.NullableJsonNullValueInput;
 })
 @IsOptional()
 after?: Prisma.InputJsonValue  | Prisma.NullableJsonNullValueInput;
+@ApiProperty({
+  type: () => Object,
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+diff?: Prisma.InputJsonValue  | Prisma.NullableJsonNullValueInput;
 @ApiProperty({
   type: () => Object,
   required: false,

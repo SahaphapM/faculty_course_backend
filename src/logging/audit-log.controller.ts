@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Param,
   Query,
   UseGuards,
   UseInterceptors,
@@ -31,5 +32,12 @@ export class AuditLogController {
   @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
   async getResources() {
     return this.auditLogService.getTables();
+  }
+
+  @Get(':id')
+  @UseInterceptors(AuditLogDecoratorInterceptor)
+  @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
+  async getLogById(@Param('id') id: number) {
+    return this.auditLogService.getLogById(id);
   }
 }

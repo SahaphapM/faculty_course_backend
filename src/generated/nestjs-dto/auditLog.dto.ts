@@ -10,6 +10,12 @@ export class AuditLogDto {
 })
 id: number ;
 @ApiProperty({
+  type: 'integer',
+  format: 'int32',
+  nullable: true,
+})
+userId: number  | null;
+@ApiProperty({
   type: 'string',
 })
 action: string ;
@@ -32,6 +38,11 @@ before: Prisma.JsonValue  | null;
   nullable: true,
 })
 after: Prisma.JsonValue  | null;
+@ApiProperty({
+  type: () => Object,
+  nullable: true,
+})
+diff: Prisma.JsonValue  | null;
 @ApiProperty({
   type: () => Object,
   nullable: true,

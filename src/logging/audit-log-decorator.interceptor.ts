@@ -63,19 +63,23 @@ export class AuditLogDecoratorInterceptor implements NestInterceptor {
             metadata.response = data;
           }
 
+          console.log('metadata', metadata);
+
           // Extract resource ID from request params if not specified
           const resourceId = this.extractResourceId(request);
 
           // Log the audit entry
-          this.auditLogService.log({
-            userId: user?.id,
-            action: auditLogOptions.action,
-            resource: auditLogOptions.resource,
-            resourceId,
-            metadata,
-          }).catch(() => {
-            // Silently fail to avoid disrupting the main flow
-          });
+          this.auditLogService
+            .log({
+              userId: user?.id,
+              action: auditLogOptions.action,
+              resource: auditLogOptions.resource,
+              resourceId,
+              metadata,
+            })
+            .catch(() => {
+              // Silently fail to avoid disrupting the main flow
+            });
         } catch (error) {
           // Silently fail to avoid disrupting the main flow
           console.error('Failed to log audit entry:', error);
@@ -89,16 +93,16 @@ export class AuditLogDecoratorInterceptor implements NestInterceptor {
     if (request.params.id) {
       return request.params.id;
     }
-    
+
     if (request.params[`${request.route?.path.split('/')[1]}Id`]) {
       return request.params[`${request.route?.path.split('/')[1]}Id`];
     }
-    
+
     // Try to extract from body for POST requests
     if (request.method === 'POST' && request.body.id) {
       return request.body.id;
     }
-    
+
     return undefined;
   }
 }

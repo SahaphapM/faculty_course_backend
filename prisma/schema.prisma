@@ -378,6 +378,7 @@ model skill_assessment {
 
 model audit_log {
   id         Int      @id @default(autoincrement())
+  /// @DtoRelationIncludeId
   userId     Int?
   user       user?    @relation(fields: [userId], references: [id])
   action     String   @db.VarChar(100)
@@ -385,6 +386,7 @@ model audit_log {
   resourceId String?  @db.VarChar(255) // resourceId คือ รหัสทรัพยากรที่ถูกดำเนินการ
   before     Json? // 🔥 สภาพข้อมูลก่อนเปลี่ยน
   after      Json? // 🔥 สภาพข้อมูลหลังเปลี่ยน
+  diff       Json?   // { field: { old, new } } หรือ JSON Patch
   metadata   Json?
   timestamp  DateTime @default(now()) @db.DateTime(0)
 
