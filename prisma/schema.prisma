@@ -248,7 +248,7 @@ model student {
   code                String               @unique @db.VarChar(255)
   engName             String?              @db.VarChar(255)
   enrollmentDate      DateTime?            @db.DateTime(0)
-  socials             String?              @db.LongText
+  graduationDate      DateTime?            @db.DateTime(0)
   thaiName            String?              @db.VarChar(255)
   /// @DtoRelationIncludeId
   curriculumId        Int?

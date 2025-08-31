@@ -31,9 +31,10 @@ engName: string  | null;
 enrollmentDate: Date  | null;
 @ApiProperty({
   type: 'string',
+  format: 'date-time',
   nullable: true,
 })
-socials: string  | null;
+graduationDate: Date  | null;
 @ApiProperty({
   type: 'string',
   nullable: true,

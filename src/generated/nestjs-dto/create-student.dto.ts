@@ -31,12 +31,13 @@ engName?: string  | null;
 enrollmentDate?: Date  | null;
 @ApiProperty({
   type: 'string',
+  format: 'date-time',
   required: false,
   nullable: true,
 })
 @IsOptional()
-@IsString()
-socials?: string  | null;
+@IsDateString()
+graduationDate?: Date  | null;
 @ApiProperty({
   type: 'string',
   required: false,
