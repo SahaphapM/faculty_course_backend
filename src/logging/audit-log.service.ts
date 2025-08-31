@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { AppLoggerService } from './app-logger.service';
 import { AuditLogQueryDto } from 'src/dto/filters/filter.audit-log.dto';
-import { AuditLog } from 'src/generated/nestjs-dto/auditLog.entity';
 import { CreateAuditLogDto } from 'src/generated/nestjs-dto/create-auditLog.dto';
 import { Prisma } from '@prisma/client';
+import { createPaginatedData } from 'src/utils/paginated.utils';
 
 @Injectable()
 export class AuditLogService {
@@ -102,13 +102,7 @@ export class AuditLogService {
         this.prisma.audit_log.count({ where }),
       ]);
 
-      return {
-        data: logs,
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      };
+      return createPaginatedData(logs, total, page, limit);
     } catch (error) {
       this.logger.error('Failed to retrieve audit logs', JSON.stringify(error));
       throw error;

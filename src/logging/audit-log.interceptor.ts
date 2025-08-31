@@ -36,8 +36,6 @@ export class AuditLogInterceptor implements NestInterceptor {
 
     return new Observable((observer) => {
       (async () => {
-        console.log('Resource:', resource, 'Resource ID:', resourceId);
-
         if (['PUT', 'PATCH', 'DELETE'].includes(method) && resourceId) {
           try {
             beforeData = await (this.prisma as any)[resource]?.findUnique?.({
@@ -59,7 +57,6 @@ export class AuditLogInterceptor implements NestInterceptor {
               afterData = result;
               diff = this.getDiff(beforeData, afterData);
             } else if (method === 'DELETE') {
-              console.log('After Delete', beforeData);
               diff = beforeData;
             }
 
