@@ -7,11 +7,15 @@ import { LoggingInterceptor } from './logging/logging.interceptor';
 import { AppLoggerService } from './logging/app-logger.service';
 import { AuditLogInterceptor } from './logging/audit-log.interceptor';
 import { AuditLogDecoratorInterceptor } from './logging/audit-log-decorator.interceptor';
+import { PrismaExceptionFilter } from './prisma/prisma-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true,
   });
+
+  // Prisma exception filter to handle database errors
+  app.useGlobalFilters(new PrismaExceptionFilter());
 
   // Use custom logger that forwards to Graylog
   app.useLogger(app.get(AppLoggerService));

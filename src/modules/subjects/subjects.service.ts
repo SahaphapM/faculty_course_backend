@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { SubjectFilterDto } from 'src/dto/filters/filter.subject.dto';
 import { CreateSubjectDto } from 'src/generated/nestjs-dto/create-subject.dto';
@@ -6,6 +6,7 @@ import { UpdateSubjectDto } from 'src/generated/nestjs-dto/update-subject.dto';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
+import { AppErrorCode } from 'src/common/error-codes';
 
 @Injectable()
 export class SubjectService {
@@ -140,9 +141,57 @@ export class SubjectService {
   }
 
   async remove(id: number) {
-    const subject = await this.prisma.subject.delete({
-      where: { id },
-    });
-    return subject;
+    // 1) Check if subject exists
+    const subject = await this.prisma.subject.findUnique({ where: { id } });
+    if (!subject) {
+      throw new NotFoundException({
+        code: 'NOT_FOUND',
+        message: 'Subject not found',
+      });
+    }
+
+    // 2) Check for courses that reference this subject (onDelete: Restrict)
+    const courseCount = await this.prisma.course.count({ where: { subjectId: id } });
+
+    if (courseCount > 0) {
+      // Get the actual blocking courses with details
+      const blockingCourses = await this.prisma.course.findMany({
+        where: { subjectId: id },
+        select: {
+          id: true,
+          year: true,
+          semester: true,
+          active: true,
+        },
+        take: 10, // Limit to first 10 for performance
+      });
+
+      throw new ConflictException({
+        code: AppErrorCode.FK_CONFLICT,
+        message: `Cannot delete Subject "${subject.code} - ${subject.thaiName || subject.engName}" because there are Courses referencing it.`,
+        entity: 'Subject',
+        entityName: `${subject.code} - ${subject.thaiName || subject.engName || `Subject #${id}`}`,
+        id,
+        blockers: [{ 
+          relation: 'Course', 
+          count: courseCount, 
+          field: 'subjectId',
+          entities: blockingCourses.map(course => ({
+            id: course.id,
+            name: `Course #${course.id}`,
+            details: `Year ${course.year}, Semester ${course.semester}${course.active ? '' : ' (Inactive)'}`,
+          })),
+        }],
+        suggestions: [
+          'Delete or reassign those Courses to a different Subject.',
+          'If business allows, detach Courses first then delete Subject.',
+          'Consider soft-delete/archiving instead of hard delete.',
+        ],
+      });
+    }
+
+    // 3) Safe to delete
+    await this.prisma.subject.delete({ where: { id } });
+    return { ok: true };
   }
 }

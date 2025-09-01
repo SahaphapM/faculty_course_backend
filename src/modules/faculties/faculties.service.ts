@@ -3,6 +3,7 @@ import {
   InternalServerErrorException,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 
@@ -12,6 +13,7 @@ import { UpdateFacultyDto } from 'src/generated/nestjs-dto/update-faculty.dto';
 import { FacultyFilterDto } from 'src/dto/filters/filter.faculties.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
+import { AppErrorCode } from 'src/common/error-codes';
 
 @Injectable()
 export class FacultiesService {
@@ -148,15 +150,57 @@ export class FacultiesService {
 
   // Remove a faculty by ID
   async remove(id: number) {
-    try {
-      await this.prisma.faculty.delete({
-        where: { id },
+    // 1) Check if faculty exists
+    const faculty = await this.prisma.faculty.findUnique({ where: { id } });
+    if (!faculty) {
+      throw new NotFoundException({
+        code: 'NOT_FOUND',
+        message: 'Faculty not found',
       });
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Faculty with ID ${id} not found`);
-      }
-      throw new BadRequestException('Failed to remove faculty');
     }
+
+    // 2) Check for branches that reference this faculty (onDelete: Restrict)
+    const branchCount = await this.prisma.branch.count({ where: { facultyId: id } });
+
+    if (branchCount > 0) {
+      // Get the actual blocking branches with details
+      const blockingBranches = await this.prisma.branch.findMany({
+        where: { facultyId: id },
+        select: {
+          id: true,
+          thaiName: true,
+          engName: true,
+          abbrev: true,
+        },
+        take: 10, // Limit to first 10 for performance
+      });
+
+      throw new ConflictException({
+        code: AppErrorCode.FK_CONFLICT,
+        message: `Cannot delete Faculty "${faculty.thaiName || faculty.engName}" because there are Branches referencing it.`,
+        entity: 'Faculty',
+        entityName: faculty.thaiName || faculty.engName || `Faculty #${id}`,
+        id,
+        blockers: [{ 
+          relation: 'Branch', 
+          count: branchCount, 
+          field: 'facultyId',
+          entities: blockingBranches.map(branch => ({
+            id: branch.id,
+            name: branch.thaiName || branch.engName || `Branch #${branch.id}`,
+            details: branch.abbrev ? `(${branch.abbrev})` : '',
+          })),
+        }],
+        suggestions: [
+          'Delete or reassign those Branches to a different Faculty.',
+          'If business allows, detach Branches first (set facultyId = null) then delete Faculty.',
+          'Consider soft-delete/archiving instead of hard delete.',
+        ],
+      });
+    }
+
+    // 3) Safe to delete
+    await this.prisma.faculty.delete({ where: { id } });
+    return { ok: true };
   }
 }

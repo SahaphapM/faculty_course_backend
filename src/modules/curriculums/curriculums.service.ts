@@ -3,6 +3,7 @@ import {
   NotFoundException,
   HttpStatus,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service'; // Adjust the import path as needed
 import { Prisma } from '@prisma/client'; // Import Prisma types
@@ -16,6 +17,7 @@ import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-co
 import { findStudentsTargetSkillLevel } from './curriculums.helper2';
 import { LevelDescription } from 'src/generated/nestjs-dto/levelDescription.entity';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
+import { AppErrorCode } from 'src/common/error-codes';
 
 // types ช่วยอ่านง่ายขึ้น
 
@@ -356,6 +358,63 @@ export class CurriculumsService {
         'Failed to delete curriculum: ' + error.message,
       );
     }
+  }
+
+  // Hard delete a curriculum by ID (with restriction checks)
+  async hardDelete(id: number) {
+    // 1) Check if curriculum exists
+    const curriculum = await this.prisma.curriculum.findUnique({ where: { id } });
+    if (!curriculum) {
+      throw new NotFoundException({
+        code: 'NOT_FOUND',
+        message: 'Curriculum not found',
+      });
+    }
+
+    // 2) Check for PLOs that reference this curriculum (onDelete: Restrict)
+    const ploCount = await this.prisma.plo.count({ where: { curriculumId: id } });
+
+    if (ploCount > 0) {
+      // Get the actual blocking PLOs with details
+      const blockingPlos = await this.prisma.plo.findMany({
+        where: { curriculumId: id },
+        select: {
+          id: true,
+          name: true,
+          type: true,
+          thaiDescription: true,
+          engDescription: true,
+        },
+        take: 10, // Limit to first 10 for performance
+      });
+
+      throw new ConflictException({
+        code: AppErrorCode.FK_CONFLICT,
+        message: `Cannot delete Curriculum "${curriculum.code} - ${curriculum.thaiName || curriculum.engName}" because there are PLOs referencing it.`,
+        entity: 'Curriculum',
+        entityName: `${curriculum.code} - ${curriculum.thaiName || curriculum.engName || `Curriculum #${id}`}`,
+        id,
+        blockers: [{ 
+          relation: 'PLO', 
+          count: ploCount, 
+          field: 'curriculumId',
+          entities: blockingPlos.map(plo => ({
+            id: plo.id,
+            name: plo.name || plo.type || `PLO #${plo.id}`,
+            details: (plo.thaiDescription || plo.engDescription || '').substring(0, 100) + (plo.thaiDescription || plo.engDescription ? '...' : 'No description'),
+          })),
+        }],
+        suggestions: [
+          'Delete or reassign those PLOs to a different Curriculum.',
+          'If business allows, detach PLOs first then delete Curriculum.',
+          'Consider soft-delete/archiving instead of hard delete.',
+        ],
+      });
+    }
+
+    // 3) Safe to hard delete
+    await this.prisma.curriculum.delete({ where: { id } });
+    return { ok: true };
   }
 
   // Find all curriculums including inactive ones (admin only)

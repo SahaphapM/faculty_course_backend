@@ -3,6 +3,7 @@ import {
   NotFoundException,
   BadRequestException,
   InternalServerErrorException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
@@ -11,8 +12,7 @@ import { CreateSkillDto } from 'src/generated/nestjs-dto/create-skill.dto';
 import { SkillFilterDto } from 'src/dto/filters/filter.skill.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
-import { Subject } from 'src/generated/nestjs-dto/subject.entity';
-import { SkillCollection } from 'src/generated/nestjs-dto/skillCollection.entity';
+import { AppErrorCode } from 'src/common/error-codes';
 
 @Injectable()
 export class SkillsService {
@@ -506,17 +506,105 @@ export class SkillsService {
 
   // Remove a skill by ID
   async remove(id: number) {
-    try {
-      const skill = await this.prisma.skill.delete({
-        where: { id },
+    // 1) Check if skill exists
+    const skill = await this.prisma.skill.findUnique({ where: { id } });
+    if (!skill) {
+      throw new NotFoundException({
+        code: 'NOT_FOUND',
+        message: 'Skill not found',
       });
-      return skill;
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Skill with ID ${id} not found`);
-      }
-      throw new BadRequestException(`Failed to remove skill: ${error.message}`);
     }
+
+    // 2) Check for CLOs that reference this skill (onDelete: Restrict)
+    const cloCount = await this.prisma.clo.count({ where: { skillId: id } });
+
+    // 3) Check for skill assessments that reference this skill (onDelete: Restrict)
+    const skillAssessmentCount = await this.prisma.skill_assessment.count({ 
+      where: { skillId: id } 
+    });
+
+    const blockers = [];
+    
+    if (cloCount > 0) {
+      // Get the actual blocking CLOs with details
+      const blockingClos = await this.prisma.clo.findMany({
+        where: { skillId: id },
+        select: {
+          id: true,
+          name: true,
+          subject: {
+            select: {
+              id: true,
+              code: true,
+              thaiName: true,
+              engName: true,
+            },
+          },
+        },
+        take: 10, // Limit to first 10 for performance
+      });
+
+      blockers.push({ 
+        relation: 'CLO', 
+        count: cloCount, 
+        field: 'skillId',
+        entities: blockingClos.map(clo => ({
+          id: clo.id,
+          name: clo.name || `CLO #${clo.id}`,
+          details: clo.subject ? `${clo.subject.code} - ${clo.subject.thaiName || clo.subject.engName}` : 'No subject',
+        })),
+      });
+    }
+
+    if (skillAssessmentCount > 0) {
+      // Get the actual blocking skill assessments with details
+      const blockingAssessments = await this.prisma.skill_assessment.findMany({
+        where: { skillId: id },
+        select: {
+          id: true,
+          student: {
+            select: {
+              id: true,
+              code: true,
+              thaiName: true,
+              engName: true,
+            },
+          },
+        },
+        take: 10, // Limit to first 10 for performance
+      });
+
+      blockers.push({ 
+        relation: 'SkillAssessment', 
+        count: skillAssessmentCount, 
+        field: 'skillId',
+        entities: blockingAssessments.map(assessment => ({
+          id: assessment.id,
+          name: `Assessment #${assessment.id}`,
+          details: assessment.student ? `Student: ${assessment.student.code} - ${assessment.student.thaiName || assessment.student.engName || 'Unknown'}` : 'No student',
+        })),
+      });
+    }
+
+    if (blockers.length > 0) {
+      throw new ConflictException({
+        code: AppErrorCode.FK_CONFLICT,
+        message: `Cannot delete Skill "${skill.thaiName || skill.engName}" because there are records referencing it.`,
+        entity: 'Skill',
+        entityName: skill.thaiName || skill.engName || `Skill #${id}`,
+        id,
+        blockers,
+        suggestions: [
+          'Delete or reassign those CLOs and Skill Assessments to a different Skill.',
+          'If business allows, detach references first then delete Skill.',
+          'Consider soft-delete/archiving instead of hard delete.',
+        ],
+      });
+    }
+
+    // 4) Safe to delete
+    await this.prisma.skill.delete({ where: { id } });
+    return { ok: true };
   }
 
   async subjectStudentSummary(studentCode: string) {

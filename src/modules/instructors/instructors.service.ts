@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInstructorDto } from 'src/generated/nestjs-dto/create-instructor.dto';
@@ -11,6 +12,7 @@ import { Prisma } from '@prisma/client';
 import { InstructorFilterDto } from 'src/dto/filters/filter.instructors.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
+import { AppErrorCode } from 'src/common/error-codes';
 
 @Injectable()
 export class InstructorsService {
@@ -161,14 +163,70 @@ export class InstructorsService {
   }
 
   async remove(id: number) {
-    try {
-      await this.prisma.instructor.delete({
-        where: { id },
+    // 1) Check if instructor exists
+    const instructor = await this.prisma.instructor.findUnique({ where: { id } });
+    if (!instructor) {
+      throw new NotFoundException({
+        code: 'NOT_FOUND',
+        message: 'Instructor not found',
       });
-      return `Success Delete ID ${id}`;
-    } catch (error) {
-      console.error('Error removing instructor:', error);
-      throw new BadRequestException('Failed to remove Instructor/Coordinator');
     }
+
+    // 2) Check for course_instructors that reference this instructor (onDelete: Restrict)
+    const courseInstructorCount = await this.prisma.course_instructor.count({ 
+      where: { instructorId: id } 
+    });
+
+    if (courseInstructorCount > 0) {
+      // Get the actual blocking course instructors with details
+      const blockingCourseInstructors = await this.prisma.course_instructor.findMany({
+        where: { instructorId: id },
+        select: {
+          id: true,
+          course: {
+            select: {
+              id: true,
+              year: true,
+              semester: true,
+              subject: {
+                select: {
+                  code: true,
+                  thaiName: true,
+                  engName: true,
+                },
+              },
+            },
+          },
+        },
+        take: 10, // Limit to first 10 for performance
+      });
+
+      throw new ConflictException({
+        code: AppErrorCode.FK_CONFLICT,
+        message: `Cannot delete Instructor "${instructor.thaiName || instructor.engName}" because there are Course Instructors referencing it.`,
+        entity: 'Instructor',
+        entityName: instructor.thaiName || instructor.engName || `Instructor #${id}`,
+        id,
+        blockers: [{ 
+          relation: 'CourseInstructor', 
+          count: courseInstructorCount, 
+          field: 'instructorId',
+          entities: blockingCourseInstructors.map(ci => ({
+            id: ci.id,
+            name: `Course Assignment #${ci.id}`,
+            details: ci.course ? `${ci.course.subject?.code || 'Unknown'} - ${ci.course.subject?.thaiName || ci.course.subject?.engName || 'Unknown Subject'} (${ci.course.year}/${ci.course.semester})` : 'Unknown course',
+          })),
+        }],
+        suggestions: [
+          'Delete or reassign those Course Instructors to a different Instructor.',
+          'If business allows, detach Course Instructors first then delete Instructor.',
+          'Consider soft-delete/archiving instead of hard delete.',
+        ],
+      });
+    }
+
+    // 3) Safe to delete
+    await this.prisma.instructor.delete({ where: { id } });
+    return { ok: true };
   }
 }
