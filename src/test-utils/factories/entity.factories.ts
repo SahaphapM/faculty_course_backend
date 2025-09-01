@@ -72,6 +72,7 @@ export function makeCurriculum(
     engDegree: overrides.engDegree ?? 'Bachelor of Engineering',
     period: overrides.period ?? 4,
     active: overrides.active ?? true,
+    archivedAt: overrides.archivedAt ?? new Date('2100-01-01') as any,
     thaiDescription: overrides.thaiDescription ?? null,
     engDescription: overrides.engDescription ?? null,
     branch: (overrides.branch as any) ?? undefined!,

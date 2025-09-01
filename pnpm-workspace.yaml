@@ -1,9 +1,5 @@
 onlyBuiltDependencies:
-  - '@nestjs/core'
   - '@prisma/client'
   - '@prisma/engines'
-  - '@scarf/scarf'
   - prisma
   - puppeteer
-  - sqlite3
-  - unrs-resolver

@@ -1,7 +1,7 @@
 
 import {Prisma} from '@prisma/client'
 import {ApiProperty} from '@nestjs/swagger'
-import {IsBoolean,IsDecimal,IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
+import {IsBoolean,IsDateString,IsDecimal,IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
 
 
 
@@ -90,4 +90,13 @@ engDescription?: string  | null;
 @IsOptional()
 @IsBoolean()
 active?: boolean ;
+@ApiProperty({
+  type: 'string',
+  format: 'date-time',
+  required: false,
+  nullable: true,
+})
+@IsOptional()
+@IsDateString()
+archivedAt?: Date  | null;
 }

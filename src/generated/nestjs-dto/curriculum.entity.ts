@@ -71,6 +71,12 @@ engDescription: string  | null;
 })
 active: boolean ;
 @ApiProperty({
+  type: 'string',
+  format: 'date-time',
+  nullable: true,
+})
+archivedAt: Date  | null;
+@ApiProperty({
   type: () => Branch,
   required: false,
 })

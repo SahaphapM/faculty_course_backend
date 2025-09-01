@@ -40,7 +40,7 @@ model branch {
   thaiName        String?      @db.VarChar(255)
   engName         String?      @db.VarChar(255)
   abbrev          String?      @db.VarChar(5)
-  faculty         faculty?     @relation(fields: [facultyId], references: [id], onDelete: Cascade)
+  faculty         faculty?     @relation(fields: [facultyId], references: [id], onDelete: Restrict)
   curriculum      curriculum[]
   instructor      instructor[]
   student         student[]
@@ -55,7 +55,7 @@ model course {
   year               Int                 @db.SmallInt
   /// @DtoRelationIncludeId
   subjectId          Int
-  subject            subject             @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subject            subject             @relation(fields: [subjectId], references: [id], onDelete: Restrict)
   course_instructors course_instructor[]
   skill_collections  skill_collection[]
 
@@ -67,7 +67,7 @@ model course_instructor {
   instructorId Int?
   courseId     Int?
   course       course?     @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  instructor   instructor? @relation(fields: [instructorId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  instructor   instructor? @relation(fields: [instructorId], references: [id], onDelete: Restrict, onUpdate: NoAction)
 
   @@index([instructorId])
   @@index([courseId])
@@ -106,6 +106,7 @@ model curriculum {
   thaiDescription    String?                   @db.Text
   engDescription     String?                   @db.Text
   active             Boolean                   @default(true)
+  archivedAt         DateTime?                 @db.DateTime(0)
   branch             branch                    @relation(fields: [branchId], references: [id], onDelete: Cascade)
   coordinators       curriculum_coordinators[]
   plos               plo[]
@@ -162,7 +163,7 @@ model instructor {
   position           String?             @db.VarChar(255)
   email              String              @unique @db.VarChar(255)
   course_instructors course_instructor[]
-  branch             branch?             @relation(fields: [branchId], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  branch             branch?             @relation(fields: [branchId], references: [id], onDelete: SetNull, onUpdate: SetNull)
   user               user?
 
   @@index([branchId], map: "instructor_branchId_fkey")
@@ -177,7 +178,7 @@ model plo {
   thaiDescription String?    @db.Text
   engDescription  String?    @db.Text
   clos            clo[]
-  curriculum      curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
+  curriculum      curriculum @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
 
   @@index([curriculumId])
 }
@@ -194,8 +195,8 @@ model clo {
   /// @DtoRelationIncludeId
   skillId           Int?
   expectSkillLevel  Int?               @db.TinyInt
-  plo               plo?               @relation(fields: [ploId], references: [id], onUpdate: NoAction)
-  skill             skill?             @relation(fields: [skillId], references: [id], onUpdate: NoAction)
+  plo               plo?               @relation(fields: [ploId], references: [id], onDelete: Restrict)
+  skill             skill?             @relation(fields: [skillId], references: [id], onDelete: Restrict)
   subject           subject?           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   skill_collections skill_collection[]
 
@@ -217,7 +218,7 @@ model skill {
   curriculumId      Int
   clos              clo[]
   curriculum        curriculum         @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  parent            skill?             @relation("SkillHierarchy", fields: [parentId], references: [id], onDelete: NoAction)
+  parent            skill?             @relation("SkillHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   subs              skill[]            @relation("SkillHierarchy")
   skill_assessments skill_assessment[]
 
@@ -233,8 +234,8 @@ model skill_collection {
   passed      Boolean  @default(false)
   cloId       Int?
   courseId    Int?
-  clo         clo?     @relation(fields: [cloId], references: [id], onUpdate: NoAction)
-  course      course?  @relation(fields: [courseId], references: [id], onUpdate: NoAction)
+  clo         clo?     @relation(fields: [cloId], references: [id], onUpdate: Restrict)
+  course      course?  @relation(fields: [courseId], references: [id], onUpdate: SetNull)
   student     student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, courseId, cloId])
@@ -258,8 +259,8 @@ model student {
   userId              Int?
   skill_assessments   skill_assessment[]
   skill_collections   skill_collection[]
-  branch              branch?              @relation(fields: [branchId], references: [id], onDelete: Restrict, onUpdate: NoAction)
-  curriculum          curriculum?          @relation(fields: [curriculumId], references: [id], onUpdate: NoAction)
+  branch              branch?              @relation(fields: [branchId], references: [id], onDelete: SetNull)
+  curriculum          curriculum?          @relation(fields: [curriculumId], references: [id], onUpdate: NoAction, onDelete: SetNull)
   student_internships student_internship[]
   user                user?
 
@@ -368,7 +369,7 @@ model skill_assessment {
   skillId           Int?
   /// @DtoRelationIncludeId
   studentId         Int?
-  skill             skill?   @relation(fields: [skillId], references: [id], onDelete: NoAction)
+  skill             skill?   @relation(fields: [skillId], references: [id], onDelete: Restrict)
   student           student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([skillId, studentId])
@@ -386,7 +387,7 @@ model audit_log {
   resourceId String?  @db.VarChar(255) // resourceId คือ รหัสทรัพยากรที่ถูกดำเนินการ
   before     Json? // 🔥 สภาพข้อมูลก่อนเปลี่ยน
   after      Json? // 🔥 สภาพข้อมูลหลังเปลี่ยน
-  diff       Json?   // { field: { old, new } } หรือ JSON Patch
+  diff       Json? // { field: { old, new } } หรือ JSON Patch
   metadata   Json?
   timestamp  DateTime @default(now()) @db.DateTime(0)
 

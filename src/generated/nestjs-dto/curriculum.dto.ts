@@ -62,4 +62,10 @@ engDescription: string  | null;
   type: 'boolean',
 })
 active: boolean ;
+@ApiProperty({
+  type: 'string',
+  format: 'date-time',
+  nullable: true,
+})
+archivedAt: Date  | null;
 }
