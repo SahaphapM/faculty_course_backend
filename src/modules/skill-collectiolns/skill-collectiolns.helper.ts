@@ -12,7 +12,8 @@ type SkillFull = {
 
 export type SkillNode = {
   id: number;
-  name: string | null;
+  thaiName: string | null;
+  engName: string | null;
   domain: string | null;
   parentId: number | null;
   gained: number;
@@ -80,7 +81,8 @@ export class SkillCollectionsHelper {
     for (const s of relatedSkills.values()) {
       skillMap.set(s.id, {
         id: s.id,
-        name: s.thaiName ?? null,
+        thaiName: s.thaiName ?? null,
+        engName: s.engName ?? null,
         domain: s.domain ?? null,
         parentId: s.parentId ?? null,
         gained: skillLevelMap.get(s.id) ?? 0,
@@ -163,7 +165,8 @@ export class SkillCollectionsHelper {
     for (const s of relatedSkills.values()) {
       skillMap.set(s.id, {
         id: s.id,
-        name: s.thaiName ?? null,
+        thaiName: s.thaiName ?? null,
+        engName: s.engName ?? null,
         domain: s.domain ?? null,
         parentId: s.parentId ?? null,
         gained: skillLevelMap.get(s.id) ?? 0,
@@ -198,7 +201,8 @@ export class SkillCollectionsHelper {
       ) {
         skillMap.set(sa.skillId, {
           id: sa.id,
-          name: sa.skill.thaiName,
+          thaiName: sa.skill.thaiName,
+          engName: sa.skill.engName,
           domain: sa.skill.domain,
           parentId: sa.skill.parentId,
           gained: this.getLevelFromSkillAssessment(sa),
