@@ -1,6 +1,7 @@
 import { IsIn, IsOptional, IsString, IsNotEmpty, IsNumber } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform } from 'class-transformer';
 
 // src/modules/curriculums/dto/skill-collection-summary.filter.dto.ts
 export class SkillCollectionSummaryFilterDto extends BaseFilterParams {
@@ -68,6 +69,7 @@ export class SkillCollectionFilterDto extends BaseFilterParams {
     example: '123',
   })
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   courseId: number;
 
   @ApiPropertyOptional({
@@ -76,5 +78,6 @@ export class SkillCollectionFilterDto extends BaseFilterParams {
     example: '123',
   })
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   cloId: number;
 }

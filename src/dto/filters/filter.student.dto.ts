@@ -47,6 +47,7 @@ export class StudentFilterDto extends BaseFilterParams {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   curriculumId?: number;
 
   @ApiPropertyOptional({
@@ -58,6 +59,7 @@ export class StudentFilterDto extends BaseFilterParams {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   facultyId?: number;
 
   @ApiPropertyOptional({
@@ -69,5 +71,6 @@ export class StudentFilterDto extends BaseFilterParams {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   branchId?: number;
 }

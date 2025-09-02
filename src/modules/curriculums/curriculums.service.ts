@@ -15,7 +15,6 @@ import { CreateLevelDescriptionDto } from 'src/generated/nestjs-dto/create-level
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { SkillCollectionSummaryFilterDto } from 'src/dto/filters/filter.skill-collection.dto';
 import { findStudentsTargetSkillLevel } from './curriculums.helper2';
-import { LevelDescription } from 'src/generated/nestjs-dto/levelDescription.entity';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 import { AppErrorCode } from 'src/common/error-codes';
 
@@ -110,38 +109,6 @@ export class CurriculumsService {
       message: 'Curriculum created successfully',
       data: curriculum,
     };
-  }
-
-  async updateLevelDescriptions(updates: Partial<LevelDescription>[]) {
-    console.dir(updates, { depth: 3 });
-    return Promise.all(
-      updates.map((update) =>
-        this.prisma.level_description.update({
-          where: { id: update.id },
-          data: { description: update.description },
-        }),
-      ),
-    );
-  }
-
-  async getAllLevelDescription(curriculumCode: string) {
-    const curriculum = await this.prisma.curriculum.findFirst({
-      where: {
-        code: curriculumCode,
-        active: true,
-      },
-      select: {
-        level_descriptions: true,
-      },
-    });
-
-    if (!curriculum) {
-      throw new NotFoundException(
-        `Curriculum with code ${curriculumCode} not found`,
-      );
-    }
-
-    return curriculum?.level_descriptions;
   }
 
   // Find all curriculums with pagination and search

@@ -3,11 +3,13 @@ import { CurriculumsService } from './curriculums.service';
 import { CurriculumsController } from './curriculums.controller';
 import { PrismaModule } from 'src/prisma/prisma.module';
 import { CoordinatorCurriculumsService } from './coordinator-curriculums.service';
+import { LevelDescriptionsService } from './level-descriptions.service';
+import { LevelDescriptionsController } from './level-descriptions.controller';
 
 @Module({
   imports: [PrismaModule],
-  controllers: [CurriculumsController],
-  providers: [CurriculumsService, CoordinatorCurriculumsService],
+  controllers: [CurriculumsController, LevelDescriptionsController],
+  providers: [CurriculumsService, CoordinatorCurriculumsService, LevelDescriptionsService],
   exports: [CurriculumsService],
 })
 export class CurriculumsModule {}

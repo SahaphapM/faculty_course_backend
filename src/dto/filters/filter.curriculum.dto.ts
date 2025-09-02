@@ -29,6 +29,7 @@ export class CurriculumFilterDto extends BaseFilterParams {
   })
   @IsOptional()
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   branchId?: number;
 
   @ApiPropertyOptional({
@@ -38,6 +39,7 @@ export class CurriculumFilterDto extends BaseFilterParams {
   })
   @IsOptional()
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   facultyId?: number;
 
   @ApiPropertyOptional({
@@ -47,6 +49,7 @@ export class CurriculumFilterDto extends BaseFilterParams {
   })
   @IsOptional()
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   coordinatorId?: number;
 
   @ApiPropertyOptional({

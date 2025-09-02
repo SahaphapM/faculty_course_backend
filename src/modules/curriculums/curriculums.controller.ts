@@ -105,31 +105,12 @@ export class CurriculumsController {
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
-  @Patch('skillLevel/descriptions') // เส้นทางคงที่
-  updateLevelDescriptions(
-    @Body() body: { levelDescription: { id: number; description: string }[] },
-  ) {
-    console.dir(body, { depth: 3 });
-    return this.curriculumsService.updateLevelDescriptions(
-      body.levelDescription,
-    );
-  }
-
-  @Roles(UserRole.Admin, UserRole.Coordinator)
   @Patch(':id')
   update(
     @Param('id') id: string,
     @Body() updateCurriculumDto: UpdateCurriculumDto,
   ) {
     return this.curriculumsService.update(+id, updateCurriculumDto);
-  }
-
-  // get all level description
-  @UseGuards(CurriculumAccessGuard)
-  @CurriculumAccess({ paramName: 'curriculumCode', paramType: 'code' })
-  @Get('levels/:curriculumCode')
-  getAllLevelDescription(@Param('curriculumCode') curriculumCode: string) {
-    return this.curriculumsService.getAllLevelDescription(curriculumCode);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator)

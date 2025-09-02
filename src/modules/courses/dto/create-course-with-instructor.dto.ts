@@ -39,6 +39,7 @@ export class CreateCourseDtoWithInstructor {
   })
   @IsNotEmpty()
   @IsInt()
+  @Transform(({ value }) => (value ? Number(value) : value))
   semester: number;
   @ApiProperty({
     type: 'integer',
@@ -46,6 +47,7 @@ export class CreateCourseDtoWithInstructor {
   })
   @IsNotEmpty()
   @IsInt()
+  @Transform(({ value }) => (value ? Number(value) : value))
   year: number;
   @ApiProperty({
     type: 'integer',
@@ -53,6 +55,7 @@ export class CreateCourseDtoWithInstructor {
   })
   @IsNotEmpty()
   @IsInt()
+  @Transform(({ value }) => (value ? Number(value) : value))
   subjectId: number;
 
   @ApiProperty({ type: [Number], example: [1, 2, 3] })

@@ -1,6 +1,7 @@
 import { IsOptional, IsNumber, IsString } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
 import { ApiPropertyOptional } from '@nestjs/swagger';
+import { Transform, Type } from 'class-transformer';
 
 export class InternshipsFilterDto extends BaseFilterParams {
   @ApiPropertyOptional({
@@ -16,10 +17,13 @@ export class InternshipsFilterDto extends BaseFilterParams {
   })
   @IsOptional()
   @IsNumber()
+  @Type(() => Number)
+  @Transform(({ value }) => (value ? Number(value) : value))
   curriculumId?: number;
 
   @ApiPropertyOptional({
-    description: 'Filter by internship year (e.g. 2024 or BE years as used in UI)',
+    description:
+      'Filter by internship year (e.g. 2024 or BE years as used in UI)',
     required: false,
     example: '2024',
   })

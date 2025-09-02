@@ -1,6 +1,6 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
-import { Type } from 'class-transformer';
+import { Type, Transform } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SubjectFilterDto extends BaseFilterParams {
@@ -21,6 +21,7 @@ export class SubjectFilterDto extends BaseFilterParams {
   @IsOptional()
   @Type(() => Number) // 👈 สำคัญ!
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   @ApiPropertyOptional({ description: 'Filter by curriculum id', required: false, example: 1 })
   @IsOptional()
   @Type(() => Number)
@@ -30,6 +31,7 @@ export class SubjectFilterDto extends BaseFilterParams {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   @ApiPropertyOptional({ description: 'Filter by faculty id', required: false, example: 1 })
   @IsOptional()
   @Type(() => Number)
@@ -39,6 +41,7 @@ export class SubjectFilterDto extends BaseFilterParams {
   @IsOptional()
   @Type(() => Number)
   @IsNumber()
+  @Transform(({ value }) => (value ? Number(value) : value))
   @ApiPropertyOptional({ description: 'Filter by branch id', required: false, example: 1 })
   @IsOptional()
   @Type(() => Number)
