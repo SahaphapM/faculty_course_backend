@@ -1,6 +1,6 @@
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class CurriculumFilterDto extends BaseFilterParams {
@@ -28,7 +28,6 @@ export class CurriculumFilterDto extends BaseFilterParams {
     example: 1,
   })
   @IsOptional()
-  @Type(() => Number)
   @IsNumber()
   branchId?: number;
 
@@ -38,7 +37,6 @@ export class CurriculumFilterDto extends BaseFilterParams {
     example: 1,
   })
   @IsOptional()
-  @Type(() => Number)
   @IsNumber()
   facultyId?: number;
 
@@ -48,7 +46,30 @@ export class CurriculumFilterDto extends BaseFilterParams {
     example: 1,
   })
   @IsOptional()
-  @Type(() => Number)
   @IsNumber()
   coordinatorId?: number;
+
+  @ApiPropertyOptional({
+    description: 'Filter by active status',
+    required: false,
+    example: true,
+    type: Boolean,
+  })
+  @IsOptional()
+  @IsBoolean()
+  @Transform(({ value }) => {
+    // already boolean?
+    if (typeof value === 'boolean') return value;
+
+    // string cases
+    if (typeof value === 'string') {
+      const v = value.trim().toLowerCase();
+      if (v === 'true' || v === '1') return true;
+      if (v === 'false' || v === '0') return false;
+    }
+
+    // anything else -> undefined (means "not provided")
+    return undefined;
+  })
+  active?: boolean;
 }

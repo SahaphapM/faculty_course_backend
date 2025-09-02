@@ -24,10 +24,11 @@ export class CoordinatorCurriculumsService {
       branchId,
       facultyId,
       coordinatorId,
+      active,
     } = pag || {};
 
     const whereCondition: Prisma.curriculumWhereInput = {
-      active: true, // Only show active curriculums
+      ...(active !== undefined ? { active } : { active: true }), // Default to active=true if no active filter provided
       coordinators: {
         some: {
           coordinator: {

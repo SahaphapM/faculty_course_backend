@@ -1,6 +1,6 @@
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 import { BaseFilterParams } from './filter.base.dto';
-import { Type } from 'class-transformer';
+import { Transform, Type } from 'class-transformer';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 
 export class SkillFilterDto extends BaseFilterParams {
@@ -60,5 +60,19 @@ export class SkillFilterDto extends BaseFilterParams {
   })
   @IsOptional()
   @IsBoolean()
+  @Transform(({ value }) => {
+    // already boolean?
+    if (typeof value === 'boolean') return value;
+
+    // string cases
+    if (typeof value === 'string') {
+      const v = value.trim().toLowerCase();
+      if (v === 'true' || v === '1') return true;
+      if (v === 'false' || v === '0') return false;
+    }
+
+    // anything else -> undefined (means "not provided")
+    return undefined;
+  })
   subOnly?: boolean;
 }

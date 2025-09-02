@@ -26,8 +26,21 @@ export class CourseFilterDto extends BaseFilterParams {
     example: true,
   })
   @IsOptional()
-  @Type(() => Boolean)
   @IsBoolean()
+  @Transform(({ value }) => {
+    // already boolean?
+    if (typeof value === 'boolean') return value;
+
+    // string cases
+    if (typeof value === 'string') {
+      const v = value.trim().toLowerCase();
+      if (v === 'true' || v === '1') return true;
+      if (v === 'false' || v === '0') return false;
+    }
+
+    // anything else -> undefined (means "not provided")
+    return undefined;
+  })
   active?: boolean;
 
   @ApiPropertyOptional({

@@ -159,10 +159,11 @@ export class CurriculumsService {
       branchId,
       facultyId,
       coordinatorId,
+      active,
     } = pag || {};
 
     const whereCondition: Prisma.curriculumWhereInput = {
-      active: true, // Only show active curriculums
+      ...(active !== undefined ? { active } : { active: true }), // Default to active=true if no active filter provided
       ...(nameCode && {
         OR: [
           {
@@ -238,7 +239,6 @@ export class CurriculumsService {
     const curriculum = await this.prisma.curriculum.findFirst({
       where: {
         id,
-        active: true, // Only return active curriculums
       },
       include: {
         coordinators: {
@@ -265,7 +265,6 @@ export class CurriculumsService {
     const curriculum = await this.prisma.curriculum.findFirst({
       where: {
         code,
-        active: true, // Only return active curriculums
       },
       include: {
         branch: true,
@@ -363,7 +362,9 @@ export class CurriculumsService {
   // Hard delete a curriculum by ID (with restriction checks)
   async hardDelete(id: number) {
     // 1) Check if curriculum exists
-    const curriculum = await this.prisma.curriculum.findUnique({ where: { id } });
+    const curriculum = await this.prisma.curriculum.findUnique({
+      where: { id },
+    });
     if (!curriculum) {
       throw new NotFoundException({
         code: 'NOT_FOUND',
@@ -372,7 +373,9 @@ export class CurriculumsService {
     }
 
     // 2) Check for PLOs that reference this curriculum (onDelete: Restrict)
-    const ploCount = await this.prisma.plo.count({ where: { curriculumId: id } });
+    const ploCount = await this.prisma.plo.count({
+      where: { curriculumId: id },
+    });
 
     if (ploCount > 0) {
       // Get the actual blocking PLOs with details
@@ -394,16 +397,25 @@ export class CurriculumsService {
         entity: 'Curriculum',
         entityName: `${curriculum.code} - ${curriculum.thaiName || curriculum.engName || `Curriculum #${id}`}`,
         id,
-        blockers: [{ 
-          relation: 'PLO', 
-          count: ploCount, 
-          field: 'curriculumId',
-          entities: blockingPlos.map(plo => ({
-            id: plo.id,
-            name: plo.name || plo.type || `PLO #${plo.id}`,
-            details: (plo.thaiDescription || plo.engDescription || '').substring(0, 100) + (plo.thaiDescription || plo.engDescription ? '...' : 'No description'),
-          })),
-        }],
+        blockers: [
+          {
+            relation: 'PLO',
+            count: ploCount,
+            field: 'curriculumId',
+            entities: blockingPlos.map((plo) => ({
+              id: plo.id,
+              name: plo.name || plo.type || `PLO #${plo.id}`,
+              details:
+                (plo.thaiDescription || plo.engDescription || '').substring(
+                  0,
+                  100,
+                ) +
+                (plo.thaiDescription || plo.engDescription
+                  ? '...'
+                  : 'No description'),
+            })),
+          },
+        ],
         suggestions: [
           'Delete or reassign those PLOs to a different Curriculum.',
           'If business allows, detach PLOs first then delete Curriculum.',
@@ -432,10 +444,11 @@ export class CurriculumsService {
       branchId,
       facultyId,
       coordinatorId,
+      active,
     } = pag || {};
 
     const whereCondition: Prisma.curriculumWhereInput = {
-      // No active filter - shows all curriculums including inactive ones
+      // Supports active filter if provided
       ...(nameCode && {
         OR: [
           {
@@ -460,6 +473,7 @@ export class CurriculumsService {
       ...(coordinatorId && {
         coordinators: { some: { coordinatorId: coordinatorId } },
       }),
+      ...(active !== undefined && { active }),
     };
 
     const options: Prisma.curriculumFindManyArgs = {

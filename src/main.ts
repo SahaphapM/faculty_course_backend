@@ -31,7 +31,7 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: false,
-      transformOptions: { enableImplicitConversion: true },
+      transformOptions: { enableImplicitConversion: false }, // Disable implicit conversion for fix transform boolean issues
     }),
   );
 
