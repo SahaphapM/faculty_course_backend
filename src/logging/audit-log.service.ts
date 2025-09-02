@@ -149,4 +149,76 @@ export class AuditLogService {
       throw error;
     }
   }
+
+  async getUserLogs(userId: number, query?: AuditLogQueryDto) {
+    const {
+      page = 1,
+      limit = 10,
+      sort = 'id',
+      orderBy = 'desc',
+      keyword,
+      ...filters
+    } = query;
+
+    try {
+      const where: Prisma.audit_logWhereInput = {
+        userId: userId, // Filter by specific user
+      };
+
+      if (filters?.action) {
+        where.action = { contains: filters.action };
+      }
+
+      if (filters?.resource) {
+        where.resource = { contains: filters.resource };
+      }
+
+      if (filters?.startDate || filters?.endDate) {
+        where.timestamp = {};
+        if (filters.startDate) {
+          where.timestamp.gte = filters.startDate;
+        }
+        if (filters.endDate) {
+          where.timestamp.lte = filters.endDate;
+        }
+      }
+
+      if (keyword) {
+        where.OR = [
+          { metadata: { string_contains: keyword } },
+          { before: { string_contains: keyword } },
+          { after: { string_contains: keyword } },
+        ];
+      }
+
+      const [logs, total] = await Promise.all([
+        this.prisma.audit_log.findMany({
+          where,
+          skip: (page - 1) * limit,
+          take: limit,
+          orderBy: [
+            {
+              [sort]: orderBy.toLowerCase(),
+            },
+          ],
+          select: {
+            id: true,
+            action: true,
+            resource: true,
+            resourceId: true,
+            timestamp: true,
+            metadata: true,
+            before: true,
+            after: true,
+          },
+        }),
+        this.prisma.audit_log.count({ where }),
+      ]);
+
+      return createPaginatedData(logs, total, page, limit);
+    } catch (error) {
+      this.logger.error('Failed to retrieve user audit logs', JSON.stringify(error));
+      throw error;
+    }
+  }
 }

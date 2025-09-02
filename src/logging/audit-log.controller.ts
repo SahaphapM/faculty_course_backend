@@ -10,17 +10,18 @@ import { AuditLogService } from './audit-log.service';
 import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole as Role } from 'src/enums/role.enum';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
+import { SelfAccessGuard } from 'src/auth/guard/self-access.guard';
 import { AuditLogDecoratorInterceptor } from './audit-log-decorator.interceptor';
 import { AuditLog } from './audit-log.decorator';
 import { AuditLogQueryDto } from 'src/dto/filters/filter.audit-log.dto';
 
 @Controller('audit-logs')
 @UseGuards(RolesGuard)
-@Roles(Role.Admin)
 export class AuditLogController {
   constructor(private readonly auditLogService: AuditLogService) {}
 
   @Get()
+  @Roles(Role.Admin)
   @UseInterceptors(AuditLogDecoratorInterceptor)
   @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
   async getAuditLogs(@Query() query: AuditLogQueryDto) {
@@ -35,9 +36,21 @@ export class AuditLogController {
   }
 
   @Get(':id')
+  @Roles(Role.Admin)
   @UseInterceptors(AuditLogDecoratorInterceptor)
   @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
   async getLogById(@Param('id') id: number) {
     return this.auditLogService.getLogById(id);
+  }
+
+  @Get('user/:userId')
+  @UseGuards(SelfAccessGuard)
+  @UseInterceptors(AuditLogDecoratorInterceptor)
+  @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
+  async getUserAuditLogs(
+    @Param('userId') userId: number,
+    @Query() query: AuditLogQueryDto,
+  ) {
+    return this.auditLogService.getUserLogs(userId, query);
   }
 }
