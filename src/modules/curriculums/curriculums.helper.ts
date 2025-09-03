@@ -149,12 +149,6 @@ function aggregateNodeForStudent(
   };
 }
 
-/** รวมทั้ง forest (ทุก root) ของนักเรียน 1 คน */
-// function aggregateStudentForest(skills: Skill[], studentId: number): AggNode[] {
-//   const { children, roots } = buildIndex(skills);
-//   return roots.map((r) => aggregateNodeForStudent(r, children, studentId, 0));
-// }
-
 // ---------- Public APIs (DB) ----------
 export function getSkillDomains(skillType: string): LearningDomain[] {
   return skillType === 'soft'
@@ -199,57 +193,6 @@ export async function fetchSkillsWithCollections(
   });
 }
 
-// ---------- สรุปผล per-root (ทุกนักเรียน) ----------
-// function summarizeAcrossStudentsHierarchical(
-//   skills: Skill[],
-//   studentIds: number[],
-// ): RootSummary[] {
-//   const { roots } = buildIndex(skills);
-
-//   // เตรียมโครงสรุป
-//   const base = roots.map((r) => ({
-//     skillName: r.thaiName,
-//     skillId: r.id,
-//     domain: r.domain,
-//     totalStudent: studentIds.length,
-//     buckets: {
-//       above: { count: 0, studentIds: [] as number[] },
-//       on: { count: 0, studentIds: [] as number[] },
-//       below: { count: 0, studentIds: [] as number[] },
-//     },
-//   }));
-
-//   // วนทีละนักเรียน → roll-up แบบไล่ชั้น → อัปเดต bucket ของแต่ละ root
-//   for (const sid of studentIds) {
-//     const forest = aggregateStudentForest(skills, sid);
-//     for (const rootNode of forest) {
-//       const dest = base.find((b) => b.skillId === rootNode.id)!;
-//       if (
-//         rootNode.category === 'above' ||
-//         rootNode.category === 'on' ||
-//         rootNode.category === 'below'
-//       ) {
-//         dest.buckets[rootNode.category].count += 1;
-//         dest.buckets[rootNode.category].studentIds.push(sid);
-//       }
-//       // ถ้า 'n/a' จะไม่นับรวม (ข้อมูลไม่พอ)
-//     }
-//   }
-
-//   // จัดรูปแบบ levelSummary (มีค่า 0 ก็แสดง)
-//   return base.map((b) => ({
-//     skillName: b.skillName,
-//     skillId: b.skillId,
-//     domain: b.domain,
-//     totalStudent: b.totalStudent,
-//     levelSummary: (['above', 'on', 'below'] as const).map((cat) => ({
-//       category: cat,
-//       count: b.buckets[cat].count,
-//       studentIds: b.buckets[cat].studentIds,
-//     })),
-//   }));
-// }
-
 // ---------- Service entry (พร้อมดีบักทางเลือก) ----------
 export async function getSkillSummary(
   curriculumId: number,
@@ -292,6 +235,7 @@ export async function getSkillSummary(
   // สรุป per-root โดยเทียบ "assessment vs expected (per-student)"
   return summarizeAcrossStudentsUsingAssessments(
     skills as unknown as Skill[],
+    roots,
     studentIds,
     assessments,
   );
@@ -316,6 +260,11 @@ async function fetchRootAssessments(
     where: {
       skillId: { in: rootIds },
       studentId: { in: studentIds },
+      OR: [
+        { finalLevel: { gte: 1 } },
+        { companyLevel: { gte: 1 } },
+        { curriculumLevel: { gte: 1 } },
+      ],
     },
     select: {
       id: true,
@@ -353,17 +302,9 @@ export function pickAssessedLevel(
   return null;
 }
 
-// fallback ให้เคสไม่มี expected จาก skillcollection
-function fallbackCategoryFromLevel(lvl: number): Category {
-  // ตามโจทย์: level = 0 -> 'below', level > 1 -> 'on'
-  // (กรณี lvl === 1 ไม่ได้ระบุไว้ ชงให้เป็น 'below' เพื่อ conservative)
-  if (lvl === 0) return 'below';
-  if (lvl > 1) return 'on';
-  return 'below';
-}
-
 function summarizeAcrossStudentsUsingAssessments(
   skills: Skill[],
+  roots: Skill[],
   studentIds: number[],
   assessments: Partial<SkillAssessment>[],
   pickOrder: Array<'final' | 'company' | 'curriculum'> = [
@@ -372,13 +313,11 @@ function summarizeAcrossStudentsUsingAssessments(
     'curriculum',
   ],
 ): RootSummary[] {
-  const { roots } = buildIndex(skills);
-
   const base = roots.map((r) => ({
     skillName: r.thaiName,
     skillId: r.id,
     domain: r.domain,
-    totalStudent: studentIds.length,
+    totalStudent: 0,
     buckets: {
       above: { count: 0, studentIds: [] as number[] },
       on: { count: 0, studentIds: [] as number[] },
@@ -402,24 +341,19 @@ function summarizeAcrossStudentsUsingAssessments(
     for (const root of roots) {
       const target = expectedByRoot.get(root.id);
       const assessed = assessMap.get(`${root.id}:${sid}`);
+      let bucket: 'above' | 'on' | 'below';
       // ไม่มี assessment ก็ข้ามเหมือนเดิม
       if (!isNum(assessed)) continue;
+      if (!isNum(target)) continue;
 
-      let bucket: 'above' | 'on' | 'below';
-      if (!isNum(target)) {
-        // <<< NEW: ไม่มี expected → ใช้ fallback rule
-        // level = 0 → 'below', level > 1 → 'on', (ระดับอื่นถือเป็น 'below')
-        // ถ้าอยากให้ 1 เป็น 'on' ด้วย เปลี่ยนเป็น (assessed >= 1)
-        bucket = assessed === 0 ? 'below' : assessed >= 1 ? 'on' : 'below';
-      } else {
-        // เทียบปกติเมื่อมี expected
-        bucket =
-          assessed > target ? 'above' : assessed === target ? 'on' : 'below';
-      }
+      // เทียบปกติเมื่อมี expected
+      bucket =
+        assessed > target ? 'above' : assessed === target ? 'on' : 'below';
 
       const dest = base.find((b) => b.skillId === root.id)!;
       dest.buckets[bucket].count += 1;
       dest.buckets[bucket].studentIds.push(sid);
+      dest.totalStudent += 1;
     }
   }
 

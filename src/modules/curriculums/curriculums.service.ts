@@ -514,63 +514,6 @@ export class CurriculumsService {
     });
   }
 
-  // async findStudentsBySkillLevel(
-  //   skillId: number,
-  //   targetLevel: 'on' | 'above' | 'below' | 'all',
-  //   yearCode: string, // 68 69 70
-  //   page: number = 1,
-  //   limit: number = 10,
-  //   search?: string,
-  // ) {
-  //   const take = Math.max(1, Number(limit) || 10);
-  //   const currPage = Math.max(1, Number(page) || 1);
-  //   const skip = (currPage - 1) * take;
-
-  //   // ใช้กับทั้ง student.where และ include
-  //   const assessmentWhere: Prisma.skill_assessmentWhereInput = {
-  //     skillId: skillId, // ลูก ๆ ของ skill เป้าหมาย
-  //   };
-
-  //   // STEP 4: เงื่อนไข student (ปี/ค้นหา) + ต้องมี skill_assessments ตรง whereSC
-  //   const studentWhere: Prisma.studentWhereInput = {
-  //     ...(yearCode
-  //       ? { code: { startsWith: yearCode } } // ปรับตามรูปแบบรหัสนักศึกษา
-  //       : {}),
-  //     ...(search
-  //       ? {
-  //           OR: [
-  //             { thaiName: { contains: search } },
-  //             { engName: { contains: search } },
-  //             { code: { contains: search } },
-  //           ],
-  //         }
-  //       : {}),
-  //     // ต้องมีทั้ง skill_collections (ตาม targetLevel) และ skill_assessments (ตามเงื่อนไขที่กำหนด)
-  //     AND: [{ skill_assessments: { some: assessmentWhere } }],
-  //   };
-
-  //   // STEP 5: นับ total และดึงหน้าที่ขอ
-  //   const [total, students] = await this.prisma.$transaction([
-  //     this.prisma.student.count({ where: studentWhere }),
-  //     this.prisma.student.findMany({
-  //       where: studentWhere,
-  //       include: {
-  //         skill_assessments: {
-  //           where: assessmentWhere,
-  //         },
-  //       },
-  //       orderBy: { id: 'asc' }, // ปรับได้ตามต้องการ
-  //       skip,
-  //       take,
-  //     }),
-  //   ]);
-
-  //   // // STEP 6: ส่งกลับแบบแบ่งหน้า
-  //   return createPaginatedData(students, total, currPage, take);
-  // }
-
-  // curriculums.service.ts
-
   async findStudentsBySkillLevel(
     skillId: number,
     targetLevel: 'on' | 'above' | 'below' | 'all',
