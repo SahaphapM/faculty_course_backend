@@ -24,7 +24,7 @@ export class AuditLogInterceptor implements NestInterceptor {
     const user = (request as any).user;
 
     // Log เฉพาะการเปลี่ยนแปลงข้อมูล
-    if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)) {
+    if (!['POST', 'PUT', 'PATCH', 'DELETE', 'GET'].includes(method)) {
       return next.handle();
     }
 
@@ -36,7 +36,7 @@ export class AuditLogInterceptor implements NestInterceptor {
 
     return new Observable((observer) => {
       (async () => {
-        if (['PUT', 'PATCH', 'DELETE'].includes(method) && resourceId) {
+        if (['PUT', 'PATCH', 'DELETE', 'GET'].includes(method) && resourceId) {
           try {
             beforeData = await (this.prisma as any)[resource]?.findUnique?.({
               where: { id: Number(resourceId) },
@@ -50,6 +50,7 @@ export class AuditLogInterceptor implements NestInterceptor {
           next: async (result) => {
             let afterData: any = null;
             let diff: any = null;
+            // console.log('==============================>' + resource + method);
 
             if (method === 'POST') {
               afterData = result;

@@ -6,7 +6,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { LoggingInterceptor } from './logging/logging.interceptor';
 import { AppLoggerService } from './logging/app-logger.service';
 import { AuditLogInterceptor } from './logging/audit-log.interceptor';
-import { AuditLogDecoratorInterceptor } from './logging/audit-log-decorator.interceptor';
 import { PrismaExceptionFilter } from './prisma/prisma-exception.filter';
 
 async function bootstrap() {
@@ -39,7 +38,6 @@ async function bootstrap() {
   app.useGlobalInterceptors(
     app.get(LoggingInterceptor),
     app.get(AuditLogInterceptor),
-    app.get(AuditLogDecoratorInterceptor),
   );
 
   // If UNAUTH is true, disable Swagger security to bypass authorization in Swagger UI

@@ -11,7 +11,6 @@ import { Roles } from 'src/decorators/roles.decorator';
 import { UserRole as Role } from 'src/enums/role.enum';
 import { RolesGuard } from 'src/auth/guard/roles.guard';
 import { SelfAccessGuard } from 'src/auth/guard/self-access.guard';
-import { AuditLogDecoratorInterceptor } from './audit-log-decorator.interceptor';
 import { AuditLog } from './audit-log.decorator';
 import { AuditLogQueryDto } from 'src/dto/filters/filter.audit-log.dto';
 
@@ -22,14 +21,12 @@ export class AuditLogController {
 
   @Get()
   @Roles(Role.Admin)
-  @UseInterceptors(AuditLogDecoratorInterceptor)
   @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
   async getAuditLogs(@Query() query: AuditLogQueryDto) {
     return this.auditLogService.getLogs(query);
   }
 
   @Get('resources')
-  @UseInterceptors(AuditLogDecoratorInterceptor)
   @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
   async getResources() {
     return this.auditLogService.getTables();
@@ -37,7 +34,6 @@ export class AuditLogController {
 
   @Get(':id')
   @Roles(Role.Admin)
-  @UseInterceptors(AuditLogDecoratorInterceptor)
   @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
   async getLogById(@Param('id') id: number) {
     return this.auditLogService.getLogById(id);
@@ -45,7 +41,6 @@ export class AuditLogController {
 
   @Get('user/:userId')
   @UseGuards(SelfAccessGuard)
-  @UseInterceptors(AuditLogDecoratorInterceptor)
   @AuditLog({ action: 'READ', resource: 'audit_log', includeRequest: true })
   async getUserAuditLogs(
     @Param('userId') userId: number,

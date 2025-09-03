@@ -5,7 +5,6 @@ import { AppLoggerService } from './app-logger.service';
 import { LoggingInterceptor } from './logging.interceptor';
 import { AuditLogService } from './audit-log.service';
 import { AuditLogInterceptor } from './audit-log.interceptor';
-import { AuditLogDecoratorInterceptor } from './audit-log-decorator.interceptor';
 import { AuditLogController } from './audit-log.controller';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { PrismaModule } from 'src/prisma/prisma.module';
@@ -27,7 +26,6 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     },
     LoggingInterceptor,
     AuditLogInterceptor,
-    AuditLogDecoratorInterceptor,
     PrismaService,
   ],
   exports: [
@@ -35,7 +33,6 @@ import { PrismaModule } from 'src/prisma/prisma.module';
     AppLoggerService,
     LoggingInterceptor,
     AuditLogInterceptor,
-    AuditLogDecoratorInterceptor,
     'AUDIT_LOG_SERVICE',
     AuditLogService,
   ],
