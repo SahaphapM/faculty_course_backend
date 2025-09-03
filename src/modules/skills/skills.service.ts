@@ -519,12 +519,12 @@ export class SkillsService {
     const cloCount = await this.prisma.clo.count({ where: { skillId: id } });
 
     // 3) Check for skill assessments that reference this skill (onDelete: Restrict)
-    const skillAssessmentCount = await this.prisma.skill_assessment.count({ 
-      where: { skillId: id } 
+    const skillAssessmentCount = await this.prisma.skill_assessment.count({
+      where: { skillId: id },
     });
 
     const blockers = [];
-    
+
     if (cloCount > 0) {
       // Get the actual blocking CLOs with details
       const blockingClos = await this.prisma.clo.findMany({
@@ -544,14 +544,16 @@ export class SkillsService {
         take: 10, // Limit to first 10 for performance
       });
 
-      blockers.push({ 
-        relation: 'CLO', 
-        count: cloCount, 
+      blockers.push({
+        relation: 'CLO',
+        count: cloCount,
         field: 'skillId',
-        entities: blockingClos.map(clo => ({
+        entities: blockingClos.map((clo) => ({
           id: clo.id,
           name: clo.name || `CLO #${clo.id}`,
-          details: clo.subject ? `${clo.subject.code} - ${clo.subject.thaiName || clo.subject.engName}` : 'No subject',
+          details: clo.subject
+            ? `${clo.subject.code} - ${clo.subject.thaiName || clo.subject.engName}`
+            : 'No subject',
         })),
       });
     }
@@ -574,14 +576,16 @@ export class SkillsService {
         take: 10, // Limit to first 10 for performance
       });
 
-      blockers.push({ 
-        relation: 'SkillAssessment', 
-        count: skillAssessmentCount, 
+      blockers.push({
+        relation: 'SkillAssessment',
+        count: skillAssessmentCount,
         field: 'skillId',
-        entities: blockingAssessments.map(assessment => ({
+        entities: blockingAssessments.map((assessment) => ({
           id: assessment.id,
           name: `Assessment #${assessment.id}`,
-          details: assessment.student ? `Student: ${assessment.student.code} - ${assessment.student.thaiName || assessment.student.engName || 'Unknown'}` : 'No student',
+          details: assessment.student
+            ? `Student: ${assessment.student.code} - ${assessment.student.thaiName || assessment.student.engName || 'Unknown'}`
+            : 'No student',
         })),
       });
     }
@@ -623,6 +627,7 @@ export class SkillsService {
                     id: true,
                     thaiName: true,
                     engName: true,
+                    domain: true,
                   },
                 },
                 subjectId: true,
@@ -670,7 +675,7 @@ export class SkillsService {
       id: number;
       gainedLevel: number;
       cloId: number;
-      skill: { id: number; thaiName: string; engName: string };
+      skill: { id: number; thaiName: string; engName: string; domain: string };
     };
 
     type Grouped = {
@@ -698,6 +703,7 @@ export class SkillsService {
           id: sc.clo.skill.id,
           thaiName: sc.clo.skill.thaiName,
           engName: sc.clo.skill.engName,
+          domain: sc.clo.skill.domain,
         },
       });
     }
