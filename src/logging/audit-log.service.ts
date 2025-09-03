@@ -137,12 +137,12 @@ export class AuditLogService {
 
   async getTables() {
     try {
+      const schema = process.env.DATABASE_NAME; // skillmap_test จาก .env
       const tables = await this.prisma.$queryRaw<{ table_name: string }[]>`
         SELECT table_name 
         FROM information_schema.tables 
-        WHERE table_schema = 'skillmap_test'
+        WHERE table_schema = ${schema}
       `;
-      // return tables;
       return tables.map((table) => table.table_name);
     } catch (error) {
       this.logger.error('Failed to retrieve tables', JSON.stringify(error));
@@ -217,7 +217,10 @@ export class AuditLogService {
 
       return createPaginatedData(logs, total, page, limit);
     } catch (error) {
-      this.logger.error('Failed to retrieve user audit logs', JSON.stringify(error));
+      this.logger.error(
+        'Failed to retrieve user audit logs',
+        JSON.stringify(error),
+      );
       throw error;
     }
   }
