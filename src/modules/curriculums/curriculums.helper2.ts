@@ -202,32 +202,19 @@ export async function findStudentsTargetSkillLevel(
 
     // เหมือน getSkillSummary: ถ้าไม่มี expected หรือไม่มี assessed → ข้าม
     if (!isNum(assessed)) continue;
+    if (!isNum(expected)) continue;
 
     let isPass: boolean;
 
-    if (!isNum(expected)) {
-      // <<< NEW: ไม่มี expected (ไม่เคยได้ skillcollection) → ใช้ fallback rule
-      if (targetLevel === 'all') {
-        isPass = true;
-      } else if (targetLevel === 'on') {
-        isPass = assessed >= 1; // เปลี่ยนเป็น >= 1 ได้ถ้าต้องการ
-      } else if (targetLevel === 'below') {
-        isPass = assessed === 0;
-      } else {
-        // 'above' ทำไม่ได้เมื่อไม่มี expected
-        isPass = false;
-      }
+    // เดิม: มี expected → เทียบตามปกติ
+    if (targetLevel === 'all') {
+      isPass = true;
+    } else if (targetLevel === 'on') {
+      isPass = assessed === expected;
+    } else if (targetLevel === 'above') {
+      isPass = assessed > expected;
     } else {
-      // เดิม: มี expected → เทียบตามปกติ
-      if (targetLevel === 'all') {
-        isPass = true;
-      } else if (targetLevel === 'on') {
-        isPass = assessed === expected;
-      } else if (targetLevel === 'above') {
-        isPass = assessed > expected;
-      } else {
-        isPass = assessed < expected; // below
-      }
+      isPass = assessed < expected; // below
     }
     if (isPass) passedIds.push(sid);
   }
