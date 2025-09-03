@@ -74,7 +74,11 @@ export function buildIndex(skills: Skill[]) {
 function buildExpectedForestForStudent(
   skills: Skill[],
   studentId: number,
-): { forest: AggNode[]; expectedByRoot: Map<number, Level | null> } {
+): {
+  forest: AggNode[];
+  expectedByRoot: Map<number, Level | null>;
+  gainedByRoot: Map<number, Level | null>;
+} {
   const { children, roots } = buildIndex(skills);
   const forest = roots.map((r) =>
     aggregateNodeForStudent(r, children, studentId, 0),
@@ -82,7 +86,11 @@ function buildExpectedForestForStudent(
   const expectedByRoot = new Map<number, Level | null>(
     forest.map((n) => [n.id, n.expected]),
   );
-  return { forest, expectedByRoot };
+  const gainedByRoot = new Map<number, Level | null>(
+    forest.map((n) => [n.id, n.gained]),
+  );
+
+  return { forest, expectedByRoot, gainedByRoot };
 }
 
 /** รวม expected/gained จาก CLO ใต้สกิล “เฉพาะของนักเรียนคนนี้” */
@@ -98,6 +106,21 @@ function collectExpectedForStudentOnNode(
     );
     if (!related) continue;
     if (isNum(clo.expectSkillLevel)) xs.push(clo.expectSkillLevel);
+  }
+  return xs;
+}
+
+function collectGainedForStudentOnNode(
+  skill: Partial<Skill>,
+  studentId: number,
+): Level[] {
+  const xs: Level[] = [];
+  for (const clo of skill.clos ?? []) {
+    for (const sc of clo.skill_collections ?? []) {
+      if (sc.studentId === studentId && isNum(sc.gainedLevel)) {
+        xs.push(sc.gainedLevel);
+      }
+    }
   }
   return xs;
 }
@@ -126,14 +149,22 @@ function aggregateNodeForStudent(
   );
 
   // รวมค่าจากลูก (expected เท่านั้น)
-  const childExp = childAggs.map((c) => c.expected).filter(isNum) as Level[];
+  const childExpected = childAggs
+    .map((c) => c.expected)
+    .filter(isNum) as Level[];
 
   // expected จาก CLO ของโหนดนี้ (เฉพาะที่เด็กเกี่ยวข้อง)
-  const selfExpVals = collectExpectedForStudentOnNode(skill, studentId);
+  const selfExpectedVals = collectExpectedForStudentOnNode(skill, studentId);
 
   // pool ของ "ชั้นนี้"
-  const expPool: Level[] = [...childExp, ...selfExpVals];
-  const expected = modeThenMax(expPool);
+  const expectedPool: Level[] = [...childExpected, ...selfExpectedVals];
+  const expected = modeThenMax(expectedPool);
+
+  // gained ของ node นี้ (คล้าย expected แต่เอามาจาก gainedLevel)
+  const childGained = childAggs.map((c) => c.gained).filter(isNum) as Level[];
+  const selfGainedVals = collectGainedForStudentOnNode(skill, studentId);
+  const gainedPool: Level[] = [...childGained, ...selfGainedVals];
+  const gained = gainedPool.length ? Math.max(...gainedPool) : null;
 
   // gained/category ไม่คำนวณที่ชั้นกลาง (จะไปเทียบตอนสรุปด้วย assessment)
   return {
@@ -143,7 +174,7 @@ function aggregateNodeForStudent(
     parentId: skill.parentId,
     depth,
     expected,
-    gained: null,
+    gained,
     category: 'n/a',
     children: childAggs,
   };
@@ -185,7 +216,7 @@ export async function fetchSkillsWithCollections(
         include: {
           skill_collections: {
             where: { studentId: { in: studentIds } },
-            select: { studentId: true }, // << ใช้เป็น mask อย่างเดียว
+            select: { studentId: true, gainedLevel: true }, // << ใช้เป็น mask อย่างเดียว
           },
         },
       },
@@ -223,7 +254,7 @@ export async function getSkillSummary(
       where: { id: debug.studentId },
     });
 
-    // console.log('Student:', student?.code, student.thaiName, student.id);
+    console.log('Student:', student?.code, student.thaiName, student.id);
     const { forest } = buildExpectedForestForStudent(
       skills as unknown as Skill[],
       debug.studentId,
