@@ -463,16 +463,30 @@ export async function buildPerStudentLeafLevels(
     select: { studentId: true, cloId: true, gainedLevel: true },
   });
 
+  // เก็บค่าทั้งหมดต่อใบ (ไม่สรุปทันที)
+  const bag: Map<number, Map<number, number[]>> = new Map();
   for (const r of cols) {
     const sid = r.studentId!;
     const leafSkillId = cloIdToLeafSkillId.get(r.cloId!)!;
-    const cur = perStudentLeaf.get(sid) ?? new Map<number, number>();
-    cur.set(
-      leafSkillId,
-      Math.max(cur.get(leafSkillId) ?? 0, r.gainedLevel || 0),
-    );
-    perStudentLeaf.set(sid, cur);
+    const lv = r.gainedLevel ?? 0;
+
+    if (!bag.has(sid)) bag.set(sid, new Map());
+    const byLeaf = bag.get(sid)!;
+    const arr = byLeaf.get(leafSkillId) ?? [];
+    arr.push(lv);
+    byLeaf.set(leafSkillId, arr);
   }
+
+  // สรุปด้วย mode→max
+  for (const [sid, byLeaf] of bag) {
+    const m = new Map<number, number>();
+    for (const [leafSkillId, levels] of byLeaf) {
+      if (!levels.length) continue;
+      m.set(leafSkillId, aggregateModeThenMax(levels));
+    }
+    perStudentLeaf.set(sid, m);
+  }
+
   return perStudentLeaf;
 }
 
