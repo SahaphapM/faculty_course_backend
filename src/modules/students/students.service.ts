@@ -312,6 +312,19 @@ export class StudentsService {
       where: { code },
       include: {
         skill_collections: true,
+        branch: {
+          select: {
+            thaiName: true,
+            engName: true,
+          },
+        },
+        curriculum: {
+          select: {
+            thaiName: true,
+            engName: true,
+            code: true,
+          },
+        },
       },
     });
 
