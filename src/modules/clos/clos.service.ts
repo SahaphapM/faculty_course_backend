@@ -45,7 +45,7 @@ export class ClosService {
     } = pag || {};
 
     const whereCondition: Prisma.cloWhereInput = subjectId
-      ? { subjectId: Number(subjectId) }
+      ? { subjectId}
       : {};
 
     if (search) {

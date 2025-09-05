@@ -12,7 +12,14 @@ import {
 } from '@nestjs/common';
 import { CurriculumsService } from './curriculums.service';
 import { CoordinatorCurriculumsService } from './coordinator-curriculums.service';
-import { ApiBearerAuth, ApiOkResponse, ApiParam, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiParam,
+  ApiQuery,
+  ApiExtraModels,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { CreateCurriculumDto } from 'src/generated/nestjs-dto/create-curriculum.dto';
 import { UpdateCurriculumDto } from 'src/generated/nestjs-dto/update-curriculum.dto';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -43,20 +50,25 @@ export class CurriculumsController {
   }
 
   @ApiExtraModels(CurriculumFilterDto)
-  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(CurriculumFilterDto) }, description: 'Filter/query parameters' })
+  @ApiQuery({
+    name: 'pag',
+    required: false,
+    schema: { $ref: getSchemaPath(CurriculumFilterDto) },
+    description: 'Filter/query parameters',
+  })
   @Get()
-  @ApiOkResponse({type: PaginatedCurriculumDto})
-  findAll(
-    @Query() pag?: CurriculumFilterDto,
-    @Req() req?: any,
-  ) {
+  @ApiOkResponse({ type: PaginatedCurriculumDto })
+  findAll(@Query() pag?: CurriculumFilterDto, @Req() req?: any) {
     const currentUser = req?.user;
-    
+
     // If user is a coordinator, use the specialized service
     if (currentUser?.role === UserRole.Coordinator) {
-      return this.coordinatorCurriculumsService.findAllForCoordinator(currentUser.id, pag);
+      return this.coordinatorCurriculumsService.findAllForCoordinator(
+        currentUser.id,
+        pag,
+      );
     }
-    
+
     // For admins and other roles, use the regular service
     return this.curriculumsService.findAll(pag);
   }
@@ -65,12 +77,14 @@ export class CurriculumsController {
   @Get('options')
   findAllOptions(@Req() req?: any) {
     const currentUser = req?.user;
-    
+
     // If user is a coordinator, use the specialized service
     if (currentUser?.role === UserRole.Coordinator) {
-      return this.coordinatorCurriculumsService.findOptionsForCoordinator(currentUser.id);
+      return this.coordinatorCurriculumsService.findOptionsForCoordinator(
+        currentUser.id,
+      );
     }
-    
+
     // For admins and other roles, use the regular service
     return this.curriculumsService.findOptions();
   }
@@ -127,17 +141,26 @@ export class CurriculumsController {
 
   @Roles(UserRole.Admin)
   @ApiExtraModels(CurriculumFilterDto)
-  @ApiQuery({ name: 'pag', required: false, schema: { $ref: getSchemaPath(CurriculumFilterDto) }, description: 'Filter/query parameters' })
+  @ApiQuery({
+    name: 'pag',
+    required: false,
+    schema: { $ref: getSchemaPath(CurriculumFilterDto) },
+    description: 'Filter/query parameters',
+  })
   @Get('admin/all')
-  @ApiOkResponse({type: PaginatedCurriculumDto})
-  findAllIncludeInactive(
-    @Query() pag?: CurriculumFilterDto,
-  ) {
+  @ApiOkResponse({ type: PaginatedCurriculumDto })
+  findAllIncludeInactive(@Query() pag?: CurriculumFilterDto) {
     return this.curriculumsService.findAllIncludeInactive(pag);
   }
 
+  @Roles(UserRole.Admin, UserRole.Coordinator)
   @ApiExtraModels(StudentsBySkillLevelFilterDto)
-  @ApiQuery({ name: 'filter', required: false, schema: { $ref: getSchemaPath(StudentsBySkillLevelFilterDto) }, description: 'Filter/query parameters' })
+  @ApiQuery({
+    name: 'filter',
+    required: false,
+    schema: { $ref: getSchemaPath(StudentsBySkillLevelFilterDto) },
+    description: 'Filter/query parameters',
+  })
   @Get('filters/skill/:skillId/students')
   @ApiParam({ name: 'skillId', type: String, description: 'Skill ID' })
   async getStudentsBySkillLevel(
@@ -154,10 +177,16 @@ export class CurriculumsController {
     );
   }
 
+  @Roles(UserRole.Admin, UserRole.Coordinator)
   @UseGuards(CurriculumAccessGuard)
   @CurriculumAccess({ paramName: 'curriculumId', paramType: 'id' })
   @ApiExtraModels(SkillCollectionSummaryFilterDto)
-  @ApiQuery({ name: 'q', required: false, schema: { $ref: getSchemaPath(SkillCollectionSummaryFilterDto) }, description: 'Filter/query parameters' })
+  @ApiQuery({
+    name: 'q',
+    required: false,
+    schema: { $ref: getSchemaPath(SkillCollectionSummaryFilterDto) },
+    description: 'Filter/query parameters',
+  })
   @Get('summary/skill-collection/:curriculumId')
   async getSkillCollectionSummaryByCurriculum(
     @Param('curriculumId') curriculumId: number,

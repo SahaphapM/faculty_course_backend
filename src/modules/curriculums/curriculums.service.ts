@@ -130,7 +130,7 @@ export class CurriculumsService {
     } = pag || {};
 
     const whereCondition: Prisma.curriculumWhereInput = {
-      ...(active !== undefined ? { active } : { active: true }), // Default to active=true if no active filter provided
+  ...(active !== undefined && { active }),
       ...(nameCode && {
         OR: [
           {

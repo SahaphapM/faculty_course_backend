@@ -89,7 +89,6 @@ export class CurriculumAccessGuard implements CanActivate {
     const curriculum = await this.prisma.curriculum.findFirst({
       where: {
         ...whereClause,
-        active: true, // Only check active curriculums
         coordinators: {
           some: {
             coordinator: {

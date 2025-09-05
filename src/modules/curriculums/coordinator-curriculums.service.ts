@@ -28,7 +28,7 @@ export class CoordinatorCurriculumsService {
     } = pag || {};
 
     const whereCondition: Prisma.curriculumWhereInput = {
-      ...(active !== undefined ? { active } : { active: true }), // Default to active=true if no active filter provided
+  ...(active !== undefined && { active }),
       coordinators: {
         some: {
           coordinator: {
