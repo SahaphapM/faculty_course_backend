@@ -169,6 +169,7 @@ export class StudentsService {
         curriculum: {
           select: {
             id: true,
+            code: true,
             thaiName: true,
             engName: true,
           },
