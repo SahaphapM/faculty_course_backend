@@ -13,6 +13,7 @@ import { SkillFilterDto } from 'src/dto/filters/filter.skill.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 import { AppErrorCode } from 'src/common/error-codes';
+import type { ForeignKeyConflictError } from 'src/common/conflict-error';
 
 @Injectable()
 export class SkillsService {
@@ -523,7 +524,15 @@ export class SkillsService {
       where: { skillId: id },
     });
 
-    const blockers = [];
+    // 4) Check for child skills (subs) that reference this skill via parentId (self-relation)
+    const childSkillCount = await this.prisma.skill.count({ where: { parentId: id } });
+
+    // Use a typed blockers array for clarity and future reuse
+    const blockers: ForeignKeyConflictError['blockers'] & Array<
+      ForeignKeyConflictError['blockers'][number] & {
+        entities?: Array<{ id: number | string; name: string; details?: string }>;
+      }
+    > = [];
 
     if (cloCount > 0) {
       // Get the actual blocking CLOs with details
@@ -590,8 +599,37 @@ export class SkillsService {
       });
     }
 
+    if (childSkillCount > 0) {
+      const blockingChildren = await this.prisma.skill.findMany({
+        where: { parentId: id },
+        select: {
+          id: true,
+          thaiName: true,
+          engName: true,
+          domain: true,
+        },
+        take: 10,
+      });
+
+      blockers.push({
+        relation: 'SubSkill',
+        count: childSkillCount,
+        field: 'parentId',
+        entities: blockingChildren.map((s) => ({
+          id: s.id,
+          name: s.thaiName || s.engName || `Skill #${s.id}`,
+          details: s.domain,
+        })),
+      });
+    }
+
     if (blockers.length > 0) {
-      throw new ConflictException({
+      const payload: ForeignKeyConflictError & {
+        entityName?: string;
+        blockers: (ForeignKeyConflictError['blockers'][number] & {
+          entities?: Array<{ id: number | string; name: string; details?: string }>;
+        })[];
+      } = {
         code: AppErrorCode.FK_CONFLICT,
         message: `Cannot delete Skill "${skill.thaiName || skill.engName}" because there are records referencing it.`,
         entity: 'Skill',
@@ -603,10 +641,12 @@ export class SkillsService {
           'If business allows, detach references first then delete Skill.',
           'Consider soft-delete/archiving instead of hard delete.',
         ],
-      });
+      };
+
+      throw new ConflictException(payload);
     }
 
-    // 4) Safe to delete
+    // 5) Safe to delete
     await this.prisma.skill.delete({ where: { id } });
     return { ok: true };
   }
