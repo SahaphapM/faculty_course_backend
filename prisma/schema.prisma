@@ -107,7 +107,7 @@ model curriculum {
   engDescription     String?                   @db.Text
   active             Boolean                   @default(true)
   archivedAt         DateTime?                 @db.DateTime(0)
-  branch             branch                    @relation(fields: [branchId], references: [id], onDelete: Cascade)
+  branch             branch                    @relation(fields: [branchId], references: [id], onDelete: Restrict)
   coordinators       curriculum_coordinators[]
   plos               plo[]
   skills             skill[]
@@ -178,7 +178,7 @@ model plo {
   thaiDescription String?    @db.Text
   engDescription  String?    @db.Text
   clos            clo[]
-  curriculum      curriculum @relation(fields: [curriculumId], references: [id], onDelete: Restrict)
+  curriculum      curriculum @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
 
   @@index([curriculumId])
 }
@@ -218,7 +218,7 @@ model skill {
   curriculumId      Int
   clos              clo[]
   curriculum        curriculum         @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
-  parent            skill?             @relation("SkillHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
+  parent            skill?             @relation("SkillHierarchy", fields: [parentId], references: [id], onDelete: Restrict)
   subs              skill[]            @relation("SkillHierarchy")
   skill_assessments skill_assessment[]
 
@@ -235,8 +235,8 @@ model skill_collection {
   cloId       Int?
   courseId    Int?
   clo         clo?     @relation(fields: [cloId], references: [id], onUpdate: Restrict)
-  course      course?  @relation(fields: [courseId], references: [id], onUpdate: SetNull)
-  student     student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course      course?  @relation(fields: [courseId], references: [id], onUpdate: SetNull, onDelete: Restrict)
+  student     student? @relation(fields: [studentId], references: [id], onDelete: Restrict)
 
   @@unique([studentId, courseId, cloId])
   @@index([studentId, cloId, courseId])
@@ -313,7 +313,7 @@ model company_job_position {
   companyId     Int?
   jobPositionId Int?
   company       company?      @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  jobPosition   job_position? @relation(fields: [jobPositionId], references: [id], onDelete: Cascade)
+  jobPosition   job_position? @relation(fields: [jobPositionId], references: [id], onDelete: Restrict)
 
   @@index([companyId], map: "company_job_position_companyId_fkey")
   @@index([jobPositionId], map: "company_job_position_jobPositionId_fkey")
@@ -327,7 +327,7 @@ model internship {
   companyId          Int?
   /// @DtoRelationIncludeId
   curriculumId       Int?
-  company            company?             @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  company            company?             @relation(fields: [companyId], references: [id], onDelete: Restrict)
   studentInternships student_internship[]
   curriculum         curriculum?          @relation(fields: [curriculumId], references: [id], onDelete: Cascade)
 
@@ -346,10 +346,8 @@ model student_internship {
   jobPositionId Int?
   /// @DtoRelationIncludeId
   internshipId  Int?
-  // ลบ internship แล้วให้ลบ student_internship แถวนั้นตามไปด้วย — ช่วยแก้ P2003 ได้ถ้าตารางอื่นไม่อ้างต่อ
-  internship    internship?   @relation(fields: [internshipId], references: [id], onDelete: Cascade)
-  // ถ้า business rule อนุญาต แนะนำเปลี่ยนเป็น SetNull เพื่อให้ลบตำแหน่งงานได้โดยไม่พัง record ลูก
-  jobPosition   job_position? @relation(fields: [jobPositionId], references: [id], onDelete: SetNull)
+  internship    internship?   @relation(fields: [internshipId], references: [id], onDelete: Restrict)
+  jobPosition   job_position? @relation(fields: [jobPositionId], references: [id], onDelete: Restrict)
   student       student?      @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([studentId, internshipId])
