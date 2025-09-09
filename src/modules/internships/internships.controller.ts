@@ -13,6 +13,7 @@ import { CreateInternshipWithStudentDto } from './dto/create-internship-with-stu
 import { ApiOkResponse, ApiOperation, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
 import { PaginatedInternshipDto } from 'src/dto/pagination.types';
 import { InternshipsFilterDto } from 'src/dto/filters/filter.internships.dto';
+import { DetachStudentsDto } from './dto/detach-students.dto';
 
 @Controller('internships')
 export class InternshipsController {
@@ -63,6 +64,17 @@ export class InternshipsController {
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.internshipsService.remove(+id);
+  }
+
+  @Patch(':id/detach-students')
+  @ApiOperation({
+    summary: 'ถอด (detach) นิสิตออกจากการฝึกงานแบบเลือกบางคน',
+  })
+  detachStudents(
+    @Param('id') id: string,
+    @Body() dto: DetachStudentsDto,
+  ) {
+    return this.internshipsService.detachStudents(+id, dto.studentIds);
   }
 
   /////// company ///////

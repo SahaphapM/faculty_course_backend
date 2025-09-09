@@ -1,9 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInternshipWithStudentDto } from './dto/create-internship-with-student.dto';
 import { randomBytes } from 'crypto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { InternshipsFilterDto } from 'src/dto/filters/filter.internships.dto';
+import { AppErrorCode } from 'src/common/error-codes';
 
 @Injectable()
 export class InternshipsService {
@@ -205,9 +206,64 @@ export class InternshipsService {
   }
 
   async remove(id: number) {
-    await this.prisma.internship.delete({
+    // Pre-check FK blockers to provide a helpful error instead of raw FK error
+    const internship = await this.prisma.internship.findUnique({
       where: { id },
+      select: { id: true, year: true },
     });
+    if (!internship) throw new NotFoundException('Internship not found');
+
+    const count = await this.prisma.student_internship.count({ where: { internshipId: id } });
+    if (count > 0) {
+      const blockers = await this.prisma.student_internship.findMany({
+        where: { internshipId: id },
+        select: {
+          id: true,
+          student: { select: { id: true, code: true, thaiName: true, engName: true } },
+          jobPosition: { select: { id: true, name: true } },
+        },
+        take: 10,
+      });
+
+      throw new ConflictException({
+        code: AppErrorCode.FK_CONFLICT,
+        message: `Cannot delete Internship #${id} (year: ${internship.year ?? '-'}). There are StudentInternships referencing it.`,
+        entity: 'Internship',
+        entityName: `Internship #${id}`,
+        id,
+        blockers: [{
+          relation: 'StudentInternship',
+          count,
+          field: 'internshipId',
+          entities: blockers.map((b) => ({
+            id: b.id,
+            name: b.student?.thaiName || b.student?.engName || b.student?.code || `StudentInternship #${b.id}`,
+            details: b.jobPosition ? `Job: ${b.jobPosition.name}` : '',
+          })),
+        }],
+        suggestions: [
+          'Detach students from this internship first.',
+          'Consider soft-delete/archiving instead of hard delete.',
+        ],
+      });
+    }
+
+    await this.prisma.internship.delete({ where: { id } });
+  }
+
+  // Detach specific students from an internship
+  async detachStudents(internshipId: number, studentIds: number[]) {
+    // verify internship exists
+    const exists = await this.prisma.internship.findUnique({ where: { id: internshipId }, select: { id: true } });
+    if (!exists) throw new NotFoundException('Internship not found');
+
+    if (!studentIds?.length) return { affected: 0 };
+
+    const result = await this.prisma.student_internship.deleteMany({
+      where: { internshipId, studentId: { in: studentIds } },
+    });
+
+    return { affected: result.count };
   }
 
   /////////////////////////////////// Company ///////////////////////////////////
