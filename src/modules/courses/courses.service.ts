@@ -3,6 +3,7 @@ import {
   Injectable,
   InternalServerErrorException,
   NotFoundException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { UpdateCourseDto } from 'src/generated/nestjs-dto/update-course.dto';
@@ -11,6 +12,7 @@ import { CourseFilterDto } from 'src/dto/filters/filter.course.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { CreateCourseDtoWithInstructor } from './dto/create-course-with-instructor.dto';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
+import { AppErrorCode } from 'src/common/error-codes';
 
 @Injectable()
 export class CourseService {
@@ -249,16 +251,77 @@ export class CourseService {
 
   // Delete a course by ID
   async remove(id: number): Promise<void> {
-    try {
-      await this.prisma.course.delete({
-        where: { id },
-      });
-    } catch (error) {
-      if (error.code === 'P2025') {
-        throw new NotFoundException(`Course with ID ${id} not found`);
-      }
-      throw new BadRequestException('Failed to delete course');
+    // 1) Check if course exists (with a bit of context for better messages)
+    const course = await this.prisma.course.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        year: true,
+        semester: true,
+        subject: { select: { code: true, thaiName: true, engName: true } },
+      },
+    });
+    if (!course) {
+      throw new NotFoundException(`Course with ID ${id} not found`);
     }
+
+    // 2) Check FK blockers: skill_collections (onDelete: Restrict)
+    const skillCollectionCount = await this.prisma.skill_collection.count({
+      where: { courseId: id },
+    });
+
+    if (skillCollectionCount > 0) {
+      const blockers = await this.prisma.skill_collection.findMany({
+        where: { courseId: id },
+        select: {
+          id: true,
+          student: { select: { id: true, code: true, thaiName: true, engName: true } },
+          clo: {
+            select: {
+              id: true,
+              subject: { select: { code: true, thaiName: true, engName: true } },
+            },
+          },
+        },
+        take: 10,
+      });
+
+      const subjectLabel = course.subject?.code
+        ? `${course.subject.code} - ${course.subject.thaiName || course.subject.engName || ''}`.trim()
+        : 'Unknown Subject';
+
+      throw new ConflictException({
+        code: AppErrorCode.FK_CONFLICT,
+        message: `Cannot delete Course #${id} (${subjectLabel}; ${course.year}/${course.semester}). There are SkillCollections referencing it.`,
+        entity: 'Course',
+        entityName: subjectLabel,
+        id,
+        blockers: [
+          {
+            relation: 'SkillCollection',
+            count: skillCollectionCount,
+            field: 'courseId',
+            entities: blockers.map((b) => ({
+              id: b.id,
+              name:
+                (b.student?.code
+                  ? `${b.student.code} - ${b.student.thaiName || b.student.engName || 'Unknown'}`
+                  : `SkillCollection #${b.id}`),
+              details: b.clo?.subject
+                ? `${b.clo.subject.code} - ${b.clo.subject.thaiName || b.clo.subject.engName}`
+                : undefined,
+            })),
+          },
+        ],
+        suggestions: [
+          'Detach or delete Skill Collections for this course first.',
+          'Consider soft-delete/archiving instead of hard delete.',
+        ],
+      });
+    }
+
+    // 3) Safe to delete (course_instructor rows will cascade)
+    await this.prisma.course.delete({ where: { id } });
   }
 
   // assign instructor to course and remove instructor from course (diff update)
