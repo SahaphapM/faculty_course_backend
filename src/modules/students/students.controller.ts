@@ -11,7 +11,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { StudentsService } from './students.service';
-import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiExtraModels, getSchemaPath } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOkResponse, ApiQuery, ApiExtraModels, getSchemaPath, ApiOperation, ApiBody } from '@nestjs/swagger';
 import { CreateStudentDto } from 'src/generated/nestjs-dto/create-student.dto';
 import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 import { UserRole } from 'src/enums/role.enum';
@@ -21,6 +21,7 @@ import { Response } from 'express';
 import axios from 'axios';
 import { Public } from 'src/decorators/public.decorator';
 import { PaginatedStudentDto } from 'src/dto/pagination.types';
+import { UpdateGraduationDateDto } from './dto/update-graduation-date.dto';
 
 
 @ApiBearerAuth()
@@ -141,6 +142,14 @@ export class StudentsController {
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateStudentDto: UpdateStudentDto) {
     return this.studentsService.update(+id, updateStudentDto);
+  }
+
+  @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)
+  @Patch('graduation-date/by-curriculum')
+  @ApiOperation({ summary: 'Update graduationDate for all students in a curriculum' })
+  @ApiBody({ type: UpdateGraduationDateDto })
+  updateGraduationDateByCurriculum(@Body() dto: UpdateGraduationDateDto) {
+    return this.studentsService.updateGraduationDateByCurriculum(dto);
   }
 
   @Roles(UserRole.Admin, UserRole.Coordinator, UserRole.Instructor)

@@ -12,6 +12,7 @@ import { StudentFilterDto } from 'src/dto/filters/filter.student.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
 import { AppErrorCode } from 'src/common/error-codes';
+import { UpdateGraduationDateDto } from './dto/update-graduation-date.dto';
 
 @Injectable()
 export class StudentsService {
@@ -45,6 +46,31 @@ export class StudentsService {
     } catch (error) {
       throw new BadRequestException('Failed to create student', error.message);
     }
+  }
+
+  // Bulk update graduationDate for all students in a curriculum
+  async updateGraduationDateByCurriculum(dto: UpdateGraduationDateDto) {
+    const { curriculumId, graduationDate } = dto;
+
+    // Optional: ensure curriculum exists to provide clearer error
+    const curriculum = await this.prisma.curriculum.findUnique({ where: { id: curriculumId }, select: { id: true, code: true, thaiName: true, engName: true } });
+    if (!curriculum) {
+      throw new NotFoundException(`Curriculum with ID ${curriculumId} not found`);
+    }
+
+    const result = await this.prisma.student.updateMany({
+      where: { curriculumId },
+      data: { graduationDate },
+    });
+
+    if (result.count === 0) {
+      // No students under this curriculum
+      throw new NotFoundException(
+        `No students found for curriculum "${curriculum.code} - ${curriculum.thaiName || curriculum.engName || curriculum.id}"`,
+      );
+    }
+
+    return { updated: result.count, curriculumId };
   }
 
   // Import multiple students
