@@ -9,6 +9,7 @@ import { CreateUserDto } from 'src/generated/nestjs-dto/create-user.dto';
 import { LoginDto } from 'src/dto/login.dto';
 import { UserRole } from 'src/enums/role.enum';
 import { StudentsService } from 'src/modules/students/students.service';
+import e from 'express';
 
 export interface JwtPayload {
   id: number;
@@ -140,8 +141,9 @@ export class AuthService {
         refreshToken,
       };
     } else {
-      const name = googleUser.email.split('@')[0];
-      const isNumeric = /^\d+$/.test(name);
+      const code = googleUser.email.split('@')[0];
+      const isNumeric = /^\d+$/.test(code);
+      console.log('Is numeric:', code);
 
       // Create the user first
       const newUser = await this.usersService.create({
@@ -150,13 +152,27 @@ export class AuthService {
       });
 
       if (isNumeric) {
-        // If student, create student record and link to user
-        const student = await this.studentService.create({
-          code: name,
-          userId: newUser.id,
-        });
+        // find student by code
+        let student = await this.studentService.findOne(code);
+        if (!student) {
+          // If student, create student record and link to user
+          const createdStudent = await this.studentService.create({
+            code: code,
+            userId: newUser.id,
+          });
+          // Fetch the complete student object with required properties
+          student = await this.studentService.findOne(createdStudent.code);
+        } else if (!student.userId) {
+          // If student exists but not linked to user, link it
+          await this.studentService.update(student.id, { userId: newUser.id });
+        }
+        console.log('Linked student:', student);
+
         // Optionally update the user with studentId
-        await this.usersService.updateStudentId(newUser.id, { studentId: student.id });
+        const user = await this.usersService.updateStudentId(newUser.id, {
+          studentId: student.id,
+        });
+        console.log('Updated user with studentId:', user);
       }
 
       const { accessToken, refreshToken } = await this.generateTokens(

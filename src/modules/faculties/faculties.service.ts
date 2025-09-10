@@ -55,15 +55,15 @@ export class FacultiesService {
           },
         },
       });
-  } catch (_error) {
+    } catch (_error) {
       throw new InternalServerErrorException('Failed to fetch faculties');
     }
   }
 
   // Find all faculties with pagination and search
   async findAll(pag?: FacultyFilterDto) {
-  const defaultLimit = DefaultPaginaitonValue.limit;
-  const defaultPage = DefaultPaginaitonValue.page;
+    const defaultLimit = DefaultPaginaitonValue.limit;
+    const defaultPage = DefaultPaginaitonValue.page;
 
     const options: Prisma.facultyFindManyArgs = {
       include: { branch: true },
@@ -81,7 +81,7 @@ export class FacultiesService {
 
       options.take = limit || defaultLimit;
       options.skip = ((page || defaultPage) - 1) * (limit || defaultLimit);
-  options.orderBy = { id: (order as Prisma.SortOrder) || 'asc' };
+      options.orderBy = { id: (order as Prisma.SortOrder) || 'desc' };
 
       options.where = {
         ...(thaiName && { thaiName: { contains: thaiName } }),
@@ -89,7 +89,7 @@ export class FacultiesService {
       };
 
       try {
-  const [faculties, total] = await Promise.all([
+        const [faculties, total] = await Promise.all([
           this.prisma.faculty.findMany(options),
           this.prisma.faculty.count({ where: options.where }),
         ]);
@@ -99,17 +99,20 @@ export class FacultiesService {
           Number(page || defaultPage),
           Number(limit || defaultLimit),
         );
-  } catch (_error) {
-  console.error('Error fetching faculties:', _error);
+      } catch (_error) {
+        console.error('Error fetching faculties:', _error);
         throw new InternalServerErrorException('Failed to fetch faculties');
       }
     }
 
     // No pagination applied when pag is undefined
     try {
-      return await this.prisma.faculty.findMany({ include: { branch: true } });
-  } catch (_error) {
-  console.error('Error fetching faculties:', _error);
+      return await this.prisma.faculty.findMany({
+        include: { branch: true },
+        orderBy: { id: 'desc' },
+      });
+    } catch (_error) {
+      console.error('Error fetching faculties:', _error);
       throw new InternalServerErrorException('Failed to fetch faculties');
     }
   }
@@ -127,7 +130,7 @@ export class FacultiesService {
       }
 
       return faculty;
-  } catch (_error) {
+    } catch (_error) {
       throw new InternalServerErrorException('Failed to fetch faculty');
     }
   }
@@ -160,7 +163,9 @@ export class FacultiesService {
     }
 
     // 2) Check for branches that reference this faculty (onDelete: Restrict)
-    const branchCount = await this.prisma.branch.count({ where: { facultyId: id } });
+    const branchCount = await this.prisma.branch.count({
+      where: { facultyId: id },
+    });
 
     if (branchCount > 0) {
       // Get the actual blocking branches with details
@@ -181,16 +186,18 @@ export class FacultiesService {
         entity: 'Faculty',
         entityName: faculty.thaiName || faculty.engName || `Faculty #${id}`,
         id,
-        blockers: [{ 
-          relation: 'Branch', 
-          count: branchCount, 
-          field: 'facultyId',
-          entities: blockingBranches.map(branch => ({
-            id: branch.id,
-            name: branch.thaiName || branch.engName || `Branch #${branch.id}`,
-            details: branch.abbrev ? `(${branch.abbrev})` : '',
-          })),
-        }],
+        blockers: [
+          {
+            relation: 'Branch',
+            count: branchCount,
+            field: 'facultyId',
+            entities: blockingBranches.map((branch) => ({
+              id: branch.id,
+              name: branch.thaiName || branch.engName || `Branch #${branch.id}`,
+              details: branch.abbrev ? `(${branch.abbrev})` : '',
+            })),
+          },
+        ],
         suggestions: [
           'Delete or reassign those Branches to a different Faculty.',
           'If business allows, detach Branches first (set facultyId = null) then delete Faculty.',
