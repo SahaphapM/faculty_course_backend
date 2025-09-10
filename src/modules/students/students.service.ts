@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  ConflictException,
 } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Prisma } from '@prisma/client';
@@ -10,6 +11,7 @@ import { UpdateStudentDto } from 'src/generated/nestjs-dto/update-student.dto';
 import { StudentFilterDto } from 'src/dto/filters/filter.student.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
+import { AppErrorCode } from 'src/common/error-codes';
 
 @Injectable()
 export class StudentsService {
@@ -347,9 +349,83 @@ export class StudentsService {
 
   // Delete a student by ID
   async remove(id: number) {
-    const student = await this.prisma.student.delete({
+    // 1) Ensure student exists with a bit of context
+    const existing = await this.prisma.student.findUnique({
       where: { id },
+      select: {
+        id: true,
+        code: true,
+        thaiName: true,
+        engName: true,
+      },
     });
+    if (!existing) {
+      throw new NotFoundException(`Student with ID ${id} not found`);
+    }
+
+    // 2) Check FK blockers from skill_collection (onDelete: Restrict)
+    const skillCollectionCount = await this.prisma.skill_collection.count({
+      where: { studentId: id },
+    });
+
+    if (skillCollectionCount > 0) {
+      const blocking = await this.prisma.skill_collection.findMany({
+        where: { studentId: id },
+        select: {
+          id: true,
+          clo: {
+            select: {
+              id: true,
+              subject: {
+                select: { code: true, thaiName: true, engName: true },
+              },
+            },
+          },
+          course: {
+            select: {
+              id: true,
+              year: true,
+              semester: true,
+              subject: { select: { code: true, thaiName: true, engName: true } },
+            },
+          },
+        },
+        take: 10,
+      });
+
+      const displayName = existing.code || existing.thaiName || existing.engName || `Student #${id}`;
+
+      throw new ConflictException({
+        code: AppErrorCode.FK_CONFLICT,
+        message: `Cannot delete Student "${displayName}" because there are Skill Collections referencing it.`,
+        entity: 'Student',
+        entityName: displayName,
+        id,
+        blockers: [
+          {
+            relation: 'SkillCollection',
+            count: skillCollectionCount,
+            field: 'studentId',
+            entities: blocking.map((b) => ({
+              id: b.id,
+              name:
+                b.course?.subject?.code
+                  ? `${b.course.subject.code} - ${b.course.subject.thaiName || b.course.subject.engName || ''}`.trim()
+                  : b.clo?.subject?.code
+                  ? `${b.clo.subject.code} - ${b.clo.subject.thaiName || b.clo.subject.engName || ''}`.trim()
+                  : `SkillCollection #${b.id}`,
+            })),
+          },
+        ],
+        suggestions: [
+          'Delete skill collections for this student first.',
+          'Or detach references if business rules allow before deleting the student.',
+        ],
+      });
+    }
+
+    // 3) Safe to delete
+    const student = await this.prisma.student.delete({ where: { id } });
     return student;
   }
 
