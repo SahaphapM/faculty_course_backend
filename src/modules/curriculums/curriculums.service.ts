@@ -50,7 +50,7 @@ export class CurriculumsService {
     const levels: CreateLevelDescriptionDto[] = [
       {
         level: 1,
-        name: '',
+        name: 'ระดับเริ่มต้น', // แทนที่จาก ''
         description:
           'สามารถอธิบายหลักการหรือแนวคิดพื้นฐานได้ ยังไม่สามารถนำไปปฏิบัติได้ด้วยตนเอง',
         isHardSkill: true,
@@ -58,46 +58,49 @@ export class CurriculumsService {
       },
       {
         level: 2,
-        name: 'ระดับ 2',
+        name: 'ระดับเริ่มปฏิบัติ', // แทนที่จาก 'ระดับ 2'
         description: 'สามารถปฏิบัติงานได้เมื่อมีคนชี้แนะหรือติดตามใกล้ชิด',
         isHardSkill: true,
         curriculumId: curriculum.id,
       },
       {
         level: 3,
-        name: 'ระดับ 3',
+        name: 'ระดับเชี่ยวชาญ', // แทนที่จาก 'ระดับ 3'
         description: 'สามารถทำงานได้สำเร็จโดยไม่ต้องมีคนคอยกำกับ',
         isHardSkill: true,
         curriculumId: curriculum.id,
       },
       {
         level: 4,
-        name: 'ระดับ 4',
+        name: 'ระดับสูง', // แทนที่จาก 'ระดับ 4'
         description: 'ทำได้คล่องและปรับวิธีให้เหมาะสมกับสถานการณ์',
         isHardSkill: true,
         curriculumId: curriculum.id,
       },
       {
         level: 5,
-        name: 'ระดับ 5',
+        name: 'ระดับมาสเตอร์', // แทนที่จาก 'ระดับ 5'
         description: 'เป็นผู้เชี่ยวชาญ ให้คำปรึกษาหรือพัฒนาวิธีใหม่ได้',
         isHardSkill: true,
         curriculumId: curriculum.id,
       },
       {
         level: 1,
+        name: 'ระดับพื้นฐาน', // แทนที่จาก ''
         description: 'เข้าใจหลักการสื่อสารที่ดี',
         isHardSkill: false,
         curriculumId: curriculum.id,
       },
       {
         level: 2,
+        name: 'ระดับเริ่มพัฒนา', // แทนที่จาก ''
         description: 'สามารถสื่อสารได้ชัดเจนเมื่อมีคำแนะนำหรือโครงสร้างช่วย',
         isHardSkill: false,
         curriculumId: curriculum.id,
       },
       {
         level: 3,
+        name: 'ระดับเชี่ยวชาญ', // แทนที่จาก ''
         description: 'จัดการความขัดแย้งหรือสถานการณ์ที่ซับซ้อนได้ด้วยตนเอง',
         isHardSkill: false,
         curriculumId: curriculum.id,
@@ -135,7 +138,7 @@ export class CurriculumsService {
     } = pag || {};
 
     const whereCondition: Prisma.curriculumWhereInput = {
-  ...(active !== undefined && { active }),
+      ...(active !== undefined && { active }),
       ...(nameCode && {
         OR: [
           {
@@ -513,12 +516,15 @@ export class CurriculumsService {
     skillType: string,
     _debug?: { studentId?: number; rootSkillId?: number }, // optional ดีบัก
   ): Promise<any> {
-    return getSkillSummary(curriculumId, yearCode.slice(-2), skillType, 
-    // {
-    //   studentId: 2115,
-    //   rootSkillId: 64,
-    // }
-  );
+    return getSkillSummary(
+      curriculumId,
+      yearCode.slice(-2),
+      skillType,
+      // {
+      //   studentId: 2115,
+      //   rootSkillId: 64,
+      // }
+    );
   }
 
   async findStudentsBySkillLevel(
