@@ -12,7 +12,12 @@ export class LevelDescriptionsService {
       updates.map((update) =>
         this.prisma.level_description.update({
           where: { id: update.id },
-          data: { description: update.description },
+          data: {
+            ...(update.name !== undefined && { name: update.name }),
+            ...(update.description !== undefined && {
+              description: update.description,
+            }),
+          },
         }),
       ),
     );
