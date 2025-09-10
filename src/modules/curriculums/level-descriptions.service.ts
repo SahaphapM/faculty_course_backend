@@ -23,11 +23,11 @@ export class LevelDescriptionsService {
     );
   }
 
-  async getAllLevelDescription(curriculumCode: string) {
+  async getAllLevelDescription(curriculumCode?: string, curriculumId?: number) {
     const curriculum = await this.prisma.curriculum.findFirst({
       where: {
-        code: curriculumCode,
-        active: true,
+        ...(curriculumCode && { code: curriculumCode }),
+        ...(curriculumId && { id: curriculumId }),
       },
       select: {
         level_descriptions: true,

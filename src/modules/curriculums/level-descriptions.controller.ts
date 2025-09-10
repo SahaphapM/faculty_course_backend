@@ -1,4 +1,12 @@
-import { Controller, Get, Patch, Param, Body, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Param,
+  Body,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { LevelDescriptionsService } from './level-descriptions.service';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { Roles } from 'src/decorators/roles.decorator';
@@ -10,7 +18,9 @@ import { LevelDescription } from 'src/generated/nestjs-dto/levelDescription.enti
 @ApiBearerAuth()
 @Controller('level-descriptions')
 export class LevelDescriptionsController {
-  constructor(private readonly levelDescriptionsService: LevelDescriptionsService) {}
+  constructor(
+    private readonly levelDescriptionsService: LevelDescriptionsService,
+  ) {}
 
   @Roles(UserRole.Admin, UserRole.Coordinator)
   @Patch('descriptions')
@@ -25,8 +35,14 @@ export class LevelDescriptionsController {
 
   @UseGuards(CurriculumAccessGuard)
   @CurriculumAccess({ paramName: 'curriculumCode', paramType: 'code' })
-  @Get(':curriculumCode')
-  getAllLevelDescription(@Param('curriculumCode') curriculumCode: string) {
-    return this.levelDescriptionsService.getAllLevelDescription(curriculumCode);
+  @Get()
+  getAllLevelDescription(
+    @Query('curriculumCode') curriculumCode: string,
+    @Query('curriculumId') curriculumId: number,
+  ) {
+    return this.levelDescriptionsService.getAllLevelDescription(
+      curriculumCode,
+      curriculumId,
+    );
   }
 }
