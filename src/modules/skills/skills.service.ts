@@ -525,14 +525,21 @@ export class SkillsService {
     });
 
     // 4) Check for child skills (subs) that reference this skill via parentId (self-relation)
-    const childSkillCount = await this.prisma.skill.count({ where: { parentId: id } });
+    const childSkillCount = await this.prisma.skill.count({
+      where: { parentId: id },
+    });
 
     // Use a typed blockers array for clarity and future reuse
-    const blockers: ForeignKeyConflictError['blockers'] & Array<
-      ForeignKeyConflictError['blockers'][number] & {
-        entities?: Array<{ id: number | string; name: string; details?: string }>;
-      }
-    > = [];
+    const blockers: ForeignKeyConflictError['blockers'] &
+      Array<
+        ForeignKeyConflictError['blockers'][number] & {
+          entities?: Array<{
+            id: number | string;
+            name: string;
+            details?: string;
+          }>;
+        }
+      > = [];
 
     if (cloCount > 0) {
       // Get the actual blocking CLOs with details
@@ -627,7 +634,11 @@ export class SkillsService {
       const payload: ForeignKeyConflictError & {
         entityName?: string;
         blockers: (ForeignKeyConflictError['blockers'][number] & {
-          entities?: Array<{ id: number | string; name: string; details?: string }>;
+          entities?: Array<{
+            id: number | string;
+            name: string;
+            details?: string;
+          }>;
         })[];
       } = {
         code: AppErrorCode.FK_CONFLICT,
@@ -685,9 +696,9 @@ export class SkillsService {
     // get unique subjectIds not use map ordinary
     const subjectsIds = [
       ...new Set(
-        student.skill_collections.map(
-          (skill_collection) => skill_collection.clo.subjectId,
-        ),
+        student.skill_collections
+          .filter((skill_collection) => skill_collection.clo?.subjectId)
+          .map((skill_collection) => skill_collection.clo.subjectId),
       ),
     ];
 
@@ -727,7 +738,7 @@ export class SkillsService {
 
     for (const sc of student.skill_collections) {
       const sid = sc.clo?.subjectId;
-      if (!sid) continue;
+      if (!sid || !sc.clo) continue;
       const subject = subjectById.get(sid);
       if (!subject) continue; // กันเคสข้อมูลไม่แมตช์
 
