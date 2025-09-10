@@ -1,6 +1,6 @@
 
 import {ApiProperty} from '@nestjs/swagger'
-import {IsBoolean,IsInt,IsNotEmpty,IsString} from 'class-validator'
+import {IsBoolean,IsInt,IsNotEmpty,IsOptional,IsString} from 'class-validator'
 
 
 
@@ -13,6 +13,14 @@ export class CreateLevelDescriptionDto {
 @IsNotEmpty()
 @IsInt()
 level: number ;
+@ApiProperty({
+  type: 'string',
+  default: '',
+  required: false,
+})
+@IsOptional()
+@IsString()
+name?: string ;
 @ApiProperty({
   type: 'string',
 })

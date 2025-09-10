@@ -16,6 +16,14 @@ export class UpdateLevelDescriptionDto {
 level?: number ;
 @ApiProperty({
   type: 'string',
+  default: '',
+  required: false,
+})
+@IsOptional()
+@IsString()
+name?: string ;
+@ApiProperty({
+  type: 'string',
   required: false,
 })
 @IsOptional()

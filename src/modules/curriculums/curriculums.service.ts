@@ -50,6 +50,7 @@ export class CurriculumsService {
     const levels: CreateLevelDescriptionDto[] = [
       {
         level: 1,
+        name: '',
         description:
           'สามารถอธิบายหลักการหรือแนวคิดพื้นฐานได้ ยังไม่สามารถนำไปปฏิบัติได้ด้วยตนเอง',
         isHardSkill: true,
@@ -57,24 +58,28 @@ export class CurriculumsService {
       },
       {
         level: 2,
+        name: 'ระดับ 2',
         description: 'สามารถปฏิบัติงานได้เมื่อมีคนชี้แนะหรือติดตามใกล้ชิด',
         isHardSkill: true,
         curriculumId: curriculum.id,
       },
       {
         level: 3,
+        name: 'ระดับ 3',
         description: 'สามารถทำงานได้สำเร็จโดยไม่ต้องมีคนคอยกำกับ',
         isHardSkill: true,
         curriculumId: curriculum.id,
       },
       {
         level: 4,
+        name: 'ระดับ 4',
         description: 'ทำได้คล่องและปรับวิธีให้เหมาะสมกับสถานการณ์',
         isHardSkill: true,
         curriculumId: curriculum.id,
       },
       {
         level: 5,
+        name: 'ระดับ 5',
         description: 'เป็นผู้เชี่ยวชาญ ให้คำปรึกษาหรือพัฒนาวิธีใหม่ได้',
         isHardSkill: true,
         curriculumId: curriculum.id,

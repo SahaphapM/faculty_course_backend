@@ -17,6 +17,10 @@ level: number ;
 @ApiProperty({
   type: 'string',
 })
+name: string ;
+@ApiProperty({
+  type: 'string',
+})
 description: string ;
 @ApiProperty({
   type: 'boolean',

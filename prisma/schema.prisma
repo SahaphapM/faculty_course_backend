@@ -398,6 +398,7 @@ model audit_log {
 model level_description {
   id          Int     @id @default(autoincrement())
   level       Int
+  name        String   @db.VarChar(255) @default("")
   description String
   isHardSkill Boolean
 
