@@ -1,4 +1,9 @@
-import { BadRequestException, ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateInternshipWithStudentDto } from './dto/create-internship-with-student.dto';
 import { randomBytes } from 'crypto';
@@ -53,8 +58,18 @@ export class InternshipsService {
     const where = {
       ...(year !== undefined && year !== null ? { year: Number(year) } : {}),
       ...(search ? { company: { name: { contains: search } } } : {}),
-      ...(filter.curriculumId ? { curriculumId: Number(filter.curriculumId) } : {}),
+      ...(filter.curriculumId
+        ? { curriculumId: Number(filter.curriculumId) }
+        : {}),
     };
+
+    // Handle orderBy for relation fields
+    let orderByClause;
+    if (sort === 'company') {
+      orderByClause = { company: { name: orderBy || 'asc' } };
+    } else {
+      orderByClause = { [sort || 'id']: orderBy || 'asc' };
+    }
 
     const data = await this.prisma.internship.findMany({
       where,
@@ -70,7 +85,7 @@ export class InternshipsService {
           },
         },
       },
-      orderBy: { [sort || 'id']: orderBy || 'asc' },
+      orderBy: orderByClause,
     });
 
     const total = await this.prisma.internship.count({
@@ -122,7 +137,9 @@ export class InternshipsService {
       data: {
         ...rest,
         ...(companyId ? { company: { connect: { id: companyId } } } : {}),
-        ...(curriculumId ? { curriculum: { connect: { id: curriculumId } } } : {}),
+        ...(curriculumId
+          ? { curriculum: { connect: { id: curriculumId } } }
+          : {}),
       },
     });
 
@@ -213,13 +230,17 @@ export class InternshipsService {
     });
     if (!internship) throw new NotFoundException('Internship not found');
 
-    const count = await this.prisma.student_internship.count({ where: { internshipId: id } });
+    const count = await this.prisma.student_internship.count({
+      where: { internshipId: id },
+    });
     if (count > 0) {
       const blockers = await this.prisma.student_internship.findMany({
         where: { internshipId: id },
         select: {
           id: true,
-          student: { select: { id: true, code: true, thaiName: true, engName: true } },
+          student: {
+            select: { id: true, code: true, thaiName: true, engName: true },
+          },
           jobPosition: { select: { id: true, name: true } },
         },
         take: 10,
@@ -231,16 +252,22 @@ export class InternshipsService {
         entity: 'Internship',
         entityName: `Internship #${id}`,
         id,
-        blockers: [{
-          relation: 'StudentInternship',
-          count,
-          field: 'internshipId',
-          entities: blockers.map((b) => ({
-            id: b.id,
-            name: b.student?.thaiName || b.student?.engName || b.student?.code || `StudentInternship #${b.id}`,
-            details: b.jobPosition ? `Job: ${b.jobPosition.name}` : '',
-          })),
-        }],
+        blockers: [
+          {
+            relation: 'StudentInternship',
+            count,
+            field: 'internshipId',
+            entities: blockers.map((b) => ({
+              id: b.id,
+              name:
+                b.student?.thaiName ||
+                b.student?.engName ||
+                b.student?.code ||
+                `StudentInternship #${b.id}`,
+              details: b.jobPosition ? `Job: ${b.jobPosition.name}` : '',
+            })),
+          },
+        ],
         suggestions: [
           'Detach students from this internship first.',
           'Consider soft-delete/archiving instead of hard delete.',
@@ -254,7 +281,10 @@ export class InternshipsService {
   // Detach specific students from an internship
   async detachStudents(internshipId: number, studentIds: number[]) {
     // verify internship exists
-    const exists = await this.prisma.internship.findUnique({ where: { id: internshipId }, select: { id: true } });
+    const exists = await this.prisma.internship.findUnique({
+      where: { id: internshipId },
+      select: { id: true },
+    });
     if (!exists) throw new NotFoundException('Internship not found');
 
     if (!studentIds?.length) return { affected: 0 };
