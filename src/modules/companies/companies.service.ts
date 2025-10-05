@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from 'src/prisma/prisma.service';
 import {
   BaseFilterParams,
@@ -7,6 +7,8 @@ import { Company } from 'src/generated/nestjs-dto/company.entity';
 import { CreateCompanyWithJobPositionsDto } from './dto/create-company-with-job.dto';
 import { createPaginatedData } from 'src/utils/paginated.utils';
 import { DefaultPaginaitonValue } from 'src/configs/pagination.configs';
+import { AppErrorCode } from 'src/common/error-codes';
+import type { ForeignKeyConflictError } from 'src/common/conflict-error';
 
 @Injectable()
 export class CompaniesService {
@@ -156,7 +158,143 @@ export class CompaniesService {
     });
   }
 
-  remove(id: number) {
+  async remove(id: number) {
+    const company = await this.prisma.company.findUnique({
+      where: { id },
+      select: { id: true, name: true },
+    });
+
+    if (!company) {
+      throw new NotFoundException(`Company with ID ${id} not found`);
+    }
+
+    const internshipCount = await this.prisma.internship.count({
+      where: { companyId: id },
+    });
+
+    const studentInternshipCount = await this.prisma.student_internship.count({
+      where: { internship: { companyId: id } },
+    });
+
+    const blockers: Array<
+      ForeignKeyConflictError['blockers'][number] & {
+        entities?: Array<{ id: number | string; name: string; details?: string }>;
+      }
+    > = [];
+
+    if (internshipCount > 0) {
+      const internships = await this.prisma.internship.findMany({
+        where: { companyId: id },
+        select: {
+          id: true,
+          year: true,
+          curriculum: {
+            select: {
+              code: true,
+              thaiName: true,
+              engName: true,
+            },
+          },
+        },
+        orderBy: { id: 'asc' },
+        take: 5,
+      });
+
+      blockers.push({
+        relation: 'Internship',
+        count: internshipCount,
+        field: 'companyId',
+        entities: internships.map((internship) => {
+          const curriculumName =
+            internship.curriculum?.thaiName || internship.curriculum?.engName;
+          const curriculumLabel = internship.curriculum
+            ? [internship.curriculum.code, curriculumName]
+                .filter(Boolean)
+                .join(' - ')
+            : undefined;
+
+          return {
+            id: internship.id,
+            name: `Internship #${internship.id}${
+              internship.year ? ` (${internship.year})` : ''
+            }`,
+            details: curriculumLabel,
+          };
+        }),
+      });
+    }
+
+    if (studentInternshipCount > 0) {
+      const studentInternships = await this.prisma.student_internship.findMany({
+        where: { internship: { companyId: id } },
+        select: {
+          id: true,
+          student: {
+            select: {
+              id: true,
+              code: true,
+              thaiName: true,
+              engName: true,
+            },
+          },
+          internship: {
+            select: {
+              id: true,
+              year: true,
+            },
+          },
+        },
+        orderBy: { id: 'asc' },
+        take: 5,
+      });
+
+      blockers.push({
+        relation: 'StudentInternship',
+        count: studentInternshipCount,
+        field: 'internshipId',
+        entities: studentInternships.map((record) => {
+          const studentName =
+            record.student?.thaiName || record.student?.engName || 'Student';
+          const studentLabel = record.student?.code
+            ? `${record.student.code} - ${studentName}`
+            : studentName;
+          const internshipLabel = record.internship
+            ? `Internship #${record.internship.id}${
+                record.internship.year ? ` (${record.internship.year})` : ''
+              }`
+            : undefined;
+
+          return {
+            id: record.id,
+            name: studentLabel,
+            details: internshipLabel,
+          };
+        }),
+      });
+    }
+
+    if (blockers.length > 0) {
+      const payload: ForeignKeyConflictError & {
+        entityName?: string;
+        blockers: (ForeignKeyConflictError['blockers'][number] & {
+          entities?: Array<{ id: number | string; name: string; details?: string }>;
+        })[];
+      } = {
+        code: AppErrorCode.FK_CONFLICT,
+  message: `Cannot delete Company "${company.name}" because there are related records referencing it.`,
+        entity: 'Company',
+        entityName: company.name,
+        id,
+        blockers,
+        suggestions: [
+          'Reassign or delete internships referencing this company.',
+          'Detach or reassign student internships before deleting the company.',
+        ],
+      };
+
+      throw new ConflictException(payload);
+    }
+
     return this.prisma.company.delete({ where: { id } });
   }
 }

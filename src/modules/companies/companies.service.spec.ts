@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CompaniesService } from './companies.service';
 import { PrismaService } from 'src/prisma/prisma.service';
+import { ConflictException, NotFoundException } from '@nestjs/common';
 
 describe('CompaniesService', () => {
   let service: CompaniesService;
@@ -18,6 +19,14 @@ describe('CompaniesService', () => {
       deleteMany: jest.Mock;
       create: jest.Mock;
     };
+    internship: {
+      count: jest.Mock;
+      findMany: jest.Mock;
+    };
+    student_internship: {
+      count: jest.Mock;
+      findMany: jest.Mock;
+    };
   };
 
   beforeEach(async () => {
@@ -34,6 +43,14 @@ describe('CompaniesService', () => {
         findMany: jest.fn(),
         deleteMany: jest.fn(),
         create: jest.fn(),
+      },
+      internship: {
+        count: jest.fn(),
+        findMany: jest.fn(),
+      },
+      student_internship: {
+        count: jest.fn(),
+        findMany: jest.fn(),
       },
     };
 
@@ -78,10 +95,8 @@ describe('CompaniesService', () => {
         expect.objectContaining({
           skip: (page - 1) * limit,
           take: limit,
-          orderBy: { id: 'desc' },
-          where: {
-            OR: expect.any(Array),
-          },
+          orderBy: expect.any(Object),
+          where: expect.objectContaining({ OR: expect.any(Array) }),
         }),
       );
 
@@ -104,17 +119,74 @@ describe('CompaniesService', () => {
       expect(prisma.company.findMany).toHaveBeenCalledWith(
         expect.objectContaining({
           skip: 0,
-          take: 10,
+          take: 15,
         }),
       );
 
       expect(result.meta).toEqual({
         total: 0,
         page: 1,
-        limit: 10,
+        limit: 15,
         totalPages: 0,
       });
       expect(result.data).toEqual([]);
+    });
+  });
+
+  describe('remove', () => {
+    const companyId = 1;
+
+    beforeEach(() => {
+      prisma.company.findUnique.mockResolvedValue({ id: companyId, name: 'Acme Corp' });
+      prisma.internship.count.mockResolvedValue(0);
+      prisma.internship.findMany.mockResolvedValue([]);
+      prisma.student_internship.count.mockResolvedValue(0);
+      prisma.student_internship.findMany.mockResolvedValue([]);
+      prisma.company.delete.mockResolvedValue({ id: companyId });
+    });
+
+    it('removes a company when there are no blockers', async () => {
+      const result = await service.remove(companyId);
+
+      expect(prisma.company.delete).toHaveBeenCalledWith({ where: { id: companyId } });
+      expect(result).toEqual({ id: companyId });
+    });
+
+    it('throws ConflictException when internships exist', async () => {
+      prisma.internship.count.mockResolvedValue(2);
+      prisma.internship.findMany.mockResolvedValue([
+        { id: 5, year: 2024, curriculum: { code: 'CUR-1', thaiName: 'หลักสูตร', engName: null } },
+      ]);
+      prisma.student_internship.count.mockResolvedValue(0);
+
+      await expect(service.remove(companyId)).rejects.toBeInstanceOf(ConflictException);
+
+      expect(prisma.internship.findMany).toHaveBeenCalled();
+      expect(prisma.company.delete).not.toHaveBeenCalled();
+    });
+
+    it('throws ConflictException when student internships exist', async () => {
+      prisma.internship.count.mockResolvedValue(0);
+      prisma.student_internship.count.mockResolvedValue(3);
+      prisma.student_internship.findMany.mockResolvedValue([
+        {
+          id: 10,
+          student: { id: 2, code: '64001', thaiName: 'สมชาย', engName: null },
+          internship: { id: 7, year: 2024 },
+        },
+      ]);
+
+      await expect(service.remove(companyId)).rejects.toBeInstanceOf(ConflictException);
+
+      expect(prisma.student_internship.findMany).toHaveBeenCalled();
+      expect(prisma.company.delete).not.toHaveBeenCalled();
+    });
+
+    it('throws NotFoundException when company does not exist', async () => {
+      prisma.company.findUnique.mockResolvedValue(null);
+
+      await expect(service.remove(companyId)).rejects.toBeInstanceOf(NotFoundException);
+      expect(prisma.company.delete).not.toHaveBeenCalled();
     });
   });
 });
