@@ -32,6 +32,15 @@ export class AuditLogInterceptor implements NestInterceptor {
     const resourceId = this.extractResourceId(url);
     const startTime = Date.now();
 
+    // ไม่ log สำหรับ resource audit-log และ options endpoints
+    if (
+      resource === 'audit-log' ||
+      resource === 'audit_log' ||
+      url.includes('/options')
+    ) {
+      return next.handle();
+    }
+
     let beforeData: any = null;
 
     return new Observable((observer) => {
